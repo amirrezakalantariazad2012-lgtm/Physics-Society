@@ -39,6 +39,114 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+import time
+import threading
+from collections import defaultdict
+
+# ==========================================
+# PUBLIC SECURITY & RATE LIMITING SUITE
+# ==========================================
+
+class SlidingWindowRateLimiter:
+    """Thread-safe in-memory rate limiter protecting public endpoints against DDoS & brute-force"""
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._requests = defaultdict(list)
+        self._last_cleanup = time.time()
+
+    def is_allowed(self, client_ip: str, path: str) -> tuple[bool, int]:
+        now = time.time()
+        with self._lock:
+            # Periodic cleanup of stale IP records every 60 seconds
+            if now - self._last_cleanup > 60:
+                cutoff = now - 120
+                for ip in list(self._requests.keys()):
+                    self._requests[ip] = [t for t, p in self._requests[ip] if t > cutoff]
+                    if not self._requests[ip]:
+                        del self._requests[ip]
+                self._last_cleanup = now
+
+            recent = [(t, p) for t, p in self._requests[client_ip] if t > now - 60]
+            self._requests[client_ip] = recent
+
+            # Stricter limit on authentication (anti-brute force: max 15 attempts/minute)
+            if path in ("/api/auth/login", "/api/auth/register"):
+                auth_attempts = sum(1 for t, p in recent if p in ("/api/auth/login", "/api/auth/register"))
+                if auth_attempts >= 15:
+                    return False, 60
+
+            # Stricter limit on AI tutoring endpoints (max 30 queries/minute)
+            if path.startswith("/api/ai/"):
+                ai_queries = sum(1 for t, p in recent if p.startswith("/api/ai/"))
+                if ai_queries >= 30:
+                    return False, 60
+
+            # General API limit: max 180 requests/minute per client IP
+            if len(recent) >= 180:
+                return False, 60
+
+            self._requests[client_ip].append((now, path))
+            return True, 0
+
+rate_limiter = SlidingWindowRateLimiter()
+
+# 1. Security Headers Middleware (OWASP Secure Headers Recommendation)
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    
+    # Inject CSP on non-API/docs routes
+    if not request.url.path.startswith("/api/docs") and not request.url.path.startswith("/api/redoc"):
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com; "
+            "img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; "
+            "connect-src 'self' https://openrouter.ai https://api.openai.com; frame-ancestors 'self';"
+        )
+    return response
+
+# 2. Rate Limiting Middleware (Anti-DDoS Shield)
+@app.middleware("http")
+async def rate_limiting_middleware(request: Request, call_next):
+    # Bypass during automated test runner execution
+    if os.getenv("PYTEST_CURRENT_TEST") or settings.APP_ENV == "testing":
+        return await call_next(request)
+
+    path = request.url.path
+    if path.startswith("/api") and not path.startswith("/api/docs") and not path.startswith("/api/openapi.json"):
+        client_ip = request.client.host if request.client else "127.0.0.1"
+        forwarded_for = request.headers.get("X-Forwarded-For")
+        if forwarded_for:
+            client_ip = forwarded_for.split(",")[0].strip()
+
+        allowed, retry_after = rate_limiter.is_allowed(client_ip, path)
+        if not allowed:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "تعداد درخواست‌های ارسالی شما بیش از حد مجاز است. لطفاً ۶۰ ثانیه شکیبا باشید."},
+                headers={"Retry-After": str(retry_after)}
+            )
+
+    return await call_next(request)
+
+# 3. Payload Size Limiting Middleware (Memory Protection)
+@app.middleware("http")
+async def check_payload_size(request: Request, call_next):
+    cl_header = request.headers.get("content-length")
+    if cl_header:
+        try:
+            cl = int(cl_header)
+            # 20MB limit for general API payloads
+            if cl > 20 * 1024 * 1024:
+                return JSONResponse(status_code=413, content={"detail": "حجم داده‌های ارسالی بیش از سقف مجاز است."})
+        except ValueError:
+            pass
+    return await call_next(request)
+
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,

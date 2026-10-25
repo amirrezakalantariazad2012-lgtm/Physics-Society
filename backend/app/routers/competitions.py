@@ -256,7 +256,10 @@ def submit_competition_entry(
                     total_score -= penalty
                     mcq_score -= penalty
 
-    time_spent = req.time_spent_seconds or 0
+    # Server-side anti-cheat timing bound check
+    raw_time = req.time_spent_seconds or 0
+    max_duration_seconds = (comp.duration_minutes * 60) + 180  # 3 minutes grace for network/latency
+    time_spent = max(1, min(raw_time, max_duration_seconds))
     final_score = max(0.0, round(total_score, 2))
 
     sub = CompetitionSubmission(

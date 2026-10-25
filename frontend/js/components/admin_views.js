@@ -23,30 +23,30 @@ class AdminViews {
                     <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">پنل جامع مدیریت آموزشی</h1>
                 </div>
 
-                <!-- Admin Tabs Navigation -->
-                <div class="flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">
-                    <button onclick="window.currentAdminViews.switchTab('overview')" class="px-3 py-2 rounded-xl transition-all ${this.activeTab === 'overview' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                <!-- Admin Tabs Navigation (Responsive Horizontal Scroll on Mobile) -->
+                <div class="flex items-center sm:flex-wrap gap-1.5 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-xs font-bold overflow-x-auto no-scrollbar w-full sm:w-auto">
+                    <button onclick="window.currentAdminViews.switchTab('overview')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'overview' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         داشبورد
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('validation')" class="px-3 py-2 rounded-xl transition-all ${this.activeTab === 'validation' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('validation')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'validation' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         اعتبارسنجی سؤالات
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('questions')" class="px-3 py-2 rounded-xl transition-all ${this.activeTab === 'questions' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('questions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'questions' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         بانک سؤالات
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('reviews')" class="px-3 py-2 rounded-xl transition-all ${this.activeTab === 'reviews' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('reviews')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'reviews' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         مرکز بازبینی و تصحیح
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('competitions')" class="px-3 py-2 rounded-xl transition-all ${this.activeTab === 'competitions' ? 'bg-white dark:bg-slate-900 text-cyan-400 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('competitions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'competitions' ? 'bg-white dark:bg-slate-900 text-cyan-400 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         مدیریت لیگ‌ها و مسابقات
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('ai')" class="px-3 py-2 rounded-xl transition-all ${this.activeTab === 'ai' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('ai')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'ai' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         تنظیمات هوش مصنوعی
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('textbooks')" class="px-3 py-2 rounded-xl transition-all ${this.activeTab === 'textbooks' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('textbooks')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'textbooks' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         کتاب‌ها و استخراج PDF
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('students')" class="px-3 py-2 rounded-xl transition-all ${this.activeTab === 'students' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('students')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'students' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         دانش‌آموزان
                     </button>
                 </div>

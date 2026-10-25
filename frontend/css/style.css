@@ -314,3 +314,52 @@ input[type=range].physics-slider::-webkit-slider-thumb:hover {
     box-shadow: 0 0 10px #22d3ee;
     animation: pulse-ring 2s infinite;
 }
+
+/* Mobile & Touch Responsive Enhancements */
+.touch-manipulation {
+    touch-action: manipulation;
+}
+
+/* Responsive KaTeX Formula Container with Horizontal Touch Scroll */
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    padding: 0.5rem 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.katex-display::-webkit-scrollbar {
+    height: 4px;
+}
+
+.katex-display::-webkit-scrollbar-thumb {
+    background: rgba(34, 211, 238, 0.35);
+    border-radius: 4px;
+}
+
+/* Hidden scrollbar utilities */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Mobile Safe Area Padding */
+.pb-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem);
+}
+
+@media (max-width: 640px) {
+    /* Responsive font scale adjustments for compact phones */
+    h1 {
+        word-break: break-word;
+    }
+    
+    /* Ensure tables and code blocks do not force viewport horizontal expansion */
+    table, pre, code {
+        max-width: 100%;
+    }
+}
