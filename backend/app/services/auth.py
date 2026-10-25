@@ -86,10 +86,15 @@ def get_optional_current_user(token: Optional[str] = Depends(oauth2_scheme), db:
         return None
 
 def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
-    """Dependency enforcing administrator role"""
+    """Dependency enforcing administrator role and password change requirements"""
     if current_user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="دسترسی غیرمجاز. این بخش صرفاً مخصوص مدیران سامانه انجمن فیزیک است."
+            detail="دسترسی غیرمجاز. این بخش صرفاً مخصوص مدیران سامانه QUANTUM CUT است."
+        )
+    if getattr(current_user, "must_change_password", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="PASSWORD_CHANGE_REQUIRED: دسترسی به بخش مدیریت تا زمان تغییر رمز عبور پیش‌فرض امکان‌پذیر نمی‌باشد. لطفاً ابتدا رمز عبور خود را تغییر دهید."
         )
     return current_user

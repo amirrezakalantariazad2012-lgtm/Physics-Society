@@ -49,14 +49,20 @@ BACKUP_FOLDER=$(find "${TEMP_RESTORE_DIR}" -mindepth 1 -maxdepth 1 -type d | hea
 # Restore Database
 if [ -f "${BACKUP_FOLDER}/database.sql" ]; then
     echo "[2/3] Restoring PostgreSQL database..."
-    # Terminate existing connections
-    docker exec -i "${DB_CONTAINER}" psql -U "${DB_USER}" -d postgres -c \
-        "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DB_NAME}' AND pid <> pg_backend_pid();" || true
+    if docker ps --format '{{.Names}}' | grep -q "^${DB_CONTAINER}$"; then
+        docker exec -i "${DB_CONTAINER}" psql -U "${DB_USER}" -d postgres -c \
+            "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DB_NAME}' AND pid <> pg_backend_pid();" || true
+        docker exec -i "${DB_CONTAINER}" psql -U "${DB_USER}" -d "${DB_NAME}" < "${BACKUP_FOLDER}/database.sql"
+        echo "PostgreSQL database restored successfully."
+    else
+        echo "Note: PostgreSQL container ${DB_CONTAINER} is not running; skipped SQL dump restore."
+    fi
+fi
 
-    docker exec -i "${DB_CONTAINER}" psql -U "${DB_USER}" -d "${DB_NAME}" < "${BACKUP_FOLDER}/database.sql"
-    echo "Database restored successfully."
-else
-    echo "Warning: No database.sql found in archive."
+if [ -f "${BACKUP_FOLDER}/physics_platform.db" ]; then
+    echo "Restoring SQLite database to physics_platform.db..."
+    cp "${BACKUP_FOLDER}/physics_platform.db" "$(dirname "$0")/../physics_platform.db"
+    echo "SQLite database restored successfully."
 fi
 
 # Restore Media Data

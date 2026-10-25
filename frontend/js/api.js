@@ -80,6 +80,16 @@ class ApiClient {
     updateProfile(payload) {
         return this.request('/auth/profile', { method: 'PUT', body: payload });
     }
+    changePassword(currentPassword, newPassword, confirmPassword) {
+        return this.request('/auth/change-password', {
+            method: 'POST',
+            body: {
+                current_password: currentPassword,
+                new_password: newPassword,
+                confirm_password: confirmPassword
+            }
+        });
+    }
 
     // Curriculum
     getGrades() {
@@ -131,21 +141,55 @@ class ApiClient {
         return this.request('/exams/my-history');
     }
 
-    // Competitions
-    getCompetitions() {
-        return this.request('/competitions');
+    // Competitions & Leagues
+    getCompetitions(leagueType = null, gradeId = null) {
+        let url = '/competitions';
+        const params = [];
+        if (leagueType) params.push(`league_type=${encodeURIComponent(leagueType)}`);
+        if (gradeId) params.push(`grade_id=${encodeURIComponent(gradeId)}`);
+        if (params.length > 0) url += `?${params.join('&')}`;
+        return this.request(url);
     }
     getCompetition(compId) {
         return this.request(`/competitions/${compId}`);
     }
-    submitCompetition(compId, answers) {
+    submitCompetition(compId, answers, timeSpentSeconds = 0) {
         return this.request(`/competitions/${compId}/submit`, {
             method: 'POST',
-            body: { competition_id: compId, answers: answers }
+            body: {
+                competition_id: compId,
+                answers: answers,
+                time_spent_seconds: timeSpentSeconds
+            }
         });
     }
     getCompetitionLeaderboard(compId) {
         return this.request(`/competitions/${compId}/leaderboard`);
+    }
+    getLeagueStandings(leagueType = 'weekly', gradeId = null) {
+        let url = `/competitions/leagues/standings?league_type=${encodeURIComponent(leagueType)}`;
+        if (gradeId) url += `&grade_id=${encodeURIComponent(gradeId)}`;
+        return this.request(url);
+    }
+
+    // Admin Competition Controls
+    adminCreateCompetition(data) {
+        return this.request('/competitions/admin/create', { method: 'POST', body: data });
+    }
+    adminUpdateCompetition(compId, data) {
+        return this.request(`/competitions/admin/${compId}`, { method: 'PUT', body: data });
+    }
+    adminDeleteCompetition(compId) {
+        return this.request(`/competitions/admin/${compId}`, { method: 'DELETE' });
+    }
+    adminGetCompetitionSubmissions(compId) {
+        return this.request(`/competitions/admin/${compId}/submissions`);
+    }
+    adminGradeCompetitionSubmission(compId, subId, score, feedback) {
+        return this.request(`/competitions/admin/${compId}/submissions/${subId}/grade`, {
+            method: 'POST',
+            body: { score: score, feedback_fa: feedback }
+        });
     }
 
     // Gamification
@@ -208,6 +252,14 @@ class ApiClient {
     }
     processTextbook(sourceId) {
         return this.request(`/admin/textbooks/${sourceId}/process`, { method: 'POST' });
+    }
+
+    // AI Services
+    askAiTutor(payload) {
+        return this.request('/ai/tutor', { method: 'POST', body: payload });
+    }
+    explainMistake(payload) {
+        return this.request('/ai/explain-mistake', { method: 'POST', body: payload });
     }
 
     // Public Stats

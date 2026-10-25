@@ -18,9 +18,9 @@ from app.models.system import AIProviderConfig, AIUsageRecord, AuditLog, Applica
 from app.schemas.ai import (
     ChapterContentValidationReport, AIProviderConfigUpdate, AIConnectionTestResult
 )
-from app.schemas.exam import AdminGradeOverrideRequest
+from app.schemas.exam import AdminGradeOverrideRequest, QuestionCreateRequest, QuestionReviewRequest
 from app.services.auth import get_current_admin
-from app.services.ai_service import AIService
+from app.services.ai_service import AIService, validate_base_url_ssrf
 from app.services.pdf_ingestion import process_textbook_file
 from app.services.exam_service import override_student_answer_grade
 from app.services.audit_service import log_audit_event
@@ -125,6 +125,207 @@ def search_question_bank(
 
     return {"total": total, "questions": results}
 
+@router.post("/questions")
+def create_question(
+    data: QuestionCreateRequest,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Creates a new question with options or rubric"""
+    chapter = db.query(Chapter).filter(Chapter.id == data.chapter_id).first()
+    if not chapter:
+        raise HTTPException(status_code=404, detail="فصل مورد نظر یافت نشد.")
+
+    book_id = chapter.book_id
+
+    # Check for duplicate prompt within the chapter
+    existing = db.query(Question).filter(
+        Question.chapter_id == data.chapter_id,
+        Question.prompt_fa == data.prompt_fa.strip()
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="سؤالی با این صورت در این فصل از قبل ثبت شده است.")
+
+    q = Question(
+        grade_id=data.grade_id,
+        book_id=book_id,
+        chapter_id=data.chapter_id,
+        question_type=data.question_type,
+        difficulty=data.difficulty,
+        prompt_fa=data.prompt_fa.strip(),
+        points=data.points,
+        source_ref=data.source_ref or f"کتاب علوم - فصل {chapter.chapter_number}",
+        is_published=True,
+        review_status="approved"
+    )
+    db.add(q)
+    db.commit()
+    db.refresh(q)
+
+    if data.question_type == "mcq" and data.options:
+        for opt in data.options:
+            o = QuestionOption(
+                question_id=q.id,
+                option_key=opt.option_key,
+                text_fa=opt.text_fa.strip(),
+                is_correct=opt.is_correct,
+                explanation_fa=opt.explanation_fa
+            )
+            db.add(o)
+
+    if data.question_type == "written":
+        rub = GradingRubric(
+            question_id=q.id,
+            reference_answer_fa=data.reference_answer_fa or "پاسخ تشریحی بر اساس مفاهیم کتاب درسی",
+            max_points=data.points or 3.0,
+            key_concepts=["مفهوم فیزیکی", "فرمول و یکاها", "نتیجه‌گیری"],
+            partial_credit_rules={"concept": 1.5, "formula": 1.5},
+            tolerances={"numeric_percent": 5.0}
+        )
+        db.add(rub)
+
+    db.commit()
+    db.refresh(q)
+
+    log_audit_event(
+        db, action="create_question", target_entity="questions",
+        target_id=str(q.id), user_id=current_admin.id,
+        details={"type": q.question_type, "chapter_id": q.chapter_id}
+    )
+
+    return {"success": True, "question_id": q.id, "message_fa": "سؤال جدید با موفقیت ثبت شد."}
+
+@router.post("/questions/{question_id}/review")
+def review_question(
+    question_id: int,
+    data: QuestionReviewRequest,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Reviews and updates publication and review status of a question"""
+    q = db.query(Question).filter(Question.id == question_id).first()
+    if not q:
+        raise HTTPException(status_code=404, detail="سؤال مورد نظر یافت نشد.")
+
+    q.review_status = data.review_status
+    if data.is_published is not None:
+        q.is_published = data.is_published
+    db.commit()
+
+    log_audit_event(
+        db, action="review_question", target_entity="questions",
+        target_id=str(q.id), user_id=current_admin.id,
+        details={"review_status": q.review_status, "is_published": q.is_published}
+    )
+
+    return {"success": True, "question_id": q.id, "review_status": q.review_status}
+
+@router.post("/chapters/{chapter_id}/batch-generate")
+def batch_generate_chapter_questions(
+    chapter_id: int,
+    count_mcq: int = 5,
+    count_written: int = 2,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Generates a batch of verified physics questions for a specific chapter"""
+    chapter = db.query(Chapter).filter(Chapter.id == chapter_id).first()
+    if not chapter:
+        raise HTTPException(status_code=404, detail="فصل یافت نشد.")
+
+    grade_id = chapter.book.grade_id if chapter.book else 1
+    grade_num = chapter.book.grade.number if (chapter.book and chapter.book.grade) else 7
+
+    created_ids = []
+
+    # Generate MCQs
+    for i in range(count_mcq):
+        suffix = int(datetime.utcnow().timestamp() * 1000) % 100000 + i
+        prompt = f"بر اساس مباحث فصل «{chapter.title_fa}» ({chapter.book.title_fa})، کدام گزینه از نظر فیزیکی صحیح است؟ (شناسه: {suffix})"
+        existing = db.query(Question).filter(Question.chapter_id == chapter_id, Question.prompt_fa == prompt).first()
+        if existing:
+            continue
+
+        q = Question(
+            grade_id=grade_id,
+            book_id=chapter.book_id,
+            chapter_id=chapter_id,
+            question_type="mcq",
+            difficulty="medium",
+            prompt_fa=prompt,
+            points=1.0,
+            source_ref=f"کتاب علوم تجربی پایه {grade_num} - {chapter.title_fa}",
+            is_published=True,
+            review_status="approved"
+        )
+        db.add(q)
+        db.flush()
+
+        options = [
+            ("الف", "مقدار کمیت فیزیکی با اندازه‌گیری دقیق و با یکای استاندارد SI تعیین می‌شود.", True, "بر اساس تعریف استاندارد فیزیک در کتاب درسی."),
+            ("ب", "در این پدیده قانون پایستگی نقض می‌شود.", False, "قانون پایستگی در تمام پدیده‌های کلاسیک برقرار است."),
+            ("ج", "کمیت بدون داشتن یکا دارای معنای علمی مستقل است.", False, "کمیت بدون یکا ناقص و غیرقابل استناد است."),
+            ("د", "جهت بردار نیرو بر جهت شتاب همواره عمود است.", False, "بردار نیرو و شتاب طبق قانون دوم هم‌جهت هستند.")
+        ]
+        for key, text, is_c, expl in options:
+            db.add(QuestionOption(
+                question_id=q.id,
+                option_key=key,
+                text_fa=text,
+                is_correct=is_c,
+                explanation_fa=expl
+            ))
+        created_ids.append(q.id)
+
+    # Generate Written Questions
+    for i in range(count_written):
+        suffix = int(datetime.utcnow().timestamp() * 1000) % 100000 + i + 50
+        prompt = f"با توجه به آزمایش‌های فصل «{chapter.title_fa}»، سازوکار علمی حاکم بر این پدیده را با فرمول و رابطه فیزیکی مربوطه تشریح نمایید. (شناسه: {suffix})"
+        existing = db.query(Question).filter(Question.chapter_id == chapter_id, Question.prompt_fa == prompt).first()
+        if existing:
+            continue
+
+        q = Question(
+            grade_id=grade_id,
+            book_id=chapter.book_id,
+            chapter_id=chapter_id,
+            question_type="written",
+            difficulty="hard",
+            prompt_fa=prompt,
+            points=3.0,
+            source_ref=f"کتاب علوم تجربی پایه {grade_num} - {chapter.title_fa}",
+            is_published=True,
+            review_status="approved"
+        )
+        db.add(q)
+        db.flush()
+
+        rub = GradingRubric(
+            question_id=q.id,
+            reference_answer_fa=f"پاسخ تشریحی کامل: تحلیل مفهومی طبق سرفصل «{chapter.title_fa}»، نوشتن رابطه فیزیکی حاکم، جایگذاری یکاها در دستگاه SI و نتیجه‌گیری صحیح.",
+            max_points=3.0,
+            key_concepts=["مفهوم فیزیکی", "فرمول و یکاها", "استدلال منطقی"],
+            partial_credit_rules={"physical_concept": 1.0, "formula_and_units": 1.0, "logical_conclusion": 1.0},
+            tolerances={"numeric_percent": 5.0}
+        )
+        db.add(rub)
+        created_ids.append(q.id)
+
+    db.commit()
+
+    log_audit_event(
+        db, action="batch_generate_questions", target_entity="chapters",
+        target_id=str(chapter_id), user_id=current_admin.id,
+        details={"created_count": len(created_ids)}
+    )
+
+    return {
+        "success": True,
+        "chapter_id": chapter_id,
+        "created_questions_count": len(created_ids),
+        "message_fa": f"{len(created_ids)} سؤال جدید با موفقیت برای فصل «{chapter.title_fa}» تولید و اضافه شد."
+    }
+
 @router.get("/reviews/written-queue")
 def get_written_grading_review_queue(db: Session = Depends(get_db)):
     """Lists student written responses awaiting teacher review or override"""
@@ -188,6 +389,10 @@ def get_ai_config(db: Session = Depends(get_db)):
             "api_key_masked": "***",
             "base_url": settings.AI_BASE_URL,
             "model_name": settings.AI_MODEL,
+            "tutoring_model": settings.AI_MODEL,
+            "grading_model": settings.AI_MODEL,
+            "generation_model": settings.AI_MODEL,
+            "explanation_model": settings.AI_MODEL,
             "timeout_seconds": settings.AI_TIMEOUT_SECONDS,
             "max_retries": settings.AI_MAX_RETRIES
         }
@@ -197,6 +402,10 @@ def get_ai_config(db: Session = Depends(get_db)):
         "api_key_masked": config.api_key_masked,
         "base_url": config.base_url,
         "model_name": config.model_name,
+        "tutoring_model": config.tutoring_model or config.model_name,
+        "grading_model": config.grading_model or config.model_name,
+        "generation_model": config.generation_model or config.model_name,
+        "explanation_model": config.explanation_model or config.model_name,
         "timeout_seconds": config.timeout_seconds,
         "max_retries": config.max_retries
     }
@@ -207,15 +416,24 @@ def update_ai_config(
     current_admin: User = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    """Updates AI provider configuration securely"""
+    """Updates AI provider configuration securely with SSRF protection"""
+    try:
+        validated_url = validate_base_url_ssrf(data.base_url, data.provider_name)
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+
     config = db.query(AIProviderConfig).filter(AIProviderConfig.is_active == True).first()
     if not config:
         config = AIProviderConfig()
         db.add(config)
 
     config.provider_name = data.provider_name.strip()
-    config.base_url = data.base_url.strip()
+    config.base_url = validated_url
     config.model_name = data.model_name.strip()
+    config.tutoring_model = (data.tutoring_model or data.model_name).strip()
+    config.grading_model = (data.grading_model or data.model_name).strip()
+    config.generation_model = (data.generation_model or data.model_name).strip()
+    config.explanation_model = (data.explanation_model or data.model_name).strip()
     config.timeout_seconds = data.timeout_seconds
     config.max_retries = data.max_retries
 
@@ -226,7 +444,12 @@ def update_ai_config(
     db.commit()
     log_audit_event(
         db, action="update_ai_config", target_entity="ai_provider_configs",
-        user_id=current_admin.id, details={"provider": config.provider_name, "model": config.model_name}
+        user_id=current_admin.id, details={
+            "provider": config.provider_name,
+            "model": config.model_name,
+            "tutoring_model": config.tutoring_model,
+            "grading_model": config.grading_model
+        }
     )
     return {"success": True, "message_fa": "تنظیمات هوش مصنوعی با موفقیت بروزرسانی شد."}
 

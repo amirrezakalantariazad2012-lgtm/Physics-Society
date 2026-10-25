@@ -1,6 +1,5 @@
 /**
- * Interactive Physics Laboratory Simulators & 3D Apparatus Visualizers
- * Shahid Beheshti 2 High School Physics Platform
+ * QUANTUM CUT — Interactive Physics Laboratory Simulators & 3D Apparatus Visualizers
  */
 
 class PhysicsSimulators {

@@ -22,8 +22,8 @@ def health_check(db: Session = Depends(get_db)):
     return {
         "status": "healthy" if db_ok else "degraded",
         "database_connected": db_ok,
-        "service": "Physics Association Shahid Beheshti 2 School API",
-        "version": "1.0.0"
+        "service": "QUANTUM CUT API",
+        "version": "2.0.0"
     }
 
 @router.get("/system/stats")
@@ -39,8 +39,8 @@ def public_system_stats(db: Session = Depends(get_db)):
     competitions_count = db.query(Competition).count()
 
     return {
-        "school_name": "دبیرستان استعدادهای درخشان شهید بهشتی ۲",
-        "association_name": "انجمن علمی فیزیک",
+        "school_name": "QUANTUM CUT",
+        "association_name": "پلتفرم تخصصی فیزیک و هوش مصنوعی",
         "students_count": students_count,
         "grades_count": grades_count,
         "books_count": books_count,

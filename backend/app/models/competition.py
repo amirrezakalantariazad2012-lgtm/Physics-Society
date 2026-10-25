@@ -11,6 +11,12 @@ class Competition(Base):
     title_fa = Column(String(128), nullable=False)
     description_fa = Column(Text, nullable=True)
     theme_fa = Column(String(128), nullable=True)  # e.g. "چالش فیزیک نیوتونی و انرژی"
+    league_type = Column(String(32), default="weekly", nullable=False, index=True)  # 'weekly', 'monthly', 'seasonal', 'speed_cup'
+    league_tier = Column(String(32), default="quantum", nullable=False)  # 'quantum', 'photon', 'plasma'
+    duration_minutes = Column(Integer, default=45, nullable=False)
+    has_negative_marking = Column(Boolean, default=False, nullable=False)
+    negative_ratio = Column(Float, default=0.33, nullable=False)
+    status = Column(String(32), default="active", nullable=False, index=True)  # 'draft', 'active', 'closed'
     starts_at = Column(DateTime, nullable=False, index=True)
     ends_at = Column(DateTime, nullable=False, index=True)
     is_published = Column(Boolean, default=True, index=True)
@@ -52,6 +58,9 @@ class CompetitionSubmission(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     answers_json = Column(JSON, nullable=False, default=dict)  # question_id -> response
     submitted_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    time_spent_seconds = Column(Integer, default=0, nullable=False)
+    mcq_score = Column(Float, default=0.0, nullable=False)
+    written_score = Column(Float, default=0.0, nullable=False)
     score = Column(Float, default=0.0)
     final_rank = Column(Integer, nullable=True, index=True)
     xp_awarded = Column(Integer, default=0)

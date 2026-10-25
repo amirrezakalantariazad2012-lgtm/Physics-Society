@@ -362,15 +362,23 @@ class DuolingoPlayer {
                 `;
             } else {
                 window.store.playSound('wrong');
-                banner.className = 'mt-6 p-4 rounded-2xl flex items-center justify-between bg-rose-100 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200';
+                banner.className = 'mt-6 p-5 rounded-2xl flex flex-col gap-3 bg-rose-950/40 border border-rose-800 text-rose-200 shadow-lg';
                 banner.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="x-circle" class="w-6 h-6 text-rose-600"></i>
-                        <div>
-                            <span class="font-bold block">پاسخ نادرست بود.</span>
-                            <span class="text-xs text-rose-700 dark:text-rose-300">${res.explanation_fa}</span>
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="x-circle" class="w-6 h-6 text-rose-500 shrink-0 mt-0.5"></i>
+                            <div>
+                                <span class="font-bold text-base block text-rose-300">پاسخ نادرست بود</span>
+                                <span class="text-xs text-rose-200/90 leading-relaxed">${res.explanation_fa || 'پاسخ ارسالی با اصول علمی این مبحث تطابق ندارد.'}</span>
+                            </div>
                         </div>
+                        <button id="duo-ai-help-btn" onclick="window.currentDuolingoPlayer.askAIWhyWrong()" 
+                            class="shrink-0 px-3.5 py-1.5 rounded-xl bg-violet-600/30 hover:bg-violet-600/50 border border-violet-500/50 text-violet-300 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm">
+                            <i data-lucide="bot" class="w-4 h-4 text-violet-400"></i>
+                            <span>تحلیل هوشمند کج‌فهمی (AI)</span>
+                        </button>
                     </div>
+                    <div id="duo-ai-analysis-container" class="hidden mt-2 pt-3 border-t border-rose-900/50"></div>
                 `;
             }
 
@@ -384,6 +392,62 @@ class DuolingoPlayer {
             if (window.lucide) window.lucide.createIcons();
         } catch (e) {
             alert(e.message);
+        }
+    }
+
+    async askAIWhyWrong() {
+        const container = document.getElementById('duo-ai-analysis-container');
+        const btn = document.getElementById('duo-ai-help-btn');
+        if (!container) return;
+
+        if (btn) {
+            btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-violet-400 border-t-transparent rounded-full ml-1.5"></span> در حال تحلیل هوشمند...`;
+            btn.disabled = true;
+        }
+
+        const currentStepObj = this.steps[this.currentStep];
+        const ex = currentStepObj.exercise;
+        const currentGradeId = window.store?.user?.grade_id || 1;
+
+        try {
+            const aiData = await window.api.askAiTutor({
+                grade_id: currentGradeId,
+                chapter_id: this.lesson.chapter_id,
+                lesson_id: this.lesson.id,
+                student_query: `در تمرین «${ex.prompt_fa}»، پاسخ من اشتباه شد. لطفاً علت کج‌فهمی علمی، رابطه فیزیکی و نکته کلیدی را توضیح دهید.`
+            });
+
+            container.classList.remove('hidden');
+            container.innerHTML = `
+                <div class="p-4 rounded-xl bg-slate-900/90 border border-violet-500/40 shadow-inner space-y-3">
+                    <div class="flex items-center gap-2 text-violet-400 font-bold text-xs">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-violet-400"></i>
+                        <span>تحلیل معلم هوشمند فیزیک:</span>
+                    </div>
+                    <p class="text-xs text-slate-200 leading-relaxed">${aiData.response_fa}</p>
+                    ${aiData.related_formulas && aiData.related_formulas.length ? `
+                    <div class="p-2.5 rounded-lg bg-black/40 border border-violet-900/50">
+                        <span class="text-[11px] font-bold text-cyan-400 block mb-1">فرمول‌های مرتبط:</span>
+                        <div class="flex flex-wrap gap-2 text-xs font-mono text-cyan-300 dir-ltr katex-ltr-isolated" dir="ltr">
+                            ${aiData.related_formulas.join(' &nbsp;|&nbsp; ')}
+                        </div>
+                    </div>` : ''}
+                    ${aiData.key_hints && aiData.key_hints.length ? `
+                    <ul class="text-[11px] text-amber-300/90 list-disc list-inside space-y-1">
+                        ${aiData.key_hints.map(h => `<li>${h}</li>`).join('')}
+                    </ul>` : ''}
+                </div>
+            `;
+            if (btn) btn.classList.add('hidden');
+            if (window.lucide) window.lucide.createIcons();
+            if (window.renderMathInPage) setTimeout(window.renderMathInPage, 50);
+        } catch (err) {
+            container.classList.remove('hidden');
+            container.innerHTML = `<span class="text-xs text-rose-300">خطا در دریافت تحلیل هوشمند: ${err.message}</span>`;
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="bot" class="w-4 h-4 text-violet-400"></i><span>تلاش مجدد تحلیل</span>`;
+            }
         }
     }
 

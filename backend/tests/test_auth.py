@@ -52,3 +52,65 @@ def test_student_cannot_access_admin_endpoints(client):
     )
     assert admin_res.status_code == 403
     assert "دسترسی غیرمجاز" in admin_res.json()["detail"]
+
+def test_forced_password_change_workflow(client, db_session):
+    from app.models.user import User
+    from app.services.auth import hash_password
+
+    # Setup admin with must_change_password = True
+    admin = db_session.query(User).filter(User.username == "admin").first()
+    admin.hashed_password = hash_password("admin_initial")
+    admin.must_change_password = True
+    db_session.commit()
+
+    # Login as admin
+    login_res = client.post("/api/auth/login", json={
+        "username": "admin",
+        "password": "admin_initial"
+    })
+    assert login_res.status_code == 200
+    login_data = login_res.json()
+    token = login_data["access_token"]
+    assert login_data["user"]["must_change_password"] is True
+
+    # Attempt to access protected admin endpoint before changing password -> Blocked 403
+    admin_call = client.get("/api/admin/overview", headers={"Authorization": f"Bearer {token}"})
+    assert admin_call.status_code == 403
+    assert "PASSWORD_CHANGE_REQUIRED" in admin_call.json()["detail"]
+
+    # Wrong current password
+    fail_1 = client.post(
+        "/api/auth/change-password",
+        json={"current_password": "wrong", "new_password": "ValidNewPass1405!", "confirm_password": "ValidNewPass1405!"},
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert fail_1.status_code == 400
+    assert "نادرست" in fail_1.json()["detail"]
+
+    # Mismatched confirmation
+    fail_2 = client.post(
+        "/api/auth/change-password",
+        json={"current_password": "admin_initial", "new_password": "ValidNewPass1405!", "confirm_password": "DifferentPass!"},
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert fail_2.status_code == 400
+
+    # Successful password change
+    succ_res = client.post(
+        "/api/auth/change-password",
+        json={"current_password": "admin_initial", "new_password": "StrongNewPassword1405!", "confirm_password": "StrongNewPassword1405!"},
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert succ_res.status_code == 200
+    succ_data = succ_res.json()
+    new_token = succ_data["access_token"]
+    assert succ_data["user"]["must_change_password"] is False
+
+    # Now admin access is granted
+    allowed_call = client.get("/api/admin/overview", headers={"Authorization": f"Bearer {new_token}"})
+    assert allowed_call.status_code == 200
+
+    # Restore admin password for subsequent test isolation
+    admin.hashed_password = hash_password("AdminPhysics1405!")
+    admin.must_change_password = False
+    db_session.commit()

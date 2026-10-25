@@ -14,6 +14,7 @@ class User(Base):
     full_name = Column(String(128), nullable=False)
     display_name = Column(String(64), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
+    must_change_password = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 

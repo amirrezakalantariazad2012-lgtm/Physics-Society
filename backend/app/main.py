@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from app.config import settings
 from app.database import engine, Base, SessionLocal
 import app.models
-from app.routers import auth, curriculum, exams, competitions, gamification, admin, system
+from app.routers import auth, curriculum, exams, competitions, gamification, admin, system, ai
 from app.seed.curriculum_seed import seed_base_system
 from app.seed.question_bank import seed_complete_curriculum_and_questions
 
@@ -31,9 +31,9 @@ async def lifespan(app: FastAPI):
     # Shutdown logic if any
 
 app = FastAPI(
-    title="سامانه جامع انجمن فیزیک دبیرستان شهید بهشتی ۲",
-    description="پلتفرم آموزشی، یادگیری تعاملی، آزمون‌ساز هوشمند و مسابقات هفتگی فیزیک (پایه‌های هفتم، هشتم و نهم)",
-    version="1.0.0",
+    title="QUANTUM CUT API",
+    description="پلتفرم آموزشی، یادگیری تعاملی، آزمون‌ساز هوشمند و مسابقات لیگ فیزیک (پایه‌های هفتم، هشتم و نهم)",
+    version="2.0.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     lifespan=lifespan
@@ -56,6 +56,7 @@ app.include_router(exams.router, prefix="/api")
 app.include_router(competitions.router, prefix="/api")
 app.include_router(gamification.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
+app.include_router(ai.router, prefix="/api")
 
 # Static files for frontend
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend"))

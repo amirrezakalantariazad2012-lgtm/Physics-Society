@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" width="100%" height="100%">
+  <defs>
+    <!-- Cyan to Violet Gradient -->
+    <linearGradient id="qc-cyan-violet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF" />
+      <stop offset="50%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+
+    <!-- Laser Cut Gradient -->
+    <linearGradient id="laser-beam" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F0FF" stop-opacity="0" />
+      <stop offset="35%" stop-color="#22D3EE" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="1" />
+      <stop offset="65%" stop-color="#A78BFA" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Plasma Glow Filter -->
+    <filter id="neon-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <filter id="subtle-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- ICON SECTION (Left: x=10 to x=110, Center: 60, 60) -->
+  <g transform="translate(10, 10)">
+    <!-- Outer Hexagonal Quantum Cage -->
+    <polygon points="50,2 92,26 92,74 50,98 8,74 8,26" 
+             fill="none" stroke="#1E293B" stroke-width="2" />
+    <polygon points="50,6 88,28 88,72 50,94 12,72 12,28" 
+             fill="#070A18" fill-opacity="0.8" stroke="url(#qc-cyan-violet)" stroke-width="1.5" stroke-dasharray="8 4" />
+
+    <!-- Quantum Orbit 1 (Tilted -35deg) -->
+    <ellipse cx="50" cy="50" rx="38" ry="14" fill="none" 
+             stroke="#22D3EE" stroke-width="2" transform="rotate(-35, 50, 50)" filter="url(#subtle-glow)" />
+    <!-- Electron 1 -->
+    <circle cx="82" cy="32" r="3.5" fill="#FFFFFF" filter="url(#neon-glow)" />
+
+    <!-- Quantum Orbit 2 (Tilted +35deg) -->
+    <ellipse cx="50" cy="50" rx="38" ry="14" fill="none" 
+             stroke="#8B5CF6" stroke-width="2" transform="rotate(35, 50, 50)" filter="url(#subtle-glow)" />
+    <!-- Electron 2 -->
+    <circle cx="18" cy="32" r="3.5" fill="#A78BFA" filter="url(#neon-glow)" />
+
+    <!-- Quantum Nucleus / Core -->
+    <circle cx="50" cy="50" r="10" fill="url(#qc-cyan-violet)" filter="url(#neon-glow)" />
+    <circle cx="50" cy="50" r="4" fill="#FFFFFF" />
+
+    <!-- THE QUANTUM CUT: Laser beam slice cutting through diagonally -->
+    <line x1="10" y1="88" x2="90" y2="12" stroke="url(#laser-beam)" stroke-width="3.5" filter="url(#neon-glow)" />
+    <!-- Quantum Spark on the cut -->
+    <circle cx="50" cy="50" r="1.5" fill="#FFFFFF" />
+  </g>
+
+  <!-- TYPOGRAPHY SECTION -->
+  <g transform="translate(130, 20)">
+    <!-- Text QUANTUM -->
+    <text x="0" y="42" font-family="'Orbitron', 'Inter', -apple-system, sans-serif" font-weight="900" font-size="34" letter-spacing="4" fill="#F8FAFC">
+      QUANTUM
+    </text>
+    
+    <!-- Text CUT with angular sci-fi gradient fill -->
+    <text x="210" y="42" font-family="'Orbitron', 'Inter', -apple-system, sans-serif" font-weight="900" font-size="34" letter-spacing="3" fill="url(#qc-cyan-violet)" filter="url(#subtle-glow)">
+      CUT
+    </text>
+
+    <!-- Cutting Slash Mark behind CUT -->
+    <line x1="200" y1="52" x2="280" y2="8" stroke="#22D3EE" stroke-width="2" stroke-opacity="0.7" />
+
+    <!-- Subtitle / Persian Label -->
+    <text x="2" y="70" font-family="'Vazirmatn', -apple-system, sans-serif" font-weight="600" font-size="13" letter-spacing="1.5" fill="#94A3B8">
+      پلتفرم تخصصی فیزیک و هوش مصنوعی • PHYSICS ARENA
+    </text>
+
+    <!-- Accent Micro Bar -->
+    <rect x="0" y="80" width="310" height="2" rx="1" fill="#1E293B" />
+    <rect x="0" y="80" width="90" height="2" rx="1" fill="url(#qc-cyan-violet)" />
+  </g>
+</svg>

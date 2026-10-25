@@ -10,7 +10,7 @@ from app.seed.question_bank import seed_complete_curriculum_and_questions, valid
 def create_admin():
     """Interactive CLI command to create the initial administrator securely"""
     print("==================================================")
-    print("سامانه جامع انجمن فیزیک دبیرستان شهید بهشتی ۲")
+    print("پلتفرم تخصصی فیزیک و هوش مصنوعی QUANTUM CUT")
     print("ایجاد حساب کاربری مدیر ارشد سامانه (Super Admin)")
     print("==================================================")
 
@@ -18,8 +18,8 @@ def create_admin():
     Base.metadata.create_all(bind=engine)
 
     username = input("نام کاربری مدیر (پیش‌فرض: admin): ").strip() or "admin"
-    email = input("آدرس ایمیل مدیر: ").strip() or "admin@beheshti2-physics.ir"
-    full_name = input("نام و نام خانوادگی مدیر: ").strip() or "مدیر ارشد انجمن فیزیک"
+    email = input("آدرس ایمیل مدیر: ").strip() or "admin@quantumcut.ir"
+    full_name = input("نام و نام خانوادگی مدیر: ").strip() or "مدیر ارشد QUANTUM CUT"
 
     existing = db.query(User).filter(User.username == username).first()
     if existing:
@@ -43,7 +43,7 @@ def create_admin():
         username=username,
         email=email,
         full_name=full_name,
-        display_name="مدیر انجمن فیزیک",
+        display_name="مدیر QUANTUM CUT",
         hashed_password=hash_password(password),
         role="admin",
         is_active=True
@@ -55,7 +55,7 @@ def create_admin():
 
 def seed_database():
     """Seeds base system, curriculum, and all 360 questions"""
-    print("شروع مقداردهی اولیه پایگاه داده انجمن فیزیک...")
+    print("شروع مقداردهی اولیه پایگاه داده QUANTUM CUT...")
     db = SessionLocal()
     Base.metadata.create_all(bind=engine)
     seed_base_system(db)
@@ -63,11 +63,48 @@ def seed_database():
     print("نتیجه مقداردهی پایگاه داده:", stats)
     db.close()
 
-def run_validation():
-    """Runs automated chapter question compliance validation"""
-    print("شروع ارزیابی جامع انطباق سؤالات فصل‌های آموزشی...")
+def bootstrap_admin(force_reset: bool = False):
+    """Bootstraps default setup admin (admin/admin with must_change_password=True) safely preserving custom accounts"""
+    print("==================================================")
+    print("پلتفرم QUANTUM CUT: راه‌اندازی حساب مدیر پیش‌فرض")
+    print("==================================================")
     db = SessionLocal()
-    reports = validate_all_chapters_content(db)
+    Base.metadata.create_all(bind=engine)
+
+    admin = db.query(User).filter(User.username == "admin").first()
+    if admin:
+        if force_reset:
+            admin.hashed_password = hash_password("admin")
+            admin.must_change_password = True
+            db.commit()
+            print("حساب مدیر پیش‌فرض با نام 'admin' و رمز 'admin' مجدداً تنظیم شد (تغییر رمز در اولین ورود اجباری است).")
+        else:
+            print("حساب مدیر 'admin' از قبل در پایگاه داده وجود دارد و حفظ گردید.")
+            print("(برای بازنشانی به admin/admin اولیه، از سوئیچ --reset استفاده فرمایید)")
+    else:
+        admin = User(
+            username="admin",
+            email="admin@quantumcut.ir",
+            full_name="مدیر سامانه QUANTUM CUT",
+            display_name="مدیر QUANTUM CUT",
+            hashed_password=hash_password("admin"),
+            role="admin",
+            is_active=True,
+            must_change_password=True
+        )
+        db.add(admin)
+        db.commit()
+        print("حساب کاربری مدیر پیش‌فرض با موفقیت ایجاد شد:")
+        print("نام کاربری: admin")
+        print("رمز عبور: admin")
+        print("وضعیت: تغییر رمز در اولین ورود اجباری است (must_change_password = True)")
+    db.close()
+
+def run_validation():
+    """Runs automated chapter question compliance validation across all 45 curriculum chapters"""
+    print("شروع ارزیابی جامع انطباق سؤالات فصل‌های آموزشی (تمامی ۴۵ فصل کتب درسی)...")
+    db = SessionLocal()
+    reports = validate_all_chapters_content(db, physics_core_only=False)
     all_ok = True
     for r in reports:
         status_str = "منطبق (OK)" if r.is_fully_compliant else "ناقص (FAILED)"
@@ -85,11 +122,14 @@ if __name__ == "__main__":
         cmd = sys.argv[1].lower()
         if cmd == "create-admin":
             create_admin()
+        elif cmd in ("bootstrap-admin", "bootstrap_admin", "init-admin"):
+            reset = "--reset" in sys.argv or "-r" in sys.argv
+            bootstrap_admin(force_reset=reset)
         elif cmd == "seed":
             seed_database()
         elif cmd in ("validate", "validate-content", "validate_content"):
             run_validation()
         else:
-            print("دستور نامعتبر. دستورات مجاز: create-admin, seed, validate")
+            print("دستور نامعتبر. دستورات مجاز: bootstrap-admin, create-admin, seed, validate")
     else:
-        print("استفاده: python -m app.cli [create-admin | seed | validate]")
+        print("استفاده: python -m app.cli [bootstrap-admin | create-admin | seed | validate]")

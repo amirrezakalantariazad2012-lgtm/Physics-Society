@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from app.config import settings
 
@@ -20,6 +20,22 @@ if settings.DATABASE_URL.startswith("sqlite"):
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()
+
+def run_db_migrations(target_engine):
+    """Safely apply schema additions to existing SQLite or Postgres databases"""
+    try:
+        with target_engine.connect() as conn:
+            if str(target_engine.url).startswith("sqlite"):
+                res = conn.execute(text("PRAGMA table_info(users)"))
+                cols = [row[1] for row in res.fetchall()]
+                if cols and "must_change_password" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN must_change_password BOOLEAN NOT NULL DEFAULT 0"))
+                    conn.commit()
+    except Exception:
+        pass
+
+# Ensure migrations on startup
+run_db_migrations(engine)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

@@ -21,6 +21,7 @@ class UserLogin(BaseModel):
 class UserResponse(UserBase):
     id: int
     is_active: bool
+    must_change_password: bool = False
     created_at: datetime
     grade_id: Optional[int] = None
     grade_title_fa: Optional[str] = None
@@ -36,6 +37,11 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+class PasswordChangeRequest(BaseModel):
+    current_password: str = Field(..., min_length=1, description="رمز عبور فعلی")
+    new_password: str = Field(..., min_length=8, max_length=128, description="رمز عبور جدید (حداقل ۸ کاراکتر)")
+    confirm_password: str = Field(..., min_length=8, max_length=128, description="تکرار رمز عبور جدید")
 
 class StudentProfileUpdate(BaseModel):
     display_name: Optional[str] = None

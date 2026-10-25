@@ -12,7 +12,19 @@ class ExamRunner {
 
         this.currentIndex = 0;
         this.answers = {}; // question_id -> { selected_option_key, written_response_text }
-        this.remainingSeconds = this.durationMinutes * 60;
+        
+        // Persistent Exam Timer calculation across page reloads/exits
+        const startKey = `quantum_exam_start_${this.attemptId}`;
+        let startedAt = parseInt(localStorage.getItem(startKey), 10);
+        if (!startedAt) {
+            startedAt = Date.now();
+            localStorage.setItem(startKey, startedAt.toString());
+        }
+        this.startedAt = startedAt;
+        this.totalSeconds = this.durationMinutes * 60;
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+        this.remainingSeconds = Math.max(0, this.totalSeconds - elapsed);
+        this.blurCount = 0;
         this.timerInterval = null;
 
         this.initAnswers();
@@ -29,22 +41,48 @@ class ExamRunner {
         });
     }
 
-    startTimer() {
-        this.timerInterval = setInterval(() => {
-            this.remainingSeconds--;
-            const timerEl = document.getElementById('exam-timer-display');
-            if (timerEl) {
-                const m = Math.floor(this.remainingSeconds / 60);
-                const s = this.remainingSeconds % 60;
-                timerEl.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-                if (this.remainingSeconds <= 300) {
-                    timerEl.classList.add('text-rose-500', 'animate-pulse');
-                }
+    updateTimerDisplay() {
+        const timerEl = document.getElementById('exam-timer-display');
+        if (timerEl) {
+            const m = Math.floor(this.remainingSeconds / 60);
+            const s = this.remainingSeconds % 60;
+            timerEl.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            if (this.remainingSeconds <= 300) {
+                timerEl.classList.add('text-rose-500', 'animate-pulse');
             }
+        }
+    }
+
+    setupAntiCheat() {
+        const handleBlur = () => {
+            if (!document.getElementById('exam-timer-display')) return;
+            this.blurCount++;
+            const banner = document.getElementById('exam-anticheat-banner');
+            if (banner) {
+                banner.classList.remove('hidden');
+                banner.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400 inline"></i> <span>هشدار امنیتی: خروج از برگه آزمون (${this.blurCount} بار) در سامانه ثبت گردید!</span>`;
+                setTimeout(() => { if (banner) banner.classList.add('hidden'); }, 6000);
+            }
+        };
+
+        window.addEventListener('blur', handleBlur);
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) handleBlur();
+        });
+    }
+
+    startTimer() {
+        this.updateTimerDisplay();
+        this.setupAntiCheat();
+
+        this.timerInterval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - this.startedAt) / 1000);
+            this.remainingSeconds = Math.max(0, this.totalSeconds - elapsed);
+            this.updateTimerDisplay();
 
             if (this.remainingSeconds <= 0) {
                 clearInterval(this.timerInterval);
-                alert('زمان آزمون به پایان رسید! آزمون به طور خودکار ثبت می‌شود.');
+                alert('⚠️ مهلت زمانی آزمون به پایان رسید! آزمون به طور خودکار ثبت می‌شود.');
                 this.submitExam();
             }
         }, 1000);
@@ -58,9 +96,15 @@ class ExamRunner {
         const currentAns = this.answers[q.id];
 
         container.innerHTML = `
-        <div class="max-w-4xl mx-auto px-4 py-6">
+        <div class="max-w-4xl mx-auto px-4 py-6 space-y-4">
+            <!-- Anti-Cheat Focus Warning Banner -->
+            <div id="exam-anticheat-banner" class="hidden p-3 rounded-2xl bg-rose-950/80 border border-rose-500/60 text-rose-200 text-xs font-bold flex items-center gap-2 animate-shake">
+                <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
+                <span>هشدار امنیتی کوانتوم: خروج از تب آزمون در سامانه ثبت گردید!</span>
+            </div>
+
             <!-- Header with Timer -->
-            <div class="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
+            <div class="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div>
                     <h2 class="font-bold text-lg text-slate-800 dark:text-white">${this.title}</h2>
                     <span class="text-xs text-slate-500 dark:text-slate-400">سؤال ${this.currentIndex + 1} از ${this.questions.length}</span>
@@ -202,6 +246,7 @@ class ExamRunner {
 
     async submitExam() {
         clearInterval(this.timerInterval);
+        localStorage.removeItem(`quantum_exam_start_${this.attemptId}`);
         const container = document.getElementById(this.containerId);
         container.innerHTML = `
         <div class="text-center py-20 space-y-4">

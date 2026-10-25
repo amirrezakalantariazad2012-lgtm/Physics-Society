@@ -5,13 +5,13 @@ from pydantic import Field
 
 class Settings(BaseSettings):
     # Application Info
-    APP_NAME: str = "سامانه جامع انجمن فیزیک دبیرستان شهید بهشتی ۲"
+    APP_NAME: str = "QUANTUM CUT — پلتفرم پیشرفته فیزیک و هوش مصنوعی"
     APP_ENV: str = "development"
     DEBUG: bool = True
     API_PREFIX: str = "/api"
 
     # Security & Tokens
-    SECRET_KEY: str = "beheshti2-physics-association-super-secret-key-3249723984723984729384723984723894723"
+    SECRET_KEY: str = "quantum-cut-super-secret-key-3249723984723984729384723984723894723"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
 
@@ -28,18 +28,18 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
 
     # Initial Admin Setup
-    INITIAL_ADMIN_USERNAME: str = "admin"
-    INITIAL_ADMIN_EMAIL: str = "admin@beheshti2.ir"
-    INITIAL_ADMIN_PASSWORD: str = "AdminPhysics1405!"
+    INITIAL_ADMIN_USERNAME: str = "QUANTUM CUT"
+    INITIAL_ADMIN_EMAIL: str = "admin@quantumcut.ir"
+    INITIAL_ADMIN_PASSWORD: str = "QUANTUM CUT"
 
-    # AI Service Configuration
-    AI_PROVIDER: str = "mock"  # 'openai', 'deepseek', 'openrouter', 'ollama', 'mock'
-    AI_API_KEY: str = "mock-key-for-testing"
-    AI_BASE_URL: str = "https://api.openai.com/v1"
-    AI_MODEL: str = "gpt-4o-mini"
-    AI_TIMEOUT_SECONDS: int = 40
-    AI_MAX_RETRIES: int = 2
-    AI_TEMPERATURE: float = 0.2
+    # AI Service Configuration (Nexora OpenRouter Free Engine)
+    AI_PROVIDER: str = "openrouter"  # 'openrouter', 'openai', 'deepseek', 'ollama', 'mock'
+    AI_API_KEY: str = ""  # Set via AI_API_KEY in .env or environment variable
+    AI_BASE_URL: str = "https://openrouter.ai/api/v1"
+    AI_MODEL: str = "poolside/laguna-s-2.1:free"
+    AI_TIMEOUT_SECONDS: int = 35
+    AI_MAX_RETRIES: int = 3
+    AI_TEMPERATURE: float = 0.35
 
     # Storage paths
     UPLOAD_DIR: str = "./data/uploads"

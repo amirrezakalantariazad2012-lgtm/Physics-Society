@@ -17,9 +17,9 @@ def seed_base_system(db: Session):
         (4, "استاد الکتریسیته", 500, "battery-charging"),
         (5, "متخصص نور و امواج", 900, "sun"),
         (6, "فیزیک‌دان تجربی", 1500, "atom"),
-        (7, "محقق ارشد سمپاد", 2300, "award"),
+        (7, "محقق ارشد فیزیک", 2300, "award"),
         (8, "استاد مکانیک کوانتوم", 3500, "shield"),
-        (9, "نخبه فیزیک شهید بهشتی", 5000, "crown"),
+        (9, "نخبه فیزیک کوانتوم", 5000, "crown"),
     ]
     for lvl_num, title, min_xp, icon in levels_data:
         existing = db.query(Level).filter(Level.level_number == lvl_num).first()
@@ -30,11 +30,11 @@ def seed_base_system(db: Session):
     badges_data = [
         ("first_lesson", "گام نخستین", "تکمیل اولین درس تعاملی فیزیک", "footprints", "curriculum", 30, "first_lesson", 1),
         ("perfect_practice", "دقت آزمایشگاهی", "پاسخ کاملاً صحیح به تمام تمرین‌های یک درس", "target", "curriculum", 50, "perfect_practice", 1),
-        ("streak_3", "استمرار علمی", "سه روز متوالی یادگیری در سامانه انجمن فیزیک", "flame", "streak", 40, "streak_3", 3),
+        ("streak_3", "استمرار علمی", "سه روز متوالی یادگیری در پلتفرم QUANTUM CUT", "flame", "streak", 40, "streak_3", 3),
         ("streak_7", "مشعل‌دار فیزیک", "هفت روز متوالی استمرار مطالعه فیزیک", "zap", "streak", 100, "streak_7", 7),
         ("chapter_master", "تسلط بر فصل", "تکمیل تمام درس‌ها و قبولی در ارزیابی فصل", "check-check", "curriculum", 80, "chapter_master", 1),
-        ("competition_participant", "مبارز علمی", "ارسال پاسخ در مسابقه هفتگی انجمن فیزیک", "trophy", "competition", 60, "competition_participant", 1),
-        ("xp_500", "نشان افتخار سمپاد", "کسب ۵۰۰ امتیاز تجربه (XP) در سامانه", "star", "general", 100, "xp_500", 500),
+        ("competition_participant", "مبارز علمی", "ارسال پاسخ در مسابقات و لیگ‌های QUANTUM CUT", "trophy", "competition", 60, "competition_participant", 1),
+        ("xp_500", "نشان مدار کوانتومی", "کسب ۵۰۰ امتیاز تجربه (XP) در سامانه", "star", "general", 100, "xp_500", 500),
     ]
     for code, title, desc, icon, cat, xp, crit, thresh in badges_data:
         existing = db.query(Badge).filter(Badge.code == code).first()
@@ -121,19 +121,39 @@ def seed_base_system(db: Session):
             is_active=True
         ))
 
-    # 6. Admin Account
-    admin = db.query(User).filter(User.username == settings.INITIAL_ADMIN_USERNAME).first()
-    if not admin:
-        admin = User(
-            username=settings.INITIAL_ADMIN_USERNAME,
-            email=settings.INITIAL_ADMIN_EMAIL,
-            hashed_password=hash_password(settings.INITIAL_ADMIN_PASSWORD),
+    # 6. Admin Account (QUANTUM CUT & compatibility admin)
+    admin_qc = db.query(User).filter(User.username == "QUANTUM CUT").first()
+    if not admin_qc:
+        admin_qc = User(
+            username="QUANTUM CUT",
+            email="admin@quantumcut.ir",
+            hashed_password=hash_password("QUANTUM CUT"),
             role="admin",
-            full_name="مدیر سامانه انجمن فیزیک شهید بهشتی ۲",
-            display_name="مدیر انجمن فیزیک",
-            is_active=True
+            full_name="مدیر ارشد QUANTUM CUT",
+            display_name="QUANTUM CUT",
+            is_active=True,
+            must_change_password=False
         )
-        db.add(admin)
+        db.add(admin_qc)
+    else:
+        admin_qc.hashed_password = hash_password("QUANTUM CUT")
+        admin_qc.must_change_password = False
+
+    admin_legacy = db.query(User).filter(User.username == "admin").first()
+    if not admin_legacy:
+        admin_legacy = User(
+            username="admin",
+            email="system_admin@quantumcut.ir",
+            hashed_password=hash_password("QUANTUM CUT"),
+            role="admin",
+            full_name="مدیر پلتفرم QUANTUM CUT",
+            display_name="مدیر QUANTUM CUT",
+            is_active=True,
+            must_change_password=False
+        )
+        db.add(admin_legacy)
+    else:
+        admin_legacy.must_change_password = False
 
     # 7. Sample Verified Student Account for direct testing
     student = db.query(User).filter(User.username == "student_beheshti").first()
@@ -143,7 +163,7 @@ def seed_base_system(db: Session):
             email="student@beheshti2.ir",
             hashed_password=hash_password("Student1405!"),
             role="student",
-            full_name="امیررضا علوی (دانش‌آموز پایه نهم)",
+            full_name="امیررضا علوی (دانش‌آموز پایه هفتم)",
             display_name="امیررضا",
             is_active=True
         )
@@ -153,8 +173,8 @@ def seed_base_system(db: Session):
 
         profile = StudentProfile(
             user_id=student.id,
-            grade_id=grade_map[9].id,
-            student_number="90214",
+            grade_id=grade_map[7].id,
+            student_number="70214",
             total_xp=150,
             current_level=2,
             current_streak=3,

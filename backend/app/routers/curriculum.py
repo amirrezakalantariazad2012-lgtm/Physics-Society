@@ -33,8 +33,19 @@ def get_grades(db: Session = Depends(get_db)):
     return results
 
 @router.get("/grades/{grade_id}/books", response_model=List[BookResponse])
-def get_books_by_grade(grade_id: int, db: Session = Depends(get_db)):
-    """Lists books for a grade (both standard and sampad)"""
+def get_books_by_grade(
+    grade_id: int,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_current_user)
+):
+    """Lists books for a grade (both standard and sampad). Enforces grade scoping for students."""
+    if current_user and current_user.role == "student" and current_user.profile and current_user.profile.grade_id:
+        if current_user.profile.grade_id != grade_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="دسترسی غیرمجاز: شما تنها مجاز به مشاهده منابع پایه تحصیلی خود هستید."
+            )
+
     books = db.query(Book).filter(Book.grade_id == grade_id).all()
     results = []
     for b in books:
@@ -60,7 +71,18 @@ def get_chapters_by_book(
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user)
 ):
-    """Lists chapters for a book with question counts and user mastery progress"""
+    """Lists chapters for a book with question counts and user mastery progress. Enforces student grade scoping."""
+    book = db.query(Book).filter(Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="کتاب مورد نظر یافت نشد.")
+
+    if current_user and current_user.role == "student" and current_user.profile and current_user.profile.grade_id:
+        if current_user.profile.grade_id != book.grade_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="دسترسی غیرمجاز: این کتاب متعلق به پایه تحصیلی شما نیست."
+            )
+
     chapters = db.query(Chapter).filter(
         Chapter.book_id == book_id,
         Chapter.is_published == True
@@ -114,10 +136,17 @@ def get_chapter_detail(
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user)
 ):
-    """Retrieves full chapter details, lessons list, and examination ID"""
+    """Retrieves full chapter details, lessons list, and examination ID. Enforces student grade scoping."""
     ch = db.query(Chapter).filter(Chapter.id == chapter_id).first()
     if not ch:
         raise HTTPException(status_code=404, detail="فصل مورد نظر یافت نشد.")
+
+    if current_user and current_user.role == "student" and current_user.profile and current_user.profile.grade_id:
+        if ch.book and current_user.profile.grade_id != ch.book.grade_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="دسترسی غیرمجاز: این فصل متعلق به پایه تحصیلی شما نیست."
+            )
 
     completed_lesson_ids = set()
     if current_user:
@@ -162,10 +191,17 @@ def get_lesson_detail(
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_current_user)
 ):
-    """Retrieves structured interactive lesson blocks and interactive exercises"""
+    """Retrieves structured interactive lesson blocks and interactive exercises. Enforces student grade scoping."""
     lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     if not lesson:
         raise HTTPException(status_code=404, detail="درس مورد نظر یافت نشد.")
+
+    if current_user and current_user.role == "student" and current_user.profile and current_user.profile.grade_id:
+        if lesson.chapter and lesson.chapter.book and current_user.profile.grade_id != lesson.chapter.book.grade_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="دسترسی غیرمجاز: این درس متعلق به پایه تحصیلی شما نیست."
+            )
 
     is_completed = False
     if current_user:
@@ -221,6 +257,13 @@ def submit_exercise_answer(
     if not ex:
         raise HTTPException(status_code=404, detail="تمرین مورد نظر یافت نشد.")
 
+    if current_user.role == "student" and current_user.profile and current_user.profile.grade_id:
+        if ex.lesson and ex.lesson.chapter and ex.lesson.chapter.book and current_user.profile.grade_id != ex.lesson.chapter.book.grade_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="دسترسی غیرمجاز: این تمرین متعلق به پایه تحصیلی شما نیست."
+            )
+
     sub_val = str(submission.submitted_answer).strip().lower()
     corr_val = str(ex.correct_answer_json).strip().lower()
 
@@ -255,6 +298,13 @@ def mark_lesson_complete(
     lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
     if not lesson:
         raise HTTPException(status_code=404, detail="درس مورد نظر یافت نشد.")
+
+    if current_user.role == "student" and current_user.profile and current_user.profile.grade_id:
+        if lesson.chapter and lesson.chapter.book and current_user.profile.grade_id != lesson.chapter.book.grade_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="دسترسی غیرمجاز: این درس متعلق به پایه تحصیلی شما نیست."
+            )
 
     progress = db.query(StudentProgress).filter(
         StudentProgress.user_id == current_user.id,

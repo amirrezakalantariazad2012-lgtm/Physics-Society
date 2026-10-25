@@ -77,3 +77,25 @@ class AdminGradeOverrideRequest(BaseModel):
     student_answer_id: int
     new_score: float
     reason: str
+
+class QuestionOptionCreate(BaseModel):
+    option_key: str
+    text_fa: str
+    is_correct: bool = False
+    explanation_fa: Optional[str] = None
+
+class QuestionCreateRequest(BaseModel):
+    grade_id: int
+    chapter_id: int
+    question_type: str = "mcq"  # 'mcq' or 'written'
+    difficulty: str = "medium"  # 'easy', 'medium', 'hard'
+    prompt_fa: str
+    points: float = 1.0
+    source_ref: Optional[str] = None
+    options: Optional[List[QuestionOptionCreate]] = []
+    reference_answer_fa: Optional[str] = None
+    rubric_criteria: Optional[Dict[str, Any]] = None
+
+class QuestionReviewRequest(BaseModel):
+    review_status: str  # 'approved', 'rejected', 'pending_review'
+    is_published: Optional[bool] = None

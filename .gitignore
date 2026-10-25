@@ -1,19 +1,42 @@
-# Environment variables
-.env
-
-# Databases
-*.db
-backend/*.db
-
-# Python cache and build
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-.pytest_cache/
-venv/
+*.so
+.Python
 env/
-.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# OS files
+# Pytest & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environments & Secrets
+.env
+*.bak
+test_physics.db
+*.db
+*.sqlite
+*.sqlite3
+
+# OS / Editor
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/
+*.swp

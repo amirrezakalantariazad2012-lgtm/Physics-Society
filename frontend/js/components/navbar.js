@@ -11,31 +11,29 @@ function renderNavbar() {
             <div class="flex items-center justify-between h-16">
                 <!-- Brand / Logo -->
                 <div class="flex items-center gap-3 cursor-pointer" onclick="window.store.setView('landing')">
-                    <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/30">
-                        <i data-lucide="atom" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <span class="font-bold text-lg text-slate-800 dark:text-white leading-tight block">انجمن فیزیک</span>
-                        <span class="text-xs text-slate-500 dark:text-slate-400 block">دبیرستان شهید بهشتی ۲</span>
+                    <img src="/assets/quantum-cut-logo.svg" alt="QUANTUM CUT" class="h-9 w-auto hidden sm:block">
+                    <div class="flex items-center gap-2.5 sm:hidden">
+                        <img src="/assets/favicon.svg" alt="QC" class="w-8 h-8">
+                        <span class="font-black text-sm text-white tracking-widest font-sans">QUANTUM CUT</span>
                     </div>
                 </div>
 
                 <!-- Nav Links for Desktop -->
                 <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300">
-                    <a href="#curriculum" onclick="window.store.setView('curriculum')" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
-                        <i data-lucide="book-open" class="w-4 h-4"></i>
-                        <span>برنامه درسی</span>
+                    <a href="#curriculum" onclick="window.store.setView('curriculum')" class="hover:text-cyan-400 transition-colors flex items-center gap-1.5">
+                        <i data-lucide="book-open" class="w-4 h-4 text-cyan-400"></i>
+                        <span>آموزش فیزیک</span>
                     </a>
-                    <a href="#competitions" onclick="window.store.setView('competitions')" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
-                        <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
-                        <span>مسابقه هفتگی</span>
+                    <a href="#competitions" onclick="window.store.setView('competitions')" class="hover:text-amber-400 transition-colors flex items-center gap-1.5">
+                        <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
+                        <span>لیگ‌ها و مسابقات</span>
                     </a>
-                    <a href="#leaderboards" onclick="window.store.setView('leaderboards')" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
-                        <i data-lucide="award" class="w-4 h-4 text-indigo-500"></i>
+                    <a href="#leaderboards" onclick="window.store.setView('leaderboards')" class="hover:text-indigo-400 transition-colors flex items-center gap-1.5">
+                        <i data-lucide="award" class="w-4 h-4 text-indigo-400"></i>
                         <span>جدول امتیازات</span>
                     </a>
-                    <a href="#badges" onclick="window.store.setView('badges')" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
-                        <i data-lucide="medal" class="w-4 h-4 text-emerald-500"></i>
+                    <a href="#badges" onclick="window.store.setView('badges')" class="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                        <i data-lucide="medal" class="w-4 h-4 text-emerald-400"></i>
                         <span>مدال‌ها</span>
                     </a>
                     ${user && user.role === 'admin' ? `
@@ -54,6 +52,13 @@ function renderNavbar() {
                     </button>
 
                     ${user ? `
+                    ${user.must_change_password ? `
+                    <button onclick="window.openForcedPasswordModal()" class="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[11px] font-bold flex items-center gap-1.5 animate-pulse" title="تغییر رمز عبور پیش‌فرض اجباری است">
+                        <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-400"></i>
+                        <span class="hidden sm:inline">تغییر رمز اجباری</span>
+                    </button>
+                    ` : ''}
+
                     <!-- Streak -->
                     <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 text-xs font-bold border border-orange-200 dark:border-orange-900" title="استمرار روزانه">
                         <i data-lucide="flame" class="w-4 h-4 text-orange-500 streak-flame-active fill-orange-500"></i>

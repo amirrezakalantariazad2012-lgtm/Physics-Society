@@ -27,10 +27,19 @@ echo "=========================================================="
 
 mkdir -p "${TARGET_DIR}"
 
-# 1. PostgreSQL Database Dump
-echo "[1/3] Creating PostgreSQL database dump..."
-docker exec "${DB_CONTAINER}" pg_dump -U "${DB_USER}" -d "${DB_NAME}" --clean --if-exists > "${TARGET_DIR}/database.sql"
-echo "Database dump complete (${TARGET_DIR}/database.sql)."
+# 1. Database Backup (Supports both PostgreSQL container and SQLite file)
+echo "[1/3] Creating database backup..."
+if docker ps --format '{{.Names}}' | grep -q "^${DB_CONTAINER}$"; then
+    echo "Dumping PostgreSQL database from container ${DB_CONTAINER}..."
+    docker exec "${DB_CONTAINER}" pg_dump -U "${DB_USER}" -d "${DB_NAME}" --clean --if-exists > "${TARGET_DIR}/database.sql"
+    echo "PostgreSQL database dump complete (${TARGET_DIR}/database.sql)."
+fi
+
+if [ -f "$(dirname "$0")/../physics_platform.db" ]; then
+    echo "Backing up local SQLite database physics_platform.db..."
+    sqlite3 "$(dirname "$0")/../physics_platform.db" ".backup '${TARGET_DIR}/physics_platform.db'" || cp "$(dirname "$0")/../physics_platform.db" "${TARGET_DIR}/physics_platform.db"
+    echo "SQLite backup complete (${TARGET_DIR}/physics_platform.db)."
+fi
 
 # 2. Backup Textbook & Uploaded Files
 echo "[2/3] Archiving media files and uploaded textbooks..."

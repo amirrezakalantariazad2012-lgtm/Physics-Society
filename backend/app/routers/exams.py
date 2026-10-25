@@ -74,7 +74,19 @@ def start_exam(
     """
     Initializes an exam attempt session and returns questions
     CRITICAL: Does NOT return correct answer keys to the client!
+    Enforces student grade scoping.
     """
+    exam_record = db.query(Examination).filter(Examination.id == exam_id, Examination.is_active == True).first()
+    if not exam_record:
+        raise HTTPException(status_code=404, detail="آزمون مورد نظر یافت نشد یا غیرفعال است.")
+
+    if current_user.role == "student" and current_user.profile and current_user.profile.grade_id:
+        if exam_record.grade_id and current_user.profile.grade_id != exam_record.grade_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="دسترسی غیرمجاز: این آزمون متعلق به پایه تحصیلی شما نیست."
+            )
+
     try:
         attempt = start_exam_attempt(db, exam_id, current_user.id)
     except ValueError as ve:

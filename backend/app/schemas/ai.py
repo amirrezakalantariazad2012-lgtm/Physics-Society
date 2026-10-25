@@ -23,6 +23,10 @@ class AIProviderConfigUpdate(BaseModel):
     api_key: Optional[str] = None
     base_url: str
     model_name: str
+    tutoring_model: Optional[str] = "gpt-4o-mini"
+    grading_model: Optional[str] = "gpt-4o-mini"
+    generation_model: Optional[str] = "gpt-4o-mini"
+    explanation_model: Optional[str] = "gpt-4o-mini"
     timeout_seconds: int = 40
     max_retries: int = 2
 
@@ -33,6 +37,35 @@ class AIConnectionTestResult(BaseModel):
     latency_ms: int
     message_fa: str
     raw_response: Optional[str] = None
+
+class AITutorRequest(BaseModel):
+    grade_id: int
+    chapter_id: Optional[int] = None
+    lesson_id: Optional[int] = None
+    question_id: Optional[int] = None
+    student_query: str = Field(..., min_length=2, max_length=1500)
+    page_context: Optional[str] = None
+    history: Optional[List[Dict[str, str]]] = []
+    preferred_model: Optional[str] = None
+
+class AITutorResponse(BaseModel):
+    response_fa: str
+    key_hints: List[str] = []
+    related_formulas: List[str] = []
+    suggested_followups: List[str] = []
+    model_used: str
+
+class AIMistakeExplanationRequest(BaseModel):
+    question_id: int
+    selected_option_id: Optional[int] = None
+    student_text: Optional[str] = None
+
+class AIMistakeExplanationResponse(BaseModel):
+    question_id: int
+    why_incorrect_fa: str
+    correct_concept_fa: str
+    remedial_tip_fa: str
+    key_formula: Optional[str] = None
 
 class ChapterContentValidationReport(BaseModel):
     chapter_id: int
