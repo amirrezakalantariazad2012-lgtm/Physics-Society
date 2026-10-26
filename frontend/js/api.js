@@ -242,6 +242,16 @@ function formatApiErrorMessage(data, defaultMsg = 'خطایی در ارتباط 
     getXpHistory() {
         return this.request('/gamification/xp-history');
     }
+    recordLabActivity(simType, labTitleFa, xpAmount = 15) {
+        return this.request('/gamification/lab-activity', {
+            method: 'POST',
+            body: {
+                sim_type: simType,
+                lab_title_fa: labTitleFa,
+                xp_amount: xpAmount
+            }
+        });
+    }
 
     // Admin
     getAdminOverview() {

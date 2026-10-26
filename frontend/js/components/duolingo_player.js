@@ -350,12 +350,19 @@ class DuolingoPlayer {
 
             if (res.is_correct) {
                 window.store.playSound('correct');
+                const gainedXp = res.xp_earned || 10;
+                if (window.store && window.store.showXpToast) {
+                    window.store.showXpToast(gainedXp, 'پاسخ صحیح به تمرین');
+                }
+                if (window.store && window.store.refreshUser) {
+                    window.store.refreshUser();
+                }
                 banner.className = 'mt-6 p-4 rounded-2xl flex items-center justify-between bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200';
                 banner.innerHTML = `
                     <div class="flex items-center gap-3">
                         <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-600"></i>
                         <div>
-                            <span class="font-bold block">عالی بود! پاسخ کاملاً صحیح است.</span>
+                            <span class="font-bold block">عالی بود! پاسخ کاملاً صحیح است (+${gainedXp} XP)</span>
                             <span class="text-xs text-emerald-700 dark:text-emerald-300">${res.explanation_fa}</span>
                         </div>
                     </div>
@@ -458,8 +465,16 @@ class DuolingoPlayer {
             this.currentStep++;
             if (this.currentStep === this.totalSteps - 1) {
                 window.store.playSound('celebrate');
-                // Complete lesson on server
-                window.api.completeLesson(this.lesson.id);
+                // Complete lesson on server and synchronize student XP
+                window.api.completeLesson(this.lesson.id).then(compRes => {
+                    const earned = (compRes && compRes.xp_earned) ? compRes.xp_earned : 30;
+                    if (window.store && window.store.showXpToast) {
+                        window.store.showXpToast(earned, `تکمیل موفقیت‌آمیز درس: ${this.lesson.title_fa}`);
+                    }
+                    if (window.store && window.store.refreshUser) {
+                        window.store.refreshUser();
+                    }
+                }).catch(err => console.warn('Lesson complete notice:', err));
             }
             this.render();
         }
@@ -474,7 +489,10 @@ class DuolingoPlayer {
         }
     }
 
-    finishLesson() {
+    async finishLesson() {
+        if (window.store && window.store.refreshUser) {
+            await window.store.refreshUser();
+        }
         window.store.setView('curriculum');
     }
 }

@@ -198,6 +198,21 @@ def check_and_unlock_badges(db: Session, user_id: int):
             ).count()
             eligible = completed_count >= 4
 
+        elif badge.criteria_type == "competition_participant":
+            from app.models.competition import CompetitionSubmission
+            comp_count = db.query(CompetitionSubmission).filter(
+                CompetitionSubmission.user_id == user_id
+            ).count()
+            eligible = comp_count >= 1
+
+        elif badge.criteria_type == "perfect_practice":
+            from app.models.exam import ExaminationAttempt
+            perfect_attempt = db.query(ExaminationAttempt).filter(
+                ExaminationAttempt.user_id == user_id,
+                ExaminationAttempt.percentage >= 100.0
+            ).first()
+            eligible = perfect_attempt is not None
+
         if eligible:
             sb = StudentBadge(user_id=user_id, badge_id=badge.id)
             db.add(sb)

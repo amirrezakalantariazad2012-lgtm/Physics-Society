@@ -27,7 +27,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('view-changed', () => renderCurrentView());
     window.addEventListener('user-changed', () => {
         updateNavbar();
-        renderCurrentView();
+        const activeView = window.store.currentView;
+        if (['dashboard', 'leaderboards', 'badges', 'landing'].includes(activeView)) {
+            renderCurrentView();
+        }
     });
     window.addEventListener('auth-expired', () => {
         const hadUser = !!window.store.currentUser;
@@ -194,6 +197,7 @@ async function renderCurrentView() {
     }
 
     if (window.lucide) window.lucide.createIcons();
+    if (window.renderMathInPage) window.renderMathInPage(mainContainer);
 }
 
 // ==========================================
@@ -373,8 +377,8 @@ async function renderDashboardView(container) {
                 formula: '$$W = F \\cdot d \\quad , \\quad E_k = \\frac{1}{2}m v^2 \\quad , \\quad Q = mc\\Delta T$$',
                 labTitle: 'میز کار آزمایشگاه هفتم: اندازه‌گیری، چگالی و تبدیل انرژی',
                 labDesc: 'بررسی دقیق یکاهای استاندارد SI، رابطه چگالی $\\rho = \\frac{m}{V}$، تبدیلات انرژی پتانسیل گرانشی و جنبشی، و سازوکار انتقال گرما (رسانش، همرفت، تابش).',
-                labActionText: 'ورود به شبیه‌ساز پایستگی انرژی',
-                labSimChapterId: books[0] ? books[0].id : 1
+                labActionText: 'ورود به شبیه‌ساز پایستگی انرژی و چگالی',
+                simId: 'density'
             },
             8: {
                 themeClass: 'grade-theme-8',
@@ -386,7 +390,7 @@ async function renderDashboardView(container) {
                 labTitle: 'میز کار آزمایشگاه هشتم: مدار الکتریکی و شکست نور در عدسی‌ها',
                 labDesc: 'کاوش قانون اهم، مقاومت معادل مدارهای متوالی و موازی، اثر متقابل قطب‌های مغناطیسی، تشکیل تصویر در آینه‌های کروی و پدیده شکست نور در منشور.',
                 labActionText: 'ورود به شبیه‌ساز مدار و اپتیک',
-                labSimChapterId: books[0] ? books[0].id : 2
+                simId: 'circuit'
             },
             9: {
                 themeClass: 'grade-theme-9',
@@ -398,7 +402,7 @@ async function renderDashboardView(container) {
                 labTitle: 'رصدخانه تخصصی نهم: بردار نیرو، قوانین نیوتون و فشار شاره‌ها',
                 labDesc: 'تحلیل برداری سینماتیک حرکت، قوانین اول تا سوم نیوتون و نیروی اصطکاک، فشار در عمق مایعات، قانون پاسکال و مزیت مکانیکی قرقره‌ها و اهرم‌ها.',
                 labActionText: 'ورود به شبیه‌ساز حرکت و نیرو',
-                labSimChapterId: books[0] ? books[0].id : 3
+                simId: 'newton'
             }
         };
 
@@ -456,7 +460,7 @@ async function renderDashboardView(container) {
                             <span class="text-xs text-slate-400">سرفصل‌های تخصصی فیزیک دوره اول متوسطه</span>
                         </div>
                     </div>
-                    <button onclick="window.store.setView('curriculum')" class="btn-duo-blue text-white font-bold text-xs px-4 py-2 rounded-xl whitespace-nowrap">
+                    <button onclick="window.store.setView('simulators', { id: '${cfg.simId}' })" class="btn-duo-blue text-white font-bold text-xs px-4 py-2 rounded-xl whitespace-nowrap shadow-md hover:scale-105 transition-all">
                         ${cfg.labActionText}
                     </button>
                 </div>
@@ -605,6 +609,8 @@ async function renderDashboardView(container) {
             </div>
         </div>
         `;
+        if (window.lucide) window.lucide.createIcons();
+        if (window.renderMathInPage) window.renderMathInPage(container);
     } catch (e) {
         container.innerHTML = `<div class="p-6 text-center text-rose-500">${e.message}</div>`;
     }

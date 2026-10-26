@@ -106,6 +106,16 @@ def register_student(user_data: UserCreate, db: Session = Depends(get_db)):
     # Record streak
     record_daily_streak(db, user.id)
 
+    # Award welcome XP bonus
+    award_xp(
+        db, user.id,
+        amount=25,
+        activity_type="welcome_bonus",
+        description_fa="عضویت در انجمن فیزیک شهید بهشتی دو دوره اول",
+        reference_id=f"welcome_{user.id}"
+    )
+    db.refresh(user)
+
     log_audit_event(
         db, action="register", target_entity="users",
         target_id=str(user.id), user_id=user.id,

@@ -37,3 +37,15 @@ class LeaderboardResponse(BaseModel):
     period: str  # 'weekly', 'monthly', 'all_time'
     top_students: List[LeaderboardUser]
     user_position: Optional[LeaderboardUser] = None
+
+class LabActivityRequest(BaseModel):
+    sim_type: str
+    lab_title_fa: str
+    xp_amount: Optional[int] = 15
+
+class LabActivityResponse(BaseModel):
+    success: bool
+    xp_awarded: int
+    total_xp: int
+    current_level: int
+    message_fa: str

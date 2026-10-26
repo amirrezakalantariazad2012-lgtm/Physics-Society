@@ -440,6 +440,9 @@ class AdminViews {
         }
 
         if (window.lucide) window.lucide.createIcons();
+        if (window.renderMathInPage) {
+            setTimeout(window.renderMathInPage, 60);
+        }
     }
 
     openOverrideModal(answerId, currentScore, maxScore) {

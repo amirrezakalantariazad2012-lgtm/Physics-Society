@@ -179,15 +179,14 @@ def submit_exam_attempt(
 
     # Award streak & XP
     record_daily_streak(db, user_id)
-    if attempt.is_passed:
-        earned_xp = int(final_score * 5)
-        award_xp(
-            db, user_id,
-            amount=earned_xp,
-            activity_type="exam_passed",
-            description_fa=f"قبولی در آزمون: {exam.title_fa}",
-            reference_id=f"exam_attempt_{attempt.id}"
-        )
+    earned_xp = int(final_score * 5) if attempt.is_passed else max(10, int(final_score * 2))
+    award_xp(
+        db, user_id,
+        amount=earned_xp,
+        activity_type="exam_passed" if attempt.is_passed else "exam_participation",
+        description_fa=f"آزمون فیزیک: {exam.title_fa} (نمره: {final_score})",
+        reference_id=f"exam_attempt_{attempt.id}"
+    )
 
     return attempt
 

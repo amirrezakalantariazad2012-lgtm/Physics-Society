@@ -9,10 +9,11 @@ from app.models.gamification import Badge, StudentBadge, XPTransaction, Learning
 from app.models.exam import ExaminationAttempt
 from app.models.competition import Competition
 from app.schemas.gamification import (
-    BadgeResponse, LeaderboardResponse, LeaderboardUser, XPTransactionResponse
+    BadgeResponse, LeaderboardResponse, LeaderboardUser, XPTransactionResponse,
+    LabActivityRequest, LabActivityResponse
 )
 from app.services.auth import get_current_user, get_optional_current_user
-from app.services.gamification_service import get_leaderboard_data
+from app.services.gamification_service import get_leaderboard_data, award_xp, record_daily_streak
 
 router = APIRouter(prefix="/gamification", tags=["Gamification & Dashboard"])
 
@@ -170,3 +171,30 @@ def get_xp_history(
     ).order_by(desc(XPTransaction.created_at)).limit(50).all()
 
     return txs
+ 
+@router.post("/lab-activity", response_model=LabActivityResponse)
+def record_lab_activity(
+    data: LabActivityRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Awards XP for interactive physics laboratory experiments"""
+    from datetime import datetime
+    amount = min(50, max(5, data.xp_amount or 15))
+    date_key = datetime.utcnow().strftime('%Y%m%d_%H')
+    tx = award_xp(
+        db, current_user.id,
+        amount=amount,
+        activity_type="lab_experiment",
+        description_fa=f"آزمایشگاه مجازی: {data.lab_title_fa}",
+        reference_id=f"lab_{data.sim_type}_{current_user.id}_{date_key}"
+    )
+    record_daily_streak(db, current_user.id)
+    profile = current_user.profile
+    return LabActivityResponse(
+        success=True,
+        xp_awarded=amount if tx else 0,
+        total_xp=profile.total_xp if profile else 0,
+        current_level=profile.current_level if profile else 1,
+        message_fa="دستاوردهای آزمایشگاهی شما با موفقیت ثبت شد!"
+    )

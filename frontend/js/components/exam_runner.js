@@ -223,6 +223,7 @@ class ExamRunner {
         `;
 
         if (window.lucide) window.lucide.createIcons();
+        if (window.renderMathInPage) window.renderMathInPage(container);
     }
 
     selectOption(questionId, key) {
@@ -287,6 +288,12 @@ class ExamRunner {
         try {
             const answersArray = Object.values(this.answers);
             const result = await window.api.submitExam(this.attemptId, answersArray);
+            if (window.store && window.store.refreshUser) {
+                await window.store.refreshUser();
+            }
+            if (result.xp_earned && window.store && window.store.showXpToast) {
+                window.store.showXpToast(result.xp_earned, `آزمون «${result.exam_title_fa}»`);
+            }
             this.renderResults(result);
         } catch (e) {
             alert(e.message);
@@ -312,8 +319,9 @@ class ExamRunner {
                 <div class="text-4xl font-extrabold text-slate-900 dark:text-white font-mono">
                     ${res.final_score} <span class="text-lg font-normal text-slate-400">/ ${res.total_possible_points}</span>
                 </div>
-                <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold ${res.is_passed ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
-                    ${res.is_passed ? 'قبول شدید (تبریک!)' : 'نیاز به مرور و تمرین بیشتر'} (${res.percentage}٪)
+                <div class="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold ${res.is_passed ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
+                    <span>${res.is_passed ? 'قبول شدید (تبریک!)' : 'نیاز به مرور و تمرین بیشتر'} (${res.percentage}٪)</span>
+                    <span class="font-mono text-amber-500 font-bold">• ⚡ +${res.xp_earned || 0} XP ثبت شد</span>
                 </div>
                 <p class="text-sm text-slate-600 dark:text-slate-300">${res.feedback_fa || ''}</p>
             </div>
@@ -367,6 +375,7 @@ class ExamRunner {
         `;
 
         if (window.lucide) window.lucide.createIcons();
+        if (window.renderMathInPage) window.renderMathInPage(container);
     }
 }
 

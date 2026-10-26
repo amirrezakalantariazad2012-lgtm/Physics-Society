@@ -108,14 +108,20 @@ class PhysicsSimulators {
 
         container.innerHTML = `
         <div class="p-6 rounded-3xl bg-slate-900 border border-blue-500/30 text-white space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></span>
                     <h4 class="font-extrabold text-base text-cyan-300">آزمایشگاه مجازی چگالی و اصل شناوری</h4>
                 </div>
-                <span class="text-xs px-2.5 py-1 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold">
-                    آب خالص: ρ = ۱٫۰۰ g/cm³
-                </span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs px-2.5 py-1 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold">
+                        آب خالص: ρ = ۱٫۰۰ g/cm³
+                    </span>
+                    <button id="claim-lab-xp-density" onclick="window.claimLabXp('density', 'چگالی و ارشمیدس')" class="btn-duo-green text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md hover:scale-105 transition-all">
+                        <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i>
+                        <span>ثبت آزمایش (+۲۰ XP)</span>
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -244,11 +250,16 @@ class PhysicsSimulators {
 
         container.innerHTML = `
         <div class="p-6 rounded-3xl bg-slate-900 border border-indigo-500/30 text-white space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></span>
                     <h4 class="font-extrabold text-base text-amber-300">آزمایشگاه مدار الکتریکی و قانون اهم (V = I × R)</h4>
                 </div>
+                <button id="claim-lab-xp-circuit" onclick="window.claimLabXp('circuit', 'مدار الکتریکی و قانون اهم')" class="btn-duo-green text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md hover:scale-105 transition-all">
+                    <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i>
+                    <span>ثبت آزمایش (+۲۰ XP)</span>
+                </button>
+            </div>
                 <button id="sim-ohm-switch-btn" class="px-4 py-1 rounded-full text-xs font-bold transition-all bg-emerald-600 text-white border border-emerald-400">
                     کلید: وصل (روشن)
                 </button>
@@ -367,14 +378,20 @@ class PhysicsSimulators {
 
         container.innerHTML = `
         <div class="p-6 rounded-3xl bg-slate-900 border border-emerald-500/30 text-white space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
                     <h4 class="font-extrabold text-base text-emerald-300">شبیه‌ساز قانون دوم نیوتون (F_net = m × a)</h4>
                 </div>
-                <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">
-                    g = ۹٫۸ m/s²
-                </span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">
+                        g = ۹٫۸ m/s²
+                    </span>
+                    <button id="claim-lab-xp-newton" onclick="window.claimLabXp('newton', 'قانون دوم نیوتون و شتاب')" class="btn-duo-green text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md hover:scale-105 transition-all">
+                        <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i>
+                        <span>ثبت آزمایش (+۲۰ XP)</span>
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -476,14 +493,20 @@ class PhysicsSimulators {
 
         container.innerHTML = `
         <div class="p-6 rounded-3xl bg-slate-900 border border-blue-500/30 text-white space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-blue-400 animate-ping"></span>
                     <h4 class="font-extrabold text-base text-blue-300">شبیه‌ساز فشار درون شاره‌ها (P = ρ × g × h)</h4>
                 </div>
-                <span class="text-xs px-2.5 py-1 rounded-full bg-blue-950 text-blue-300 border border-blue-800 font-bold">
-                    P_0 هوا = ۱۰۰ kPa
-                </span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs px-2.5 py-1 rounded-full bg-blue-950 text-blue-300 border border-blue-800 font-bold">
+                        P_0 هوا = ۱۰۰ kPa
+                    </span>
+                    <button id="claim-lab-xp-pressure" onclick="window.claimLabXp('pressure', 'فشار شاره‌ها و عمق')" class="btn-duo-green text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md hover:scale-105 transition-all">
+                        <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i>
+                        <span>ثبت آزمایش (+۲۰ XP)</span>
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -582,14 +605,20 @@ class PhysicsSimulators {
 
         container.innerHTML = `
         <div class="p-6 rounded-3xl bg-slate-900 border border-purple-500/30 text-white space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
                 <div class="flex items-center gap-2">
                     <span class="w-3 h-3 rounded-full bg-purple-400 animate-ping"></span>
                     <h4 class="font-extrabold text-base text-purple-300">شبیه‌ساز شکست نور و قانون اسنل (n₁ sinθ₁ = n₂ sinθ₂)</h4>
                 </div>
-                <span class="text-xs px-2.5 py-1 rounded-full bg-purple-950 text-purple-300 border border-purple-800 font-bold">
-                    محیط ۱: هوا (n₁ = ۱٫۰۰)
-                </span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs px-2.5 py-1 rounded-full bg-purple-950 text-purple-300 border border-purple-800 font-bold">
+                        محیط ۱: هوا (n₁ = ۱٫۰۰)
+                    </span>
+                    <button id="claim-lab-xp-optics" onclick="window.claimLabXp('optics', 'شکست نور و قانون اسنل')" class="btn-duo-green text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md hover:scale-105 transition-all">
+                        <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i>
+                        <span>ثبت آزمایش (+۲۰ XP)</span>
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -660,3 +689,35 @@ class PhysicsSimulators {
 }
 
 window.physicsSimulators = new PhysicsSimulators();
+
+window.claimLabXp = async function(simType, labTitleFa) {
+    if (!window.api || !window.api.token) {
+        if (window.openAuthModal) window.openAuthModal('login');
+        return;
+    }
+    const btn = document.getElementById(`claim-lab-xp-${simType}`);
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span> در حال ثبت...`;
+    }
+    try {
+        const res = await window.api.recordLabActivity(simType, labTitleFa, 20);
+        if (btn) {
+            btn.className = 'px-3 py-1.5 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-xs font-bold flex items-center gap-1.5 shadow-sm';
+            btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i><span>✓ ثبت شد (+${res.xp_awarded || 20} XP)</span>`;
+            if (window.lucide) window.lucide.createIcons();
+        }
+        if (window.store && window.store.showXpToast) {
+            window.store.showXpToast(res.xp_awarded || 20, `آزمایشگاه ${labTitleFa}`);
+        }
+        if (window.store && window.store.refreshUser) {
+            await window.store.refreshUser();
+        }
+    } catch (err) {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<span>تلاش مجدد ثبت</span>`;
+        }
+        console.warn('Lab XP claim error:', err);
+    }
+};

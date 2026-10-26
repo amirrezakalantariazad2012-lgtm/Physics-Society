@@ -215,6 +215,9 @@ async function renderCompetitionsView(containerId, activeTab = 'leagues', select
         `;
 
         if (window.lucide) window.lucide.createIcons();
+        if (window.renderMathInPage) {
+            setTimeout(window.renderMathInPage, 60);
+        }
     } catch (e) {
         container.innerHTML = `<div class="p-6 text-center text-rose-500 font-bold">${e.message}</div>`;
     }
@@ -418,6 +421,9 @@ async function openCompetitionModal(compId) {
 
         document.body.appendChild(modalDiv);
         if (window.lucide) window.lucide.createIcons();
+        if (window.renderMathInPage) {
+            setTimeout(window.renderMathInPage, 60);
+        }
 
         // Start Live Timer and Anti-Cheat if active
         if (canTakeExam) {
@@ -598,7 +604,15 @@ async function handleCompetitionSubmit(e, compId) {
             window.store.playSound('celebrate');
         }
 
-        alert(`تبریک! ${res.message_fa}\nامتیاز کسب‌شده: ${res.score}\nزمان صرف‌شده: ${elapsedSeconds} ثانیه`);
+        const xpAwarded = res.xp_earned || 50;
+        if (window.store && window.store.showXpToast) {
+            window.store.showXpToast(xpAwarded, 'شرکت در لیگ و مسابقه کوانتومی');
+        }
+        if (window.store && window.store.refreshUser) {
+            await window.store.refreshUser();
+        }
+
+        alert(`تبریک! ${res.message_fa}\nامتیاز آزمون: ${res.score}\nزمان صرف‌شده: ${elapsedSeconds} ثانیه\nامتیاز تجربه تعلق‌گرفته: +${xpAwarded} XP`);
         closeCompetitionModal();
         renderCompetitionsView('app-main-content');
     } catch (err) {

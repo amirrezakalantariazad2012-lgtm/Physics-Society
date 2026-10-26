@@ -34,6 +34,53 @@ class AppStore {
         window.dispatchEvent(new CustomEvent('user-changed', { detail: user }));
     }
 
+    async refreshUser() {
+        if (!window.api || !window.api.token) return null;
+        try {
+            const user = await window.api.getMe();
+            if (user) {
+                this.currentUser = user;
+                window.dispatchEvent(new CustomEvent('user-changed', { detail: user }));
+                return user;
+            }
+        } catch (e) {
+            console.warn('Could not refresh user profile:', e);
+        }
+        return null;
+    }
+
+    showXpToast(amount, reason = 'موفقیت علمی') {
+        try {
+            let container = document.getElementById('xp-toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'xp-toast-container';
+                container.className = 'fixed top-5 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = 'pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-slate-900/95 border-2 border-amber-400/80 text-amber-300 shadow-2xl shadow-amber-500/25 text-xs font-bold font-sans animate-bounce-in transition-all duration-300';
+            toast.innerHTML = `
+                <span class="w-6 h-6 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-400/30 flex items-center justify-center font-black">⚡</span>
+                <span class="text-sm font-black text-amber-300 font-mono">+${amount} XP</span>
+                <span class="text-slate-400 text-[11px]">•</span>
+                <span class="text-white text-xs">${reason}</span>
+            `;
+
+            container.appendChild(toast);
+            this.playSound('correct');
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px) scale(0.95)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        } catch (err) {
+            console.warn('XP toast error:', err);
+        }
+    }
+
     setView(view, params = {}) {
         this.currentView = view;
         this.viewParams = params;
