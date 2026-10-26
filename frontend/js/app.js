@@ -1614,57 +1614,165 @@ async function handleAiTutorSubmit(e) {
     }
 }
 
-async function renderSimulatorsCatalogView(container, activeSim = 'density') {
-    const validSims = ['density', 'circuit', 'newton', 'pressure', 'optics'];
-    if (!validSims.includes(activeSim)) activeSim = 'density';
-
-    const simTabs = [
-        { id: 'density', title: 'چگالی و ارشمیدس', grade: 'پایه هفتم', icon: 'droplets', desc: 'بررسی جرم، حجم و نیروی شناوری ارشمیدس در آب' },
-        { id: 'circuit', title: 'مدار و قانون اهم', grade: 'پایه هشتم', icon: 'zap', desc: 'محاسبه رابطه ولتاژ، مقاومت و شدت جریان الکتریکی' },
-        { id: 'pressure', title: 'فشار شاره‌ها و عمق', grade: 'پایه نهم', icon: 'gauge', desc: 'تغییرات فشار با عمق مایع، چگالی و شتاب گرانش' },
-        { id: 'newton', title: 'قانون دوم نیوتون', grade: 'پایه نهم', icon: 'activity', desc: 'بررسی شتاب، نیروی پیشران، جرم و اصطکاک سطح' },
-        { id: 'optics', title: 'شکست نور و اسنل', grade: 'پایه هشتم', icon: 'eye', desc: 'محاسبه زاویه تابش، شکست و ضریب شکست در محیط‌های مختلف' },
-    ];
+async function renderSimulatorsCatalogView(container, activeSim = 'density', currentMode = 'native', gradeFilter = 'all') {
+    const simCatalog = window.physicsSimulators ? window.physicsSimulators.catalog : [];
+    const activeLab = simCatalog.find(s => s.id === activeSim) || simCatalog[0] || {
+        id: 'density', title: 'چگالی و ارشمیدس', gradeTitle: 'پایه هفتم', grade: 7,
+        desc: 'بررسی جرم، حجم و نیروی شناوری ارشمیدس', formula: '\\rho = m/V', goals: []
+    };
 
     container.innerHTML = `
-    <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
-        <!-- Header -->
-        <div class="text-center space-y-2">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-950/60 border border-teal-500/40 text-teal-300 text-xs font-bold cyber-glow-cyan">
-                <i data-lucide="flask-conical" class="w-4 h-4 text-teal-400"></i>
-                <span>آزمایشگاه مجازی فیزیک شهید بهشتی دو</span>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <!-- Hero Header -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 p-6 sm:p-10 border border-teal-500/30 text-white shadow-2xl space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-900/60 border border-teal-500/40 text-teal-300 text-xs font-bold">
+                    <i data-lucide="flask-conical" class="w-4 h-4 text-teal-400"></i>
+                    <span>آزمایشگاه مجازی و تعاملی فیزیک سمپاد — دوره‌های هفتم، هشتم و نهم</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.physicsSimulators.openLabToolboxModal('caliper')" 
+                        class="px-3.5 py-2 rounded-2xl bg-cyan-600/90 hover:bg-cyan-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg transition-all hover:scale-105">
+                        <i data-lucide="wrench" class="w-4 h-4"></i>
+                        <span>جعبه ابزار آزاد فیزیکدان</span>
+                    </button>
+                    <button onclick="window.physicsSimulators.openLabToolboxModal('report')" 
+                        class="px-3.5 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-2 transition-all">
+                        <i data-lucide="file-text" class="w-4 h-4 text-emerald-400"></i>
+                        <span>دفترچه گزارش کار</span>
+                    </button>
+                </div>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">شبیه‌سازهای تعاملی و آزمایشگاه فیزیک</h1>
-            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
-                پارامترهای فیزیکی را تغییر دهید، نمودارهای زنده را بررسی کنید و قوانین بنیادین علوم را به صورت تجربی لمس نمایید.
+
+            <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
+                آزمایشگاه تجربی، شبیه‌سازهای باز و کارگاه اندازه‌گیری
+            </h1>
+
+            <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+                فرصتی برای لمس بی‌واسطه قوانین فیزیک بدون خطر و بدون محدودیت ابزار. متغیرها را آزادانه تغییر دهید، فرضیه‌سازی کنید، با کولیس و ترازو اندازه‌گیری نمایید و گزارش کار مستند دریافت کنید.
             </p>
+
+            <!-- Grade & Search Filters Bar -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800/80">
+                <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'all')"
+                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === 'all' ? 'bg-teal-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
+                        همه پایه‌ها (${simCatalog.length})
+                    </button>
+                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '7')"
+                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '7' ? 'bg-amber-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
+                        🟡 پایه هفتم (اندازه‌گیری و گرما)
+                    </button>
+                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '8')"
+                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '8' ? 'bg-blue-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
+                        🔵 پایه هشتم (مدار و اپتیک)
+                    </button>
+                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '9')"
+                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '9' ? 'bg-purple-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
+                        🟣 پایه نهم (حرکت و فشار)
+                    </button>
+                </div>
+
+                <!-- Mode Switcher (Native vs PhET) -->
+                <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs">
+                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', 'native', '${gradeFilter}')"
+                        class="px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 ${currentMode === 'native' ? 'bg-teal-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'}">
+                        <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                        <span>شبیه‌ساز بومی کوانتوم</span>
+                    </button>
+                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', 'phet', '${gradeFilter}')"
+                        class="px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 ${currentMode === 'phet' ? 'bg-cyan-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'}">
+                        <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                        <span>سندباکس باز PhET</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Simulator Selector Tabs -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2">
-            ${simTabs.map(s => `
-                <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${s.id}')"
-                    class="p-3 rounded-2xl border text-right transition-all flex flex-col justify-between ${s.id === activeSim 
-                        ? 'bg-teal-500/10 border-teal-500 text-teal-400 font-bold shadow-md shadow-teal-500/10' 
-                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-teal-500/50'}">
-                    <div class="flex items-center justify-between mb-1">
-                        <i data-lucide="${s.icon}" class="w-4 h-4 text-teal-400"></i>
-                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">${s.grade}</span>
-                    </div>
-                    <span class="text-xs font-bold block truncate">${s.title}</span>
-                </button>
-            `).join('')}
+        <!-- Experiment Selector Grid -->
+        <div class="space-y-3">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-400">
+                <span>انتخاب آزمایش از سرفصل دروس فیزیک:</span>
+                <span>${simCatalog.filter(s => gradeFilter === 'all' || s.grade.toString() === gradeFilter).length} آزمایش در دسترس</span>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+                ${simCatalog.filter(s => gradeFilter === 'all' || s.grade.toString() === gradeFilter).map(s => {
+                    const isSelected = s.id === activeSim;
+                    const gradeColor = s.grade === 7 ? 'text-amber-400 bg-amber-950/60 border-amber-800/40' : (s.grade === 8 ? 'text-blue-400 bg-blue-950/60 border-blue-800/40' : 'text-purple-400 bg-purple-950/60 border-purple-800/40');
+                    return `
+                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${s.id}', '${currentMode}', '${gradeFilter}')"
+                        class="p-3 rounded-2xl border text-right transition-all flex flex-col justify-between group ${isSelected 
+                            ? 'bg-teal-500/15 border-teal-500 text-teal-300 font-bold shadow-lg shadow-teal-500/10 ring-2 ring-teal-500/30' 
+                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-teal-500/50 hover:bg-slate-50 dark:hover:bg-slate-850'}">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
+                                <i data-lucide="${s.icon || 'atom'}" class="w-4 h-4"></i>
+                            </span>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded border font-mono font-bold ${gradeColor}">
+                                ${s.gradeTitle}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold block truncate leading-tight">${s.title}</span>
+                            <span class="text-[10px] text-slate-500 block truncate mt-0.5">${s.topic}</span>
+                        </div>
+                    </button>
+                    `;
+                }).join('')}
+            </div>
         </div>
 
-        <!-- Mount Point for the Simulator -->
+        <!-- Mount Point for the Active Simulator Apparatus -->
         <div id="catalog-sim-mount-point" class="w-full"></div>
+
+        <!-- Academic Learning Goals & Key Formulas Card -->
+        <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-white space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="book-open" class="w-4 h-4 text-teal-400"></i>
+                    <h3 class="font-extrabold text-sm sm:text-base text-white">اهداف آموزشی و روابط بنیادین: ${activeLab.title}</h3>
+                </div>
+                <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-teal-300 font-mono font-bold">
+                    ${activeLab.badge || 'فیزیک متوسطه اول'}
+                </span>
+            </div>
+
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed text-justify">
+                ${activeLab.desc}
+            </p>
+
+            ${activeLab.formula ? `
+            <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-center font-mono">
+                <span class="text-[11px] text-slate-400 block mb-1">فرمول و رابطه فیزیکی حاکم:</span>
+                <div class="katex-ltr-container text-base sm:text-lg text-cyan-300">
+                    $$${activeLab.formula}$$
+                </div>
+            </div>
+            ` : ''}
+
+            ${activeLab.goals && activeLab.goals.length > 0 ? `
+            <div>
+                <span class="text-xs font-bold text-slate-300 block mb-2">دستاوردهای یادگیری این آزمایش:</span>
+                <ul class="space-y-1.5 text-xs text-slate-400">
+                    ${activeLab.goals.map(g => `
+                    <li class="flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-3.5 h-3.5 text-teal-400 shrink-0"></i>
+                        <span>${g}</span>
+                    </li>
+                    `).join('')}
+                </ul>
+            </div>
+            ` : ''}
+        </div>
     </div>
     `;
 
     if (window.lucide) window.lucide.createIcons();
+    if (window.renderMathInPage) window.renderMathInPage(container);
 
     if (window.physicsSimulators) {
-        window.physicsSimulators.mount(activeSim, 'catalog-sim-mount-point');
+        window.physicsSimulators.mount(activeSim, 'catalog-sim-mount-point', currentMode);
     }
 }
 
