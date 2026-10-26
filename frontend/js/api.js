@@ -113,6 +113,9 @@ function formatApiErrorMessage(data, defaultMsg = 'خطایی در ارتباط 
     getCurrentUser() {
         return this.request('/auth/me');
     }
+    getMe() {
+        return this.getCurrentUser();
+    }
     updateProfile(payload) {
         return this.request('/auth/profile', { method: 'PUT', body: payload });
     }

@@ -164,22 +164,23 @@ class AdminViews {
                 <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                     <h3 class="font-bold text-base text-slate-800 dark:text-white">رویدادها و گزارش‌های امنیتی اخیر (Audit Logs)</h3>
                     <div class="divide-y divide-slate-100 dark:divide-slate-800">
-                        ${data.recent_logs.map(l => `
+                        ${(data.recent_logs && data.recent_logs.length > 0) ? data.recent_logs.map(l => `
                         <div class="py-3 flex items-center justify-between text-xs">
                             <div class="flex items-center gap-2">
                                 <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-mono text-[11px]">${l.action}</span>
                                 <span class="text-slate-600 dark:text-slate-300">موجودیت: ${l.target_entity} (شناسه: ${l.target_id || '-'})</span>
                             </div>
-                            <span class="text-slate-400 font-mono">${window.formatPersianTime(l.created_at)}</span>
+                            <span class="text-slate-400 font-mono">${window.formatPersianTime ? window.formatPersianTime(l.created_at) : (l.created_at || '-')}</span>
                         </div>
-                        `).join('')}
+                        `).join('') : '<div class="py-4 text-center text-xs text-slate-400">هیچ رویداد جدیدی ثبت نشده است.</div>'}
                     </div>
                 </div>
             </div>
             `;
         } else if (this.activeTab === 'validation') {
-            const reports = await window.api.getValidationReport();
-            const allPassed = reports.every(r => r.is_fully_compliant);
+            const rawReports = await window.api.getValidationReport();
+            const reports = Array.isArray(rawReports) ? rawReports : (rawReports && Array.isArray(rawReports.reports) ? rawReports.reports : []);
+            const allPassed = reports.length > 0 && reports.every(r => r.is_fully_compliant);
 
             target.innerHTML = `
             <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
@@ -206,7 +207,11 @@ class AdminViews {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-200 font-medium">
-                            ${reports.map(r => `
+                            ${reports.length === 0 ? `
+                            <tr>
+                                <td colspan="6" class="p-6 text-center text-slate-400">اطلاعات اعتبارسنجی در دسترس نیست.</td>
+                            </tr>
+                            ` : reports.map(r => `
                             <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                                 <td class="p-3 font-bold">پایه ${r.grade_number}</td>
                                 <td class="p-3">فصل ${r.chapter_number}</td>
@@ -246,33 +251,34 @@ class AdminViews {
                 </div>
 
                 <div class="space-y-3">
-                    ${data.questions.map(q => `
+                    ${(data.questions && data.questions.length > 0) ? data.questions.map(q => `
                     <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all space-y-2">
                         <div class="flex items-center justify-between text-xs">
                             <div class="flex items-center gap-2">
                                 <span class="px-2 py-0.5 rounded font-bold text-[11px] ${q.question_type === 'mcq' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300'}">
                                     ${q.question_type === 'mcq' ? 'تستی' : 'تشریحی'}
                                 </span>
-                                <span class="text-slate-500 font-semibold">${q.chapter_title_fa} (پایه ${q.grade_number})</span>
+                                <span class="text-slate-500 font-semibold">${q.chapter_title_fa || 'فصل فیزیک'} (پایه ${q.grade_number || '-'})</span>
                                 <span class="text-[10px] text-slate-400 font-mono">سطح: ${q.difficulty === 'hard' ? 'سخت' : q.difficulty === 'easy' ? 'آسان' : 'متوسط'}</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <span class="text-slate-500 font-mono text-[11px] font-bold">${q.points} نمره</span>
+                                <span class="text-slate-500 font-mono text-[11px] font-bold">${q.points || 1} نمره</span>
                                 <button onclick="window.currentAdminViews.deleteQuestion(${q.id}, '${(q.prompt_fa || '').substring(0, 35).replace(/'/g, "\\'")}')" class="text-rose-500 hover:text-rose-700 p-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1" title="حذف دائمی این سؤال">
                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                     <span class="hidden sm:inline">حذف</span>
                                 </button>
                             </div>
                         </div>
-                        <p class="text-xs font-semibold text-slate-800 dark:text-white leading-relaxed text-justify">${q.prompt_fa}</p>
+                        <p class="text-xs font-semibold text-slate-800 dark:text-white leading-relaxed text-justify">${q.prompt_fa || ''}</p>
                         ${q.source_ref ? `<span class="text-[11px] text-slate-400 block font-mono">مرجع: ${q.source_ref}</span>` : ''}
                     </div>
-                    `).join('')}
+                    `).join('') : '<div class="p-8 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/20 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">هیچ سؤالی در بانک اطلاعاتی یافت نشد.</div>'}
                 </div>
             </div>
             `;
         } else if (this.activeTab === 'reviews') {
-            const queue = await window.api.getWrittenQueue();
+            const rawQueue = await window.api.getWrittenQueue();
+            const queue = Array.isArray(rawQueue) ? rawQueue : (rawQueue && Array.isArray(rawQueue.items) ? rawQueue.items : []);
             target.innerHTML = `
             <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
                 <div>
@@ -436,7 +442,8 @@ class AdminViews {
         } else if (this.activeTab === 'materials') {
             await this.renderMaterialsManagement(target);
         } else if (this.activeTab === 'students') {
-            const students = await window.api.getStudents();
+            const rawStudents = await window.api.getStudents();
+            const students = Array.isArray(rawStudents) ? rawStudents : (rawStudents && Array.isArray(rawStudents.students) ? rawStudents.students : []);
             target.innerHTML = `
             <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
                 <h3 class="font-bold text-base text-slate-800 dark:text-white">مدیریت حساب‌های کاربری دانش‌آموزان</h3>
@@ -454,9 +461,13 @@ class AdminViews {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            ${students.map(s => `
+                            ${students.length === 0 ? `
                             <tr>
-                                <td class="p-3 font-bold text-slate-800 dark:text-white">${s.full_name}</td>
+                                <td colspan="7" class="p-6 text-center text-slate-400">دانش‌آموزی ثبت نشده است.</td>
+                            </tr>
+                            ` : students.map(s => `
+                            <tr>
+                                <td class="p-3 font-bold text-slate-800 dark:text-white">${s.full_name || s.username}</td>
                                 <td class="p-3 font-mono text-slate-500">${s.username}</td>
                                 <td class="p-3">${s.grade_title_fa}</td>
                                 <td class="p-3 font-mono font-bold text-blue-600">${s.total_xp}</td>
@@ -846,7 +857,7 @@ class AdminViews {
                 </div>
 
                 <div class="divide-y divide-slate-800">
-                    ${data.submissions.length === 0 ? `
+                    ${(!data.submissions || data.submissions.length === 0) ? `
                     <p class="py-8 text-center text-slate-400 text-xs">هیچ پاسخی برای این مسابقه ارسال نشده است.</p>
                     ` : data.submissions.map(s => `
                     <div class="py-4 space-y-3">
@@ -1113,7 +1124,7 @@ class AdminViews {
                             ` : `
                             <span class="text-xs text-slate-400 italic">بدون لینک ضمیمه</span>
                             `}
-                            <button onclick="window.currentAdminViews.deleteStudyMaterial(${m.id}, '${m.title_fa.replace(/'/g, "\\'")}')" 
+                            <button onclick="window.currentAdminViews.deleteStudyMaterial(${m.id}, '${(m.title_fa || m.title || '').replace(/'/g, "\\'")}')" 
                                 class="p-1.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-colors" title="حذف جزوه">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
@@ -1376,19 +1387,19 @@ class AdminViews {
                                     ${g.number}
                                 </div>
                                 <div>
-                                    <h3 class="font-black text-lg text-slate-900 dark:text-white">${g.title_fa}</h3>
-                                    <span class="text-xs text-slate-400">${g.books.map(b => b.title_fa).join(' • ')}</span>
+                                    <h3 class="font-black text-lg text-slate-900 dark:text-white">${g.title_fa || g.title || ''}</h3>
+                                    <span class="text-xs text-slate-400">${(g.books || []).map(b => b.title_fa || b.title || '').join(' • ')}</span>
                                 </div>
                             </div>
                             <button onclick="window.currentAdminViews.openCreateChapterModal(${g.id})" class="text-xs font-bold text-purple-600 hover:text-purple-700 bg-purple-50 dark:bg-purple-950/40 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1">
                                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                                <span>افزودن فصل به پایه ${g.number}</span>
+                                <span>افزودن فصل به پایه ${g.number || ''}</span>
                             </button>
                         </div>
 
                         <!-- Chapters List -->
                         <div class="grid grid-cols-1 gap-4">
-                            ${g.books.flatMap(b => b.chapters).map(ch => `
+                            ${(g.books || []).flatMap(b => b.chapters || []).map(ch => `
                             <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-4">
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-slate-700/60 pb-3">
                                     <div>
@@ -1410,7 +1421,7 @@ class AdminViews {
                                             <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
                                             <span>افزودن درسنامه</span>
                                         </button>
-                                        <button onclick="window.currentAdminViews.deleteChapter(${ch.id}, '${ch.title_fa.replace(/'/g, "\\'")}')" class="p-1.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-all" title="حذف کامل این فصل">
+                                        <button onclick="window.currentAdminViews.deleteChapter(${ch.id}, '${(ch.title_fa || ch.title || '').replace(/'/g, "\\'")}')" class="p-1.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-all" title="حذف کامل این فصل">
                                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     </div>
@@ -1440,7 +1451,7 @@ class AdminViews {
 
                                             <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60 text-[11px]">
                                                 <span class="text-slate-400 font-mono">⏱️ ${les.estimated_minutes} دقیقه</span>
-                                                <button onclick="window.currentAdminViews.deleteLesson(${les.id}, '${les.title_fa.replace(/'/g, "\\'")}')" class="text-rose-500 hover:text-rose-700 p-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1" title="حذف درسنامه">
+                                                <button onclick="window.currentAdminViews.deleteLesson(${les.id}, '${(les.title_fa || les.title || '').replace(/'/g, "\\'")}')" class="text-rose-500 hover:text-rose-700 p-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1" title="حذف درسنامه">
                                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                     <span>حذف</span>
                                                 </button>
