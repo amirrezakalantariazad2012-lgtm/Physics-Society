@@ -172,6 +172,8 @@ async function renderCurrentView() {
         if (window.renderLeaderboardsView) {
             await window.renderLeaderboardsView('app-main-content');
         }
+    } else if (view === 'simulators') {
+        await renderSimulatorsCatalogView(mainContainer, params.id || 'density');
     } else if (view === 'badges') {
         if (window.renderBadgesView) {
             await window.renderBadgesView('app-main-content');
@@ -1571,6 +1573,61 @@ async function handleAiTutorSubmit(e) {
     }
 }
 
+async function renderSimulatorsCatalogView(container, activeSim = 'density') {
+    const validSims = ['density', 'circuit', 'newton', 'pressure', 'optics'];
+    if (!validSims.includes(activeSim)) activeSim = 'density';
+
+    const simTabs = [
+        { id: 'density', title: 'چگالی و ارشمیدس', grade: 'پایه هفتم', icon: 'droplets', desc: 'بررسی جرم، حجم و نیروی شناوری ارشمیدس در آب' },
+        { id: 'circuit', title: 'مدار و قانون اهم', grade: 'پایه هشتم', icon: 'zap', desc: 'محاسبه رابطه ولتاژ، مقاومت و شدت جریان الکتریکی' },
+        { id: 'pressure', title: 'فشار شاره‌ها و عمق', grade: 'پایه نهم', icon: 'gauge', desc: 'تغییرات فشار با عمق مایع، چگالی و شتاب گرانش' },
+        { id: 'newton', title: 'قانون دوم نیوتون', grade: 'پایه نهم', icon: 'activity', desc: 'بررسی شتاب، نیروی پیشران، جرم و اصطکاک سطح' },
+        { id: 'optics', title: 'شکست نور و اسنل', grade: 'پایه هشتم', icon: 'eye', desc: 'محاسبه زاویه تابش، شکست و ضریب شکست در محیط‌های مختلف' },
+    ];
+
+    container.innerHTML = `
+    <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
+        <!-- Header -->
+        <div class="text-center space-y-2">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-950/60 border border-teal-500/40 text-teal-300 text-xs font-bold cyber-glow-cyan">
+                <i data-lucide="flask-conical" class="w-4 h-4 text-teal-400"></i>
+                <span>آزمایشگاه مجازی فیزیک شهید بهشتی دو</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">شبیه‌سازهای تعاملی و آزمایشگاه فیزیک</h1>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto">
+                پارامترهای فیزیکی را تغییر دهید، نمودارهای زنده را بررسی کنید و قوانین بنیادین علوم را به صورت تجربی لمس نمایید.
+            </p>
+        </div>
+
+        <!-- Simulator Selector Tabs -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2">
+            ${simTabs.map(s => `
+                <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${s.id}')"
+                    class="p-3 rounded-2xl border text-right transition-all flex flex-col justify-between ${s.id === activeSim 
+                        ? 'bg-teal-500/10 border-teal-500 text-teal-400 font-bold shadow-md shadow-teal-500/10' 
+                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-teal-500/50'}">
+                    <div class="flex items-center justify-between mb-1">
+                        <i data-lucide="${s.icon}" class="w-4 h-4 text-teal-400"></i>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">${s.grade}</span>
+                    </div>
+                    <span class="text-xs font-bold block truncate">${s.title}</span>
+                </button>
+            `).join('')}
+        </div>
+
+        <!-- Mount Point for the Simulator -->
+        <div id="catalog-sim-mount-point" class="w-full"></div>
+    </div>
+    `;
+
+    if (window.lucide) window.lucide.createIcons();
+
+    if (window.physicsSimulators) {
+        window.physicsSimulators.mount(activeSim, 'catalog-sim-mount-point');
+    }
+}
+
+window.renderSimulatorsCatalogView = renderSimulatorsCatalogView;
 window.renderNexoraMarkdown = renderNexoraMarkdown;
 window.toggleAiTutorModal = toggleAiTutorModal;
 window.minimizeAiCopilot = minimizeAiCopilot;

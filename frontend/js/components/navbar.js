@@ -45,6 +45,10 @@ function renderNavbar() {
                         <i data-lucide="book-open" class="w-4 h-4 text-cyan-400"></i>
                         <span>آموزش فیزیک</span>
                     </a>
+                    <a href="#simulators" onclick="window.store.setView('simulators')" class="transition-colors flex items-center gap-1.5 ${isTabActive('simulators') ? 'text-teal-400 font-bold' : 'hover:text-teal-400'}">
+                        <i data-lucide="flask-conical" class="w-4 h-4 text-teal-400"></i>
+                        <span>آزمایشگاه فیزیک</span>
+                    </a>
                     <a href="#competitions" onclick="window.store.setView('competitions')" class="transition-colors flex items-center gap-1.5 ${isTabActive('competitions') ? 'text-amber-400 font-bold' : 'hover:text-amber-400'}">
                         <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
                         <span>لیگ‌ها و مسابقات</span>
@@ -151,6 +155,10 @@ function renderNavbar() {
                 <button onclick="window.store.setView('curriculum'); window.toggleMobileDrawer(false)" class="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-right flex items-center gap-2 text-cyan-300">
                     <i data-lucide="book-open" class="w-4 h-4"></i>
                     <span>سرفصل‌های فیزیک</span>
+                </button>
+                <button onclick="window.store.setView('simulators'); window.toggleMobileDrawer(false)" class="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-right flex items-center gap-2 text-teal-300">
+                    <i data-lucide="flask-conical" class="w-4 h-4"></i>
+                    <span>آزمایشگاه فیزیک</span>
                 </button>
                 <button onclick="window.store.setView('competitions'); window.toggleMobileDrawer(false)" class="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-right flex items-center gap-2 text-amber-300">
                     <i data-lucide="trophy" class="w-4 h-4"></i>

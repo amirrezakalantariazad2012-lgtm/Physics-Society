@@ -12,10 +12,16 @@ from app.routers import auth, curriculum, exams, competitions, gamification, adm
 from app.seed.curriculum_seed import seed_base_system
 from app.seed.question_bank import seed_complete_curriculum_and_questions
 
+from app.services.schema_sync import auto_sync_schema
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: ensure tables exist and seed default curriculum if empty
-    Base.metadata.create_all(bind=engine)
+    # Startup: ensure tables exist and all schema columns are synchronized
+    try:
+        auto_sync_schema(engine)
+    except Exception as ex:
+        print(f"[SchemaSync Notice]: {ex}")
+        Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
         from app.models.curriculum import Chapter

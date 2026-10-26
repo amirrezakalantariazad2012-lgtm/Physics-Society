@@ -18,7 +18,7 @@ class AdminViews {
                 <div>
                     <div class="flex items-center gap-2 text-rose-600 font-bold text-xs mb-1">
                         <i data-lucide="shield-check" class="w-4 h-4"></i>
-                        <span>پنل مدیریت سامانه QUANTUM CUT</span>
+                        <span>پنل مدیریت انجمن فیزیک شهید بهشتی دو دوره اول</span>
                     </div>
                     <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">پنل جامع مدیریت آموزشی</h1>
                 </div>
@@ -103,7 +103,7 @@ class AdminViews {
                             <i data-lucide="terminal" class="w-5 h-5 text-cyan-400"></i>
                             <h3 class="text-sm font-extrabold text-white">مرکز فرماندهی و دسترسی‌های سریع مدیر (Admin Control Deck)</h3>
                         </div>
-                        <span class="text-[11px] px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono">QUANTUM CUT SUPERUSER</span>
+                        <span class="text-[11px] px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono">مدیریت انجمن فیزیک</span>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                         <button onclick="window.currentAdminViews.switchTab('competitions'); setTimeout(() => window.currentAdminViews.openCreateCompetitionModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-cyan-500/30 text-right flex items-center justify-between transition-all group">

@@ -10,7 +10,7 @@ from app.seed.question_bank import seed_complete_curriculum_and_questions, valid
 def create_admin():
     """Interactive CLI command to create the initial administrator securely"""
     print("==================================================")
-    print("پلتفرم تخصصی فیزیک و هوش مصنوعی QUANTUM CUT")
+    print("سامانه انجمن فیزیک شهید بهشتی دو دوره اول")
     print("ایجاد حساب کاربری مدیر ارشد سامانه (Super Admin)")
     print("==================================================")
 
@@ -18,8 +18,8 @@ def create_admin():
     Base.metadata.create_all(bind=engine)
 
     username = input("نام کاربری مدیر (پیش‌فرض: admin): ").strip() or "admin"
-    email = input("آدرس ایمیل مدیر: ").strip() or "admin@quantumcut.ir"
-    full_name = input("نام و نام خانوادگی مدیر: ").strip() or "مدیر ارشد QUANTUM CUT"
+    email = input("آدرس ایمیل مدیر: ").strip() or "admin@physics-beheshti.ir"
+    full_name = input("نام و نام خانوادگی مدیر: ").strip() or "مدیر انجمن فیزیک"
 
     existing = db.query(User).filter(User.username == username).first()
     if existing:
@@ -43,7 +43,7 @@ def create_admin():
         username=username,
         email=email,
         full_name=full_name,
-        display_name="مدیر QUANTUM CUT",
+        display_name="مدیر انجمن فیزیک",
         hashed_password=hash_password(password),
         role="admin",
         is_active=True
@@ -55,7 +55,7 @@ def create_admin():
 
 def seed_database():
     """Seeds base system, curriculum, and all 360 questions"""
-    print("شروع مقداردهی اولیه پایگاه داده QUANTUM CUT...")
+    print("شروع مقداردهی اولیه پایگاه داده انجمن فیزیک...")
     db = SessionLocal()
     Base.metadata.create_all(bind=engine)
     seed_base_system(db)
@@ -66,7 +66,7 @@ def seed_database():
 def bootstrap_admin(force_reset: bool = False):
     """Bootstraps default setup admin (admin/admin with must_change_password=True) safely preserving custom accounts"""
     print("==================================================")
-    print("پلتفرم QUANTUM CUT: راه‌اندازی حساب مدیر پیش‌فرض")
+    print("سامانه انجمن فیزیک: راه‌اندازی حساب مدیر پیش‌فرض")
     print("==================================================")
     db = SessionLocal()
     Base.metadata.create_all(bind=engine)
@@ -84,9 +84,9 @@ def bootstrap_admin(force_reset: bool = False):
     else:
         admin = User(
             username="admin",
-            email="admin@quantumcut.ir",
-            full_name="مدیر سامانه QUANTUM CUT",
-            display_name="مدیر QUANTUM CUT",
+            email="admin@physics-beheshti.ir",
+            full_name="مدیر انجمن فیزیک شهید بهشتی دو دوره اول",
+            display_name="مدیر انجمن فیزیک",
             hashed_password=hash_password("admin"),
             role="admin",
             is_active=True,

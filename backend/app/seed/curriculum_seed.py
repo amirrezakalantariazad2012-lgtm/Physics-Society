@@ -30,10 +30,10 @@ def seed_base_system(db: Session):
     badges_data = [
         ("first_lesson", "گام نخستین", "تکمیل اولین درس تعاملی فیزیک", "footprints", "curriculum", 30, "first_lesson", 1),
         ("perfect_practice", "دقت آزمایشگاهی", "پاسخ کاملاً صحیح به تمام تمرین‌های یک درس", "target", "curriculum", 50, "perfect_practice", 1),
-        ("streak_3", "استمرار علمی", "سه روز متوالی یادگیری در پلتفرم QUANTUM CUT", "flame", "streak", 40, "streak_3", 3),
+        ("streak_3", "استمرار علمی", "سه روز متوالی یادگیری در انجمن فیزیک", "flame", "streak", 40, "streak_3", 3),
         ("streak_7", "مشعل‌دار فیزیک", "هفت روز متوالی استمرار مطالعه فیزیک", "zap", "streak", 100, "streak_7", 7),
         ("chapter_master", "تسلط بر فصل", "تکمیل تمام درس‌ها و قبولی در ارزیابی فصل", "check-check", "curriculum", 80, "chapter_master", 1),
-        ("competition_participant", "مبارز علمی", "ارسال پاسخ در مسابقات و لیگ‌های QUANTUM CUT", "trophy", "competition", 60, "competition_participant", 1),
+        ("competition_participant", "مبارز علمی", "ارسال پاسخ در مسابقات و لیگ‌های انجمن فیزیک", "trophy", "competition", 60, "competition_participant", 1),
         ("xp_500", "نشان مدار کوانتومی", "کسب ۵۰۰ امتیاز تجربه (XP) در سامانه", "star", "general", 100, "xp_500", 500),
     ]
     for code, title, desc, icon, cat, xp, crit, thresh in badges_data:
@@ -121,24 +121,7 @@ def seed_base_system(db: Session):
             is_active=True
         ))
 
-    # 6. Admin Account (QUANTUM CUT & compatibility admin)
-    admin_qc = db.query(User).filter(User.username == "QUANTUM CUT").first()
-    if not admin_qc:
-        admin_qc = User(
-            username="QUANTUM CUT",
-            email="admin@quantumcut.ir",
-            hashed_password=hash_password("QUANTUM CUT"),
-            role="admin",
-            full_name="مدیر ارشد QUANTUM CUT",
-            display_name="QUANTUM CUT",
-            is_active=True,
-            must_change_password=False
-        )
-        db.add(admin_qc)
-    else:
-        admin_qc.hashed_password = hash_password("QUANTUM CUT")
-        admin_qc.must_change_password = False
-
+    # 6. Admin Account
     admin_legacy = db.query(User).filter(User.username == "admin").first()
     if not admin_legacy:
         admin_legacy = User(

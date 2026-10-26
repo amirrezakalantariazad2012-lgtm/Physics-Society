@@ -274,7 +274,7 @@ def submit_competition_entry(
         score=final_score,
         xp_awarded=comp.xp_participation,
         status="graded",
-        feedback_fa=f"پاسخ شما با موفقیت در سامانه مسابقات و لیگ‌های QUANTUM CUT ثبت شد. امتیاز کسب‌شده در سؤالات تستی: {final_score}."
+        feedback_fa=f"پاسخ شما با موفقیت در مسابقات انجمن فیزیک شهید بهشتی دو دوره اول ثبت شد. امتیاز کسب‌شده در سؤالات تستی: {final_score}."
     )
     db.add(sub)
     db.commit()

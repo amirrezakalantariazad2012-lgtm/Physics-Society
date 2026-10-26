@@ -75,7 +75,7 @@ def extract_json_response(raw_text: str) -> Optional[Dict[str, Any]]:
     return None
 
 # System prompt for structured scientific Persian grading
-GRADING_SYSTEM_PROMPT = """شما سامانه ارزیابی هوشمند و دستیار تصحیح پاسخ‌های تشریحی فیزیک در پلتفرم QUANTUM CUT هستید.
+GRADING_SYSTEM_PROMPT = """شما سامانه ارزیابی هوشمند و دستیار تصحیح پاسخ‌های تشریحی انجمن فیزیک شهید بهشتی دو دوره اول هستید.
 وظیفه شما ارزیابی دقیق، منصفانه و علمی پاسخ دانش‌آموز بر اساس راهنمای تصحیح (بارم‌بندی) است.
 
 قوانین تصحیح:
@@ -93,7 +93,7 @@ GRADING_SYSTEM_PROMPT = """شما سامانه ارزیابی هوشمند و د
   "requires_review": bool
 }"""
 
-TUTOR_SYSTEM_PROMPT = """شما «دستیار هوشمند و معلم همراه فیزیک» در پلتفرم تخصصی QUANTUM CUT هستید.
+TUTOR_SYSTEM_PROMPT = """شما «دستیار هوشمند و معلم همراه فیزیک» در سامانه انجمن فیزیک شهید بهشتی دو دوره اول هستید.
 مخاطب شما دانش‌آموز تیزهوش پایه {grade_number} است.
 
 اصول راهنمایی آموزشی:
@@ -109,7 +109,7 @@ TUTOR_SYSTEM_PROMPT = """شما «دستیار هوشمند و معلم همرا
   "suggested_followups": ["پرسش تفکربرانگیز یا گام بعدی ۱", "پرسش ۲"]
 }}"""
 
-MISTAKE_SYSTEM_PROMPT = """شما کارشناس تحلیل خطاهای مفهومی فیزیک و یادگیری عمیق در پلتفرم QUANTUM CUT هستید.
+MISTAKE_SYSTEM_PROMPT = """شما کارشناس تحلیل خطاهای مفهومی فیزیک و یادگیری عمیق در انجمن فیزیک شهید بهشتی دو دوره اول هستید.
 وظیفه شما کالبدشکافی خطای دانش‌آموز، ریشه‌یابی کج‌فهمی علمی و ارائه راهکار اصلاحی است.
 
 خروجی باید منحصراً در قالب JSON زیر باشد:
@@ -233,8 +233,8 @@ class AIService:
             headers["Authorization"] = f"Bearer {self.api_key}"
 
         if self.provider == "openrouter":
-            headers["HTTP-Referer"] = "https://quantumcut.ir"
-            headers["X-Title"] = "QUANTUM CUT Platform"
+            headers["HTTP-Referer"] = "https://physics-beheshti.ir"
+            headers["X-Title"] = "Physics Society Shahid Beheshti 2"
 
         return headers
 
@@ -587,7 +587,7 @@ class AIService:
 پرسش یا ابهام دانش‌آموز:
 \"{student_query}\"
 
-لطفاً به عنوان معلم فیزیک QUANTUM CUT، با لحنی علمی، انگیزاننده و به روش گام‌به‌گام و سقراطی دانش‌آموز را راهنمایی کنید. فرمول‌ها را به صورت استاندارد LaTeX بنویسید."""
+لطفاً به عنوان معلم فیزیک انجمن فیزیک شهید بهشتی دو دوره اول، با لحنی علمی، انگیزاننده و به روش گام‌به‌گام و سقراطی دانش‌آموز را راهنمایی کنید. فرمول‌ها را به صورت استاندارد LaTeX بنویسید."""
 
         if self.provider == "mock" or not self.api_key or self.api_key == "mock-key-for-testing":
             return self._mock_tutoring(student_query, grade_number, chapter_title, question_prompt)
@@ -834,7 +834,7 @@ class AIService:
         else:
             return AITutorResponse(
                 response_fa=f"پرسش بسیار خوبی در زمینه علوم پایه {grade_number} مطرح کردی. برای حل این مسئله ابتدا داده‌ها و مجهول را یادداشت کن، سپس رابطه ریاضی یا مفهوم فیزیکی مربوطه را مشخص نما و با تبدیل یکاها پاسخ را به دست آور.",
-                key_hints=["همواره به تبدیل یکاها در دستگاه بین‌المللی SI توجه کن.", "مفاهیم کتاب درسی رسمی و نکات تکمیلی QUANTUM CUT مکمل یکدیگرند."],
+                key_hints=["همواره به تبدیل یکاها در دستگاه بین‌المللی SI توجه کن.", "مفاهیم کتاب درسی رسمی و نکات تکمیلی انجمن فیزیک شهید بهشتی دو دوره اول مکمل یکدیگرند."],
                 related_formulas=["$SIUnits$", "$DimensionalAnalysis$"],
                 suggested_followups=["آیا می‌خواهی یک مثال عددی حل شده از این مبحث را با هم بررسی کنیم؟"],
                 model_used="mock-physics-tutor"

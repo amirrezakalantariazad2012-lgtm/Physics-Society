@@ -5,7 +5,7 @@ from pydantic import Field
 
 class Settings(BaseSettings):
     # Application Info
-    APP_NAME: str = "QUANTUM CUT — پلتفرم پیشرفته فیزیک و هوش مصنوعی"
+    APP_NAME: str = "انجمن فیزیک شهید بهشتی دو دوره اول"
     APP_ENV: str = "development"
     DEBUG: bool = True
     API_PREFIX: str = "/api"
@@ -28,9 +28,9 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.ALLOWED_ORIGINS.split(",") if o.strip()]
 
     # Initial Admin Setup
-    INITIAL_ADMIN_USERNAME: str = "QUANTUM CUT"
-    INITIAL_ADMIN_EMAIL: str = "admin@quantumcut.ir"
-    INITIAL_ADMIN_PASSWORD: str = "QUANTUM CUT"
+    INITIAL_ADMIN_USERNAME: str = "admin"
+    INITIAL_ADMIN_EMAIL: str = "admin@physics-beheshti.ir"
+    INITIAL_ADMIN_PASSWORD: str = "AdminPhysics1405!"
 
     # AI Service Configuration (Nexora OpenRouter Free Engine)
     AI_PROVIDER: str = "openrouter"  # 'openrouter', 'openai', 'deepseek', 'ollama', 'mock'

@@ -173,7 +173,7 @@ async function renderCompetitionsView(containerId, activeTab = 'leagues', select
             <div class="text-center space-y-3">
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-xs font-bold cyber-glow-cyan">
                     <i data-lucide="zap" class="w-4 h-4 text-cyan-400 fill-cyan-400"></i>
-                    <span>لیگ‌ها و چالش‌های علمی QUANTUM CUT</span>
+                    <span>لیگ‌ها و چالش‌های علمی انجمن فیزیک شهید بهشتی دو دوره اول</span>
                 </div>
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-white">میدان رقابت و لیگ‌های فیزیک</h1>
                 <p class="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
