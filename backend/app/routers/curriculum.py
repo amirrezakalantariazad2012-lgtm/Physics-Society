@@ -1,4 +1,5 @@
 import os
+import re
 import uuid
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
@@ -17,6 +18,7 @@ from app.schemas.curriculum import (
 )
 from app.services.auth import get_current_user, get_optional_current_user
 from app.services.gamification_service import award_xp, record_daily_streak
+from app.services.audit_service import log_audit_event
 
 router = APIRouter(prefix="/curriculum", tags=["Curriculum"])
 
@@ -440,31 +442,121 @@ def create_study_material(
     )
 
 
+ALLOWED_EXTENSIONS = {
+    ".pdf", ".docx", ".pptx", ".xlsx", ".zip", ".rar",
+    ".png", ".jpg", ".jpeg", ".webp", ".txt"
+}
+
+MAGIC_SIGNATURES = {
+    ".pdf": [b"%PDF-"],
+    ".png": [b"\x89PNG\r\n\x1a\n"],
+    ".jpg": [b"\xFF\xD8\xFF"],
+    ".jpeg": [b"\xFF\xD8\xFF"],
+    ".webp": [b"RIFF"],
+    ".docx": [b"PK\x03\x04"],
+    ".pptx": [b"PK\x03\x04"],
+    ".xlsx": [b"PK\x03\x04"],
+    ".zip": [b"PK\x03\x04"],
+    ".rar": [b"Rar!\x1a\x07"],
+}
+
+DANGEROUS_SIGNATURES = [
+    b"MZ",                # Windows DOS/PE executable
+    b"\x7fELF",           # Linux Executable
+    b"\xca\xfe\xba\xbe",  # Java Class / Mach-O
+    b"<?php",             # PHP script
+    b"<script",           # HTML script execution
+    b"#!/bin",            # Shell script
+    b"#!/usr",            # Shell script
+]
+
+
+def pentagon_validate_upload(filename: str, content: bytes) -> str:
+    """
+    Military-grade validation and sanitization of uploaded files:
+    1. Null-byte injection check
+    2. Strict extension whitelist
+    3. Magic bytes / file header verification against MIME spoofing
+    4. Malicious executable & script header blocking
+    5. Path traversal elimination and filename sanitization
+    """
+    if not filename or "\x00" in filename:
+        raise HTTPException(status_code=400, detail="خطای امنیتی: کاراکتر غیرمجاز یا null-byte شناسایی شد.")
+
+    clean_filename = os.path.basename(filename)
+    name_parts = clean_filename.rsplit(".", 1)
+    if len(name_parts) != 2:
+        raise HTTPException(status_code=400, detail="خطای امنیتی: پسوند فایل نامعتبر است.")
+
+    ext = f".{name_parts[1].lower()}"
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"فرمت فایل مجاز نیست. فرمت‌های معتبر: {', '.join(sorted(ALLOWED_EXTENSIONS))}"
+        )
+
+    # Check file size (max 50 MB)
+    max_size = 50 * 1024 * 1024
+    if len(content) > max_size:
+        raise HTTPException(status_code=400, detail="حجم فایل بیش از حد مجاز است (حداکثر ۵۰ مگابایت).")
+
+    if len(content) < 4:
+        raise HTTPException(status_code=400, detail="فایل ارسالی خالی یا مخدوش است.")
+
+    # Check for known dangerous executable signatures
+    for dangerous in DANGEROUS_SIGNATURES:
+        if content.startswith(dangerous):
+            raise HTTPException(status_code=400, detail="خطای امنیتی فوق‌العاده: امضای باینری فایل اجرایی یا اسکریپت مسدود گردید.")
+
+    # Verify matching magic bytes
+    if ext in MAGIC_SIGNATURES:
+        signatures = MAGIC_SIGNATURES[ext]
+        matches = any(content.startswith(sig) for sig in signatures)
+        if ext == ".webp" and matches:
+            matches = b"WEBP" in content[:16]
+        if not matches:
+            raise HTTPException(
+                status_code=400,
+                detail=f"عدم تطابق امضای باینری: محتوای فایل با پسوند {ext} همخوانی ندارد (تلاش برای جعل پسوند مسدود شد)."
+            )
+
+    # Sanitize name
+    safe_base = re.sub(r"[^a-zA-Z0-9_\-\u0600-\u06FF]", "_", name_parts[0])[:50]
+    safe_name = f"{uuid.uuid4().hex[:12]}_{safe_base}{ext}"
+    return safe_name
+
+
 @router.post("/study-materials/upload")
 async def upload_material_file(
     file: UploadFile = File(...),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
-    """Uploads a study material file (PDF, Docx, Image) and returns permanent URL"""
+    """Uploads a study material file with Pentagon-grade magic-byte validation and traversal protection"""
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="دسترسی غیرمجاز: فقط ادمین مجاز است.")
 
+    content = await file.read()
+    safe_name = pentagon_validate_upload(file.filename, content)
+
     upload_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "uploads", "materials"))
     os.makedirs(upload_dir, exist_ok=True)
-
-    safe_name = f"{uuid.uuid4().hex[:10]}_{file.filename.replace(' ', '_')}"
     target_path = os.path.join(upload_dir, safe_name)
 
-    content = await file.read()
     with open(target_path, "wb") as f:
         f.write(content)
+
+    log_audit_event(
+        db, action="upload_study_material_file", target_entity="supplementary_materials",
+        user_id=current_user.id, details={"filename": file.filename, "size": len(content), "stored": safe_name}
+    )
 
     return {
         "success": True,
         "file_url": f"/uploads/materials/{safe_name}",
         "original_filename": file.filename,
         "file_size_bytes": len(content),
-        "message_fa": "فایل جزوه با موفقیت در سرور ذخیره شد."
+        "message_fa": "فایل جزوه با ارزیابی کامل امنیتی در سرور ذخیره شد."
     }
 
 
@@ -484,6 +576,13 @@ def delete_study_material(
 
     db.delete(mat)
     db.commit()
+
+    log_audit_event(
+        db, action="delete_study_material", target_entity="supplementary_materials",
+        target_id=str(material_id), user_id=current_user.id,
+        details={"title": mat.title_fa}
+    )
+
     return {"success": True, "message_fa": "جزوه / درسنامه با موفقیت حذف گردید."}
 
 

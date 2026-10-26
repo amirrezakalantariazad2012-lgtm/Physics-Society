@@ -4,7 +4,8 @@
 class AdminViews {
     constructor(containerId) {
         this.containerId = containerId;
-        this.activeTab = 'overview'; // 'overview', 'materials', 'validation', 'questions', 'reviews', 'competitions', 'ai', 'textbooks', 'students'
+        this.activeTab = 'overview'; // 'overview', 'curriculum', 'materials', 'validation', 'questions', 'reviews', 'competitions', 'ai', 'textbooks', 'students'
+        this.curriculumGradeFilter = null;
         this.materialsGradeFilter = null;
         this.materialsCategoryFilter = null;
     }
@@ -29,6 +30,9 @@ class AdminViews {
                 <div class="flex items-center sm:flex-wrap gap-1.5 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-xs font-bold overflow-x-auto no-scrollbar w-full sm:w-auto">
                     <button onclick="window.currentAdminViews.switchTab('overview')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'overview' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         داشبورد
+                    </button>
+                    <button onclick="window.currentAdminViews.switchTab('curriculum')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'curriculum' ? 'bg-white dark:bg-slate-900 text-purple-600 shadow-sm font-black' : 'text-slate-600 dark:text-slate-400'}">
+                        سرفصل‌ها و درسنامه‌ساز
                     </button>
                     <button onclick="window.currentAdminViews.switchTab('materials')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'materials' ? 'bg-white dark:bg-slate-900 text-emerald-500 shadow-sm font-black' : 'text-slate-600 dark:text-slate-400'}">
                         درسنامه‌ها و جزوات متفرقه
@@ -110,7 +114,14 @@ class AdminViews {
                         </div>
                         <span class="text-[11px] px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono">مدیریت انجمن فیزیک</span>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+                        <button onclick="window.currentAdminViews.switchTab('curriculum'); setTimeout(() => window.currentAdminViews.openCreateChapterModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-purple-500/40 text-right flex items-center justify-between transition-all group">
+                            <div>
+                                <span class="block text-xs font-black text-purple-300 group-hover:text-white">📖 سرفصل‌ها و درسنامه‌ساز</span>
+                                <span class="text-[11px] text-slate-400">طراحی فصول و دروس بدون کد</span>
+                            </div>
+                            <i data-lucide="book-plus" class="w-5 h-5 text-purple-400"></i>
+                        </button>
                         <button onclick="window.currentAdminViews.switchTab('materials'); setTimeout(() => window.currentAdminViews.openCreateMaterialModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-emerald-500/40 text-right flex items-center justify-between transition-all group">
                             <div>
                                 <span class="block text-xs font-black text-emerald-300 group-hover:text-white">📄 بارگذاری جزوه و درسنامه</span>
@@ -141,8 +152,8 @@ class AdminViews {
                         </button>
                         <button onclick="window.currentAdminViews.switchTab('questions')" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-amber-500/30 text-right flex items-center justify-between transition-all group">
                             <div>
-                                <span class="block text-xs font-black text-amber-300 group-hover:text-white">📚 بانک سؤالات و تولید AI</span>
-                                <span class="text-[11px] text-slate-400">مدیریت ۱,۴۰۸ سؤال فعال</span>
+                                <span class="block text-xs font-black text-amber-300 group-hover:text-white">📚 بانک سؤالات و طراحی نو</span>
+                                <span class="text-[11px] text-slate-400">طراحی تستی و تشریحی</span>
                             </div>
                             <i data-lucide="help-circle" class="w-5 h-5 text-amber-400"></i>
                         </button>
@@ -228,26 +239,33 @@ class AdminViews {
                         <h3 class="font-bold text-base text-slate-800 dark:text-white">فهرست و جستجوی بانک سؤالات (${data.total} پرسش ثبت شده)</h3>
                         <p class="text-xs text-slate-500 mt-0.5">شامل سؤالات استاندارد چهارگزینه‌ای و مسائل تشریحی به تفکیک پایه‌ها و فصول</p>
                     </div>
-                    <button onclick="window.showComingSoon('طراحی مستقیم سؤال تستی یا تشریحی جدید')" class="btn-duo-blue text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm flex items-center gap-1.5 self-start sm:self-auto hover:scale-105 transition-all">
+                    <button onclick="window.currentAdminViews.openCreateQuestionModal()" class="btn-duo-blue text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 self-start sm:self-auto hover:scale-105 transition-all">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                        <span>➕ طراحی سؤال جدید</span>
+                        <span>➕ طراح سؤال جدید (بدون کدنویسی)</span>
                     </button>
                 </div>
 
                 <div class="space-y-3">
                     ${data.questions.map(q => `
-                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-2">
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all space-y-2">
                         <div class="flex items-center justify-between text-xs">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded font-bold text-[11px] ${q.question_type === 'mcq' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}">
+                                <span class="px-2 py-0.5 rounded font-bold text-[11px] ${q.question_type === 'mcq' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300'}">
                                     ${q.question_type === 'mcq' ? 'تستی' : 'تشریحی'}
                                 </span>
                                 <span class="text-slate-500 font-semibold">${q.chapter_title_fa} (پایه ${q.grade_number})</span>
+                                <span class="text-[10px] text-slate-400 font-mono">سطح: ${q.difficulty === 'hard' ? 'سخت' : q.difficulty === 'easy' ? 'آسان' : 'متوسط'}</span>
                             </div>
-                            <span class="text-slate-400 font-mono text-[11px]">${q.points} نمره</span>
+                            <div class="flex items-center gap-3">
+                                <span class="text-slate-500 font-mono text-[11px] font-bold">${q.points} نمره</span>
+                                <button onclick="window.currentAdminViews.deleteQuestion(${q.id}, '${(q.prompt_fa || '').substring(0, 35).replace(/'/g, "\\'")}')" class="text-rose-500 hover:text-rose-700 p-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1" title="حذف دائمی این سؤال">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    <span class="hidden sm:inline">حذف</span>
+                                </button>
+                            </div>
                         </div>
-                        <p class="text-xs font-semibold text-slate-800 dark:text-white leading-relaxed">${q.prompt_fa}</p>
-                        ${q.source_ref ? `<span class="text-[11px] text-slate-400 block">مرجع: ${q.source_ref}</span>` : ''}
+                        <p class="text-xs font-semibold text-slate-800 dark:text-white leading-relaxed text-justify">${q.prompt_fa}</p>
+                        ${q.source_ref ? `<span class="text-[11px] text-slate-400 block font-mono">مرجع: ${q.source_ref}</span>` : ''}
                     </div>
                     `).join('')}
                 </div>
@@ -411,6 +429,8 @@ class AdminViews {
                 </div>
             </div>
             `;
+        } else if (this.activeTab === 'curriculum') {
+            await this.renderCurriculumManagement(target);
         } else if (this.activeTab === 'competitions') {
             await this.renderCompetitionsManagement(target);
         } else if (this.activeTab === 'materials') {
@@ -1283,6 +1303,679 @@ class AdminViews {
             this.loadTabContent();
         } catch (err) {
             alert('خطا در حذف: ' + err.message);
+        }
+    }
+
+    // ========================================================
+    // ZERO-CODE CURRICULUM MANAGEMENT (فصول و درسنامه‌ها)
+    // ========================================================
+
+    async renderCurriculumManagement(target) {
+        target.innerHTML = `<div class="text-center py-12"><div class="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div><p class="text-xs text-slate-500 mt-2 font-bold">در حال بارگذاری ساختار سرفصل‌ها و درسنامه‌ها...</p></div>`;
+
+        try {
+            const tree = await window.api.getCurriculumTree();
+            this.curriculumTreeCache = tree;
+
+            const filteredTree = this.curriculumGradeFilter
+                ? tree.filter(g => g.id === this.curriculumGradeFilter)
+                : tree;
+
+            const totalChapters = tree.reduce((acc, g) => acc + g.books.reduce((bAcc, b) => bAcc + b.chapters.length, 0), 0);
+            const totalLessons = tree.reduce((acc, g) => acc + g.books.reduce((bAcc, b) => bAcc + b.chapters.reduce((cAcc, c) => cAcc + c.lessons.length, 0), 0), 0);
+
+            target.innerHTML = `
+            <div class="space-y-6">
+                <!-- Header & Action Deck -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+                        <div>
+                            <div class="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold text-xs mb-1">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                <span>سامانه مدیریت محتوای آموزشی بدون نیاز به کدنویسی (Zero-Code Curriculum CMS)</span>
+                            </div>
+                            <h2 class="text-xl font-black text-slate-900 dark:text-white">طراحی و مدیریت سرفصل‌ها و درسنامه‌ها</h2>
+                            <p class="text-xs text-slate-500 mt-1">تعداد کل فصول ثبت‌شده: <strong class="text-purple-600 font-mono">${totalChapters}</strong> فصل | تعداد کل درسنامه‌ها: <strong class="text-emerald-500 font-mono">${totalLessons}</strong> درسنامه</p>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button onclick="window.currentAdminViews.openCreateChapterModal()" class="btn-duo-blue text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 hover:scale-105 transition-all">
+                                <i data-lucide="folder-plus" class="w-4 h-4"></i>
+                                <span>➕ ایجاد فصل جدید</span>
+                            </button>
+                            <button onclick="window.currentAdminViews.openCreateLessonModal()" class="btn-duo-green text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 hover:scale-105 transition-all">
+                                <i data-lucide="file-plus" class="w-4 h-4"></i>
+                                <span>➕ ایجاد درسنامه جدید</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Grade Filter Pills -->
+                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs font-bold">
+                        <button onclick="window.currentAdminViews.filterCurriculumByGrade(null)" class="px-3.5 py-1.5 rounded-xl transition-all ${this.curriculumGradeFilter === null ? 'bg-purple-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                            همه پایه‌ها (${totalChapters} فصل)
+                        </button>
+                        ${tree.map(g => {
+                            const gChCount = g.books.reduce((acc, b) => acc + b.chapters.length, 0);
+                            return `
+                            <button onclick="window.currentAdminViews.filterCurriculumByGrade(${g.id})" class="px-3.5 py-1.5 rounded-xl transition-all ${this.curriculumGradeFilter === g.id ? 'bg-purple-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                                ${g.title_fa} (${gChCount} فصل)
+                            </button>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- Tree Hierarchy List -->
+                <div class="space-y-6">
+                    ${filteredTree.map(g => `
+                    <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-purple-100 dark:bg-purple-950/80 text-purple-600 flex items-center justify-center font-black">
+                                    ${g.number}
+                                </div>
+                                <div>
+                                    <h3 class="font-black text-lg text-slate-900 dark:text-white">${g.title_fa}</h3>
+                                    <span class="text-xs text-slate-400">${g.books.map(b => b.title_fa).join(' • ')}</span>
+                                </div>
+                            </div>
+                            <button onclick="window.currentAdminViews.openCreateChapterModal(${g.id})" class="text-xs font-bold text-purple-600 hover:text-purple-700 bg-purple-50 dark:bg-purple-950/40 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                                <span>افزودن فصل به پایه ${g.number}</span>
+                            </button>
+                        </div>
+
+                        <!-- Chapters List -->
+                        <div class="grid grid-cols-1 gap-4">
+                            ${g.books.flatMap(b => b.chapters).map(ch => `
+                            <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 space-y-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-slate-700/60 pb-3">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-mono font-bold text-xs">
+                                                فصل ${ch.chapter_number}
+                                            </span>
+                                            <h4 class="font-black text-base text-slate-900 dark:text-white">${ch.title_fa}</h4>
+                                        </div>
+                                        ${ch.description_fa ? `<p class="text-xs text-slate-500 mt-1">${ch.description_fa}</p>` : ''}
+                                    </div>
+
+                                    <div class="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+                                        <span class="text-xs text-slate-400 font-mono font-semibold">${ch.estimated_minutes} دقیقه</span>
+                                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">${ch.lessons.length} درسنامه</span>
+                                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">${ch.questions_count} سؤال</span>
+                                        
+                                        <button onclick="window.currentAdminViews.openCreateLessonModal(${ch.id})" class="px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-300 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800 text-xs font-bold transition-all flex items-center gap-1" title="افزودن درسنامه به این فصل">
+                                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                                            <span>افزودن درسنامه</span>
+                                        </button>
+                                        <button onclick="window.currentAdminViews.deleteChapter(${ch.id}, '${ch.title_fa.replace(/'/g, "\\'")}')" class="p-1.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-all" title="حذف کامل این فصل">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Lessons inside this Chapter -->
+                                <div class="space-y-2">
+                                    ${ch.lessons.length === 0 ? `
+                                    <div class="text-center py-4 text-xs text-slate-400 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                                        هنوز درسنامه‌ای برای این فصل ثبت نشده است. با دکمه «افزودن درسنامه» اولین درسنامه را بسازید.
+                                    </div>
+                                    ` : `
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                                        ${ch.lessons.map(les => `
+                                        <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-purple-400 transition-all flex flex-col justify-between space-y-2 shadow-2xs">
+                                            <div class="space-y-1">
+                                                <div class="flex items-center justify-between text-[11px]">
+                                                    <span class="font-mono font-bold text-slate-400">درس ${les.order_index}</span>
+                                                    <div class="flex items-center gap-1">
+                                                        <span class="font-mono text-amber-500 font-bold">⚡ +${les.xp_reward} XP</span>
+                                                        ${les.simulator_type ? `<span class="px-1.5 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950 text-cyan-600 text-[10px] font-bold">🔬 ${les.simulator_type}</span>` : ''}
+                                                    </div>
+                                                </div>
+                                                <h5 class="font-bold text-xs text-slate-800 dark:text-white line-clamp-1">${les.title_fa}</h5>
+                                                ${les.summary_fa ? `<p class="text-[11px] text-slate-500 line-clamp-2">${les.summary_fa}</p>` : ''}
+                                            </div>
+
+                                            <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60 text-[11px]">
+                                                <span class="text-slate-400 font-mono">⏱️ ${les.estimated_minutes} دقیقه</span>
+                                                <button onclick="window.currentAdminViews.deleteLesson(${les.id}, '${les.title_fa.replace(/'/g, "\\'")}')" class="text-rose-500 hover:text-rose-700 p-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1" title="حذف درسنامه">
+                                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                    <span>حذف</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        `).join('')}
+                                    </div>
+                                    `}
+                                </div>
+                            </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    `).join('')}
+                </div>
+            </div>
+            `;
+            if (window.lucide) window.lucide.createIcons();
+        } catch (err) {
+            target.innerHTML = `<div class="p-6 rounded-2xl bg-rose-50 text-rose-700 text-xs font-bold text-center">خطا در بارگذاری سرفصل‌ها: ${err.message}</div>`;
+        }
+    }
+
+    filterCurriculumByGrade(gradeId) {
+        this.curriculumGradeFilter = gradeId;
+        this.loadTabContent();
+    }
+
+    // Modal: Create Chapter
+    openCreateChapterModal(defaultGradeId = null) {
+        const modal = document.createElement('div');
+        modal.id = 'admin-create-chapter-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in';
+        modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-purple-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-lg text-slate-900 dark:text-white space-y-5 shadow-2xl animate-scale-up">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-500 flex items-center justify-center">
+                        <i data-lucide="folder-plus" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">ایجاد فصل جدید در کتاب درسی (بدون کدنویسی)</h3>
+                        <span class="text-[10px] text-purple-600 dark:text-purple-400">سامانه محتوای آموزشی کوانتوم</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('admin-create-chapter-modal').remove()" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="window.currentAdminViews.handleCreateChapterSubmit(event)" class="space-y-4 text-xs font-semibold">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">پایه تحصیلی: *</label>
+                        <select name="grade_id" required class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-purple-500">
+                            <option value="1" ${defaultGradeId === 1 ? 'selected' : ''}>پایه هفتم</option>
+                            <option value="2" ${defaultGradeId === 2 ? 'selected' : ''}>پایه هشتم</option>
+                            <option value="3" ${defaultGradeId === 3 ? 'selected' : ''}>پایه نهم</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">شماره فصل: *</label>
+                        <input type="number" name="chapter_number" min="1" max="25" value="1" required
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono outline-none focus:border-purple-500" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">عنوان فصل: *</label>
+                    <input type="text" name="title_fa" required placeholder="مثال: فیزیک و اندازه‌گیری / الکتریسیته و مغناطیس"
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-purple-500" />
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">زمان مطالعه برآورد شده (دقیقه):</label>
+                    <input type="number" name="estimated_minutes" min="15" max="300" value="45"
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono outline-none focus:border-purple-500" />
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">توضیحات و اهداف آموزشی فصل:</label>
+                    <textarea name="description_fa" rows="3" placeholder="مباحث کلیدی، مفاهیم و اهداف یادگیری این فصل..."
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-purple-500 leading-relaxed"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onclick="document.getElementById('admin-create-chapter-modal').remove()" class="px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                        انصراف
+                    </button>
+                    <button type="submit" class="btn-duo-blue text-white font-black px-6 py-2.5 rounded-xl shadow-md">
+                        ثبت و ایجاد فصل
+                    </button>
+                </div>
+            </form>
+        </div>
+        `;
+        document.body.appendChild(modal);
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    async handleCreateChapterSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const payload = {
+            grade_id: parseInt(form.grade_id.value, 10),
+            chapter_number: parseInt(form.chapter_number.value, 10),
+            title_fa: form.title_fa.value.trim(),
+            description_fa: form.description_fa.value.trim(),
+            estimated_minutes: parseInt(form.estimated_minutes.value, 10) || 45
+        };
+
+        try {
+            await window.api.createChapter(payload);
+            alert('فصل جدید با موفقیت ایجاد گردید.');
+            const m = document.getElementById('admin-create-chapter-modal');
+            if (m) m.remove();
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در ثبت فصل: ' + err.message);
+        }
+    }
+
+    async deleteChapter(id, title) {
+        if (!confirm(`آیا از حذف کامل فصل "${title}" و تمامی درسنامه‌های مرتبط با آن اطمینان دارید؟`)) return;
+        try {
+            await window.api.deleteChapter(id);
+            alert('فصل با موفقیت حذف گردید.');
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در حذف فصل: ' + err.message);
+        }
+    }
+
+    // Modal: Create Lesson
+    async openCreateLessonModal(defaultChapterId = null) {
+        const tree = this.curriculumTreeCache || await window.api.getCurriculumTree();
+        const allChapters = [];
+        tree.forEach(g => {
+            g.books.forEach(b => {
+                b.chapters.forEach(ch => {
+                    allChapters.push({
+                        id: ch.id,
+                        gradeNumber: g.number,
+                        title: `پایه ${g.number} - فصل ${ch.chapter_number}: ${ch.title_fa}`
+                    });
+                });
+            });
+        });
+
+        const modal = document.createElement('div');
+        modal.id = 'admin-create-lesson-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in';
+        modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-emerald-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-slate-900 dark:text-white space-y-5 max-h-[92vh] overflow-y-auto shadow-2xl animate-scale-up">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
+                        <i data-lucide="file-plus" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">طراحی درسنامه تعاملی جدید (بدون کدنویسی)</h3>
+                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400">سامانه محتوای استاندارد دولینگو فیزیک</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('admin-create-lesson-modal').remove()" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="window.currentAdminViews.handleCreateLessonSubmit(event)" class="space-y-4 text-xs font-semibold">
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">انتخاب فصل درسی: *</label>
+                    <select name="chapter_id" required class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-emerald-500">
+                        ${allChapters.map(c => `
+                        <option value="${c.id}" ${defaultChapterId === c.id ? 'selected' : ''}>${c.title}</option>
+                        `).join('')}
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="sm:col-span-2">
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">عنوان درسنامه: *</label>
+                        <input type="text" name="title_fa" required placeholder="مثال: مفهوم کار، انرژی جنبشی و پایستگی انرژی"
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-emerald-500" />
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">شماره ترتیب درس:</label>
+                        <input type="number" name="order_index" min="1" max="20" value="1"
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono outline-none focus:border-emerald-500" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">زمان مطالعه (دقیقه):</label>
+                        <input type="number" name="estimated_minutes" min="5" max="90" value="15"
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono outline-none focus:border-emerald-500" />
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">پاداش امتیاز (XP):</label>
+                        <input type="number" name="xp_reward" min="10" max="100" value="25"
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono outline-none focus:border-emerald-500" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">ضمیمه شبیه‌ساز آزمایشگاه فیزیک:</label>
+                    <select name="simulator_type" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-emerald-500">
+                        <option value="none">بدون آزمایشگاه شبیه‌ساز</option>
+                        <option value="gravity">سقوط آزاد و شتاب گرانش (Gravity & Motion)</option>
+                        <option value="optics">اپتیک، شکست نور و آینه‌ها (Optics & Light)</option>
+                        <option value="circuit">مدار الکتریکی، مقاومت و قانون اهم (Circuits & Ohm)</option>
+                        <option value="waves">موج، دامنه و فرکانس نوسان (Waves & Frequency)</option>
+                        <option value="thermodynamics">گرما، دماسنجی و انبساط حرارتی (Heat & Temperature)</option>
+                    </select>
+                </div>
+
+                <!-- Structured Blocks Accordion -->
+                <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span class="block text-xs font-black text-purple-600 dark:text-purple-400">بخش‌های آموزشی درسنامه (پخش در پخش‌کننده تعاملی):</span>
+
+                    <div>
+                        <label class="block text-slate-600 dark:text-slate-300 text-[11px] mb-1">۱. جرقه ذهنی و مقدمه (Intro):</label>
+                        <textarea name="intro" rows="2" placeholder="یک سوال شگفت‌انگیز یا پدیده روزمره برای ایجاد انگیزه..."
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-purple-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-600 dark:text-slate-300 text-[11px] mb-1">۲. تشریح مفاهیم و قوانین فیزیکی (Theory):</label>
+                        <textarea name="explanation" rows="4" placeholder="توضیح مفهومی قوانین فیزیک با بیان شیوا و روان..."
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-purple-500"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-slate-600 dark:text-slate-300 text-[11px] mb-1">۳. فرمول و روابط فیزیکی:</label>
+                            <input type="text" name="formula" placeholder="مثال: $W = F \\cdot d \\cdot \\cos(\\theta)$"
+                                class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono outline-none focus:border-purple-500" />
+                        </div>
+                        <div>
+                            <label class="block text-slate-600 dark:text-slate-300 text-[11px] mb-1">۴. تعاریف کلیدی (Definitions):</label>
+                            <input type="text" name="definition" placeholder="تعریف دقیق علمی و یکاهای مربوطه..."
+                                class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-purple-500" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-600 dark:text-slate-300 text-[11px] mb-1">۵. آزمایشگاه و فعالیت تجربی (Experiment):</label>
+                        <textarea name="experiment" rows="2" placeholder="توصیف آزمایش تجربی یا دستورکار آزمایشگاهی..."
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-purple-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-600 dark:text-slate-300 text-[11px] mb-1">۶. اشتباهات رایج مفهومی (Misconception):</label>
+                        <input type="text" name="misconception" placeholder="اشتباه رایجی که دانش‌آموزان در این مبحث مرتکب می‌شوند..."
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-purple-500" />
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-600 dark:text-slate-300 text-[11px] mb-1">۷. جمع‌بندی درسنامه (Summary):</label>
+                        <textarea name="summary_fa" rows="2" placeholder="خلاصه ۳ خطی نکات کلیدی این درسنامه..."
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-purple-500"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onclick="document.getElementById('admin-create-lesson-modal').remove()" class="px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                        انصراف
+                    </button>
+                    <button type="submit" class="btn-duo-green text-white font-black px-6 py-2.5 rounded-xl shadow-md">
+                        ثبت و انتشار درسنامه
+                    </button>
+                </div>
+            </form>
+        </div>
+        `;
+        document.body.appendChild(modal);
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    async handleCreateLessonSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const payload = {
+            chapter_id: parseInt(form.chapter_id.value, 10),
+            title_fa: form.title_fa.value.trim(),
+            order_index: parseInt(form.order_index.value, 10) || 1,
+            estimated_minutes: parseInt(form.estimated_minutes.value, 10) || 15,
+            xp_reward: parseInt(form.xp_reward.value, 10) || 25,
+            simulator_type: form.simulator_type.value,
+            intro: form.intro.value.trim() || null,
+            explanation: form.explanation.value.trim() || null,
+            formula: form.formula.value.trim() || null,
+            definition: form.definition.value.trim() || null,
+            experiment: form.experiment.value.trim() || null,
+            misconception: form.misconception.value.trim() || null,
+            summary_fa: form.summary_fa.value.trim() || null
+        };
+
+        try {
+            await window.api.createLesson(payload);
+            alert('درسنامه تعاملی جدید با موفقیت ثبت و به فصل مربوطه اضافه گردید.');
+            const m = document.getElementById('admin-create-lesson-modal');
+            if (m) m.remove();
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در ثبت درسنامه: ' + err.message);
+        }
+    }
+
+    async deleteLesson(id, title) {
+        if (!confirm(`آیا از حذف درسنامه "${title}" اطمینان دارید؟`)) return;
+        try {
+            await window.api.deleteLesson(id);
+            alert('درسنامه با موفقیت حذف گردید.');
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در حذف درسنامه: ' + err.message);
+        }
+    }
+
+    // ========================================================
+    // ZERO-CODE QUESTION BUILDER (طراح سؤالات بدون کدنویسی)
+    // ========================================================
+
+    async openCreateQuestionModal() {
+        const tree = this.curriculumTreeCache || await window.api.getCurriculumTree();
+        const allChapters = [];
+        tree.forEach(g => {
+            g.books.forEach(b => {
+                b.chapters.forEach(ch => {
+                    allChapters.push({
+                        id: ch.id,
+                        gradeId: g.id,
+                        title: `پایه ${g.number} - فصل ${ch.chapter_number}: ${ch.title_fa}`
+                    });
+                });
+            });
+        });
+
+        const modal = document.createElement('div');
+        modal.id = 'admin-create-question-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in';
+        modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-blue-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-slate-900 dark:text-white space-y-5 max-h-[92vh] overflow-y-auto shadow-2xl animate-scale-up">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center">
+                        <i data-lucide="help-circle" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">طراح هوشمند سؤال جدید (بدون کدنویسی)</h3>
+                        <span class="text-[10px] text-blue-600 dark:text-blue-400">بانک سؤالات رسمی و استاندارد انجمن فیزیک</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('admin-create-question-modal').remove()" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="window.currentAdminViews.handleCreateQuestionSubmit(event)" class="space-y-4 text-xs font-semibold">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">فصل و پایه تحصیلی: *</label>
+                        <select name="chapter_id" id="question-chapter-select" required class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500">
+                            ${allChapters.map(c => `<option value="${c.id}" data-grade="${c.gradeId}">${c.title}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">نوع سؤال: *</label>
+                        <select name="question_type" id="question-type-select" onchange="window.currentAdminViews.toggleQuestionTypeFields(this.value)" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500">
+                            <option value="mcq">چهارگزینه‌ای استاندارد (تستی)</option>
+                            <option value="written">تشریحی / مسأله تحلیلی فیزیک</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">سطح دشواری: *</label>
+                        <select name="difficulty" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500">
+                            <option value="easy">آسان و مفاهیم پایه‌ای</option>
+                            <option value="medium" selected>متوسط و استاندارد امتحانی</option>
+                            <option value="hard">سخت و المپیادی (سمپاد)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">بارم / نمره سؤال: *</label>
+                        <input type="number" step="0.25" min="0.5" max="10" name="points" value="1.0" required
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono outline-none focus:border-blue-500" />
+                    </div>
+                </div>
+
+                <!-- Prompt -->
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">متن صورت سؤال: *</label>
+                    <textarea name="prompt_fa" rows="4" required placeholder="صورت مسأله فیزیک را تایپ کنید. برای فرمول‌ها از $...$ استفاده نمایید..."
+                        oninput="window.currentAdminViews.updateQuestionPromptPreview(this.value)"
+                        class="w-full p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500 leading-relaxed"></textarea>
+                    
+                    <!-- Live KaTeX Preview -->
+                    <div class="p-3 rounded-xl bg-blue-50/50 dark:bg-slate-800/60 border border-blue-200/60 dark:border-slate-700 mt-2 text-xs">
+                        <span class="text-[10px] text-blue-500 font-bold block mb-1">پیش‌نمایش زنده صورت سؤال:</span>
+                        <div id="create-q-preview" class="text-slate-800 dark:text-slate-200 min-h-[24px] italic text-slate-400">پیش‌نمایش...</div>
+                    </div>
+                </div>
+
+                <!-- MCQ Options Section -->
+                <div id="mcq-options-container" class="space-y-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
+                    <span class="block text-xs font-black text-blue-600 dark:text-blue-400">۴ گزینه تستی (گزینه صحیح را با دکمه رادیویی علامت بزنید):</span>
+                    
+                    ${['الف', 'ب', 'ج', 'د'].map((key, idx) => `
+                    <div class="flex items-center gap-3">
+                        <label class="flex items-center gap-1.5 cursor-pointer shrink-0">
+                            <input type="radio" name="correct_key" value="${key}" ${idx === 0 ? 'checked' : ''} class="w-4 h-4 text-blue-600" />
+                            <span class="font-mono font-black text-xs w-6 h-6 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 flex items-center justify-center">${key}</span>
+                        </label>
+                        <input type="text" name="option_${key}" required placeholder="متن گزینه ${key}..."
+                            class="flex-1 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500 text-xs" />
+                    </div>
+                    `).join('')}
+
+                    <div class="pt-2">
+                        <label class="block text-slate-600 dark:text-slate-300 text-[11px] mb-1">تحلیل و تشریح پاسخ صحیح (جهت نمایش در کارنامه):</label>
+                        <textarea name="mcq_explanation" rows="2" placeholder="استدلال فیزیکی، فرمول حاکم و دلیل رد سایر گزینه‌ها..."
+                            class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500 text-xs"></textarea>
+                    </div>
+                </div>
+
+                <!-- Written Question Section -->
+                <div id="written-options-container" class="hidden space-y-3 p-4 rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-900/60">
+                    <span class="block text-xs font-black text-purple-600 dark:text-purple-400">تنظیمات مسأله تشریحی و رابریک تصحیح هوشمند:</span>
+                    <div>
+                        <label class="block text-slate-600 dark:text-slate-300 text-[11px] mb-1">پاسخ مرجع کتاب درسی (Reference Answer): *</label>
+                        <textarea name="reference_answer_fa" rows="3" placeholder="پاسخ کامل، گام‌به‌گام به همراه روابط و یکاهای SI..."
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-purple-500 text-xs leading-relaxed"></textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">منبع سؤال (کتاب درسی، نمونه دولتی، سمپاد یا المپیاد):</label>
+                    <input type="text" name="source_ref" placeholder="مثال: کتاب علوم تجربی نهم - صفحه ۵۴ / آزمون ورودی مدارس تیزهوشان"
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500 font-mono text-xs" />
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onclick="document.getElementById('admin-create-question-modal').remove()" class="px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                        انصراف
+                    </button>
+                    <button type="submit" class="btn-duo-blue text-white font-black px-6 py-2.5 rounded-xl shadow-md">
+                        ثبت و افزودن به بانک سؤالات
+                    </button>
+                </div>
+            </form>
+        </div>
+        `;
+        document.body.appendChild(modal);
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    toggleQuestionTypeFields(type) {
+        const mcqBox = document.getElementById('mcq-options-container');
+        const writtenBox = document.getElementById('written-options-container');
+        if (type === 'mcq') {
+            if (mcqBox) mcqBox.classList.remove('hidden');
+            if (writtenBox) writtenBox.classList.add('hidden');
+        } else {
+            if (mcqBox) mcqBox.classList.add('hidden');
+            if (writtenBox) writtenBox.classList.remove('hidden');
+        }
+    }
+
+    updateQuestionPromptPreview(text) {
+        const prev = document.getElementById('create-q-preview');
+        if (prev) {
+            prev.innerHTML = text.trim() ? text : 'پیش‌نمایش...';
+            if (window.renderMathInPage) window.renderMathInPage(prev);
+        }
+    }
+
+    async handleCreateQuestionSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const qType = form.question_type.value;
+        const chapterSelect = form.chapter_id;
+        const selectedOpt = chapterSelect.options[chapterSelect.selectedIndex];
+        const gradeId = parseInt(selectedOpt.getAttribute('data-grade') || '1', 10);
+        const chapterId = parseInt(chapterSelect.value, 10);
+        const points = parseFloat(form.points.value) || 1.0;
+        const difficulty = form.difficulty.value;
+        const promptFa = form.prompt_fa.value.trim();
+        const sourceRef = form.source_ref.value.trim() || null;
+
+        const payload = {
+            grade_id: gradeId,
+            chapter_id: chapterId,
+            question_type: qType,
+            difficulty: difficulty,
+            prompt_fa: promptFa,
+            points: points,
+            source_ref: sourceRef
+        };
+
+        if (qType === 'mcq') {
+            const correctKey = form.correct_key.value;
+            const explanation = form.mcq_explanation.value.trim() || null;
+            payload.options = ['الف', 'ب', 'ج', 'د'].map(k => ({
+                option_key: k,
+                text_fa: (form[`option_${k}`].value || '').trim(),
+                is_correct: k === correctKey,
+                explanation_fa: k === correctKey ? explanation : null
+            }));
+        } else {
+            payload.reference_answer_fa = form.reference_answer_fa.value.trim() || 'پاسخ تشریحی بر اساس مفاهیم کتاب درسی';
+        }
+
+        try {
+            await window.api.createQuestion(payload);
+            alert('سؤال جدید با موفقیت به بانک سؤالات اضافه شد.');
+            const m = document.getElementById('admin-create-question-modal');
+            if (m) m.remove();
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در ثبت سؤال: ' + err.message);
+        }
+    }
+
+    async deleteQuestion(id, prompt) {
+        if (!confirm(`آیا از حذف دائمی این سؤال اطمینان دارید؟\n"${prompt}..."`)) return;
+        try {
+            await window.api.deleteQuestion(id);
+            alert('سؤال با موفقیت از بانک سؤالات حذف شد.');
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در حذف سؤال: ' + err.message);
         }
     }
 }

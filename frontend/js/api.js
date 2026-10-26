@@ -264,6 +264,27 @@ function formatApiErrorMessage(data, defaultMsg = 'خطایی در ارتباط 
         const qs = new URLSearchParams(params).toString();
         return this.request(`/admin/questions?${qs}`);
     }
+    createQuestion(data) {
+        return this.request('/admin/questions', { method: 'POST', body: data });
+    }
+    deleteQuestion(id) {
+        return this.request(`/admin/questions/${id}`, { method: 'DELETE' });
+    }
+    getCurriculumTree() {
+        return this.request('/admin/curriculum/tree');
+    }
+    createChapter(data) {
+        return this.request('/admin/curriculum/chapters', { method: 'POST', body: data });
+    }
+    deleteChapter(id) {
+        return this.request(`/admin/curriculum/chapters/${id}`, { method: 'DELETE' });
+    }
+    createLesson(data) {
+        return this.request('/admin/curriculum/lessons', { method: 'POST', body: data });
+    }
+    deleteLesson(id) {
+        return this.request(`/admin/curriculum/lessons/${id}`, { method: 'DELETE' });
+    }
     getWrittenQueue() {
         return this.request('/admin/reviews/written-queue');
     }

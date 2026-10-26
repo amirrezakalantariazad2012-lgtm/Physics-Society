@@ -1,5 +1,6 @@
 import os
 import shutil
+import uuid
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
@@ -18,6 +19,7 @@ from app.models.system import AIProviderConfig, AIUsageRecord, AuditLog, Applica
 from app.schemas.ai import (
     ChapterContentValidationReport, AIProviderConfigUpdate, AIConnectionTestResult
 )
+from app.schemas.curriculum import ChapterCreateRequest, LessonCreateRequest
 from app.schemas.exam import AdminGradeOverrideRequest, QuestionCreateRequest, QuestionReviewRequest
 from app.services.auth import get_current_admin
 from app.services.ai_service import AIService, validate_base_url_ssrf
@@ -580,3 +582,219 @@ def trigger_textbook_processing(
         "extracted_sections": job.extracted_sections_count,
         "log_output": job.log_output
     }
+
+
+# ========================================================
+# ZERO-CODE CURRICULUM & QUESTION CMS (PENTAGON-HARDENED)
+# ========================================================
+
+@router.delete("/questions/{question_id}")
+def delete_question(
+    question_id: int,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Permanently deletes a question from the question bank with audit logging"""
+    q = db.query(Question).filter(Question.id == question_id).first()
+    if not q:
+        raise HTTPException(status_code=404, detail="سؤال مورد نظر یافت نشد.")
+
+    prompt_snippet = q.prompt_fa[:60] if q.prompt_fa else str(question_id)
+    db.delete(q)
+    db.commit()
+
+    log_audit_event(
+        db, action="delete_question", target_entity="questions",
+        target_id=str(question_id), user_id=current_admin.id,
+        details={"prompt_snippet": prompt_snippet}
+    )
+    return {"success": True, "message_fa": "سؤال با موفقیت از بانک سؤالات حذف گردید."}
+
+
+@router.get("/curriculum/tree")
+def get_curriculum_tree(db: Session = Depends(get_db)):
+    """Returns full hierarchical curriculum tree for zero-code admin CMS"""
+    grades = db.query(Grade).order_by(Grade.number).all()
+    tree = []
+    for g in grades:
+        g_data = {
+            "id": g.id,
+            "number": g.number,
+            "title_fa": g.title_fa,
+            "books": []
+        }
+        for b in g.books:
+            b_data = {
+                "id": b.id,
+                "title_fa": b.title_fa,
+                "code": b.code,
+                "chapters": []
+            }
+            for ch in b.chapters:
+                ch_data = {
+                    "id": ch.id,
+                    "chapter_number": ch.chapter_number,
+                    "title_fa": ch.title_fa,
+                    "description_fa": ch.description_fa,
+                    "estimated_minutes": ch.estimated_minutes,
+                    "lessons_count": len(ch.lessons),
+                    "questions_count": len(ch.questions),
+                    "lessons": [
+                        {
+                            "id": les.id,
+                            "order_index": les.order_index,
+                            "title_fa": les.title_fa,
+                            "estimated_minutes": les.estimated_minutes,
+                            "xp_reward": les.xp_reward,
+                            "simulator_type": (les.content_blocks or {}).get("simulator_type") if isinstance(les.content_blocks, dict) else None,
+                            "summary_fa": les.summary_fa
+                        }
+                        for les in ch.lessons
+                    ]
+                }
+                b_data["chapters"].append(ch_data)
+            g_data["books"].append(b_data)
+        tree.append(g_data)
+    return tree
+
+
+@router.post("/curriculum/chapters")
+def create_chapter(
+    data: ChapterCreateRequest,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Creates a new chapter without code"""
+    grade = db.query(Grade).filter(Grade.id == data.grade_id).first()
+    if not grade:
+        raise HTTPException(status_code=404, detail="پایه تحصیلی یافت نشد.")
+
+    book = None
+    if data.book_id:
+        book = db.query(Book).filter(Book.id == data.book_id).first()
+    if not book:
+        book = db.query(Book).filter(Book.grade_id == data.grade_id).first()
+    if not book:
+        raise HTTPException(status_code=400, detail="کتابی برای این پایه یافت نشد.")
+
+    slug = f"g{grade.number}-ch{data.chapter_number}-{uuid.uuid4().hex[:4]}"
+    ch = Chapter(
+        book_id=book.id,
+        chapter_number=data.chapter_number,
+        title_fa=data.title_fa.strip(),
+        slug=slug,
+        description_fa=data.description_fa.strip() if data.description_fa else None,
+        estimated_minutes=data.estimated_minutes or 45,
+        order_index=data.chapter_number,
+        is_published=True
+    )
+    db.add(ch)
+    db.commit()
+    db.refresh(ch)
+
+    log_audit_event(
+        db, action="create_chapter", target_entity="chapters",
+        target_id=str(ch.id), user_id=current_admin.id,
+        details={"title_fa": ch.title_fa, "grade_id": grade.id}
+    )
+    return {"success": True, "chapter_id": ch.id, "message_fa": f"فصل «{ch.title_fa}» با موفقیت افزوده شد."}
+
+
+@router.delete("/curriculum/chapters/{chapter_id}")
+def delete_chapter(
+    chapter_id: int,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Deletes a chapter and cascaded content with audit logging"""
+    ch = db.query(Chapter).filter(Chapter.id == chapter_id).first()
+    if not ch:
+        raise HTTPException(status_code=404, detail="فصل مورد نظر یافت نشد.")
+
+    title = ch.title_fa
+    db.delete(ch)
+    db.commit()
+
+    log_audit_event(
+        db, action="delete_chapter", target_entity="chapters",
+        target_id=str(chapter_id), user_id=current_admin.id,
+        details={"title_fa": title}
+    )
+    return {"success": True, "message_fa": f"فصل «{title}» با موفقیت حذف گردید."}
+
+
+@router.post("/curriculum/lessons")
+def create_lesson(
+    data: LessonCreateRequest,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Creates a new lesson without code with full structured physics content blocks"""
+    chapter = db.query(Chapter).filter(Chapter.id == data.chapter_id).first()
+    if not chapter:
+        raise HTTPException(status_code=404, detail="فصل مورد نظر یافت نشد.")
+
+    slug = f"ch{chapter.id}-l{data.order_index or 1}-{uuid.uuid4().hex[:6]}"
+
+    content_blocks = {}
+    if data.intro:
+        content_blocks["intro"] = data.intro.strip()
+    if data.explanation:
+        content_blocks["explanation"] = data.explanation.strip()
+    if data.definition:
+        content_blocks["definition"] = data.definition.strip()
+    if data.formula:
+        content_blocks["formula"] = data.formula.strip()
+    if data.experiment:
+        content_blocks["experiment"] = data.experiment.strip()
+    if data.example:
+        content_blocks["example"] = data.example.strip()
+    if data.misconception:
+        content_blocks["misconception"] = data.misconception.strip()
+    if data.simulator_type and data.simulator_type != "none":
+        content_blocks["simulator_type"] = data.simulator_type
+
+    les = Lesson(
+        chapter_id=chapter.id,
+        title_fa=data.title_fa.strip(),
+        slug=slug,
+        order_index=data.order_index or 1,
+        is_published=True,
+        estimated_minutes=data.estimated_minutes or 15,
+        xp_reward=data.xp_reward or 25,
+        content_blocks=content_blocks,
+        summary_fa=data.summary_fa.strip() if data.summary_fa else None
+    )
+    db.add(les)
+    db.commit()
+    db.refresh(les)
+
+    log_audit_event(
+        db, action="create_lesson", target_entity="lessons",
+        target_id=str(les.id), user_id=current_admin.id,
+        details={"title_fa": les.title_fa, "chapter_id": chapter.id}
+    )
+    return {"success": True, "lesson_id": les.id, "message_fa": f"درسنامه «{les.title_fa}» با موفقیت افزوده شد."}
+
+
+@router.delete("/curriculum/lessons/{lesson_id}")
+def delete_lesson(
+    lesson_id: int,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Deletes a lesson with audit logging"""
+    les = db.query(Lesson).filter(Lesson.id == lesson_id).first()
+    if not les:
+        raise HTTPException(status_code=404, detail="درسنامه مورد نظر یافت نشد.")
+
+    title = les.title_fa
+    db.delete(les)
+    db.commit()
+
+    log_audit_event(
+        db, action="delete_lesson", target_entity="lessons",
+        target_id=str(lesson_id), user_id=current_admin.id,
+        details={"title_fa": title}
+    )
+    return {"success": True, "message_fa": f"درسنامه «{title}» با موفقیت حذف گردید."}

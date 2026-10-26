@@ -126,3 +126,29 @@ class SupplementaryMaterialResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+class ChapterCreateRequest(BaseModel):
+    grade_id: int
+    book_id: Optional[int] = None
+    chapter_number: int
+    title_fa: str
+    description_fa: Optional[str] = None
+    estimated_minutes: Optional[int] = 45
+
+
+class LessonCreateRequest(BaseModel):
+    chapter_id: int
+    title_fa: str
+    order_index: Optional[int] = 1
+    estimated_minutes: Optional[int] = 15
+    xp_reward: Optional[int] = 25
+    simulator_type: Optional[str] = None
+    intro: Optional[str] = None
+    explanation: Optional[str] = None
+    definition: Optional[str] = None
+    formula: Optional[str] = None
+    experiment: Optional[str] = None
+    example: Optional[str] = None
+    misconception: Optional[str] = None
+    summary_fa: Optional[str] = None
+
