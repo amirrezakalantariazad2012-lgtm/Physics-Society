@@ -126,29 +126,14 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
     if not user:
         user = db.query(User).filter(func.lower(User.username) == func.lower(uname)).first()
 
-    # 3. QUANTUM CUT admin alias
-    if not user and uname.upper() in ["QUANTUM CUT", "QUANTUM_CUT"]:
-        user = db.query(User).filter(User.username == "QUANTUM CUT").first() or \
-               db.query(User).filter(User.role == "admin").first()
-
-    # 4. admin legacy alias
-    if not user and uname.lower() == "admin":
-        user = db.query(User).filter(User.username == "QUANTUM CUT").first() or \
-               db.query(User).filter(User.role == "admin").first()
-
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="نام کاربری یا رمز عبور اشتباه است."
         )
 
-    # Password check
-    is_valid = verify_password(credentials.password, user.hashed_password)
-    if not is_valid and user.role == "admin":
-        if credentials.password in ["QUANTUM CUT", "AdminPhysics1405!", "admin"]:
-            is_valid = True
-
-    if not is_valid:
+    # Password check strictly via database hash
+    if not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="نام کاربری یا رمز عبور اشتباه است."

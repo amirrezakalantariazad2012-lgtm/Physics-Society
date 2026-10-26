@@ -29,11 +29,13 @@ function renderNavbar() {
         <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-14 sm:h-16">
                 <!-- Brand / Logo -->
-                <div class="flex items-center gap-2 sm:gap-3 cursor-pointer shrink-0" onclick="window.store.setView('landing')">
-                    <img src="/assets/quantum-cut-logo.svg" alt="QUANTUM CUT" class="h-8 sm:h-9 w-auto hidden sm:block">
-                    <div class="flex items-center gap-2 sm:hidden">
-                        <img src="/assets/favicon.svg" alt="QC" class="w-7 h-7">
-                        <span class="font-black text-xs text-slate-900 dark:text-white tracking-wider font-sans">QUANTUM CUT</span>
+                <div class="flex items-center gap-2.5 sm:gap-3 cursor-pointer shrink-0" onclick="window.store.setView('landing')">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
+                        <i data-lucide="atom" class="w-5 h-5 text-cyan-200"></i>
+                    </div>
+                    <div class="flex flex-col text-right">
+                        <span class="font-black text-xs sm:text-sm text-slate-900 dark:text-white tracking-tight">انجمن فیزیک شهید بهشتی دو دوره اول</span>
+                        <span class="text-[9px] text-cyan-400 font-mono hidden sm:block">SAMPAD PHYSICS SOCIETY • ROUND 1</span>
                     </div>
                 </div>
 
@@ -176,7 +178,7 @@ function renderNavbar() {
 
             <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
                 <a href="/api/docs" target="_blank" class="hover:text-cyan-400">مستندات سرور API</a>
-                <span>نسخه ۲.۰ کوانتوم کات</span>
+                <span>انجمن فیزیک شهید بهشتی دو</span>
             </div>
         </div>
     </header>

@@ -277,7 +277,7 @@ def submit_exercise_answer(
             amount=xp_earned,
             activity_type="exercise_practice",
             description_fa=f"پاسخ صحیح به تمرین: {ex.prompt_fa[:40]}...",
-            reference_id=f"ex_{ex.id}_user_{current_user.id}_{int(datetime.utcnow().timestamp())}"
+            reference_id=f"ex_{ex.id}_user_{current_user.id}"
         )
         record_daily_streak(db, current_user.id)
 

@@ -61,7 +61,7 @@ class SlidingWindowRateLimiter:
             if now - self._last_cleanup > 60:
                 cutoff = now - 120
                 for ip in list(self._requests.keys()):
-                    self._requests[ip] = [t for t, p in self._requests[ip] if t > cutoff]
+                    self._requests[ip] = [(t, p) for t, p in self._requests[ip] if t > cutoff]
                     if not self._requests[ip]:
                         del self._requests[ip]
                 self._last_cleanup = now

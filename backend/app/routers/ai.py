@@ -28,20 +28,21 @@ def get_ai_tutor_guidance(
     Supports authenticated students and guest learners seamlessly.
     """
     # Enforce Grade Scoping for authenticated students
-    if current_user:
-        user_grade_id = current_user.profile.grade_id if current_user.profile else None
-        if current_user.role == "student" and user_grade_id is not None and user_grade_id != req.grade_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="دسترسی به معلم هوشمند سایر پایه‌های تحصیلی مجاز نمی‌باشد."
-            )
+    user_grade_id = current_user.profile.grade_id if (current_user and current_user.profile) else None
+    is_student = (current_user is not None) and (current_user.role == "student")
+
+    if is_student and user_grade_id is not None and user_grade_id != req.grade_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="دسترسی به معلم هوشمند سایر پایه‌های تحصیلی مجاز نمی‌باشد."
+        )
 
     # Fetch context details if provided
     chapter_title = None
     if req.chapter_id:
         chapter = db.query(Chapter).filter(Chapter.id == req.chapter_id).first()
         if chapter:
-            if current_user.role == "student" and user_grade_id is not None and chapter.book.grade_id != user_grade_id:
+            if is_student and user_grade_id is not None and chapter.book.grade_id != user_grade_id:
                 raise HTTPException(status_code=403, detail="دسترسی به فصول سایر پایه‌ها مجاز نیست.")
             chapter_title = f"{chapter.title_fa} ({chapter.book.title_fa})"
 
@@ -49,7 +50,7 @@ def get_ai_tutor_guidance(
     if req.lesson_id:
         lesson = db.query(Lesson).filter(Lesson.id == req.lesson_id).first()
         if lesson:
-            if current_user.role == "student" and user_grade_id is not None and lesson.chapter.book.grade_id != user_grade_id:
+            if is_student and user_grade_id is not None and lesson.chapter.book.grade_id != user_grade_id:
                 raise HTTPException(status_code=403, detail="دسترسی به درسنامه‌های سایر پایه‌ها مجاز نیست.")
             lesson_title = lesson.title_fa
 
@@ -57,7 +58,7 @@ def get_ai_tutor_guidance(
     if req.question_id:
         question = db.query(Question).filter(Question.id == req.question_id).first()
         if question:
-            if current_user.role == "student" and user_grade_id is not None and question.grade_id != user_grade_id:
+            if is_student and user_grade_id is not None and question.grade_id != user_grade_id:
                 raise HTTPException(status_code=403, detail="دسترسی به سؤالات سایر پایه‌ها مجاز نیست.")
             question_prompt = question.prompt_fa
 

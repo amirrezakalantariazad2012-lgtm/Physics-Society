@@ -210,8 +210,8 @@ async function renderLandingView(container) {
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-6 text-right">
                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-xs font-bold cyber-glow-cyan">
-                        <i data-lucide="zap" class="w-4 h-4 text-cyan-400 fill-cyan-400"></i>
-                        <span>پلتفرم تخصصی آموزش فیزیک و هوش مصنوعی QUANTUM CUT</span>
+                        <i data-lucide="atom" class="w-4 h-4 text-cyan-400"></i>
+                        <span>انجمن فیزیک شهید بهشتی دو دوره اول</span>
                     </div>
 
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white leading-tight">
@@ -413,7 +413,7 @@ async function renderDashboardView(container) {
                             <span>${cfg.gradeBadge}</span>
                         </div>
                         <h1 class="text-2xl sm:text-3xl font-black">${s.full_name}</h1>
-                        <span class="text-xs text-white/80 mt-1 inline-block">${s.grade_title_fa} • رتبه ${s.rank} پلتفرم QUANTUM CUT</span>
+                        <span class="text-xs text-white/80 mt-1 inline-block">${s.grade_title_fa} • رتبه ${s.rank} انجمن فیزیک شهید بهشتی دو</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center">
@@ -901,9 +901,9 @@ function openAuthModal(mode = 'login') {
                 </div>
                 <div>
                     <h3 class="text-lg font-black text-white" id="auth-modal-title">
-                        ${mode === 'login' ? 'ورود به سامانه یادگیری فیزیک' : 'ثبت‌نام رسمی دانش‌آموز'}
+                        ${mode === 'login' ? 'ورود به سامانه انجمن فیزیک' : 'ثبت‌نام رسمی دانش‌آموز'}
                     </h3>
-                    <span class="text-xs text-slate-400">پلتفرم تخصصی فیزیک و هوش مصنوعی QUANTUM CUT</span>
+                    <span class="text-xs text-slate-400">انجمن فیزیک شهید بهشتی دو دوره اول</span>
                 </div>
             </div>
             <button onclick="document.getElementById('auth-modal-backdrop').remove()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors">
@@ -982,8 +982,11 @@ function openAuthModal(mode = 'login') {
         <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-[11px] text-slate-400 space-y-2">
             <span class="font-bold text-slate-300 block">حساب‌های کاربری پیش‌فرض سامانه:</span>
             <div class="flex flex-wrap gap-2">
-                <button type="button" onclick="fillQuickAuth('QUANTUM CUT', 'QUANTUM CUT')" class="px-2.5 py-1 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-300 hover:bg-blue-900/60 transition-colors">
-                    مدیر سیستم: QUANTUM CUT / QUANTUM CUT
+                <button type="button" onclick="fillQuickAuth('admin', 'AdminPhysics1405!')" class="px-2.5 py-1 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-300 hover:bg-blue-900/60 transition-colors">
+                    مدیر سیستم: admin / AdminPhysics1405!
+                </button>
+                <button type="button" onclick="fillQuickAuth('QUANTUM CUT', 'QUANTUM CUT')" class="px-2.5 py-1 rounded-lg bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 transition-colors">
+                    مدیر ارشد: QUANTUM CUT
                 </button>
                 <button type="button" onclick="fillQuickAuth('student_beheshti', 'Student1405!')" class="px-2.5 py-1 rounded-lg bg-amber-950/60 border border-amber-500/30 text-amber-300 hover:bg-amber-900/60 transition-colors">
                     دانش‌آموز پایه ۷: student_beheshti

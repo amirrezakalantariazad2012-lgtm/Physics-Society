@@ -166,6 +166,14 @@ def submit_exam_attempt(
     attempt.status = "reviewed" if not has_written_awaiting_review else "grading"
     attempt.feedback_fa = f"آزمون با موفقیت ثبت شد. نمره کل: {attempt.final_score} از {attempt.total_possible_points} ({attempt.percentage}٪)"
 
+    # Server-side anti-cheat: check if submission exceeded allowed duration
+    max_allowed_seconds = (attempt.examination.duration_minutes * 60) + 180  # ۳ دقیقه فرجه برای تأخیر شبکه
+    elapsed_seconds = (datetime.utcnow() - attempt.started_at).total_seconds()
+    if elapsed_seconds > max_allowed_seconds:
+        attempt.status = "expired"
+        attempt.is_passed = False
+        attempt.feedback_fa = "آزمون خارج از مهلت زمانی مجاز ارسال شده است و به عنوان منقضی ثبت گردید."
+
     db.commit()
     db.refresh(attempt)
 

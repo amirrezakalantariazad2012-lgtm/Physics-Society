@@ -39,6 +39,23 @@ class ExamRunner {
                 written_response_text: ''
             };
         });
+
+        // 1. Restore answers from localStorage to prevent data loss on reload or disconnect
+        try {
+            const saved = localStorage.getItem('quantum_exam_answers_' + this.attemptId);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && typeof parsed === 'object') {
+                    Object.keys(parsed).forEach(qid => {
+                        if (this.answers[qid]) {
+                            this.answers[qid] = parsed[qid];
+                        }
+                    });
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to restore cached exam answers:', e);
+        }
     }
 
     updateTimerDisplay() {
@@ -210,11 +227,21 @@ class ExamRunner {
 
     selectOption(questionId, key) {
         this.answers[questionId].selected_option_key = key;
+        this.saveAnswersToStorage();
         this.render();
     }
 
     setWrittenText(questionId, text) {
         this.answers[questionId].written_response_text = text;
+        this.saveAnswersToStorage();
+    }
+
+    saveAnswersToStorage() {
+        try {
+            localStorage.setItem('quantum_exam_answers_' + this.attemptId, JSON.stringify(this.answers));
+        } catch (e) {
+            console.warn('Failed to save exam answers to localStorage:', e);
+        }
     }
 
     nextQuestion() {
@@ -247,6 +274,7 @@ class ExamRunner {
     async submitExam() {
         clearInterval(this.timerInterval);
         localStorage.removeItem(`quantum_exam_start_${this.attemptId}`);
+        localStorage.removeItem('quantum_exam_answers_' + this.attemptId);
         const container = document.getElementById(this.containerId);
         container.innerHTML = `
         <div class="text-center py-20 space-y-4">

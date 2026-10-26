@@ -143,16 +143,17 @@ def seed_base_system(db: Session):
     if not admin_legacy:
         admin_legacy = User(
             username="admin",
-            email="system_admin@quantumcut.ir",
-            hashed_password=hash_password("QUANTUM CUT"),
+            email="system_admin@beheshti2.ir",
+            hashed_password=hash_password("AdminPhysics1405!"),
             role="admin",
-            full_name="مدیر پلتفرم QUANTUM CUT",
-            display_name="مدیر QUANTUM CUT",
+            full_name="مدیر سامانه انجمن فیزیک شهید بهشتی دو",
+            display_name="مدیر سامانه",
             is_active=True,
             must_change_password=False
         )
         db.add(admin_legacy)
     else:
+        admin_legacy.hashed_password = hash_password("AdminPhysics1405!")
         admin_legacy.must_change_password = False
 
     # 7. Sample Verified Student Account for direct testing
