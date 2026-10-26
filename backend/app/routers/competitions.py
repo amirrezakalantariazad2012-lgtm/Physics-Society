@@ -258,8 +258,10 @@ def submit_competition_entry(
 
     # Server-side anti-cheat timing bound check
     raw_time = req.time_spent_seconds or 0
+    q_count = len(comp.questions) if comp.questions else 1
+    min_reasonable_seconds = max(15, q_count * 3)  # At least 3 seconds per question, min 15s total
     max_duration_seconds = (comp.duration_minutes * 60) + 180  # 3 minutes grace for network/latency
-    time_spent = max(1, min(raw_time, max_duration_seconds))
+    time_spent = max(min_reasonable_seconds, min(raw_time, max_duration_seconds))
     final_score = max(0.0, round(total_score, 2))
 
     sub = CompetitionSubmission(

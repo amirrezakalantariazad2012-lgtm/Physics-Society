@@ -985,9 +985,6 @@ function openAuthModal(mode = 'login') {
                 <button type="button" onclick="fillQuickAuth('admin', 'AdminPhysics1405!')" class="px-2.5 py-1 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-300 hover:bg-blue-900/60 transition-colors">
                     مدیر سیستم: admin / AdminPhysics1405!
                 </button>
-                <button type="button" onclick="fillQuickAuth('QUANTUM CUT', 'QUANTUM CUT')" class="px-2.5 py-1 rounded-lg bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 transition-colors">
-                    مدیر ارشد: QUANTUM CUT
-                </button>
                 <button type="button" onclick="fillQuickAuth('student_beheshti', 'Student1405!')" class="px-2.5 py-1 rounded-lg bg-amber-950/60 border border-amber-500/30 text-amber-300 hover:bg-amber-900/60 transition-colors">
                     دانش‌آموز پایه ۷: student_beheshti
                 </button>
@@ -1106,7 +1103,7 @@ function openForcedPasswordModal() {
             </div>
             <div>
                 <h3 class="text-lg font-black text-white">تغییر اجباری رمز عبور پیش‌فرض</h3>
-                <span class="text-xs text-amber-300">الزام امنیتی پلتفرم QUANTUM CUT</span>
+                <span class="text-xs text-amber-300">الزام امنیتی سامانه انجمن فیزیک</span>
             </div>
         </div>
 

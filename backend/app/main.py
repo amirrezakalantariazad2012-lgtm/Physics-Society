@@ -31,8 +31,8 @@ async def lifespan(app: FastAPI):
     # Shutdown logic if any
 
 app = FastAPI(
-    title="QUANTUM CUT API",
-    description="پلتفرم آموزشی، یادگیری تعاملی، آزمون‌ساز هوشمند و مسابقات لیگ فیزیک (پایه‌های هفتم، هشتم و نهم)",
+    title="سامانه جامع انجمن فیزیک شهید بهشتی دو دوره اول",
+    description="سامانه جامع انجمن فیزیک شهید بهشتی دو دوره اول (پایه‌های هفتم، هشتم و نهم)",
     version="2.0.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
