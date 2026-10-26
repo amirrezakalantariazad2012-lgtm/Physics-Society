@@ -41,22 +41,58 @@ class ApiClient {
             config.body = options.isFormData ? options.body : JSON.stringify(options.body);
         }
 
+function formatApiErrorMessage(data, defaultMsg = 'خطایی در ارتباط با سرور رخ داد.') {
+    if (!data) return defaultMsg;
+    if (typeof data.detail === 'string') return data.detail;
+    if (Array.isArray(data.detail)) {
+        return data.detail.map(item => {
+            const field = Array.isArray(item.loc) ? item.loc[item.loc.length - 1] : '';
+            const fieldNames = {
+                username: 'نام کاربری',
+                password: 'رمز عبور',
+                full_name: 'نام و نام خانوادگی',
+                grade_id: 'پایه تحصیلی',
+                email: 'پست الکترونیکی',
+                display_name: 'نام نمایشی'
+            };
+            const name = fieldNames[field] || field || 'اطلاعات وارد شده';
+            if (item.type === 'string_too_short' || (item.msg && item.msg.includes('at least'))) {
+                return `${name} باید طولانی‌تر باشد.`;
+            }
+            return `${name}: ${item.msg || 'نامعتبر است.'}`;
+        }).join(' | ');
+    }
+    if (typeof data.message === 'string') return data.message;
+    return defaultMsg;
+}
+
         try {
             const response = await fetch(url, config);
 
-            // Handle 401 Unauthorized (expired session)
+            // Handle 401 Unauthorized
             if (response.status === 401) {
+                const data = await response.json().catch(() => ({}));
                 this.setToken(null);
-                if (!endpoint.includes('/auth/login') && !endpoint.includes('/auth/me')) {
-                    window.dispatchEvent(new CustomEvent('auth-expired'));
+
+                // If it's the login form itself, show the specific credential error from server
+                if (endpoint.includes('/auth/login')) {
+                    throw new Error(formatApiErrorMessage(data, 'نام کاربری یا رمز عبور اشتباه است.'));
                 }
+
+                // If initial /auth/me check fails on guest visitor, throw clean message without auth-expired
+                if (endpoint.includes('/auth/me')) {
+                    throw new Error(formatApiErrorMessage(data, 'نیاز به ورود به حساب کاربری دارد.'));
+                }
+
+                // If user was previously active and an authenticated session expired:
+                window.dispatchEvent(new CustomEvent('auth-expired'));
                 throw new Error('جلسه کاری شما به پایان رسیده است. لطفاً دوباره وارد شوید.');
             }
 
             const data = await response.json().catch(() => ({}));
 
             if (!response.ok) {
-                const errorMsg = data.detail || 'خطایی در ارتباط با سرور رخ داد.';
+                const errorMsg = formatApiErrorMessage(data, 'خطایی در ارتباط با سرور رخ داد.');
                 throw new Error(errorMsg);
             }
 

@@ -987,6 +987,9 @@ function openAuthModal(mode = 'login') {
                 <button type="button" onclick="fillQuickAuth('admin', 'AdminPhysics1405!')" class="px-2.5 py-1 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-300 hover:bg-blue-900/60 transition-colors">
                     مدیر سیستم: admin / AdminPhysics1405!
                 </button>
+                <button type="button" onclick="fillQuickAuth('QUANTUM CUT', 'AdminPhysics1405!')" class="px-2.5 py-1 rounded-lg bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 transition-colors">
+                    مدیر ویژه: QUANTUM CUT
+                </button>
                 <button type="button" onclick="fillQuickAuth('student_beheshti', 'Student1405!')" class="px-2.5 py-1 rounded-lg bg-amber-950/60 border border-amber-500/30 text-amber-300 hover:bg-amber-900/60 transition-colors">
                     دانش‌آموز پایه ۷: student_beheshti
                 </button>
@@ -1229,10 +1232,23 @@ async function handleAuthSubmit(e, mode) {
     try {
         let res;
         if (mode === 'login') {
+            if (!username || !password) {
+                throw new Error('لطفاً نام کاربری و رمز عبور را وارد کنید.');
+            }
             res = await window.api.login(username, password);
         } else {
-            const fullName = document.getElementById('auth-fullname').value.trim();
-            const gradeId = parseInt(document.getElementById('auth-grade').value) || 1;
+            const fullNameInput = document.getElementById('auth-fullname');
+            const fullName = fullNameInput ? fullNameInput.value.trim() : '';
+            if (!fullName || fullName.length < 2) {
+                throw new Error('لطفاً نام و نام خانوادگی خود را کامل وارد کنید (حداقل ۲ کاراکتر).');
+            }
+            if (!username || username.length < 3) {
+                throw new Error('نام کاربری باید حداقل ۳ کاراکتر باشد.');
+            }
+            if (!password || password.length < 6) {
+                throw new Error('رمز عبور باید حداقل ۶ کاراکتر باشد.');
+            }
+            const gradeId = parseInt(document.getElementById('auth-grade')?.value) || 1;
             res = await window.api.register({
                 username: username,
                 password: password,
