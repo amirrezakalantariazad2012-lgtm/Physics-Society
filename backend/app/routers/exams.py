@@ -45,6 +45,32 @@ def list_examinations(
         })
     return results
 
+@router.get("/my-history")
+def get_my_exam_history(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Lists current student's completed and in-progress exams"""
+    attempts = db.query(ExaminationAttempt).filter(
+        ExaminationAttempt.user_id == current_user.id
+    ).order_by(ExaminationAttempt.started_at.desc()).all()
+
+    results = []
+    for a in attempts:
+        results.append({
+            "attempt_id": a.id,
+            "exam_id": a.exam_id,
+            "exam_title_fa": a.examination.title_fa,
+            "started_at": a.started_at,
+            "submitted_at": a.submitted_at,
+            "final_score": a.final_score,
+            "total_points": a.total_possible_points,
+            "percentage": a.percentage,
+            "is_passed": a.is_passed,
+            "status": a.status
+        })
+    return results
+
 @router.get("/{exam_id}")
 def get_examination_info(exam_id: int, db: Session = Depends(get_db)):
     """Retrieves examination overview"""
@@ -268,28 +294,3 @@ def get_attempt_detail(
         questions=results_items
     )
 
-@router.get("/my-history")
-def get_my_exam_history(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Lists current student's completed and in-progress exams"""
-    attempts = db.query(ExaminationAttempt).filter(
-        ExaminationAttempt.user_id == current_user.id
-    ).order_by(ExaminationAttempt.started_at.desc()).all()
-
-    results = []
-    for a in attempts:
-        results.append({
-            "attempt_id": a.id,
-            "exam_id": a.exam_id,
-            "exam_title_fa": a.examination.title_fa,
-            "started_at": a.started_at,
-            "submitted_at": a.submitted_at,
-            "final_score": a.final_score,
-            "total_points": a.total_possible_points,
-            "percentage": a.percentage,
-            "is_passed": a.is_passed,
-            "status": a.status
-        })
-    return results
