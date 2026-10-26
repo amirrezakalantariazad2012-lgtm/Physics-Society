@@ -8,7 +8,7 @@ from app.models.user import User, StudentProfile
 from app.models.curriculum import Grade
 from app.schemas.user import UserCreate, UserLogin, UserResponse, TokenResponse, StudentProfileUpdate, PasswordChangeRequest
 from app.services.auth import hash_password, verify_password, create_access_token, get_current_user
-from app.services.gamification_service import record_daily_streak
+from app.services.gamification_service import record_daily_streak, award_xp
 from app.services.audit_service import log_audit_event
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
