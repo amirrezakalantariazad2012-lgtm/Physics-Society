@@ -10,6 +10,7 @@ from app.models.competition import Competition
 router = APIRouter(tags=["System"])
 
 @router.get("/health")
+@router.get("/system/health")
 def health_check(db: Session = Depends(get_db)):
     """Health check endpoint for Docker Compose & Nginx load balancers"""
     db_ok = False
