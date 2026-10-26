@@ -161,6 +161,8 @@ async function renderCurrentView() {
         await renderDashboardView(mainContainer);
     } else if (view === 'curriculum') {
         await renderCurriculumView(mainContainer, params.id);
+    } else if (view === 'materials') {
+        await renderStudyMaterialsView(mainContainer, params.id);
     } else if (view === 'chapter') {
         await renderChapterDetailView(mainContainer, params.id);
     } else if (view === 'lesson') {
@@ -759,6 +761,23 @@ async function renderCurriculumView(container, gradeId = null) {
                 ` : ''}
             </div>
             `}
+
+            <!-- Supplementary Study Materials Banner -->
+            <div class="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-emerald-950/80 via-slate-900 to-indigo-950/80 border border-emerald-500/40 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                        <i data-lucide="book-marked" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-extrabold text-sm text-white">درسنامه‌ها، خلاصه‌ها و جزوات متفرقه فیزیک</h4>
+                        <p class="text-xs text-emerald-300/80">دریافت فایل جزوات دبیران، فرمول‌نامه‌های سریع و نمونه سؤالات امتحانی به همراه پاسخ تشریحی</p>
+                    </div>
+                </div>
+                <button onclick="window.store.setView('materials')" class="btn-duo-green text-white font-bold text-xs px-4 py-2.5 rounded-xl self-start sm:self-auto shrink-0 shadow-sm flex items-center gap-1.5 hover:scale-105 transition-all">
+                    <span>مشاهده جزوات و درسنامه‌ها</span>
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
 
             <!-- Books & Chapters -->
             <div class="space-y-12">
@@ -1658,3 +1677,210 @@ window.getCurrentPageContext = getCurrentPageContext;
 window.updateAiTutorContextBadge = updateAiTutorContextBadge;
 window.askQuickTutor = askQuickTutor;
 window.handleAiTutorSubmit = handleAiTutorSubmit;
+
+// ==========================================
+// VIEW: SUPPLEMENTARY STUDY MATERIALS & PAMPHLETS
+// ==========================================
+async function renderStudyMaterialsView(container, activeGradeId = null) {
+    container.innerHTML = `<div class="text-center py-16"><div class="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div></div>`;
+    
+    try {
+        const user = window.store.currentUser;
+        let selectedGrade = activeGradeId ? parseInt(activeGradeId) : (user && user.grade_id ? user.grade_id : null);
+        let selectedCategory = null;
+
+        const loadMaterials = async () => {
+            const materials = await window.api.getStudyMaterials(selectedGrade, selectedCategory);
+            renderContent(materials);
+        };
+
+        const renderContent = (materials) => {
+            const categoryLabels = {
+                pamphlet: { title: 'جزوه و درسنامه کامل', color: 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
+                summary: { title: 'خلاصه درس و فرمول‌نامه', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' },
+                exam_sample: { title: 'نمونه سؤال با پاسخ', color: 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800' },
+                slide: { title: 'اسلاید آموزشی', color: 'bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
+                other: { title: 'سایر منابع', color: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700' }
+            };
+
+            container.innerHTML = `
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+                <!-- Hero Header -->
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-950 via-slate-900 to-indigo-950 p-6 sm:p-10 border border-emerald-500/30 cyber-glow-cyan text-white space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
+                        <i data-lucide="book-marked" class="w-4 h-4 text-emerald-400"></i>
+                        <span>بانک تخصصی درسنامه‌ها و جزوات متفرقه فیزیک</span>
+                    </div>
+
+                    <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
+                        درسنامه‌ها، خلاصه‌ها و نمونه سؤالات تکمیلی
+                    </h1>
+
+                    <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                        دسترسی رایگان به جزوات طلایی تدریس دبیران، فرمول‌نامه‌های سریع، خلاصه فصول کتب رسمی و سمپاد، و نمونه سؤالات امتحانات نوبت اول و دوم به همراه پاسخ‌های تشریحی.
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-3 pt-2 text-xs">
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-300">
+                            <i data-lucide="file-check" class="w-4 h-4 text-emerald-400"></i>
+                            <span>تأیید شده توسط دبیران سمپاد</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-300">
+                            <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+                            <span>دانلود مستقیم و سریع فایل‌ها</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Strip -->
+                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <!-- Grade Switcher -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold">
+                        <span class="text-slate-400 text-xs shrink-0 pl-1">پایه:</span>
+                        <button id="mat-grade-all" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === null ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-500'}">
+                            همه پایه‌ها
+                        </button>
+                        <button id="mat-grade-7" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 1 ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-500'}">
+                            پایه هفتم
+                        </button>
+                        <button id="mat-grade-8" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 2 ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-500'}">
+                            پایه هشتم
+                        </button>
+                        <button id="mat-grade-9" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 3 ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-500'}">
+                            پایه نهم
+                        </button>
+                    </div>
+
+                    <!-- Category Switcher -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold">
+                        <span class="text-slate-400 text-xs shrink-0 pl-1">موضوع:</span>
+                        <button id="mat-cat-all" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === null ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                            همه
+                        </button>
+                        <button id="mat-cat-pamphlet" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'pamphlet' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                            جزوات
+                        </button>
+                        <button id="mat-cat-summary" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'summary' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                            فرمول‌نامه
+                        </button>
+                        <button id="mat-cat-exam_sample" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'exam_sample' ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                            نمونه سؤال
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Materials Cards Grid -->
+                <div id="materials-grid-container">
+                    ${materials.length === 0 ? `
+                    <div class="text-center py-16 space-y-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+                            <i data-lucide="folder-open" class="w-8 h-8"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="font-bold text-slate-800 dark:text-white text-base">درسنامه‌ای برای این فیلتر یافت نشد</h3>
+                            <p class="text-xs text-slate-400">لطفاً فیلترهای پایه یا موضوع را تغییر دهید یا به زودی مجدداً سر بزنید.</p>
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${materials.map(m => {
+                            const cat = categoryLabels[m.category] || categoryLabels.other;
+                            const sizeStr = m.file_size_bytes > 0 
+                                ? (m.file_size_bytes > 1024 * 1024 ? (m.file_size_bytes / (1024 * 1024)).toFixed(1) + ' مگابایت' : Math.round(m.file_size_bytes / 1024) + ' کیلوبایت')
+                                : 'فایل تکمیلی';
+                            return `
+                            <div class="group flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/40 hover:shadow-xl hover:shadow-emerald-500/5 transition-all space-y-5">
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="px-2.5 py-1 rounded-xl text-[11px] font-bold border ${cat.color}">
+                                            ${cat.title}
+                                        </span>
+                                        <span class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-bold">
+                                            ${m.grade_title_fa}
+                                        </span>
+                                    </div>
+
+                                    <h3 class="font-black text-base text-slate-900 dark:text-white leading-snug group-hover:text-emerald-500 transition-colors">
+                                        ${m.title_fa}
+                                    </h3>
+
+                                    ${m.description_fa ? `
+                                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
+                                        ${m.description_fa}
+                                    </p>
+                                    ` : ''}
+
+                                    <div class="pt-3 border-t border-slate-100 dark:border-slate-800/80 text-xs text-slate-500 dark:text-slate-400 space-y-1.5">
+                                        <div class="flex items-center gap-1.5">
+                                            <i data-lucide="user-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+                                            <span>مؤلف: <strong class="text-slate-700 dark:text-slate-200 font-semibold">${m.author_name || 'دبیرخانه فیزیک'}</strong></span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-[11px] pt-1">
+                                            <span class="flex items-center gap-1">
+                                                <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-slate-400"></i>
+                                                <span>حجم: ${sizeStr}</span>
+                                            </span>
+                                            <span class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
+                                                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                                <span>${m.download_count} دانلود</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    ${m.file_url ? `
+                                    <a href="${m.file_url}" target="_blank" onclick="window.api.incrementMaterialDownload(${m.id})"
+                                        class="w-full py-2.5 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.02]">
+                                        <i data-lucide="download" class="w-4 h-4"></i>
+                                        <span>مشاهده و دریافت فایل</span>
+                                    </a>
+                                    ` : `
+                                    <button onclick="window.showComingSoon('فایل ضمیمه این جزوه')" class="w-full py-2.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold text-xs">
+                                        فایل در دست آماده‌سازی
+                                    </button>
+                                    `}
+                                </div>
+                            </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    `}
+                </div>
+            </div>
+            `;
+
+            // Bind filter button events
+            const bindClick = (id, fn) => {
+                const el = document.getElementById(id);
+                if (el) el.onclick = fn;
+            };
+
+            bindClick('mat-grade-all', () => { selectedGrade = null; loadMaterials(); });
+            bindClick('mat-grade-7', () => { selectedGrade = 1; loadMaterials(); });
+            bindClick('mat-grade-8', () => { selectedGrade = 2; loadMaterials(); });
+            bindClick('mat-grade-9', () => { selectedGrade = 3; loadMaterials(); });
+
+            bindClick('mat-cat-all', () => { selectedCategory = null; loadMaterials(); });
+            bindClick('mat-cat-pamphlet', () => { selectedCategory = 'pamphlet'; loadMaterials(); });
+            bindClick('mat-cat-summary', () => { selectedCategory = 'summary'; loadMaterials(); });
+            bindClick('mat-cat-exam_sample', () => { selectedCategory = 'exam_sample'; loadMaterials(); });
+
+            if (window.lucide) window.lucide.createIcons();
+        };
+
+        await loadMaterials();
+    } catch (err) {
+        container.innerHTML = `
+        <div class="max-w-md mx-auto my-12 p-6 rounded-3xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-center space-y-3">
+            <i data-lucide="alert-triangle" class="w-8 h-8 text-rose-500 mx-auto"></i>
+            <h3 class="font-bold text-rose-700 dark:text-rose-300">خطا در دریافت درسنامه‌ها</h3>
+            <p class="text-xs text-rose-600 dark:text-rose-400">${err.message}</p>
+        </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+    }
+}
+
+window.renderStudyMaterialsView = renderStudyMaterialsView;
+

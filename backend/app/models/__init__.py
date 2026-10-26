@@ -1,7 +1,7 @@
 from app.models.user import User, StudentProfile
 from app.models.curriculum import (
     Grade, Book, TextbookSource, TextbookProcessingJob,
-    ExtractedTextSection, Chapter, Topic, Lesson, Exercise
+    ExtractedTextSection, Chapter, Topic, Lesson, Exercise, SupplementaryMaterial
 )
 from app.models.exam import (
     Question, QuestionOption, GradingRubric, Examination,
@@ -20,7 +20,7 @@ from app.models.system import (
 __all__ = [
     "User", "StudentProfile",
     "Grade", "Book", "TextbookSource", "TextbookProcessingJob",
-    "ExtractedTextSection", "Chapter", "Topic", "Lesson", "Exercise",
+    "ExtractedTextSection", "Chapter", "Topic", "Lesson", "Exercise", "SupplementaryMaterial",
     "Question", "QuestionOption", "GradingRubric", "Examination",
     "ExaminationQuestion", "ExaminationAttempt", "StudentAnswer", "GradingReview",
     "Competition", "CompetitionQuestion", "CompetitionSubmission",

@@ -95,3 +95,34 @@ class LessonResponse(BaseModel):
 class LessonProgressUpdate(BaseModel):
     lesson_id: int
     score_percent: int = 100
+
+
+class SupplementaryMaterialCreate(BaseModel):
+    title_fa: str
+    description_fa: Optional[str] = None
+    grade_id: Optional[int] = None
+    author_name: Optional[str] = "دبیران انجمن فیزیک شهید بهشتی دو"
+    category: str = "pamphlet"  # pamphlet, summary, formula_sheet, sample_questions
+    file_url: Optional[str] = None
+    original_filename: Optional[str] = None
+    file_size_bytes: Optional[int] = 0
+
+
+class SupplementaryMaterialResponse(BaseModel):
+    id: int
+    title_fa: str
+    description_fa: Optional[str] = None
+    grade_id: Optional[int] = None
+    grade_title_fa: Optional[str] = None
+    author_name: Optional[str] = None
+    category: str
+    file_url: Optional[str] = None
+    original_filename: Optional[str] = None
+    file_size_bytes: int = 0
+    download_count: int = 0
+    is_published: bool = True
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+

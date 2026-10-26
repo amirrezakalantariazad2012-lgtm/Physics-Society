@@ -182,3 +182,27 @@ class Exercise(Base):
 
     # Relationships
     lesson = relationship("Lesson", back_populates="exercises")
+
+
+class SupplementaryMaterial(Base):
+    """
+    درسنامه‌ها، جزوات متفرقه، فرمول‌نامه‌ها و فایل‌های تکمیلی آموزشی انجمن فیزیک
+    """
+    __tablename__ = "supplementary_materials"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title_fa = Column(String(256), nullable=False)
+    description_fa = Column(Text, nullable=True)
+    grade_id = Column(Integer, ForeignKey("grades.id", ondelete="SET NULL"), nullable=True, index=True)
+    author_name = Column(String(128), default="دبیران انجمن فیزیک شهید بهشتی دو", nullable=True)
+    category = Column(String(64), default="pamphlet", nullable=False)  # pamphlet (جزوه), summary (خلاصه درس), formula_sheet (فرمول‌نامه), sample_questions (نمونه سوال)
+    file_url = Column(String(512), nullable=True)
+    original_filename = Column(String(256), nullable=True)
+    file_size_bytes = Column(Integer, default=0)
+    download_count = Column(Integer, default=0)
+    is_published = Column(Boolean, default=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    grade = relationship("Grade")
+

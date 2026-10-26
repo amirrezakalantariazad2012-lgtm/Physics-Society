@@ -172,6 +172,11 @@ app.include_router(gamification.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 
+# Uploaded files directory for study materials & notes
+uploads_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "uploads"))
+os.makedirs(os.path.join(uploads_dir, "materials"), exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
 # Static files for frontend
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend"))
 if os.path.exists(frontend_dir):
@@ -180,9 +185,9 @@ if os.path.exists(frontend_dir):
     # Serve index.html for root and SPA client routes
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str):
-        # Do not intercept /api routes
-        if full_path.startswith("api"):
-            return JSONResponse(status_code=404, content={"detail": "مسیریابی نامعتبر در API"})
+        # Do not intercept /api or /uploads routes
+        if full_path.startswith("api") or full_path.startswith("uploads"):
+            return JSONResponse(status_code=404, content={"detail": "مسیریابی نامعتبر در API یا فایل یافت نشد."})
         
         file_candidate = os.path.join(frontend_dir, full_path)
         if os.path.isfile(file_candidate):

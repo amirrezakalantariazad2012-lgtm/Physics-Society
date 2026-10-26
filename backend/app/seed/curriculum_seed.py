@@ -127,7 +127,7 @@ def seed_base_system(db: Session):
         admin_legacy = User(
             username="admin",
             email="system_admin@beheshti2.ir",
-            hashed_password=hash_password("AdminPhysics1405!"),
+            hashed_password=hash_password("admin"),
             role="admin",
             full_name="مدیر سامانه انجمن فیزیک شهید بهشتی دو",
             display_name="مدیر سامانه",
@@ -136,7 +136,7 @@ def seed_base_system(db: Session):
         )
         db.add(admin_legacy)
     else:
-        admin_legacy.hashed_password = hash_password("AdminPhysics1405!")
+        admin_legacy.hashed_password = hash_password("admin")
         admin_legacy.must_change_password = False
 
     # 7. Sample Verified Student Account for direct testing
@@ -167,6 +167,51 @@ def seed_base_system(db: Session):
         )
         db.add(profile)
 
+    # 8. Initial Supplementary Materials (درسنامه‌های متفرقه و جزوات فیزیک)
+    from app.models.curriculum import SupplementaryMaterial
+    if db.query(SupplementaryMaterial).count() == 0:
+        samples = [
+            SupplementaryMaterial(
+                title_fa="فرمول‌نامه و جمع‌بندی طلایی فیزیک هفتم",
+                description_fa="شامل کلیه یکاهای استاندارد SI، رابطه چگالی $\\rho = \\frac{m}{V}$، پایستگی انرژی و سازوکار انتقال گرما",
+                grade_id=grade_map[7].id,
+                author_name="استاد علی‌زاده — دبیر فیزیک سمپاد",
+                category="formula_sheet",
+                file_url="https://raw.githubusercontent.com/amirrezakalantariazad2012-lgtm/Physics-Society/main/frontend/assets/formulas_grade7.pdf",
+                original_filename="formulas_grade7.pdf",
+                file_size_bytes=1048576,
+                download_count=42,
+                is_published=True
+            ),
+            SupplementaryMaterial(
+                title_fa="جزوه تکمیلی الکتریسیته ساکن و مدار الکتریکی پایه هشتم",
+                description_fa="قانون اهم $V = I \\cdot R$، اتصال متوالی و موازی مقاومت‌ها، و قوانین کیرشه‌هف برای مسابقات علمی",
+                grade_id=grade_map[8].id,
+                author_name="دبیرخانه انجمن فیزیک شهید بهشتی دو",
+                category="pamphlet",
+                file_url="https://raw.githubusercontent.com/amirrezakalantariazad2012-lgtm/Physics-Society/main/frontend/assets/circuit_notes_grade8.pdf",
+                original_filename="circuit_notes_grade8.pdf",
+                file_size_bytes=2097152,
+                download_count=78,
+                is_published=True
+            ),
+            SupplementaryMaterial(
+                title_fa="درسنامه تحلیلی قوانین نیوتون، شتاب و فشار در شاره‌ها پایه نهم",
+                description_fa="بررسی نمودارهای حرکت، نیروی خالص $F = ma$، فشار هیدرواستاتیک $P = \\rho g h$ و نمونه سوالات المپیادی",
+                grade_id=grade_map[9].id,
+                author_name="گروه فیزیک دوره اول سمپاد",
+                category="summary",
+                file_url="https://raw.githubusercontent.com/amirrezakalantariazad2012-lgtm/Physics-Society/main/frontend/assets/newton_laws_grade9.pdf",
+                original_filename="newton_laws_grade9.pdf",
+                file_size_bytes=1572864,
+                download_count=115,
+                is_published=True
+            ),
+        ]
+        for s in samples:
+            db.add(s)
+
     db.commit()
-    print("Base system, grades, books, badges, and accounts seeded successfully!")
+    print("Base system, grades, books, badges, study materials, and accounts seeded successfully!")
     return grade_map, book_map
+

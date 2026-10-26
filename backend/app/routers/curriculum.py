@@ -1,16 +1,19 @@
+import os
+import uuid
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
 from datetime import datetime
 
 from app.database import get_db
 from app.models.user import User
-from app.models.curriculum import Grade, Book, Chapter, Lesson, Exercise
+from app.models.curriculum import Grade, Book, Chapter, Lesson, Exercise, SupplementaryMaterial
 from app.models.exam import Question
 from app.models.gamification import StudentProgress
 from app.schemas.curriculum import (
     GradeResponse, BookResponse, ChapterResponse, LessonResponse,
-    ExerciseResponse, ExerciseSubmit, ExerciseSubmitResult, LessonProgressUpdate
+    ExerciseResponse, ExerciseSubmit, ExerciseSubmitResult, LessonProgressUpdate,
+    SupplementaryMaterialCreate, SupplementaryMaterialResponse
 )
 from app.services.auth import get_current_user, get_optional_current_user
 from app.services.gamification_service import award_xp, record_daily_streak
@@ -351,3 +354,148 @@ def mark_lesson_complete(
         "xp_earned": earned_xp,
         "message_fa": f"درس «{lesson.title_fa}» با موفقیت تکمیل شد!"
     }
+
+
+# ==========================================
+# SUPPLEMENTARY STUDY MATERIALS & PAMPHLETS
+# ==========================================
+
+@router.get("/study-materials", response_model=List[SupplementaryMaterialResponse])
+def get_study_materials(
+    grade_id: Optional[int] = None,
+    category: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Lists published supplementary study materials, formula sheets, and pamphlets"""
+    query = db.query(SupplementaryMaterial).filter(SupplementaryMaterial.is_published == True)
+    if grade_id:
+        query = query.filter((SupplementaryMaterial.grade_id == grade_id) | (SupplementaryMaterial.grade_id == None))
+    if category:
+        query = query.filter(SupplementaryMaterial.category == category)
+    items = query.order_by(SupplementaryMaterial.created_at.desc()).all()
+    results = []
+    for it in items:
+        g_title = it.grade.title_fa if it.grade else "تمامی پایه‌ها (عمومی)"
+        results.append(SupplementaryMaterialResponse(
+            id=it.id,
+            title_fa=it.title_fa,
+            description_fa=it.description_fa,
+            grade_id=it.grade_id,
+            grade_title_fa=g_title,
+            author_name=it.author_name or "دبیران انجمن فیزیک شهید بهشتی دو",
+            category=it.category,
+            file_url=it.file_url,
+            original_filename=it.original_filename,
+            file_size_bytes=it.file_size_bytes or 0,
+            download_count=it.download_count or 0,
+            is_published=it.is_published,
+            created_at=it.created_at
+        ))
+    return results
+
+
+@router.post("/study-materials", response_model=SupplementaryMaterialResponse)
+def create_study_material(
+    data: SupplementaryMaterialCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Creates a new supplementary study material (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="دسترسی غیرمجاز: تنها مدیران و دبیران سامانه می‌توانند درسنامه متفرقه ثبت کنند."
+        )
+
+    mat = SupplementaryMaterial(
+        title_fa=data.title_fa.strip(),
+        description_fa=data.description_fa.strip() if data.description_fa else None,
+        grade_id=data.grade_id,
+        author_name=data.author_name.strip() if data.author_name else "دبیران انجمن فیزیک شهید بهشتی دو",
+        category=data.category or "pamphlet",
+        file_url=data.file_url.strip() if data.file_url else None,
+        original_filename=data.original_filename,
+        file_size_bytes=data.file_size_bytes or 0,
+        is_published=True
+    )
+    db.add(mat)
+    db.commit()
+    db.refresh(mat)
+
+    g_title = mat.grade.title_fa if mat.grade else "تمامی پایه‌ها (عمومی)"
+    return SupplementaryMaterialResponse(
+        id=mat.id,
+        title_fa=mat.title_fa,
+        description_fa=mat.description_fa,
+        grade_id=mat.grade_id,
+        grade_title_fa=g_title,
+        author_name=mat.author_name,
+        category=mat.category,
+        file_url=mat.file_url,
+        original_filename=mat.original_filename,
+        file_size_bytes=mat.file_size_bytes or 0,
+        download_count=mat.download_count or 0,
+        is_published=mat.is_published,
+        created_at=mat.created_at
+    )
+
+
+@router.post("/study-materials/upload")
+async def upload_material_file(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user)
+):
+    """Uploads a study material file (PDF, Docx, Image) and returns permanent URL"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="دسترسی غیرمجاز: فقط ادمین مجاز است.")
+
+    upload_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "uploads", "materials"))
+    os.makedirs(upload_dir, exist_ok=True)
+
+    safe_name = f"{uuid.uuid4().hex[:10]}_{file.filename.replace(' ', '_')}"
+    target_path = os.path.join(upload_dir, safe_name)
+
+    content = await file.read()
+    with open(target_path, "wb") as f:
+        f.write(content)
+
+    return {
+        "success": True,
+        "file_url": f"/uploads/materials/{safe_name}",
+        "original_filename": file.filename,
+        "file_size_bytes": len(content),
+        "message_fa": "فایل جزوه با موفقیت در سرور ذخیره شد."
+    }
+
+
+@router.delete("/study-materials/{material_id}")
+def delete_study_material(
+    material_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Deletes a supplementary study material (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="دسترسی غیرمجاز")
+
+    mat = db.query(SupplementaryMaterial).filter(SupplementaryMaterial.id == material_id).first()
+    if not mat:
+        raise HTTPException(status_code=404, detail="درسنامه یا جزوه مورد نظر یافت نشد.")
+
+    db.delete(mat)
+    db.commit()
+    return {"success": True, "message_fa": "جزوه / درسنامه با موفقیت حذف گردید."}
+
+
+@router.post("/study-materials/{material_id}/increment-download")
+def increment_material_download(
+    material_id: int,
+    db: Session = Depends(get_db)
+):
+    """Increments the download counter for a study material"""
+    mat = db.query(SupplementaryMaterial).filter(SupplementaryMaterial.id == material_id).first()
+    if mat:
+        mat.download_count = (mat.download_count or 0) + 1
+        db.commit()
+    return {"success": True}
+

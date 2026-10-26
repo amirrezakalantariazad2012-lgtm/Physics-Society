@@ -4,7 +4,9 @@
 class AdminViews {
     constructor(containerId) {
         this.containerId = containerId;
-        this.activeTab = 'overview'; // 'overview', 'validation', 'questions', 'reviews', 'ai', 'textbooks', 'students'
+        this.activeTab = 'overview'; // 'overview', 'materials', 'validation', 'questions', 'reviews', 'competitions', 'ai', 'textbooks', 'students'
+        this.materialsGradeFilter = null;
+        this.materialsCategoryFilter = null;
     }
 
     async render() {
@@ -28,8 +30,11 @@ class AdminViews {
                     <button onclick="window.currentAdminViews.switchTab('overview')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'overview' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         داشبورد
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('validation')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'validation' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
-                        اعتبارسنجی سؤالات
+                    <button onclick="window.currentAdminViews.switchTab('materials')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'materials' ? 'bg-white dark:bg-slate-900 text-emerald-500 shadow-sm font-black' : 'text-slate-600 dark:text-slate-400'}">
+                        درسنامه‌ها و جزوات متفرقه
+                    </button>
+                    <button onclick="window.currentAdminViews.switchTab('competitions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'competitions' ? 'bg-white dark:bg-slate-900 text-cyan-400 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                        مدیریت لیگ‌ها و مسابقات
                     </button>
                     <button onclick="window.currentAdminViews.switchTab('questions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'questions' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         بانک سؤالات
@@ -37,8 +42,8 @@ class AdminViews {
                     <button onclick="window.currentAdminViews.switchTab('reviews')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'reviews' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         مرکز بازبینی و تصحیح
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('competitions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'competitions' ? 'bg-white dark:bg-slate-900 text-cyan-400 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
-                        مدیریت لیگ‌ها و مسابقات
+                    <button onclick="window.currentAdminViews.switchTab('validation')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'validation' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                        اعتبارسنجی سؤالات
                     </button>
                     <button onclick="window.currentAdminViews.switchTab('ai')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'ai' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
                         تنظیمات هوش مصنوعی
@@ -105,7 +110,14 @@ class AdminViews {
                         </div>
                         <span class="text-[11px] px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono">مدیریت انجمن فیزیک</span>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        <button onclick="window.currentAdminViews.switchTab('materials'); setTimeout(() => window.currentAdminViews.openCreateMaterialModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-emerald-500/40 text-right flex items-center justify-between transition-all group">
+                            <div>
+                                <span class="block text-xs font-black text-emerald-300 group-hover:text-white">📄 بارگذاری جزوه و درسنامه</span>
+                                <span class="text-[11px] text-slate-400">بانک درسنامه‌های متفرقه</span>
+                            </div>
+                            <i data-lucide="file-plus" class="w-5 h-5 text-emerald-400"></i>
+                        </button>
                         <button onclick="window.currentAdminViews.switchTab('competitions'); setTimeout(() => window.currentAdminViews.openCreateCompetitionModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-cyan-500/30 text-right flex items-center justify-between transition-all group">
                             <div>
                                 <span class="block text-xs font-black text-cyan-300 group-hover:text-white">➕ ساخت مسابقه یا چالش</span>
@@ -120,12 +132,12 @@ class AdminViews {
                             </div>
                             <i data-lucide="clipboard-check" class="w-5 h-5 text-violet-400"></i>
                         </button>
-                        <button onclick="window.currentAdminViews.switchTab('ai')" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-emerald-500/30 text-right flex items-center justify-between transition-all group">
+                        <button onclick="window.currentAdminViews.switchTab('ai')" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-teal-500/30 text-right flex items-center justify-between transition-all group">
                             <div>
-                                <span class="block text-xs font-black text-emerald-300 group-hover:text-white">⚡ پایش هوش مصنوعی نکسورا</span>
+                                <span class="block text-xs font-black text-teal-300 group-hover:text-white">⚡ پایش هوش مصنوعی نکسورا</span>
                                 <span class="text-[11px] text-slate-400">تست تاخیر و مدل‌های آزاد</span>
                             </div>
-                            <i data-lucide="cpu" class="w-5 h-5 text-emerald-400"></i>
+                            <i data-lucide="cpu" class="w-5 h-5 text-teal-400"></i>
                         </button>
                         <button onclick="window.currentAdminViews.switchTab('questions')" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-amber-500/30 text-right flex items-center justify-between transition-all group">
                             <div>
@@ -211,8 +223,15 @@ class AdminViews {
             const data = await window.api.getQuestions({ limit: 50 });
             target.innerHTML = `
             <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-                <div class="flex items-center justify-between">
-                    <h3 class="font-bold text-base text-slate-800 dark:text-white">فهرست و جستجوی بانک سؤالات (${data.total} پرسش ثبت شده)</h3>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div>
+                        <h3 class="font-bold text-base text-slate-800 dark:text-white">فهرست و جستجوی بانک سؤالات (${data.total} پرسش ثبت شده)</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">شامل سؤالات استاندارد چهارگزینه‌ای و مسائل تشریحی به تفکیک پایه‌ها و فصول</p>
+                    </div>
+                    <button onclick="window.showComingSoon('طراحی مستقیم سؤال تستی یا تشریحی جدید')" class="btn-duo-blue text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm flex items-center gap-1.5 self-start sm:self-auto hover:scale-105 transition-all">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        <span>➕ طراحی سؤال جدید</span>
+                    </button>
                 </div>
 
                 <div class="space-y-3">
@@ -394,6 +413,8 @@ class AdminViews {
             `;
         } else if (this.activeTab === 'competitions') {
             await this.renderCompetitionsManagement(target);
+        } else if (this.activeTab === 'materials') {
+            await this.renderMaterialsManagement(target);
         } else if (this.activeTab === 'students') {
             const students = await window.api.getStudents();
             target.innerHTML = `
@@ -897,6 +918,373 @@ class AdminViews {
             alert(err.message);
         }
     }
+
+    async renderMaterialsManagement(target) {
+        const gradeId = this.materialsGradeFilter;
+        const category = this.materialsCategoryFilter;
+        let materials = [];
+        try {
+            materials = await window.api.getStudyMaterials(gradeId, category);
+        } catch (e) {
+            console.error('Failed to load study materials:', e);
+            materials = [];
+        }
+
+        const categoryLabels = {
+            pamphlet: { title: 'جزوه و درسنامه کامل', color: 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
+            summary: { title: 'خلاصه درس و فرمول‌نامه', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' },
+            exam_sample: { title: 'نمونه سؤال امتحانی', color: 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800' },
+            slide: { title: 'اسلاید و ارائه کلاسی', color: 'bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
+            other: { title: 'سایر منابع و فایل‌ها', color: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700' }
+        };
+
+        const totalDownloads = materials.reduce((acc, m) => acc + (m.download_count || 0), 0);
+
+        target.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div>
+                    <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs mb-1">
+                        <i data-lucide="folder-git-2" class="w-4 h-4"></i>
+                        <span>سامانه مدیریت محتوای متفرقه فیزیک</span>
+                    </div>
+                    <h3 class="font-extrabold text-lg text-slate-800 dark:text-white">مدیریت درسنامه‌ها، جزوات و فایل‌های متفرقه</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">بارگذاری جزوات دبیران، خلاصه‌های درسی، فرمول‌نامه‌ها، نمونه سؤالات امتحانی و فایل‌های تکمیلی فیزیک</p>
+                </div>
+                <button onclick="window.currentAdminViews.openCreateMaterialModal()" class="btn-duo-green text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 self-start sm:self-auto shadow-md hover:scale-105 transition-all">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>➕ بارگذاری جزوه یا فایل جدید</span>
+                </button>
+            </div>
+
+            <!-- Stats Ribbon -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                    <span class="text-[11px] text-slate-400 font-bold block mb-1">کل فایل‌ها و جزوات</span>
+                    <span class="text-2xl font-black text-slate-800 dark:text-white font-mono">${materials.length}</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                    <span class="text-[11px] text-slate-400 font-bold block mb-1">مجموع دفعات دانلود</span>
+                    <span class="text-2xl font-black text-emerald-500 font-mono">${totalDownloads}</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                    <span class="text-[11px] text-slate-400 font-bold block mb-1">پایه هفتم و هشتم</span>
+                    <span class="text-2xl font-black text-cyan-500 font-mono">${materials.filter(m => m.grade_id === 1 || m.grade_id === 2).length}</span>
+                </div>
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                    <span class="text-[11px] text-slate-400 font-bold block mb-1">پایه نهم و عمومی</span>
+                    <span class="text-2xl font-black text-violet-500 font-mono">${materials.filter(m => m.grade_id === 3 || !m.grade_id).length}</span>
+                </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
+                <!-- Grade Filters -->
+                <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold">
+                    <span class="text-slate-400 text-[11px] shrink-0 pl-1">پایه:</span>
+                    <button onclick="window.currentAdminViews.filterMaterialsByGrade(null)" 
+                        class="px-3 py-1.5 rounded-xl transition-all ${this.materialsGradeFilter === null ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}">
+                        همه
+                    </button>
+                    <button onclick="window.currentAdminViews.filterMaterialsByGrade(1)" 
+                        class="px-3 py-1.5 rounded-xl transition-all ${this.materialsGradeFilter === 1 ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}">
+                        هفتم
+                    </button>
+                    <button onclick="window.currentAdminViews.filterMaterialsByGrade(2)" 
+                        class="px-3 py-1.5 rounded-xl transition-all ${this.materialsGradeFilter === 2 ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}">
+                        هشتم
+                    </button>
+                    <button onclick="window.currentAdminViews.filterMaterialsByGrade(3)" 
+                        class="px-3 py-1.5 rounded-xl transition-all ${this.materialsGradeFilter === 3 ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}">
+                        نهم
+                    </button>
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold">
+                    <span class="text-slate-400 text-[11px] shrink-0 pl-1">دسته:</span>
+                    <button onclick="window.currentAdminViews.filterMaterialsByCategory(null)" 
+                        class="px-2.5 py-1.5 rounded-xl transition-all ${this.materialsCategoryFilter === null ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}">
+                        همه
+                    </button>
+                    <button onclick="window.currentAdminViews.filterMaterialsByCategory('pamphlet')" 
+                        class="px-2.5 py-1.5 rounded-xl transition-all ${this.materialsCategoryFilter === 'pamphlet' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}">
+                        جزوه
+                    </button>
+                    <button onclick="window.currentAdminViews.filterMaterialsByCategory('summary')" 
+                        class="px-2.5 py-1.5 rounded-xl transition-all ${this.materialsCategoryFilter === 'summary' ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}">
+                        خلاصه/فرمول
+                    </button>
+                    <button onclick="window.currentAdminViews.filterMaterialsByCategory('exam_sample')" 
+                        class="px-2.5 py-1.5 rounded-xl transition-all ${this.materialsCategoryFilter === 'exam_sample' ? 'bg-amber-600 text-white' : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'}">
+                        نمونه سؤال
+                    </button>
+                </div>
+            </div>
+
+            <!-- Materials Cards Grid -->
+            ${materials.length === 0 ? `
+            <div class="py-16 text-center space-y-4 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+                    <i data-lucide="file-text" class="w-7 h-7"></i>
+                </div>
+                <div class="space-y-1">
+                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">هیچ درسنامه یا جزوه‌ای در این دسته‌بندی یافت نشد</h4>
+                    <p class="text-xs text-slate-400">با کلیک روی دکمه «بارگذاری جزوه یا فایل جدید» نخستین محتوا را اضافه فرمایید.</p>
+                </div>
+                <button onclick="window.currentAdminViews.openCreateMaterialModal()" class="btn-duo-green text-white font-bold px-4 py-2 rounded-xl text-xs">
+                    بارگذاری فایل جدید
+                </button>
+            </div>
+            ` : `
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                ${materials.map(m => {
+                    const catInfo = categoryLabels[m.category] || categoryLabels.other;
+                    const sizeStr = m.file_size_bytes > 0 
+                        ? (m.file_size_bytes > 1024 * 1024 ? (m.file_size_bytes / (1024 * 1024)).toFixed(1) + ' مگابایت' : Math.round(m.file_size_bytes / 1024) + ' کیلوبایت')
+                        : 'فایل آنلاین';
+                    return `
+                    <div class="flex flex-col justify-between p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 hover:border-emerald-500/50 hover:shadow-md transition-all space-y-4">
+                        <div class="space-y-2.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${catInfo.color}">
+                                    ${catInfo.title}
+                                </span>
+                                <span class="px-2 py-0.5 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-bold">
+                                    ${m.grade_title_fa}
+                                </span>
+                            </div>
+
+                            <h4 class="font-extrabold text-sm text-slate-800 dark:text-white leading-snug">${m.title_fa}</h4>
+                            
+                            ${m.description_fa ? `
+                            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                                ${m.description_fa}
+                            </p>
+                            ` : ''}
+
+                            <div class="pt-2 text-[11px] text-slate-400 space-y-1">
+                                <div class="flex items-center gap-1.5">
+                                    <i data-lucide="user" class="w-3.5 h-3.5 text-slate-500"></i>
+                                    <span>مؤلف: <strong class="text-slate-700 dark:text-slate-300">${m.author_name || 'دبیرخانه فیزیک'}</strong></span>
+                                </div>
+                                <div class="flex items-center justify-between pt-1 text-[10px]">
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>
+                                        <span>${sizeStr}</span>
+                                    </span>
+                                    <span class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
+                                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                        <span>${m.download_count} دریافت</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="pt-3 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-2">
+                            ${m.file_url ? `
+                            <a href="${m.file_url}" target="_blank" onclick="window.api.incrementMaterialDownload(${m.id})"
+                                class="flex-1 py-1.5 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all">
+                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                <span>مشاهده / دانلود</span>
+                            </a>
+                            ` : `
+                            <span class="text-xs text-slate-400 italic">بدون لینک ضمیمه</span>
+                            `}
+                            <button onclick="window.currentAdminViews.deleteStudyMaterial(${m.id}, '${m.title_fa.replace(/'/g, "\\'")}')" 
+                                class="p-1.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-colors" title="حذف جزوه">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                    `;
+                }).join('')}
+            </div>
+            `}
+        </div>
+        `;
+    }
+
+    filterMaterialsByGrade(gradeId) {
+        this.materialsGradeFilter = gradeId;
+        this.loadTabContent();
+    }
+
+    filterMaterialsByCategory(cat) {
+        this.materialsCategoryFilter = cat;
+        this.loadTabContent();
+    }
+
+    openCreateMaterialModal() {
+        const modal = document.createElement('div');
+        modal.id = 'admin-create-material-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md';
+        modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-emerald-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl text-slate-900 dark:text-white space-y-5 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
+                        <i data-lucide="file-plus" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">بارگذاری درسنامه، جزوه یا فایل آموزشی جدید</h3>
+                        <span class="text-[10px] text-emerald-600 dark:text-emerald-400">بانک محتوای متفرقه فیزیک</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('admin-create-material-modal').remove()" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="window.currentAdminViews.handleCreateMaterialSubmit(event)" class="space-y-4 text-xs font-semibold">
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">عنوان درسنامه یا جزوه: *</label>
+                    <input type="text" name="title_fa" required placeholder="مثال: جزوه طلایی الکتریسیته ساکن و جاری به همراه ۵۰ تست تکمیلی"
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-emerald-500" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">پایه تحصیلی:</label>
+                        <select name="grade_id" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-emerald-500">
+                            <option value="">تمامی پایه‌ها (عمومی)</option>
+                            <option value="1">پایه هفتم</option>
+                            <option value="2">پایه هشتم</option>
+                            <option value="3">پایه نهم</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">دسته‌بندی محتوا:</label>
+                        <select name="category" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-emerald-500">
+                            <option value="pamphlet">جزوه و درسنامه کامل</option>
+                            <option value="summary">خلاصه درس و فرمول‌نامه</option>
+                            <option value="exam_sample">نمونه سؤال امتحانی با پاسخ تشریحی</option>
+                            <option value="slide">اسلاید و ارائه کلاسی</option>
+                            <option value="other">سایر منابع و فایل‌های متفرقه</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">نام مؤلف، گردآورنده یا دبیر:</label>
+                    <input type="text" name="author_name" placeholder="مثال: دبیرخانه انجمن فیزیک یا نام دبیر محترم"
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-emerald-500" />
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">توضیحات و سرفصل‌های فایل:</label>
+                    <textarea name="description_fa" rows="2" placeholder="توضیح کوتاه درباره مباحث، فصل‌های تحت پوشش، نکات مهم..."
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-emerald-500"></textarea>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                    <span class="block text-slate-700 dark:text-slate-300 font-bold">فایل ضمیمه:</span>
+                    
+                    <div>
+                        <label class="block text-slate-500 text-[11px] mb-1">بارگذاری مستقیم فایل (PDF، Docx، عکس یا زیپ):</label>
+                        <input type="file" name="material_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.rar,.png,.jpg,.jpeg"
+                            class="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-500 file:text-white hover:file:bg-emerald-600" />
+                    </div>
+
+                    <div class="flex items-center gap-2 my-1 text-slate-400 text-[11px]">
+                        <div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+                        <span>یا</span>
+                        <div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-500 text-[11px] mb-1">لینک مستقیم یا اینترنتی فایل (اختیاری):</label>
+                        <input type="url" name="file_url" placeholder="https://example.com/file.pdf"
+                            class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs font-mono outline-none focus:border-emerald-500" />
+                    </div>
+                </div>
+
+                <div id="material-upload-progress" class="hidden p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center gap-2">
+                    <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span>در حال بارگذاری فایل و ثبت اطلاعات...</span>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="document.getElementById('admin-create-material-modal').remove()" 
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        انصراف
+                    </button>
+                    <button type="submit" id="material-submit-btn" class="btn-duo-green text-white font-bold px-6 py-2.5 rounded-xl shadow-md">
+                        ذخیره و انتشار درسنامه
+                    </button>
+                </div>
+            </form>
+        </div>
+        `;
+        document.body.appendChild(modal);
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    async handleCreateMaterialSubmit(e) {
+        e.preventDefault();
+        const form = e.target;
+        const progressBox = document.getElementById('material-upload-progress');
+        const submitBtn = document.getElementById('material-submit-btn');
+        if (progressBox) progressBox.classList.remove('hidden');
+        if (submitBtn) submitBtn.disabled = true;
+
+        try {
+            const formData = new FormData(form);
+            const titleFa = formData.get('title_fa');
+            const gradeIdVal = formData.get('grade_id');
+            const gradeId = gradeIdVal ? parseInt(gradeIdVal) : null;
+            const category = formData.get('category') || 'pamphlet';
+            const authorName = formData.get('author_name');
+            const descriptionFa = formData.get('description_fa');
+            const fileInput = form.querySelector('input[name="material_file"]');
+            let fileUrl = formData.get('file_url') || null;
+            let originalFilename = null;
+            let fileSizeBytes = 0;
+
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                const uploadData = new FormData();
+                uploadData.append('file', fileInput.files[0]);
+                const uploadRes = await window.api.uploadStudyMaterialFile(uploadData);
+                fileUrl = uploadRes.file_url;
+                originalFilename = uploadRes.original_filename;
+                fileSizeBytes = uploadRes.file_size_bytes;
+            }
+
+            const payload = {
+                title_fa: titleFa,
+                description_fa: descriptionFa,
+                grade_id: gradeId,
+                author_name: authorName,
+                category: category,
+                file_url: fileUrl,
+                original_filename: originalFilename,
+                file_size_bytes: fileSizeBytes
+            };
+
+            await window.api.createStudyMaterial(payload);
+            alert('درسنامه / جزوه با موفقیت ثبت و منتشر گردید.');
+            const m = document.getElementById('admin-create-material-modal');
+            if (m) m.remove();
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در ثبت درسنامه: ' + err.message);
+            if (progressBox) progressBox.classList.add('hidden');
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    }
+
+    async deleteStudyMaterial(id, title) {
+        if (!confirm(`آیا از حذف درسنامه "${title}" اطمینان دارید؟`)) return;
+        try {
+            await window.api.deleteStudyMaterial(id);
+            alert('درسنامه با موفقیت حذف گردید.');
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در حذف: ' + err.message);
+        }
+    }
 }
 
 window.applyCompPreset = function(preset) {
@@ -954,3 +1342,26 @@ window.applyCompPreset = function(preset) {
 };
 
 window.AdminViews = AdminViews;
+
+window.showComingSoon = function(title, description = '') {
+    const existing = document.getElementById('coming-soon-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'coming-soon-toast';
+    toast.className = 'fixed bottom-6 left-6 z-50 p-4 rounded-2xl bg-slate-900/95 text-white border border-cyan-500/40 shadow-2xl flex items-center gap-3 backdrop-blur-md max-w-sm animate-bounce';
+    toast.innerHTML = `
+        <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+        </div>
+        <div class="text-right">
+            <span class="block text-xs font-bold text-cyan-300">به زودی (Coming Soon)</span>
+            <span class="text-[11px] text-slate-300">${title} ${description ? '— ' + description : 'در نسخه بعدی سامانه فعال خواهد شد.'}</span>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    if (window.lucide) window.lucide.createIcons();
+    setTimeout(() => {
+        if (toast && toast.parentNode) toast.remove();
+    }, 3500);
+};

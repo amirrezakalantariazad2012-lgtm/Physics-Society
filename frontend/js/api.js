@@ -312,6 +312,32 @@ function formatApiErrorMessage(data, defaultMsg = 'خطایی در ارتباط 
     getPublicStats() {
         return this.request('/system/stats');
     }
+
+    // Supplementary Study Materials & Pamphlets (درسنامه‌های متفرقه و جزوات)
+    getStudyMaterials(gradeId = null, category = null) {
+        let url = '/curriculum/study-materials';
+        const params = [];
+        if (gradeId) params.push(`grade_id=${encodeURIComponent(gradeId)}`);
+        if (category) params.push(`category=${encodeURIComponent(category)}`);
+        if (params.length > 0) url += `?${params.join('&')}`;
+        return this.request(url);
+    }
+    createStudyMaterial(data) {
+        return this.request('/curriculum/study-materials', { method: 'POST', body: data });
+    }
+    uploadStudyMaterialFile(formData) {
+        return this.request('/curriculum/study-materials/upload', {
+            method: 'POST',
+            body: formData,
+            isFormData: true
+        });
+    }
+    deleteStudyMaterial(id) {
+        return this.request(`/curriculum/study-materials/${id}`, { method: 'DELETE' });
+    }
+    incrementMaterialDownload(id) {
+        return this.request(`/curriculum/study-materials/${id}/increment-download`, { method: 'POST' });
+    }
 }
 
 window.api = new ApiClient();
