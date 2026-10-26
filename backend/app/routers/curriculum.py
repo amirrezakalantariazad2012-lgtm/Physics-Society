@@ -19,6 +19,7 @@ from app.schemas.curriculum import (
 from app.services.auth import get_current_user, get_optional_current_user
 from app.services.gamification_service import award_xp, record_daily_streak
 from app.services.audit_service import log_audit_event
+from app.config import settings
 
 router = APIRouter(prefix="/curriculum", tags=["Curriculum"])
 
@@ -371,7 +372,9 @@ def get_study_materials(
     """Lists published supplementary study materials, formula sheets, and pamphlets"""
     query = db.query(SupplementaryMaterial).filter(SupplementaryMaterial.is_published == True)
     if grade_id:
-        query = query.filter((SupplementaryMaterial.grade_id == grade_id) | (SupplementaryMaterial.grade_id == None))
+        target_grade = db.query(Grade).filter((Grade.id == grade_id) | (Grade.number == grade_id)).first()
+        target_id = target_grade.id if target_grade else grade_id
+        query = query.filter((SupplementaryMaterial.grade_id == target_id) | (SupplementaryMaterial.grade_id == None))
     if category:
         query = query.filter(SupplementaryMaterial.category == category)
     items = query.order_by(SupplementaryMaterial.created_at.desc()).all()
@@ -539,7 +542,7 @@ async def upload_material_file(
     content = await file.read()
     safe_name = pentagon_validate_upload(file.filename, content)
 
-    upload_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "uploads", "materials"))
+    upload_dir = os.path.abspath(os.path.join(settings.UPLOAD_DIR, "materials"))
     os.makedirs(upload_dir, exist_ok=True)
     target_path = os.path.join(upload_dir, safe_name)
 

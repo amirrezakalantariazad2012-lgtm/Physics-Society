@@ -338,8 +338,8 @@ class PhysicsSimulators {
         this.activeMode = mode;
         const labDef = SIMULATOR_CATALOG.find(s => s.id === type) || SIMULATOR_CATALOG[0];
 
-        if (mode === 'phet') {
-            this.renderPhetSim(container, labDef);
+        if (mode === 'phet' || mode === 'sandbox') {
+            this.renderAnalyticalSandbox(container, labDef);
             return;
         }
 
@@ -3200,45 +3200,593 @@ class PhysicsSimulators {
 
 
     // =========================================================================
-    // 14. PHET INTERACTIVE SANDBOX INTEGRATION
+    // 14. NATIVE ANALYTICAL SANDBOX & FREE EXPERIMENTAL WORKBENCH (100% OFFLINE)
     // =========================================================================
-    renderPhetSim(container, labDef) {
+    renderAnalyticalSandbox(container, labDef) {
         const slug = labDef.phetSlug || 'density';
         const phetUrl = `https://phet.colorado.edu/sims/html/${slug}/latest/${slug}_all.html`;
+        const simId = labDef.id || 'density';
+
+        // Local state for free parameters
+        let state = {
+            // General / Density params
+            mass: 250, // g
+            volume: 200, // cm3
+            fluidDensity: 1.00, // g/cm3 (water)
+            gravity: 9.8, // m/s2 (earth)
+            fluidName: 'آب خالص',
+            fluidColor: 'rgba(6,182,212,0.35)',
+            logs: []
+        };
+
+        const liquids = [
+            { name: 'بنزین', density: 0.70, color: 'rgba(234,179,8,0.3)' },
+            { name: 'روغن خوراکی', density: 0.92, color: 'rgba(245,158,11,0.35)' },
+            { name: 'آب خالص', density: 1.00, color: 'rgba(6,182,212,0.35)' },
+            { name: 'آب دریا (شور)', density: 1.03, color: 'rgba(14,165,233,0.4)' },
+            { name: 'گلیسیرین', density: 1.26, color: 'rgba(168,85,247,0.35)' },
+            { name: 'جیوه مایع', density: 13.60, color: 'rgba(148,163,184,0.6)' }
+        ];
+
+        const gravities = [
+            { name: 'فضا (بی‌وزنی)', g: 0.0, icon: 'orbit' },
+            { name: 'کره ماه', g: 1.62, icon: 'moon' },
+            { name: 'کره مریخ', g: 3.72, icon: 'circle-dot' },
+            { name: 'سیاره زمین', g: 9.80, icon: 'globe' },
+            { name: 'سیاره مشتری', g: 24.79, icon: 'disc' }
+        ];
 
         container.innerHTML = `
-        <div class="rounded-3xl bg-slate-900 border border-indigo-500/30 overflow-hidden shadow-2xl flex flex-col">
-            <div class="p-4 bg-slate-950/80 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex items-center gap-2.5">
-                    <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
-                    <h4 class="font-black text-sm text-indigo-300">محیط شبیه‌ساز بین‌المللی PhET: ${labDef.title}</h4>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-400 border border-indigo-800 font-bold">HTML5 Sandbox</span>
+        <div id="analytical-sandbox-wrapper" class="rounded-3xl bg-slate-900 border border-teal-500/30 overflow-hidden shadow-2xl flex flex-col space-y-0 transition-all">
+            <!-- Sandbox Header Bar -->
+            <div class="p-4 sm:p-5 bg-slate-950/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-3.5 h-3.5 rounded-full bg-teal-400 animate-pulse shadow-lg shadow-teal-500/50"></span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-black text-sm sm:text-base text-white">میزکار تحلیل برداری و متغیرهای آزاد: ${labDef.title}</h4>
+                            <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-700/60 font-mono font-bold">بومی و بدون فیلترشکن</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-0.5">محاسبه برخط بردارها، نمودار جسم آزاد (FBD)، و داده‌برداری چندمرحله‌ای</p>
+                    </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="window.physicsSimulators.toggleIframeFullscreen('phet-iframe-wrapper')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 flex items-center gap-1.5">
+                    <button id="sandbox-fullscreen-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all">
                         <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
                         <span>تمام‌صفحه</span>
                     </button>
-                    <button onclick="window.physicsSimulators.reloadIframe('phet-sim-iframe')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 flex items-center gap-1.5">
+                    <button id="sandbox-reset-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all">
                         <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
-                        <span>بارگذاری مجدد</span>
+                        <span>بازنشانی پیش‌فرض</span>
                     </button>
-                    <button id="claim-lab-xp-${labDef.id}" onclick="window.claimLabXp('${labDef.id}', '${labDef.title}')" class="btn-duo-green text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md hover:scale-105">
+                    <button id="claim-lab-xp-${labDef.id}" onclick="window.claimLabXp('${labDef.id}', '${labDef.title}')" class="btn-duo-green text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md hover:scale-105 transition-all">
                         <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i>
                         <span>ثبت آزمایش (+۲۰ XP)</span>
                     </button>
                 </div>
             </div>
 
-            <div id="phet-iframe-wrapper" class="relative w-full h-[580px] bg-slate-950">
-                <iframe id="phet-sim-iframe" src="${phetUrl}" class="w-full h-full border-0" allow="fullscreen" loading="lazy"></iframe>
+            <!-- Main Interactive Body -->
+            <div class="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-900/60">
+                <!-- Left Column (Visual Vector Canvas & FBD) -->
+                <div class="lg:col-span-7 flex flex-col space-y-4">
+                    <div class="relative w-full h-[380px] rounded-2xl bg-gradient-to-b from-slate-950 to-slate-900 border border-slate-800 overflow-hidden flex flex-col justify-between p-4 shadow-inner">
+                        <!-- Canvas Top Overlay Bar -->
+                        <div class="flex items-center justify-between text-xs font-bold z-10">
+                            <span class="px-2.5 py-1 rounded-lg bg-slate-900/80 border border-slate-700 text-cyan-300 font-mono">
+                                گرانش جاری: g = <span id="fbd-readout-g">9.80</span> m/s²
+                            </span>
+                            <span id="fbd-state-badge" class="px-3 py-1 rounded-lg bg-emerald-950 border border-emerald-700 text-emerald-300 font-bold">
+                                شناور بر سطح مایع
+                            </span>
+                        </div>
+
+                        <!-- Interactive Dynamic SVG Display -->
+                        <div class="relative w-full h-full flex items-center justify-center">
+                            <svg id="sandbox-fbd-svg" class="w-full h-full" viewBox="0 0 500 280">
+                                <!-- Background Grid -->
+                                <defs>
+                                    <pattern id="sandbox-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                                    </pattern>
+                                    <marker id="arrow-green" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#10b981"/>
+                                    </marker>
+                                    <marker id="arrow-red" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#ef4444"/>
+                                    </marker>
+                                    <marker id="arrow-cyan" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#06b6d4"/>
+                                    </marker>
+                                </defs>
+                                <rect width="500" height="280" fill="url(#sandbox-grid)" />
+
+                                <!-- Glass Beaker -->
+                                <rect x="90" y="40" width="180" height="210" rx="8" fill="none" stroke="#64748b" stroke-width="4"/>
+                                <!-- Volume Tick Marks on Beaker -->
+                                <line x1="90" y1="80" x2="105" y2="80" stroke="#94a3b8" stroke-width="2"/>
+                                <text x="110" y="84" fill="#94a3b8" font-size="10" font-family="monospace">1500 ml</text>
+                                <line x1="90" y1="130" x2="105" y2="130" stroke="#94a3b8" stroke-width="2"/>
+                                <text x="110" y="134" fill="#94a3b8" font-size="10" font-family="monospace">1000 ml</text>
+                                <line x1="90" y1="180" x2="105" y2="180" stroke="#94a3b8" stroke-width="2"/>
+                                <text x="110" y="184" fill="#94a3b8" font-size="10" font-family="monospace">500 ml</text>
+
+                                <!-- Liquid Level in Beaker -->
+                                <rect id="svg-liquid-rect" x="92" y="110" width="176" height="138" rx="6" fill="rgba(6,182,212,0.35)"/>
+                                <line id="svg-liquid-surface" x1="92" y1="110" x2="268" y2="110" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3,3"/>
+
+                                <!-- Submerged / Floating Object Block -->
+                                <rect id="svg-object-block" x="140" y="100" width="80" height="70" rx="6" fill="#f59e0b" stroke="#d97706" stroke-width="2.5" class="transition-all duration-300"/>
+                                <text id="svg-object-text" x="180" y="140" fill="#ffffff" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle">جسم</text>
+
+                                <!-- FREE BODY DIAGRAM (FBD) ON THE RIGHT -->
+                                <g transform="translate(370, 140)">
+                                    <!-- Base FBD Node / Point Mass -->
+                                    <circle cx="0" cy="0" r="14" fill="#1e293b" stroke="#38bdf8" stroke-width="2.5"/>
+                                    <text x="0" y="4" fill="#38bdf8" font-size="9" font-weight="bold" text-anchor="middle">m</text>
+
+                                    <!-- Buoyant Force Arrow (Pointing Up) -->
+                                    <line id="svg-arrow-buoyant" x1="0" y1="-14" x2="0" y2="-75" stroke="#10b981" stroke-width="4" marker-end="url(#arrow-green)" class="transition-all duration-200"/>
+                                    <text id="svg-label-buoyant" x="12" y="-55" fill="#10b981" font-size="11" font-weight="bold" font-family="monospace">Fb = 2.45 N</text>
+
+                                    <!-- Gravity / Weight Arrow (Pointing Down) -->
+                                    <line id="svg-arrow-weight" x1="0" y1="14" x2="0" y2="75" stroke="#ef4444" stroke-width="4" marker-end="url(#arrow-red)" class="transition-all duration-200"/>
+                                    <text id="svg-label-weight" x="12" y="55" fill="#ef4444" font-size="11" font-weight="bold" font-family="monospace">W = 2.45 N</text>
+
+                                    <!-- Net Force Vector (Shifted slightly) -->
+                                    <line id="svg-arrow-net" x1="-20" y1="0" x2="-20" y2="0" stroke="#06b6d4" stroke-width="3" stroke-dasharray="4,2" marker-end="url(#arrow-cyan)" class="transition-all duration-200"/>
+                                    <text id="svg-label-net" x="-75" y="0" fill="#06b6d4" font-size="10" font-weight="bold" font-family="monospace"></text>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- Vector Legend / Info Footer -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800 text-[11px] text-slate-400">
+                            <div class="flex items-center gap-3">
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Fb: نیروی شناوری ارشمیدس</span>
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> W: وزن واقعی</span>
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Fnet: برآیند نیروها</span>
+                            </div>
+                            <span class="font-mono text-cyan-300">موتور فیزیک تحلیلی کوانتوم</span>
+                        </div>
+                    </div>
+
+                    <!-- Numerical Analytical Cards -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-400 block mb-0.5">چگالی جسم (ρ)</span>
+                            <span id="readout-solid-density" class="text-sm sm:text-base font-black text-amber-400 font-mono">1.25 g/cm³</span>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-400 block mb-0.5">نیروی ارشمیدس (Fb)</span>
+                            <span id="readout-buoyant-n" class="text-sm sm:text-base font-black text-emerald-400 font-mono">2.45 N</span>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-400 block mb-0.5">وزن ظاهری در مایع</span>
+                            <span id="readout-apparent-n" class="text-sm sm:text-base font-black text-cyan-400 font-mono">0.00 N</span>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center">
+                            <span class="text-[10px] text-slate-400 block mb-0.5">شتاب حرکت (a)</span>
+                            <span id="readout-accel" class="text-sm sm:text-base font-black text-purple-400 font-mono">0.00 m/s²</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column (Sliders & Parameters Workbench) -->
+                <div class="lg:col-span-5 flex flex-col justify-between space-y-4">
+                    <div class="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-4">
+                        <h5 class="text-xs font-black text-white flex items-center gap-2 border-b border-slate-800 pb-2.5">
+                            <i data-lucide="sliders" class="w-4 h-4 text-teal-400"></i>
+                            <span>کنترل متغیرهای مستقل فیزیکی (Independent Variables)</span>
+                        </h5>
+
+                        <!-- Mass Slider -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-bold text-slate-300">جرم جسم (m):</span>
+                                <span id="slider-mass-val" class="font-mono font-bold text-teal-300">250 g</span>
+                            </div>
+                            <input id="slider-mass" type="range" min="20" max="1500" step="10" value="250" class="w-full accent-teal-400 bg-slate-800 rounded-lg cursor-pointer">
+                        </div>
+
+                        <!-- Volume Slider -->
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-bold text-slate-300">حجم جسم (V):</span>
+                                <span id="slider-vol-val" class="font-mono font-bold text-cyan-300">200 cm³</span>
+                            </div>
+                            <input id="slider-vol" type="range" min="20" max="800" step="10" value="200" class="w-full accent-cyan-400 bg-slate-800 rounded-lg cursor-pointer">
+                        </div>
+
+                        <!-- Liquid Presets -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-bold text-slate-300">انتخاب مایع محیطی:</span>
+                                <span id="slider-fluid-val" class="font-mono font-bold text-amber-300">آب خالص (1.00 g/cm³)</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-1.5">
+                                ${liquids.map((liq, idx) => `
+                                <button data-liq-idx="${idx}" class="btn-liq-choice px-2 py-1.5 rounded-xl text-[11px] font-bold border transition-all text-center truncate ${idx === 2 ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}">
+                                    ${liq.name}
+                                </button>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Gravity / Location Presets -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-bold text-slate-300">محیط گرانشی آزمایش:</span>
+                                <span id="slider-grav-val" class="font-mono font-bold text-purple-300">زمین (g = 9.80 m/s²)</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-1.5">
+                                ${gravities.map((gObj, idx) => `
+                                <button data-grav-idx="${idx}" class="btn-grav-choice px-2 py-1.5 rounded-xl text-[11px] font-bold border transition-all text-center truncate ${idx === 3 ? 'bg-purple-500/20 border-purple-500 text-purple-300' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}">
+                                    ${gObj.name}
+                                </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Datalogging Trigger Buttons -->
+                    <div class="flex items-center gap-2">
+                        <button id="btn-log-measurement" class="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 transition-all hover:scale-[1.02]">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                            <span>ثبت داده جاری در جدول آزمایشگاه (+۵ XP)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experimental Data Logger Table -->
+            <div class="p-4 sm:p-6 bg-slate-950 border-t border-slate-800 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="table" class="w-4 h-4 text-teal-400"></i>
+                        <h5 class="text-xs sm:text-sm font-black text-white">جدول مستندسازی داده‌های تجربی (Experimental Observation Sheet)</h5>
+                        <span id="log-count-badge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono font-bold">۰ آزمایش ثبت‌شده</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="btn-export-csv" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            <span>دانلود جدول اکسل (CSV)</span>
+                        </button>
+                        <button id="btn-clear-logs" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span>پاک‌سازی جدول</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-2xl border border-slate-800">
+                    <table class="w-full text-right text-xs text-slate-300">
+                        <thead class="bg-slate-900 text-slate-400 font-bold border-b border-slate-800">
+                            <tr>
+                                <th class="p-3 text-center">#</th>
+                                <th class="p-3">زمان</th>
+                                <th class="p-3">جرم (g)</th>
+                                <th class="p-3">حجم (cm³)</th>
+                                <th class="p-3">چگالی جسم</th>
+                                <th class="p-3">مایع</th>
+                                <th class="p-3">گرانش g</th>
+                                <th class="p-3">شناوری (Fb)</th>
+                                <th class="p-3">وزن ظاهری</th>
+                                <th class="p-3">وضعیت فیزیکی</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sandbox-logs-tbody" class="divide-y divide-slate-800/60 font-mono">
+                            <tr id="empty-logs-row">
+                                <td colspan="10" class="p-6 text-center text-slate-500 font-sans">
+                                    هنوز داده‌ای ثبت نشده است. متغیرها را تغییر داده و دکمه «ثبت داده جاری در جدول» را بفشارید.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer: Non-VPN Reassurance and External Link -->
+            <div class="p-4 bg-slate-950/95 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-2 text-slate-300">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                    <span>این شبیه‌ساز به‌صورت ۱۰۰٪ بومی و درون‌برنامه‌ای اجرا شده و نیازی به اینترنت یا فیلترشکن ندارد.</span>
+                </div>
+                <a href="${phetUrl}" target="_blank" rel="noopener noreferrer" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-850 text-cyan-300 border border-cyan-800/50 font-bold flex items-center gap-1.5 transition-all">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    <span>مشاهده صفحه دانشگاه کلرادو (اختیاری در تب جدید) ↗</span>
+                </a>
             </div>
         </div>
         `;
+
+        // Update Physics State & Graphics
+        const updatePhysics = () => {
+            const solidDensity = state.mass / state.volume;
+            const weightN = (state.mass / 1000) * state.gravity;
+            
+            // Submerged fraction: if solidDensity < fluidDensity -> floating
+            let submergedFraction = 1.0;
+            let statusText = 'غوطه‌ور در تعادل خنثی';
+            let statusBadgeClass = 'bg-cyan-950 border-cyan-700 text-cyan-300';
+            let blockY = 120; // default mid-tank
+
+            if (state.gravity === 0) {
+                submergedFraction = 0.5;
+                statusText = 'بی‌وزنی مطلق (سکون فضا)';
+                statusBadgeClass = 'bg-purple-950 border-purple-700 text-purple-300';
+                blockY = 90;
+            } else if (solidDensity < state.fluidDensity) {
+                submergedFraction = solidDensity / state.fluidDensity;
+                statusText = `شناور بر سطح مایع (${Math.round(submergedFraction * 100)}% غوطه‌ور)`;
+                statusBadgeClass = 'bg-emerald-950 border-emerald-700 text-emerald-300';
+                // Block sits higher
+                blockY = 110 - (1 - submergedFraction) * 45;
+            } else if (solidDensity > state.fluidDensity) {
+                submergedFraction = 1.0;
+                statusText = 'ته‌نشین در کف ظرف (چگالی بیشتر)';
+                statusBadgeClass = 'bg-rose-950 border-rose-700 text-rose-300';
+                blockY = 180; // on bottom
+            }
+
+            const submergedVolume = state.volume * submergedFraction;
+            const buoyantForceN = (submergedVolume * state.fluidDensity / 1000) * state.gravity;
+            const apparentWeightN = Math.max(0, weightN - buoyantForceN);
+            const netForceN = buoyantForceN - weightN;
+            const accel = state.mass > 0 ? (netForceN / (state.mass / 1000)) : 0;
+
+            // DOM Updates
+            const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+            setText('fbd-readout-g', state.gravity.toFixed(2));
+            setText('slider-mass-val', `${state.mass} g`);
+            setText('slider-vol-val', `${state.volume} cm³`);
+            setText('slider-fluid-val', `${state.fluidName} (${state.fluidDensity.toFixed(2)} g/cm³)`);
+            setText('slider-grav-val', `g = ${state.gravity.toFixed(2)} m/s²`);
+
+            setText('readout-solid-density', `${solidDensity.toFixed(2)} g/cm³`);
+            setText('readout-buoyant-n', `${buoyantForceN.toFixed(2)} N`);
+            setText('readout-apparent-n', `${apparentWeightN.toFixed(2)} N`);
+            setText('readout-accel', `${accel.toFixed(2)} m/s²`);
+
+            const badge = document.getElementById('fbd-state-badge');
+            if (badge) {
+                badge.textContent = statusText;
+                badge.className = `px-3 py-1 rounded-lg font-bold ${statusBadgeClass}`;
+            }
+
+            // SVG Updates
+            const svgLiquid = document.getElementById('svg-liquid-rect');
+            if (svgLiquid) svgLiquid.setAttribute('fill', state.fluidColor);
+
+            const svgBlock = document.getElementById('svg-object-block');
+            if (svgBlock) {
+                svgBlock.setAttribute('y', blockY);
+                const blockHeight = Math.max(40, Math.min(90, Math.round(state.volume / 6)));
+                svgBlock.setAttribute('height', blockHeight);
+                const blockWidth = Math.max(50, Math.min(110, Math.round(state.volume / 5)));
+                svgBlock.setAttribute('width', blockWidth);
+                svgBlock.setAttribute('x', 180 - blockWidth / 2);
+            }
+
+            const svgText = document.getElementById('svg-object-text');
+            if (svgText) {
+                svgText.setAttribute('y', blockY + 35);
+                svgText.textContent = `${state.mass}g`;
+            }
+
+            // Vector lengths scaled for display (max 90px)
+            const maxArrow = 85;
+            const scale = weightN > 0 ? (maxArrow / Math.max(weightN, buoyantForceN, 5)) : 10;
+            const buoyantLen = Math.min(maxArrow, Math.max(10, buoyantForceN * scale));
+            const weightLen = Math.min(maxArrow, Math.max(10, weightN * scale));
+
+            const arrowFb = document.getElementById('svg-arrow-buoyant');
+            const labelFb = document.getElementById('svg-label-buoyant');
+            if (arrowFb) arrowFb.setAttribute('y2', -buoyantLen);
+            if (labelFb) {
+                labelFb.setAttribute('y', -buoyantLen / 2);
+                labelFb.textContent = `Fb = ${buoyantForceN.toFixed(2)} N`;
+            }
+
+            const arrowW = document.getElementById('svg-arrow-weight');
+            const labelW = document.getElementById('svg-label-weight');
+            if (arrowW) arrowW.setAttribute('y2', weightLen);
+            if (labelW) {
+                labelW.setAttribute('y', weightLen / 2);
+                labelW.textContent = `W = ${weightN.toFixed(2)} N`;
+            }
+
+            const arrowNet = document.getElementById('svg-arrow-net');
+            const labelNet = document.getElementById('svg-label-net');
+            if (arrowNet && labelNet) {
+                if (Math.abs(netForceN) < 0.05) {
+                    arrowNet.setAttribute('stroke', 'transparent');
+                    labelNet.textContent = 'Fnet = 0 (تعادل)';
+                } else if (netForceN > 0) {
+                    arrowNet.setAttribute('stroke', '#06b6d4');
+                    arrowNet.setAttribute('y2', -Math.min(maxArrow, netForceN * scale));
+                    labelNet.textContent = `↑ Fnet=${netForceN.toFixed(2)}N`;
+                } else {
+                    arrowNet.setAttribute('stroke', '#06b6d4');
+                    arrowNet.setAttribute('y2', Math.min(maxArrow, Math.abs(netForceN) * scale));
+                    labelNet.textContent = `↓ Fnet=${Math.abs(netForceN).toFixed(2)}N`;
+                }
+            }
+        };
+
+        // Bind Sliders
+        const massSlider = document.getElementById('slider-mass');
+        if (massSlider) massSlider.oninput = (e) => { state.mass = parseFloat(e.target.value); updatePhysics(); };
+
+        const volSlider = document.getElementById('slider-vol');
+        if (volSlider) volSlider.oninput = (e) => { state.volume = parseFloat(e.target.value); updatePhysics(); };
+
+        // Bind Liquid buttons
+        container.querySelectorAll('.btn-liq-choice').forEach(btn => {
+            btn.onclick = () => {
+                container.querySelectorAll('.btn-liq-choice').forEach(b => {
+                    b.classList.remove('bg-cyan-500/20', 'border-cyan-500', 'text-cyan-300');
+                    b.classList.add('bg-slate-900', 'border-slate-800', 'text-slate-400');
+                });
+                btn.classList.add('bg-cyan-500/20', 'border-cyan-500', 'text-cyan-300');
+                btn.classList.remove('bg-slate-900', 'border-slate-800', 'text-slate-400');
+                const idx = parseInt(btn.getAttribute('data-liq-idx'));
+                const sel = liquids[idx];
+                state.fluidDensity = sel.density;
+                state.fluidName = sel.name;
+                state.fluidColor = sel.color;
+                updatePhysics();
+            };
+        });
+
+        // Bind Gravity buttons
+        container.querySelectorAll('.btn-grav-choice').forEach(btn => {
+            btn.onclick = () => {
+                container.querySelectorAll('.btn-grav-choice').forEach(b => {
+                    b.classList.remove('bg-purple-500/20', 'border-purple-500', 'text-purple-300');
+                    b.classList.add('bg-slate-900', 'border-slate-800', 'text-slate-400');
+                });
+                btn.classList.add('bg-purple-500/20', 'border-purple-500', 'text-purple-300');
+                btn.classList.remove('bg-slate-900', 'border-slate-800', 'text-slate-400');
+                const idx = parseInt(btn.getAttribute('data-grav-idx'));
+                state.gravity = gravities[idx].g;
+                updatePhysics();
+            };
+        });
+
+        // Datalogging Logic
+        const renderLogsTable = () => {
+            const tbody = document.getElementById('sandbox-logs-tbody');
+            const countBadge = document.getElementById('log-count-badge');
+            if (countBadge) countBadge.textContent = `${state.logs.length} آزمایش ثبت‌شده`;
+            if (!tbody) return;
+
+            if (state.logs.length === 0) {
+                tbody.innerHTML = `
+                <tr id="empty-logs-row">
+                    <td colspan="10" class="p-6 text-center text-slate-500 font-sans">
+                        هنوز داده‌ای ثبت نشده است. متغیرها را تغییر داده و دکمه «ثبت داده جاری در جدول» را بفشارید.
+                    </td>
+                </tr>`;
+                return;
+            }
+
+            tbody.innerHTML = state.logs.map((log, idx) => `
+                <tr class="hover:bg-slate-900/60 transition-colors">
+                    <td class="p-3 text-center text-slate-400 font-bold">${idx + 1}</td>
+                    <td class="p-3 text-slate-400 font-sans text-[11px]">${log.time}</td>
+                    <td class="p-3 text-teal-300 font-bold">${log.mass}</td>
+                    <td class="p-3 text-cyan-300 font-bold">${log.volume}</td>
+                    <td class="p-3 text-amber-300 font-bold">${log.solidDensity}</td>
+                    <td class="p-3 text-slate-200 font-sans">${log.fluidName}</td>
+                    <td class="p-3 text-purple-300">${log.gravity}</td>
+                    <td class="p-3 text-emerald-400 font-bold">${log.buoyantN} N</td>
+                    <td class="p-3 text-cyan-400 font-bold">${log.apparentN} N</td>
+                    <td class="p-3 font-sans text-[11px] ${log.statusColor}">${log.status}</td>
+                </tr>
+            `).join('');
+        };
+
+        const btnLog = document.getElementById('btn-log-measurement');
+        if (btnLog) {
+            btnLog.onclick = () => {
+                const solidDensity = (state.mass / state.volume).toFixed(2);
+                const weightN = ((state.mass / 1000) * state.gravity);
+                let submergedFraction = solidDensity < state.fluidDensity ? (solidDensity / state.fluidDensity) : 1.0;
+                let buoyantN = ((state.volume * submergedFraction * state.fluidDensity / 1000) * state.gravity).toFixed(2);
+                let apparentN = Math.max(0, weightN - parseFloat(buoyantN)).toFixed(2);
+                let status = solidDensity < state.fluidDensity ? 'شناور' : (solidDensity === state.fluidDensity ? 'غوطه‌ور' : 'ته‌نشین');
+                let statusColor = solidDensity < state.fluidDensity ? 'text-emerald-400' : (solidDensity === state.fluidDensity ? 'text-cyan-400' : 'text-rose-400');
+
+                const now = new Date();
+                const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+                state.logs.unshift({
+                    time: timeStr,
+                    mass: state.mass,
+                    volume: state.volume,
+                    solidDensity,
+                    fluidName: state.fluidName,
+                    fluidDensity: state.fluidDensity,
+                    gravity: state.gravity.toFixed(2),
+                    buoyantN,
+                    apparentN,
+                    status,
+                    statusColor
+                });
+
+                renderLogsTable();
+                if (window.showToast) window.showToast('آزمایش جدید با موفقیت در برگه داده‌ها ثبت گردید (+۵ XP)', 'success');
+            };
+        }
+
+        const btnClear = document.getElementById('btn-clear-logs');
+        if (btnClear) {
+            btnClear.onclick = () => {
+                state.logs = [];
+                renderLogsTable();
+            };
+        }
+
+        const btnExport = document.getElementById('btn-export-csv');
+        if (btnExport) {
+            btnExport.onclick = () => {
+                if (state.logs.length === 0) {
+                    alert('هنوز ردیفی برای استخراج در جدول ثبت نشده است.');
+                    return;
+                }
+                let csv = 'ردیف,زمان,جرم (g),حجم (cm3),چگالی جسم (g/cm3),مایع,چگالی مایع (g/cm3),گرانش (m/s2),نیروی شناوری (N),وزن ظاهری (N),وضعیت\n';
+                state.logs.forEach((l, i) => {
+                    csv += `${i + 1},${l.time},${l.mass},${l.volume},${l.solidDensity},${l.fluidName},${l.fluidDensity},${l.gravity},${l.buoyantN},${l.apparentN},${l.status}\n`;
+                });
+                const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `physics_experiment_${simId}_${Date.now()}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+        }
+
+        const btnReset = document.getElementById('sandbox-reset-btn');
+        if (btnReset) {
+            btnReset.onclick = () => {
+                state.mass = 250;
+                state.volume = 200;
+                state.fluidDensity = 1.00;
+                state.fluidName = 'آب خالص';
+                state.fluidColor = 'rgba(6,182,212,0.35)';
+                state.gravity = 9.80;
+                if (massSlider) massSlider.value = 250;
+                if (volSlider) volSlider.value = 200;
+                updatePhysics();
+            };
+        }
+
+        const btnFullscreen = document.getElementById('sandbox-fullscreen-btn');
+        if (btnFullscreen) {
+            btnFullscreen.onclick = () => {
+                const el = document.getElementById('analytical-sandbox-wrapper');
+                if (!el) return;
+                if (!document.fullscreenElement) {
+                    el.requestFullscreen().catch(err => console.warn(err));
+                } else {
+                    document.exitFullscreen();
+                }
+            };
+        }
+
+        updatePhysics();
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    renderPhetSim(container, labDef) {
+        return this.renderAnalyticalSandbox(container, labDef);
     }
 
     toggleIframeFullscreen(wrapperId) {
-        const el = document.getElementById(wrapperId);
+        const el = document.getElementById(wrapperId) || document.getElementById('analytical-sandbox-wrapper');
         if (!el) return;
         if (!document.fullscreenElement) {
             el.requestFullscreen().catch(err => console.warn(err));
@@ -3248,8 +3796,8 @@ class PhysicsSimulators {
     }
 
     reloadIframe(iframeId) {
-        const iframe = document.getElementById(iframeId);
-        if (iframe) iframe.src = iframe.src;
+        const resetBtn = document.getElementById('sandbox-reset-btn');
+        if (resetBtn) resetBtn.click();
     }
 
     // =========================================================================

@@ -172,8 +172,8 @@ app.include_router(gamification.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 
-# Uploaded files directory for study materials & notes
-uploads_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "uploads"))
+# Uploaded files directory for study materials & notes (Persisted in volume data/uploads)
+uploads_dir = os.path.abspath(settings.UPLOAD_DIR)
 os.makedirs(os.path.join(uploads_dir, "materials"), exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 

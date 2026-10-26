@@ -1673,17 +1673,17 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                     </button>
                 </div>
 
-                <!-- Mode Switcher (Native vs PhET) -->
+                <!-- Mode Switcher (Native vs Sandbox) -->
                 <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs">
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', 'native', '${gradeFilter}')"
                         class="px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 ${currentMode === 'native' ? 'bg-teal-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'}">
                         <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-                        <span>شبیه‌ساز بومی کوانتوم</span>
+                        <span>شبیه‌ساز تعاملی بومی (بدون نیاز به فیلترشکن)</span>
                     </button>
-                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', 'phet', '${gradeFilter}')"
-                        class="px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 ${currentMode === 'phet' ? 'bg-cyan-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'}">
-                        <i data-lucide="globe" class="w-3.5 h-3.5"></i>
-                        <span>سندباکس باز PhET</span>
+                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', 'sandbox', '${gradeFilter}')"
+                        class="px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 ${(currentMode === 'sandbox' || currentMode === 'phet') ? 'bg-cyan-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'}">
+                        <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+                        <span>میزکار تحلیل برداری و ثبت داده‌ها (سندباکس آزاد)</span>
                     </button>
                 </div>
             </div>

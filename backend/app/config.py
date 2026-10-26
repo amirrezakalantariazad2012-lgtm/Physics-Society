@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     # Initial Admin Setup
     INITIAL_ADMIN_USERNAME: str = "admin"
     INITIAL_ADMIN_EMAIL: str = "admin@physics-beheshti.ir"
-    INITIAL_ADMIN_PASSWORD: str = "AdminPhysics1405!"
+    INITIAL_ADMIN_PASSWORD: str = "admin"
 
     # AI Service Configuration (Nexora OpenRouter Free Engine)
     AI_PROVIDER: str = "openrouter"  # 'openrouter', 'openai', 'deepseek', 'ollama', 'mock'
