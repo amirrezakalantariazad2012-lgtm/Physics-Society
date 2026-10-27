@@ -982,9 +982,10 @@ class PhysicsSimulators {
             return 'states-of-matter-basics';
         }
 
-        // 2. Density & Archimedes (Grade 7 Ch 2: اندازه‌گیری)
+        // 2. Density, Measurement & Springs (Grade 7 Ch 2: اندازه‌گیری)
         if (chapterTitle.includes('اندازه‌گیری') || combined.includes('چگالی') || combined.includes('ارشمیدس') || combined.includes('شناوری') || combined.includes('استوانه مدرج') || combined.includes('سنجش حجم')) {
-            if (combined.includes('آونگ')) return 'pendulum-lab';
+            if (combined.includes('آونگ') || combined.includes('زمان‌سنجی')) return 'pendulum-lab';
+            if (lessonTitle.includes('نیروسنج') || lessonTitle.includes('جرم و وزن')) return 'masses-springs';
             return 'density';
         }
 
@@ -1029,22 +1030,8 @@ class PhysicsSimulators {
             return 'bending-light';
         }
 
-        // 9. Motion & Kinematics (Grade 9 Ch 4: حرکت چیست؟)
-        if (chapterTitle.includes('حرکت چیست') || lessonTitle.includes('مسافت') || lessonTitle.includes('جابه‌جایی') || lessonTitle.includes('تندی') || lessonTitle.includes('سرعت') || lessonTitle.includes('شتاب')) {
-            if (lessonTitle.includes('مسافت') || lessonTitle.includes('جابه‌جایی') || lessonTitle.includes('بردار')) {
-                return 'vector-addition';
-            }
-            if (lessonTitle.includes('نمودار') || lessonTitle.includes('مکان - زمان') || lessonTitle.includes('سرعت - زمان') || lessonTitle.includes('شتاب') || lessonTitle.includes('تندی') || lessonTitle.includes('سرعت')) {
-                return 'calculus-grapher';
-            }
-            if (lessonTitle.includes('پرتابه')) {
-                return 'projectile-motion';
-            }
-            return 'calculus-grapher';
-        }
-
-        // 10. Forces, Newton Laws & Dynamics (Grade 9 Ch 5: نیرو و قوانین نیوتون)
-        if (chapterTitle.includes('نیرو')) {
+        // 9. Forces, Newton Laws & Dynamics (Grade 9 Ch 5: نیرو و قوانین نیوتون)
+        if (chapterTitle.includes('نیرو و قوانین') || (chapterTitle.includes('نیرو') && !chapterTitle.includes('حرکت'))) {
             if (lessonTitle.includes('هوک') || lessonTitle.includes('کشسانی فنر')) {
                 return 'hookes-law';
             }
@@ -1058,6 +1045,20 @@ class PhysicsSimulators {
                 return 'projectile-motion';
             }
             return 'forces-motion';
+        }
+
+        // 10. Motion & Kinematics (Grade 9 Ch 4: حرکت چیست؟)
+        if (chapterTitle.includes('حرکت چیست') || chapterTitle.includes('سینماتیک') || lessonTitle.includes('مسافت') || lessonTitle.includes('جابه‌جایی') || lessonTitle.includes('تندی') || lessonTitle.includes('سرعت') || lessonTitle.includes('شتاب')) {
+            if (lessonTitle.includes('نمودار') || lessonTitle.includes('مکان - زمان') || lessonTitle.includes('سرعت - زمان') || lessonTitle.includes('تندی متوسط') || lessonTitle.includes('تندی لحظه‌ای')) {
+                return 'calculus-grapher';
+            }
+            if (lessonTitle.includes('مسافت') || lessonTitle.includes('جابه‌جایی') || lessonTitle.includes('بردار')) {
+                return 'vector-addition';
+            }
+            if (lessonTitle.includes('پرتابه')) {
+                return 'projectile-motion';
+            }
+            return 'calculus-grapher';
         }
 
         // 11. Pressure & Fluids (Grade 9 Ch 8: فشار و آثار آن)
@@ -1078,7 +1079,7 @@ class PhysicsSimulators {
             if (combined.includes('ستاره') || combined.includes('طیف') || combined.includes('دمای ستارگان')) {
                 return 'blackbody-spectrum';
             }
-            if (combined.includes('چندجرمی') || combined.includes('ستاره‌های دوگانه')) {
+            if (lessonTitle.includes('منظومه شمسی') || lessonTitle.includes('سیارات') || combined.includes('چندجرمی')) {
                 return 'my-solar-system';
             }
             return 'gravity-and-orbits';
