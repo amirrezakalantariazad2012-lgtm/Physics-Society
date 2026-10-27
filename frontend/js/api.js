@@ -356,8 +356,14 @@ function formatApiErrorMessage(data, defaultMsg = 'خطایی در ارتباط 
             isFormData: true
         });
     }
+    updateStudyMaterial(id, data) {
+        return this.request(`/curriculum/study-materials/${id}`, { method: 'PUT', body: data });
+    }
     deleteStudyMaterial(id) {
         return this.request(`/curriculum/study-materials/${id}`, { method: 'DELETE' });
+    }
+    cleanupOrphanedMaterials() {
+        return this.request('/curriculum/study-materials/cleanup-orphaned', { method: 'POST' });
     }
     incrementMaterialDownload(id) {
         return this.request(`/curriculum/study-materials/${id}/increment-download`, { method: 'POST' });

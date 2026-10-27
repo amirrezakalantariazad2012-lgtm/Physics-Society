@@ -1937,13 +1937,20 @@ async function renderStudyMaterialsView(container, activeGradeId = null) {
                                 </div>
 
                                 <div>
-                                    ${m.file_url ? `
-                                    <a href="${m.file_url}" target="_blank" onclick="window.api.incrementMaterialDownload(${m.id})"
-                                        class="w-full py-2.5 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.02]">
-                                        <i data-lucide="download" class="w-4 h-4"></i>
-                                        <span>مشاهده و دریافت فایل</span>
-                                    </a>
-                                    ` : `
+                                    ${m.file_url ? (
+                                        m.file_exists_on_disk !== false ? `
+                                        <a href="${m.file_url}" target="_blank" onclick="window.api.incrementMaterialDownload(${m.id})"
+                                            class="w-full py-2.5 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.02]">
+                                            <i data-lucide="download" class="w-4 h-4"></i>
+                                            <span>مشاهده و دریافت فایل</span>
+                                        </a>
+                                        ` : `
+                                        <button onclick="alert('این فایل در حال بازبینی و به‌روزرسانی توسط دبیر محترم است.')" class="w-full py-2.5 px-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 font-bold text-xs flex items-center justify-center gap-2">
+                                            <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
+                                            <span>فایل در حال به‌روزرسانی دبیر</span>
+                                        </button>
+                                        `
+                                    ) : `
                                     <button onclick="window.showComingSoon('فایل ضمیمه این جزوه')" class="w-full py-2.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold text-xs">
                                         فایل در دست آماده‌سازی
                                     </button>

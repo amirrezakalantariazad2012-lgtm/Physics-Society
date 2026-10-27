@@ -108,6 +108,18 @@ class SupplementaryMaterialCreate(BaseModel):
     file_size_bytes: Optional[int] = 0
 
 
+class SupplementaryMaterialUpdate(BaseModel):
+    title_fa: Optional[str] = None
+    description_fa: Optional[str] = None
+    grade_id: Optional[int] = None
+    author_name: Optional[str] = None
+    category: Optional[str] = None
+    file_url: Optional[str] = None
+    original_filename: Optional[str] = None
+    file_size_bytes: Optional[int] = None
+    is_published: Optional[bool] = None
+
+
 class SupplementaryMaterialResponse(BaseModel):
     id: int
     title_fa: str
@@ -121,6 +133,7 @@ class SupplementaryMaterialResponse(BaseModel):
     file_size_bytes: int = 0
     download_count: int = 0
     is_published: bool = True
+    file_exists_on_disk: bool = True
     created_at: datetime
 
     class Config:

@@ -961,6 +961,9 @@ class AdminViews {
             materials = [];
         }
 
+        this.lastLoadedMaterials = materials;
+        const orphanedList = materials.filter(m => m.file_url && m.file_exists_on_disk === false);
+
         const categoryLabels = {
             pamphlet: { title: 'جزوه و درسنامه کامل', color: 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
             summary: { title: 'خلاصه درس و فرمول‌نامه', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' },
@@ -988,6 +991,20 @@ class AdminViews {
                     <span>➕ بارگذاری جزوه یا فایل جدید</span>
                 </button>
             </div>
+
+            <!-- Legacy Orphaned File Alert Ribbon -->
+            ${orphanedList.length > 0 ? `
+            <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-700 dark:text-amber-300">
+                <div class="flex items-center gap-2.5 text-xs font-bold">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 shrink-0"></i>
+                    <span>توجه: تعداد ${orphanedList.length} فایل از دوره‌های پیشین روی دیسک سرور یافت نشدند. می‌توانید فایل جدید را جایگزین کنید یا رکوردهای بدون فایل را با یک کلیک پاکسازی فرمایید.</span>
+                </div>
+                <button onclick="window.currentAdminViews.cleanupOrphanedMaterials()" class="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 transition-all shadow-sm flex items-center gap-1.5 self-start sm:self-auto">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>پاکسازی رکوردهای فاقد فایل</span>
+                </button>
+            </div>
+            ` : ''}
 
             <!-- Stats Ribbon -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -1088,6 +1105,15 @@ class AdminViews {
                             </div>
 
                             <h4 class="font-extrabold text-sm text-slate-800 dark:text-white leading-snug">${m.title_fa}</h4>
+
+                            <!-- File health badge -->
+                            <div class="pt-0.5">
+                                ${m.file_url ? (
+                                    m.file_exists_on_disk !== false
+                                        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 text-[10px] font-bold"><i data-lucide="check-circle" class="w-3 h-3"></i> فایل موجود و فعال در سرور</span>`
+                                        : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 text-[10px] font-bold"><i data-lucide="alert-circle" class="w-3 h-3"></i> ⚠️ فایل روی دیسک مفقود است</span>`
+                                ) : `<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-400 text-[10px]">بدون فایل ضمیمه</span>`}
+                            </div>
                             
                             ${m.description_fa ? `
                             <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
@@ -1115,15 +1141,27 @@ class AdminViews {
 
                         <!-- Action Buttons -->
                         <div class="pt-3 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-2">
-                            ${m.file_url ? `
-                            <a href="${m.file_url}" target="_blank" onclick="window.api.incrementMaterialDownload(${m.id})"
-                                class="flex-1 py-1.5 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all">
-                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                                <span>مشاهده / دانلود</span>
-                            </a>
-                            ` : `
+                            ${m.file_url ? (
+                                m.file_exists_on_disk !== false ? `
+                                <a href="${m.file_url}" target="_blank" onclick="window.api.incrementMaterialDownload(${m.id})"
+                                    class="flex-1 py-1.5 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all">
+                                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                    <span>مشاهده / دانلود</span>
+                                </a>
+                                ` : `
+                                <button onclick="window.currentAdminViews.openEditMaterialModal(${m.id})"
+                                    class="flex-1 py-1.5 px-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-xs font-bold text-center flex items-center justify-center gap-1.5 transition-all">
+                                    <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+                                    <span>جایگزینی فایل مفقود</span>
+                                </button>
+                                `
+                            ) : `
                             <span class="text-xs text-slate-400 italic">بدون لینک ضمیمه</span>
                             `}
+                            <button onclick="window.currentAdminViews.openEditMaterialModal(${m.id})" 
+                                class="p-1.5 rounded-xl text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 text-xs font-bold transition-colors" title="ویرایش اطلاعات یا تغییر فایل">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
                             <button onclick="window.currentAdminViews.deleteStudyMaterial(${m.id}, '${(m.title_fa || m.title || '').replace(/'/g, "\\'")}')" 
                                 class="p-1.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-colors" title="حذف جزوه">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -1314,6 +1352,162 @@ class AdminViews {
             this.loadTabContent();
         } catch (err) {
             alert('خطا در حذف: ' + err.message);
+        }
+    }
+
+    openEditMaterialModal(id) {
+        const mat = (this.lastLoadedMaterials || []).find(m => m.id === id);
+        if (!mat) return;
+
+        const modal = document.createElement('div');
+        modal.id = 'admin-edit-material-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md';
+        modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-blue-500/40 rounded-3xl p-6 sm:p-8 w-full max-w-xl text-slate-900 dark:text-white space-y-5 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="font-extrabold text-base">ویرایش جزوه و جایگزینی فایل</h3>
+                </div>
+                <button onclick="document.getElementById('admin-edit-material-modal').remove()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="window.currentAdminViews.handleEditMaterialSubmit(event, ${id})" class="space-y-4 text-xs font-bold">
+                <div>
+                    <label class="block text-slate-500 text-[11px] mb-1">عنوان درسنامه یا جزوه: *</label>
+                    <input type="text" name="title_fa" required value="${(mat.title_fa || '').replace(/"/g, '&quot;')}"
+                        class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:border-blue-500 text-xs" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-500 text-[11px] mb-1">پایه تحصیلی:</label>
+                        <select name="grade_id" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:border-blue-500 text-xs">
+                            <option value="" ${!mat.grade_id ? 'selected' : ''}>عمومی (تمامی پایه‌ها)</option>
+                            <option value="1" ${mat.grade_id === 1 ? 'selected' : ''}>پایه هفتم</option>
+                            <option value="2" ${mat.grade_id === 2 ? 'selected' : ''}>پایه هشتم</option>
+                            <option value="3" ${mat.grade_id === 3 ? 'selected' : ''}>پایه نهم</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-500 text-[11px] mb-1">دسته‌بندی محتوا:</label>
+                        <select name="category" class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:border-blue-500 text-xs">
+                            <option value="pamphlet" ${mat.category === 'pamphlet' ? 'selected' : ''}>جزوه و درسنامه کامل</option>
+                            <option value="summary" ${mat.category === 'summary' ? 'selected' : ''}>خلاصه درس و فرمول‌نامه</option>
+                            <option value="exam_sample" ${mat.category === 'exam_sample' ? 'selected' : ''}>نمونه سؤال امتحانی</option>
+                            <option value="slide" ${mat.category === 'slide' ? 'selected' : ''}>اسلاید و ارائه کلاسی</option>
+                            <option value="other" ${mat.category === 'other' ? 'selected' : ''}>سایر منابع</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 text-[11px] mb-1">نام مؤلف یا گردآورنده:</label>
+                    <input type="text" name="author_name" value="${(mat.author_name || '').replace(/"/g, '&quot;')}"
+                        class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:border-blue-500 text-xs" />
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 text-[11px] mb-1">توضیحات و سرفصل‌ها:</label>
+                    <textarea name="description_fa" rows="2"
+                        class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:border-blue-500 text-xs resize-none">${mat.description_fa || ''}</textarea>
+                </div>
+
+                <!-- File Replacement Section -->
+                <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
+                    <span class="block text-xs font-bold text-slate-700 dark:text-slate-200">فایل ضمیمه درسنامه:</span>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">
+                        ${mat.file_url ? `فایل فعلی: <code class="font-mono text-blue-600 dark:text-blue-400">${mat.original_filename || mat.file_url}</code>` : 'در حال حاضر فایلی ضمیمه نشده است.'}
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-500 text-[11px] mb-1">بارگذاری فایل جایگزین (PDF, Word, PowerPoint تا ۵۰ مگابایت):</label>
+                        <input type="file" name="material_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xlsx,.zip,.rar"
+                            class="w-full p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs" />
+                    </div>
+                </div>
+
+                <div id="material-edit-progress" class="hidden p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center gap-2">
+                    <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span>در حال ذخیره تغییرات و جایگزینی فایل...</span>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="document.getElementById('admin-edit-material-modal').remove()" 
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        انصراف
+                    </button>
+                    <button type="submit" id="material-edit-submit-btn" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md">
+                        ذخیره تغییرات
+                    </button>
+                </div>
+            </form>
+        </div>
+        `;
+        document.body.appendChild(modal);
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    async handleEditMaterialSubmit(e, id) {
+        e.preventDefault();
+        const form = e.target;
+        const progressBox = document.getElementById('material-edit-progress');
+        const submitBtn = document.getElementById('material-edit-submit-btn');
+        if (progressBox) progressBox.classList.remove('hidden');
+        if (submitBtn) submitBtn.disabled = true;
+
+        try {
+            const formData = new FormData(form);
+            const titleFa = formData.get('title_fa');
+            const gradeIdVal = formData.get('grade_id');
+            const gradeId = gradeIdVal ? parseInt(gradeIdVal) : null;
+            const category = formData.get('category') || 'pamphlet';
+            const authorName = formData.get('author_name');
+            const descriptionFa = formData.get('description_fa');
+            const fileInput = form.querySelector('input[name="material_file"]');
+
+            const payload = {
+                title_fa: titleFa,
+                description_fa: descriptionFa,
+                grade_id: gradeId,
+                author_name: authorName,
+                category: category
+            };
+
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                const uploadData = new FormData();
+                uploadData.append('file', fileInput.files[0]);
+                const uploadRes = await window.api.uploadStudyMaterialFile(uploadData);
+                payload.file_url = uploadRes.file_url;
+                payload.original_filename = uploadRes.original_filename;
+                payload.file_size_bytes = uploadRes.file_size_bytes;
+            }
+
+            await window.api.updateStudyMaterial(id, payload);
+            alert('اطلاعات و فایل درسنامه با موفقیت به‌روزرسانی شد.');
+            const m = document.getElementById('admin-edit-material-modal');
+            if (m) m.remove();
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در به‌روزرسانی: ' + err.message);
+            if (progressBox) progressBox.classList.add('hidden');
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    }
+
+    async cleanupOrphanedMaterials() {
+        if (!confirm('آیا از پاکسازی رکوردهای فاقد فایل فیزیکی از پایگاه‌داده اطمینان دارید؟')) return;
+        try {
+            const res = await window.api.cleanupOrphanedMaterials();
+            alert(res.message_fa || 'پاکسازی با موفقیت انجام شد.');
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در پاکسازی: ' + err.message);
         }
     }
 

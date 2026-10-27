@@ -3,6 +3,11 @@ from typing import List
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))
+DEFAULT_UPLOAD_DIR = os.path.join(PROJECT_ROOT, "data", "uploads")
+DEFAULT_TEXTBOOK_DIR = os.path.join(PROJECT_ROOT, "data", "textbooks")
+
 class Settings(BaseSettings):
     # Application Info
     APP_NAME: str = "انجمن فیزیک شهید بهشتی دو دوره اول"
@@ -41,9 +46,9 @@ class Settings(BaseSettings):
     AI_MAX_RETRIES: int = 3
     AI_TEMPERATURE: float = 0.35
 
-    # Storage paths
-    UPLOAD_DIR: str = "./data/uploads"
-    TEXTBOOK_DIR: str = "./data/textbooks"
+    # Storage paths (anchored to project root)
+    UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", DEFAULT_UPLOAD_DIR)
+    TEXTBOOK_DIR: str = os.getenv("TEXTBOOK_DIR", DEFAULT_TEXTBOOK_DIR)
     MAX_UPLOAD_SIZE_MB: int = 50
 
     class Config:

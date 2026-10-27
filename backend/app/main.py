@@ -146,9 +146,10 @@ async def check_payload_size(request: Request, call_next):
     if cl_header:
         try:
             cl = int(cl_header)
-            # 20MB limit for general API payloads
-            if cl > 20 * 1024 * 1024:
-                return JSONResponse(status_code=413, content={"detail": "حجم داده‌های ارسالی بیش از سقف مجاز است."})
+            # Allow up to settings.MAX_UPLOAD_SIZE_MB (default 50MB)
+            max_bytes = getattr(settings, "MAX_UPLOAD_SIZE_MB", 50) * 1024 * 1024
+            if cl > max_bytes:
+                return JSONResponse(status_code=413, content={"detail": f"حجم داده‌های ارسالی بیش از سقف مجاز است (حداکثر {settings.MAX_UPLOAD_SIZE_MB} مگابایت)."})
         except ValueError:
             pass
     return await call_next(request)

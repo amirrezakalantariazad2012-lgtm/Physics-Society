@@ -14,7 +14,7 @@ from app.models.gamification import StudentProgress
 from app.schemas.curriculum import (
     GradeResponse, BookResponse, ChapterResponse, LessonResponse,
     ExerciseResponse, ExerciseSubmit, ExerciseSubmitResult, LessonProgressUpdate,
-    SupplementaryMaterialCreate, SupplementaryMaterialResponse
+    SupplementaryMaterialCreate, SupplementaryMaterialUpdate, SupplementaryMaterialResponse
 )
 from app.services.auth import get_current_user, get_optional_current_user
 from app.services.gamification_service import award_xp, record_daily_streak
@@ -394,9 +394,37 @@ def get_study_materials(
             file_size_bytes=it.file_size_bytes or 0,
             download_count=it.download_count or 0,
             is_published=it.is_published,
+            file_exists_on_disk=check_material_disk_file(it.file_url),
             created_at=it.created_at
         ))
     return results
+
+
+def check_material_disk_file(file_url: Optional[str]) -> bool:
+    """Verifies whether the physical file exists on the server disk"""
+    if not file_url:
+        return False
+    if file_url.startswith("/uploads/"):
+        rel_path = file_url[len("/uploads/"):].lstrip("/")
+        full_path = os.path.abspath(os.path.join(settings.UPLOAD_DIR, rel_path))
+        return os.path.isfile(full_path)
+    return True
+
+
+def remove_disk_file_if_present(file_url: Optional[str]) -> bool:
+    """Safely removes a physical file from storage without traversal risks"""
+    if not file_url or not file_url.startswith("/uploads/"):
+        return False
+    rel_path = file_url[len("/uploads/"):].lstrip("/")
+    full_path = os.path.abspath(os.path.join(settings.UPLOAD_DIR, rel_path))
+    upload_dir_abs = os.path.abspath(settings.UPLOAD_DIR)
+    try:
+        if os.path.commonpath([full_path, upload_dir_abs]) == upload_dir_abs and os.path.isfile(full_path):
+            os.remove(full_path)
+            return True
+    except Exception:
+        pass
+    return False
 
 
 @router.post("/study-materials", response_model=SupplementaryMaterialResponse)
@@ -441,12 +469,13 @@ def create_study_material(
         file_size_bytes=mat.file_size_bytes or 0,
         download_count=mat.download_count or 0,
         is_published=mat.is_published,
+        file_exists_on_disk=check_material_disk_file(mat.file_url),
         created_at=mat.created_at
     )
 
 
 ALLOWED_EXTENSIONS = {
-    ".pdf", ".docx", ".pptx", ".xlsx", ".zip", ".rar",
+    ".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".zip", ".rar",
     ".png", ".jpg", ".jpeg", ".webp", ".txt"
 }
 
@@ -460,6 +489,8 @@ MAGIC_SIGNATURES = {
     ".pptx": [b"PK\x03\x04"],
     ".xlsx": [b"PK\x03\x04"],
     ".zip": [b"PK\x03\x04"],
+    ".doc": [b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"],
+    ".ppt": [b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"],
     ".rar": [b"Rar!\x1a\x07"],
 }
 
@@ -478,8 +509,8 @@ def pentagon_validate_upload(filename: str, content: bytes) -> str:
     """
     Military-grade validation and sanitization of uploaded files:
     1. Null-byte injection check
-    2. Strict extension whitelist
-    3. Magic bytes / file header verification against MIME spoofing
+    2. Strict extension whitelist (.pdf, .docx, .doc, .pptx, .ppt, .xlsx, images, zip, rar, txt)
+    3. Magic bytes / file header verification against MIME spoofing (ISO 32000-1 compliant for PDF)
     4. Malicious executable & script header blocking
     5. Path traversal elimination and filename sanitization
     """
@@ -499,9 +530,9 @@ def pentagon_validate_upload(filename: str, content: bytes) -> str:
         )
 
     # Check file size (max 50 MB)
-    max_size = 50 * 1024 * 1024
+    max_size = getattr(settings, "MAX_UPLOAD_SIZE_MB", 50) * 1024 * 1024
     if len(content) > max_size:
-        raise HTTPException(status_code=400, detail="حجم فایل بیش از حد مجاز است (حداکثر ۵۰ مگابایت).")
+        raise HTTPException(status_code=400, detail=f"حجم فایل بیش از حد مجاز است (حداکثر {settings.MAX_UPLOAD_SIZE_MB} مگابایت).")
 
     if len(content) < 4:
         raise HTTPException(status_code=400, detail="فایل ارسالی خالی یا مخدوش است.")
@@ -512,7 +543,14 @@ def pentagon_validate_upload(filename: str, content: bytes) -> str:
             raise HTTPException(status_code=400, detail="خطای امنیتی فوق‌العاده: امضای باینری فایل اجرایی یا اسکریپت مسدود گردید.")
 
     # Verify matching magic bytes
-    if ext in MAGIC_SIGNATURES:
+    if ext == ".pdf":
+        # Per ISO 32000-1, %PDF- can be located anywhere in the first 1024 bytes (e.g. after UTF-8 BOM, comments, etc.)
+        if b"%PDF-" not in content[:1024]:
+            raise HTTPException(
+                status_code=400,
+                detail="عدم تطابق امضای باینری: محتوای فایل با استاندارد PDF همخوانی ندارد (%PDF- یافت نشد)."
+            )
+    elif ext in MAGIC_SIGNATURES:
         signatures = MAGIC_SIGNATURES[ext]
         matches = any(content.startswith(sig) for sig in signatures)
         if ext == ".webp" and matches:
@@ -563,13 +601,82 @@ async def upload_material_file(
     }
 
 
+@router.put("/study-materials/{material_id}", response_model=SupplementaryMaterialResponse)
+def update_study_material(
+    material_id: int,
+    req: SupplementaryMaterialUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Updates an existing study material or replaces its attached file (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="دسترسی غیرمجاز: فقط ادمین مجاز است.")
+
+    mat = db.query(SupplementaryMaterial).filter(SupplementaryMaterial.id == material_id).first()
+    if not mat:
+        raise HTTPException(status_code=404, detail="درسنامه یا جزوه مورد نظر یافت نشد.")
+
+    old_file_url = mat.file_url
+
+    if req.title_fa is not None:
+        mat.title_fa = req.title_fa.strip()
+    if req.description_fa is not None:
+        mat.description_fa = req.description_fa.strip() if req.description_fa else None
+    if req.grade_id is not None:
+        mat.grade_id = req.grade_id
+    if req.author_name is not None:
+        mat.author_name = req.author_name.strip() if req.author_name else mat.author_name
+    if req.category is not None:
+        mat.category = req.category
+    if req.is_published is not None:
+        mat.is_published = req.is_published
+
+    # File replacement
+    if req.file_url is not None and req.file_url != old_file_url:
+        mat.file_url = req.file_url.strip() if req.file_url else None
+        if req.original_filename is not None:
+            mat.original_filename = req.original_filename
+        if req.file_size_bytes is not None:
+            mat.file_size_bytes = req.file_size_bytes
+        # Clean up previous file if it was a local upload and changed
+        if old_file_url and old_file_url != mat.file_url:
+            remove_disk_file_if_present(old_file_url)
+
+    db.commit()
+    db.refresh(mat)
+
+    log_audit_event(
+        db, action="update_study_material", target_entity="supplementary_materials",
+        target_id=str(material_id), user_id=current_user.id,
+        details={"title": mat.title_fa, "file_url": mat.file_url}
+    )
+
+    g_title = mat.grade.title_fa if mat.grade else "تمامی پایه‌ها (عمومی)"
+    return SupplementaryMaterialResponse(
+        id=mat.id,
+        title_fa=mat.title_fa,
+        description_fa=mat.description_fa,
+        grade_id=mat.grade_id,
+        grade_title_fa=g_title,
+        author_name=mat.author_name,
+        category=mat.category,
+        file_url=mat.file_url,
+        original_filename=mat.original_filename,
+        file_size_bytes=mat.file_size_bytes or 0,
+        download_count=mat.download_count or 0,
+        is_published=mat.is_published,
+        file_exists_on_disk=check_material_disk_file(mat.file_url),
+        created_at=mat.created_at
+    )
+
+
 @router.delete("/study-materials/{material_id}")
 def delete_study_material(
     material_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Deletes a supplementary study material (Admin only)"""
+    """Deletes a supplementary study material and cleans up its file on disk (Admin only)"""
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="دسترسی غیرمجاز")
 
@@ -577,16 +684,56 @@ def delete_study_material(
     if not mat:
         raise HTTPException(status_code=404, detail="درسنامه یا جزوه مورد نظر یافت نشد.")
 
+    file_to_remove = mat.file_url
+    title = mat.title_fa
+
     db.delete(mat)
     db.commit()
+
+    # Physically clean up file from storage
+    if file_to_remove:
+        remove_disk_file_if_present(file_to_remove)
 
     log_audit_event(
         db, action="delete_study_material", target_entity="supplementary_materials",
         target_id=str(material_id), user_id=current_user.id,
-        details={"title": mat.title_fa}
+        details={"title": title}
     )
 
-    return {"success": True, "message_fa": "جزوه / درسنامه با موفقیت حذف گردید."}
+    return {"success": True, "message_fa": "جزوه / درسنامه و فایل ضمیمه با موفقیت حذف گردید."}
+
+
+@router.post("/study-materials/cleanup-orphaned")
+def cleanup_orphaned_materials(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Scans and removes legacy study materials whose files are missing from disk (Admin only)"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="دسترسی غیرمجاز")
+
+    materials = db.query(SupplementaryMaterial).all()
+    deleted_ids = []
+    deleted_titles = []
+    for m in materials:
+        if m.file_url and not check_material_disk_file(m.file_url):
+            deleted_ids.append(m.id)
+            deleted_titles.append(m.title_fa)
+            db.delete(m)
+
+    if deleted_ids:
+        db.commit()
+        log_audit_event(
+            db, action="cleanup_orphaned_materials", target_entity="supplementary_materials",
+            user_id=current_user.id, details={"count": len(deleted_ids), "ids": deleted_ids}
+        )
+
+    return {
+        "success": True,
+        "deleted_count": len(deleted_ids),
+        "deleted_titles": deleted_titles,
+        "message_fa": f"تعداد {len(deleted_ids)} رکورد فاقد فایل فیزیکی با موفقیت از پایگاه‌داده پاکسازی شدند."
+    }
 
 
 @router.post("/study-materials/{material_id}/increment-download")
@@ -600,4 +747,5 @@ def increment_material_download(
         mat.download_count = (mat.download_count or 0) + 1
         db.commit()
     return {"success": True}
+
 
