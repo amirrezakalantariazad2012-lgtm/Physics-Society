@@ -7,10 +7,21 @@ connect_args = {}
 if settings.DATABASE_URL.startswith("sqlite"):
     connect_args["check_same_thread"] = False
 
+engine_kwargs = {
+    "connect_args": connect_args,
+    "pool_pre_ping": True,
+}
+if not settings.DATABASE_URL.startswith("sqlite"):
+    engine_kwargs.update({
+        "pool_size": 20,
+        "max_overflow": 10,
+        "pool_timeout": 30,
+        "pool_recycle": 1800,
+    })
+
 engine = create_engine(
     settings.DATABASE_URL,
-    connect_args=connect_args,
-    pool_pre_ping=True
+    **engine_kwargs
 )
 
 # Enable foreign keys for SQLite

@@ -811,6 +811,70 @@ const SIMULATOR_CATALOG = [
         localFile: 'collision-lab.html',
         localUrl: '/simulators/phet/collision-lab.html',
         phetSlug: 'collision-lab'
+    },
+    {
+        id: 'calculus-grapher',
+        title: 'تحلیل نمودارهای حرکت، شیب و جابه‌جایی (سینماتیک)',
+        grade: 9,
+        gradeKey: 'grade_9',
+        gradeTitle: 'پایه نهم',
+        gradeLabel: 'پایه نهم',
+        category: 'سینماتیک و نمودارهای حرکت',
+        topic: 'فصل ۴ نهم: نمودارهای مکان-زمان، سرعت-زمان، تندی و شتاب',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۴ (حرکت چیست؟ — تندی متوسط، تندی لحظه‌ای، سرعت و شتاب)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — فصل ۴ (تحلیل نمودارهای x-t و v-t، شیب خط مماس و سطح زیر نمودار)',
+        icon: 'trending-up',
+        desc: 'آزمایشگاه جامع سینماتیک و نمودارهای حرکت: رسم همزمان نمودار مکان-زمان x(t)، سرعت-زمان v(t) و شتاب-زمان a(t)، تحلیل شیب خط (سرعت لحظه‌ای و شتاب) و مساحت زیر نمودار (جابه‌جایی).',
+        description: 'آزمایشگاه جامع سینماتیک و نمودارهای حرکت: رسم همزمان نمودار مکان-زمان x(t)، سرعت-زمان v(t) و شتاب-زمان a(t)، تحلیل شیب خط (سرعت لحظه‌ای و شتاب) و مساحت زیر نمودار (جابه‌جایی).',
+        formula: 'v(t) = \\frac{dx}{dt} = \\text{شیب نمودار مکان-زمان} \\quad , \\quad a(t) = \\frac{dv}{dt} = \\text{شیب نمودار سرعت-زمان} \\quad , \\quad \\Delta x = \\int v(t)\\,dt = \\text{مساحت زیر نمودار}',
+        badge: 'وزارتی و سمپاد نهم — نمودارهای سینماتیک',
+        goals: [
+            'درک عینی مفهوم شیب خط مماس بر نمودار مکان-زمان به عنوان سرعت لحظه‌ای',
+            'اثبات برابری سطح زیر نمودار سرعت-زمان با جابه‌جایی کل متحرک',
+            'تحلیل گذار بین نمودارهای مکان، سرعت و شتاب با تغییر شکل مسیر حرکت'
+        ],
+        experimentSteps: [
+            'منحنی مکان x(t) را به صورت خط مستقیم شیب‌دار رسم کنید و مشاهده کنید نمودار سرعت v(t) خطی افقی و ثابت (حرکت یکنواخت) است.',
+            'منحنی مکان را به صورت سهمی درجه ۲ انحنا دهید و ببینید سرعت متحرک به صورت خطی افزایش یافته و شتاب عددی ثابت است.',
+            'با ابزار مماس‌گیر (Tangent Line)، شیب لحظه‌ای را در ثانیه‌های مختلف بسنجید و با مقدار نمودار سرعت مقایسه کنید.',
+            'گزینه مساحت زیر منحنی (Integral/Area) را فعال کنید تا جابه‌جایی را با ضرب مساحت مستطیل یا مثلث زیر نمودار بسنجید.'
+        ],
+        misconceptions: 'اشتباه رایج: هرگاه شتاب متحرک صفر باشد، متحرک ساکن است! خیر؛ اگر شتاب صفر باشد، سرعت ثابت است و متحرک می‌تواند با سرعت ثابت بسیار بالایی در حرکت یکنواخت باشد.',
+        localFile: 'calculus-grapher.html',
+        localUrl: '/simulators/phet/calculus-grapher.html',
+        phetSlug: 'calculus-grapher'
+    },
+    {
+        id: 'vector-addition',
+        title: 'بردار جابه‌جایی، جمع برداری و مؤلفه‌ها (سینماتیک)',
+        grade: 9,
+        gradeKey: 'grade_9',
+        gradeTitle: 'پایه نهم',
+        gradeLabel: 'پایه نهم',
+        category: 'سینماتیک و بردارها',
+        topic: 'فصل ۴ نهم: کمیت‌های برداری در برابر نرده‌ای (مسافت در برابر جابه‌جایی)',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۴ (مسافت، بردار جابه‌جایی و دستگاه مختصات مرجع)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — فصل ۴ (جمع برداری، رسم بردار برآیند، تجزیه مؤلفه‌های افقی و عمودی)',
+        icon: 'compass',
+        desc: 'آزمایشگاه بردارها و سینماتیک: تعریف بردار جابه‌جایی از مبدأ به مقصد، تفاوت بنیادی مسافت طی‌شده (نرده‌ای) با جابه‌جایی مستقیم (برداری)، جمع برداری به روش مثلثی و متوازی‌الاضلاع و تجزیه مؤلفه‌های دکارتی.',
+        description: 'آزمایشگاه بردارها و سینماتیک: تعریف بردار جابه‌جایی از مبدأ به مقصد، تفاوت بنیادی مسافت طی‌شده (نرده‌ای) با جابه‌جایی مستقیم (برداری)، جمع برداری به روش مثلثی و متوازی‌الاضلاع و تجزیه مؤلفه‌های دکارتی.',
+        formula: '\\vec{R} = \\vec{A} + \\vec{B} \\quad , \\quad |\\vec{R}| = \\sqrt{R_x^2 + R_y^2} \\quad , \\quad \\theta = \\arctan\\left(\\frac{R_y}{R_x}\\right)',
+        badge: 'وزارتی و سمپاد نهم — بردار جابه‌جایی',
+        goals: [
+            'تمایز آشکار مسافت پیموده‌شده (مجموع طول مسیر) و بردار جابه‌جایی (کوتاه‌ترین پاره‌خط جهت‌دار بین مبدأ و مقصد)',
+            'مشاهده تصویری جمع برداری به دو روش دنباله‌هم (مثلثی) و متوازی‌الاضلاع',
+            'تجزیه بردار به مؤلفه‌های افقی (Rx = R cosθ) و عمودی (Ry = R sinθ)'
+        ],
+        experimentSteps: [
+            'بردار جابه‌جایی اول (d1) را از مبدأ مختصات به نقطه (3, 4) امتداد دهید و طول بردار (۵ واحد) و زاویه آن را بخوانید.',
+            'بردار جابه‌جایی دوم (d2) را به دنباله بردار اول اضافه کنید.',
+            'تیک بردار برآیند «Sum» را فعال کنید تا کوتاه‌ترین مسیر جابه‌جایی کل را مشاهده نمایید.',
+            'گزینه مؤلفه‌ها (Component Style) را روشن کنید تا مثلث قائم‌الزاویه مؤلفه‌های افقی و عمودی روی شبکه شطرنجی نمایان شود.'
+        ],
+        misconceptions: 'اشتباه رایج: مسافت و جابه‌جایی همیشه با هم برابرند! خیر؛ مسافت همواره بزرگ‌تر یا مساوی با اندازه جابه‌جایی است، و این دو تنها در صورتی برابرند که متحرک روی خط مستقیم و بدون برگشت به عقب حرکت کند.',
+        localFile: 'vector-addition.html',
+        localUrl: '/simulators/phet/vector-addition.html',
+        phetSlug: 'vector-addition'
     }
 ];
 
@@ -858,7 +922,16 @@ class PhysicsSimulators {
             'coulomb': 'coulombs-law',
             'fields': 'charges-and-fields',
             'matter': 'states-of-matter-basics',
-            'states': 'states-of-matter-basics'
+            'states': 'states-of-matter-basics',
+            'calculus-grapher': 'calculus-grapher',
+            'calculus': 'calculus-grapher',
+            'grapher': 'calculus-grapher',
+            'motion-graphs': 'calculus-grapher',
+            'kinematics': 'calculus-grapher',
+            'vector-addition': 'vector-addition',
+            'vectors': 'vector-addition',
+            'vector': 'vector-addition',
+            'displacement': 'vector-addition'
         };
         if (aliasMap[raw]) return aliasMap[raw];
 
@@ -958,8 +1031,16 @@ class PhysicsSimulators {
 
         // 9. Motion & Kinematics (Grade 9 Ch 4: حرکت چیست؟)
         if (chapterTitle.includes('حرکت چیست') || lessonTitle.includes('مسافت') || lessonTitle.includes('جابه‌جایی') || lessonTitle.includes('تندی') || lessonTitle.includes('سرعت') || lessonTitle.includes('شتاب')) {
-            if (lessonTitle.includes('پرتابه')) return 'projectile-motion';
-            return 'forces-motion';
+            if (lessonTitle.includes('مسافت') || lessonTitle.includes('جابه‌جایی') || lessonTitle.includes('بردار')) {
+                return 'vector-addition';
+            }
+            if (lessonTitle.includes('نمودار') || lessonTitle.includes('مکان - زمان') || lessonTitle.includes('سرعت - زمان') || lessonTitle.includes('شتاب') || lessonTitle.includes('تندی') || lessonTitle.includes('سرعت')) {
+                return 'calculus-grapher';
+            }
+            if (lessonTitle.includes('پرتابه')) {
+                return 'projectile-motion';
+            }
+            return 'calculus-grapher';
         }
 
         // 10. Forces, Newton Laws & Dynamics (Grade 9 Ch 5: نیرو و قوانین نیوتون)

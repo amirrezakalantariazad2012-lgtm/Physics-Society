@@ -1661,7 +1661,7 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
 
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>۲۵ شبیه‌ساز رسمی و آفلاین PhET دانشگاه کلرادو بدون نیاز به فیلترشکن</span>
+                    <span>۲۷ شبیه‌ساز رسمی و آفلاین PhET دانشگاه کلرادو بدون نیاز به فیلترشکن</span>
                 </div>
             </div>
         </div>
