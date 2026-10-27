@@ -502,30 +502,121 @@ class PhysicsSimulators {
         return 'density';
     }
 
-    getSimulatorForLesson(lessonId, chapterTitle = '') {
-        let title = '';
-        if (lessonId && typeof lessonId === 'object') {
-            title = ((lessonId.title || '') + ' ' + (lessonId.chapter_title || '') + ' ' + (lessonId.description || '')).toLowerCase();
+    getSimulatorForLesson(lesson, chapter = null) {
+        let lessonTitle = '';
+        let chapterTitle = '';
+
+        if (lesson && typeof lesson === 'object') {
+            lessonTitle = lesson.title_fa || lesson.title || '';
+            if (!chapter && lesson.chapter_title_fa) {
+                chapterTitle = lesson.chapter_title_fa;
+            } else if (!chapter && lesson.chapter_title) {
+                chapterTitle = lesson.chapter_title;
+            }
         } else {
-            title = ((lessonId || '') + ' ' + (chapterTitle || '')).toLowerCase();
+            lessonTitle = String(lesson || '');
         }
 
-        if (title.includes('چگالی') || title.includes('ارشمیدس') || title.includes('شناوری') || title.includes('استوانه')) return 'density';
-        if (title.includes('دما') || title.includes('گرما') || title.includes('حرارت') || title.includes('گرماسنج') || title.includes('کالری')) return 'energy-forms';
-        if (title.includes('انرژی') || title.includes('پایستگی') || title.includes('جنبشی') || title.includes('پتانسیل') || title.includes('اسکیت')) return 'energy-skate';
-        if (title.includes('اهرم') || title.includes('گشتاور') || title.includes('ماشین') || title.includes('قرقره') || title.includes('تعادل')) return 'balancing-act';
-        if (title.includes('مدار') || title.includes('جریان') || title.includes('اهم') || title.includes('ولتاژ') || title.includes('مقاومت')) return 'circuit-dc';
-        if (title.includes('ساکن') || title.includes('بار') || title.includes('الکتروسکوپ') || title.includes('القا') || title.includes('بادکنک')) return 'balloons-static';
-        if (title.includes('شکست') || title.includes('منشور') || title.includes('اسنل') || title.includes('زاویه حد')) return 'bending-light';
-        if (title.includes('آینه') || title.includes('عدسی') || title.includes('کانون') || title.includes('اپتیک') || title.includes('تصویر')) return 'geometric-optics';
-        if (title.includes('مغناطیس') || title.includes('آهنربا') || title.includes('فارادی') || title.includes('الکترومغناطیس')) return 'faradays-law';
-        if (title.includes('حرکت') || title.includes('تندی') || title.includes('سرعت') || title.includes('شتاب') || title.includes('نیوتون')) return 'forces-motion';
-        if (title.includes('هوک') || title.includes('کشسانی')) return 'hookes-law';
-        if (title.includes('نوسان') || title.includes('آونگ') || title.includes('فنر') || title.includes('تناوب')) return 'masses-springs';
-        if (title.includes('فشار') || title.includes('پاسکال') || title.includes('هیدرولیک') || title.includes('مانومتر') || title.includes('شاره')) return 'under-pressure';
-        if (title.includes('موج') || title.includes('صوت') || title.includes('بسامد') || title.includes('طول موج') || title.includes('رزونانس')) return 'wave-on-a-string';
+        if (chapter && typeof chapter === 'object') {
+            chapterTitle = chapter.title_fa || chapter.title || '';
+        } else if (typeof chapter === 'string') {
+            chapterTitle = chapter;
+        }
 
-        return 'density';
+        const combined = `${lessonTitle} ${chapterTitle}`.toLowerCase();
+
+        // 0. Filter out purely non-physics biological, geological, or chemical topics
+        const nonPhysicsChapters = [
+            'تفکر و تجربه', 'اتم‌ها، الفبای مواد', 'مواد پیرامون ما', 'از معدن تا خانه',
+            'سفر آب روی زمین', 'سفر آب درون زمین', 'یاخته و سازمان‌بندی', 'سفره سلامت',
+            'سفر غذا', 'گردش مواد', 'تبادل با محیط',
+            'مخلوط و جداسازی', 'تغییرهای شیمیایی', 'از درون اتم', 'تنظیم عصبی',
+            'حس و حرکت', 'تنظیم هورمونی', 'الفبای زیست‌فناوری', 'تولید مثل در جانداران',
+            'کانی‌ها', 'سنگ‌ها', 'هوازدگی',
+            'مواد و نقش آنها', 'رفتار اتم‌ها با یکدیگر', 'به دنبال محیطی بهتر برای زندگی',
+            'زمین ساخت ورقه‌ای', 'آثاری از گذشته زمین', 'نگاهی به فضا',
+            'گوناگونی جانداران', 'دنیای گیاهان', 'جانوران بی‌مهره', 'جانوران مهره‌دار', 'با هم زیستن'
+        ];
+        if (nonPhysicsChapters.some(npc => chapterTitle.includes(npc))) {
+            return null;
+        }
+
+        // 1. Density & Archimedes (Grade 7 Ch 2: اندازه‌گیری)
+        if (chapterTitle.includes('اندازه‌گیری') || combined.includes('چگالی') || combined.includes('ارشمیدس') || combined.includes('شناوری') || combined.includes('استوانه مدرج') || combined.includes('سنجش حجم')) {
+            return 'density';
+        }
+
+        // 2. Work & Mechanical Energy Conservation (Grade 7 Ch 8: انرژی و تبدیل‌های آن)
+        if (chapterTitle.includes('انرژی و تبدیل') || lessonTitle.includes('مفهوم کار') || (lessonTitle.includes('انرژی جنبشی') && !chapterTitle.includes('گرما')) || lessonTitle.includes('پتانسیل گرانشی') || lessonTitle.includes('پایستگی انرژی') || combined.includes('اسکیت')) {
+            return 'energy-skate';
+        }
+
+        // 3. Heat & Thermodynamics (Grade 7 Ch 9 & 10: منابع انرژی، گرما و بهینه‌سازی مصرف)
+        if (chapterTitle.includes('گرما') || chapterTitle.includes('منابع انرژی') || lessonTitle.includes('دما') || lessonTitle.includes('گرما') || lessonTitle.includes('انرژی درونی') || lessonTitle.includes('تعادل گرمایی') || lessonTitle.includes('رسانش') || lessonTitle.includes('همرفت') || lessonTitle.includes('تابش') || lessonTitle.includes('دماسنج') || lessonTitle.includes('سوخت‌های فسیلی') || lessonTitle.includes('خورشیدی')) {
+            return 'energy-forms';
+        }
+
+        // 4. Magnetism & Faraday (Grade 8 Ch 10: مغناطیس)
+        if (chapterTitle.includes('مغناطیس') || lessonTitle.includes('آهن‌ربا') || lessonTitle.includes('آهنربا') || lessonTitle.includes('میدان مغناطیسی') || lessonTitle.includes('فارادی') || lessonTitle.includes('الکترومغناطیس') || lessonTitle.includes('قطب‌نما')) {
+            return 'faradays-law';
+        }
+
+        // 5. Electricity: Circuits vs Static (Grade 8 Ch 9: الکتریسیته)
+        if (chapterTitle.includes('الکتریسیته')) {
+            if (lessonTitle.includes('مدار') || lessonTitle.includes('جریان') || lessonTitle.includes('اهم') || lessonTitle.includes('ولتاژ') || lessonTitle.includes('مقاومت') || lessonTitle.includes('متوالی') || lessonTitle.includes('موازی')) {
+                return 'circuit-dc';
+            }
+            if (lessonTitle.includes('بار') || lessonTitle.includes('باردار کردن') || lessonTitle.includes('الکتروسکوپ') || lessonTitle.includes('القا') || lessonTitle.includes('آذرخش') || lessonTitle.includes('ساکن')) {
+                return 'balloons-static';
+            }
+            return 'circuit-dc';
+        }
+
+        // 6. Light & Reflection (Grade 8 Ch 14: نور و ویژگی‌های آن)
+        if (chapterTitle.includes('نور و ویژگی') || lessonTitle.includes('بازتاب نور') || lessonTitle.includes('آینه‌های تخت') || lessonTitle.includes('آینه‌های کروی') || lessonTitle.includes('مقعر') || lessonTitle.includes('محدب') || lessonTitle.includes('سایه') || lessonTitle.includes('انتشار در خط مستقیم')) {
+            return 'geometric-optics';
+        }
+
+        // 7. Light Refraction & Lenses (Grade 8 Ch 15: شکست نور و عدسی‌ها)
+        if (chapterTitle.includes('شکست نور')) {
+            if (lessonTitle.includes('عدسی') || lessonTitle.includes('اصلاح دید') || lessonTitle.includes('آناتومی چشم')) {
+                return 'geometric-optics';
+            }
+            return 'bending-light';
+        }
+
+        // 8. Motion & Kinematics (Grade 9 Ch 4: حرکت چیست؟)
+        if (chapterTitle.includes('حرکت چیست') || lessonTitle.includes('مسافت') || lessonTitle.includes('جابه‌جایی') || lessonTitle.includes('تندی') || lessonTitle.includes('سرعت') || lessonTitle.includes('شتاب')) {
+            return 'forces-motion';
+        }
+
+        // 9. Forces, Newton Laws & Dynamics (Grade 9 Ch 5: نیرو و قوانین نیوتون)
+        if (chapterTitle.includes('نیرو')) {
+            if (lessonTitle.includes('هوک') || lessonTitle.includes('کشسانی فنر')) {
+                return 'hookes-law';
+            }
+            if (lessonTitle.includes('نوسان') || lessonTitle.includes('وزنه و فنر')) {
+                return 'masses-springs';
+            }
+            return 'forces-motion';
+        }
+
+        // 10. Pressure & Fluids (Grade 9 Ch 8: فشار و آثار آن)
+        if (chapterTitle.includes('فشار') || lessonTitle.includes('فشار در جامدات') || lessonTitle.includes('مایعات ساکن') || lessonTitle.includes('اصل پاسکال') || lessonTitle.includes('هیدرولیک') || lessonTitle.includes('توریچلی') || lessonTitle.includes('مانومتر') || lessonTitle.includes('فشار هوا')) {
+            return 'under-pressure';
+        }
+
+        // 11. Machines & Levers (Grade 9 Ch 9: ماشین‌ها)
+        if (chapterTitle.includes('ماشین') || lessonTitle.includes('ماشین‌های ساده') || lessonTitle.includes('گشتاور') || lessonTitle.includes('تعادل دورانی') || lessonTitle.includes('اهرم') || lessonTitle.includes('مزیت مکانیکی') || lessonTitle.includes('قرقره') || lessonTitle.includes('چرخ‌دنده') || lessonTitle.includes('بازده')) {
+            return 'balancing-act';
+        }
+
+        // 12. Mechanical Waves & Sound
+        if (combined.includes('موج') || combined.includes('صوت') || combined.includes('بسامد') || combined.includes('طول موج') || combined.includes('ارتعاش') || combined.includes('تشدید')) {
+            return 'wave-on-a-string';
+        }
+
+        return null;
     }
 
     mount(type, containerId, mode = 'native') {

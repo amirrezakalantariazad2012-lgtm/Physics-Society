@@ -86,6 +86,7 @@ class LessonResponse(BaseModel):
     content_blocks: Dict[str, Any]
     summary_fa: Optional[str] = None
     source_pages_ref: Optional[str] = None
+    chapter_title_fa: Optional[str] = None
     exercises: List[ExerciseResponse] = []
     is_completed: Optional[bool] = False
 

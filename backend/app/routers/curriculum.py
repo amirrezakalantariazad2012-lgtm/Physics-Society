@@ -244,6 +244,7 @@ def get_lesson_detail(
         content_blocks=lesson.content_blocks or {},
         summary_fa=lesson.summary_fa,
         source_pages_ref=lesson.source_pages_ref,
+        chapter_title_fa=lesson.chapter.title_fa if lesson.chapter else None,
         exercises=exercises_data,
         is_completed=is_completed
     )

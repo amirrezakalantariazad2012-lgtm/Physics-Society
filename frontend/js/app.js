@@ -392,7 +392,7 @@ async function renderDashboardView(container) {
                 labTitle: 'میز کار آزمایشگاه هشتم: مدار الکتریکی و شکست نور در عدسی‌ها',
                 labDesc: 'کاوش قانون اهم، مقاومت معادل مدارهای متوالی و موازی، اثر متقابل قطب‌های مغناطیسی، تشکیل تصویر در آینه‌های کروی و پدیده شکست نور در منشور.',
                 labActionText: 'ورود به شبیه‌ساز مدار و اپتیک',
-                simId: 'circuit'
+                simId: 'circuit-dc'
             },
             9: {
                 themeClass: 'grade-theme-9',
@@ -404,7 +404,7 @@ async function renderDashboardView(container) {
                 labTitle: 'رصدخانه تخصصی نهم: بردار نیرو، قوانین نیوتون و فشار شاره‌ها',
                 labDesc: 'تحلیل برداری سینماتیک حرکت، قوانین اول تا سوم نیوتون و نیروی اصطکاک، فشار در عمق مایعات، قانون پاسکال و مزیت مکانیکی قرقره‌ها و اهرم‌ها.',
                 labActionText: 'ورود به شبیه‌ساز حرکت و نیرو',
-                simId: 'newton'
+                simId: 'forces-motion'
             }
         };
 
@@ -825,7 +825,7 @@ async function renderChapterDetailView(container, chapterId) {
                 <h3 class="font-bold text-lg text-slate-800 dark:text-white">دروس تعاملی فصل (مسیر یادگیری):</h3>
                 <div class="space-y-3">
                     ${ch.lessons.map(l => {
-                        const simType = window.physicsSimulators ? window.physicsSimulators.getSimulatorForLesson(l) : null;
+                        const simType = window.physicsSimulators ? window.physicsSimulators.getSimulatorForLesson(l, ch) : null;
                         return `
                     <div class="flex items-center justify-between p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-500/50 transition-all">
                         <div class="flex items-center gap-4">
@@ -836,19 +836,27 @@ async function renderChapterDetailView(container, chapterId) {
                                 <div class="flex items-center gap-2">
                                     <h4 class="font-bold text-sm text-slate-800 dark:text-white">${l.title_fa}</h4>
                                     ${simType ? `
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cyan-950/60 text-cyan-300 border border-cyan-800 text-[10px] font-bold">
-                                        <i data-lucide="atom" class="w-3 h-3 text-cyan-400"></i>
+                                    <button onclick="event.stopPropagation(); window.store.setView('simulators', { id: '${simType}' })" title="انتقال به آزمایشگاه مجازی این درس" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-teal-950/70 hover:bg-teal-900 border border-teal-600/50 text-teal-300 hover:text-teal-100 text-[11px] font-bold transition-all shadow-sm cursor-pointer">
+                                        <i data-lucide="atom" class="w-3.5 h-3.5 text-teal-400"></i>
                                         <span>آزمایشگاه مجازی</span>
-                                    </span>
+                                    </button>
                                     ` : ''}
                                 </div>
                                 <span class="text-xs text-slate-400 font-sans block">مدت: ${l.estimated_minutes} دقیقه • پاداش: +${l.xp_reward} XP</span>
                             </div>
                         </div>
 
-                        <button onclick="window.store.setView('lesson', { id: ${l.id} })" class="${l.is_completed ? 'btn-duo-blue' : 'btn-duo-green'} text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-sm whitespace-nowrap">
-                            ${l.is_completed ? 'مرور مجدد' : 'شروع درس'}
-                        </button>
+                        <div class="flex items-center gap-2">
+                            ${simType ? `
+                            <button onclick="event.stopPropagation(); window.store.setView('simulators', { id: '${simType}' })" title="ورود مستقیم به شبیه‌ساز این مبحث" class="px-3.5 py-2.5 rounded-xl bg-teal-950/60 hover:bg-teal-900 border border-teal-600/50 text-teal-300 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+                                <i data-lucide="flask-conical" class="w-3.5 h-3.5 text-teal-400"></i>
+                                <span class="hidden sm:inline">ورود به آزمایشگاه</span>
+                            </button>
+                            ` : ''}
+                            <button onclick="window.store.setView('lesson', { id: ${l.id} })" class="${l.is_completed ? 'btn-duo-blue' : 'btn-duo-green'} text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-sm whitespace-nowrap">
+                                ${l.is_completed ? 'مرور مجدد' : 'شروع درس'}
+                            </button>
+                        </div>
                     </div>
                         `;
                     }).join('')}
