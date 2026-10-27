@@ -246,7 +246,7 @@ async function renderLandingView(container) {
                     <div class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold">
                         <div class="flex items-center gap-2">
                             <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
-                            <span>۳۶۰+ سؤال تستی و تشریحی</span>
+                            <span>۵۰۰+ سؤال استاندارد سمپاد</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <i data-lucide="cpu" class="w-4 h-4 text-blue-500"></i>
@@ -333,7 +333,7 @@ async function renderLandingView(container) {
                         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">حرکت، تندی و شتاب • نیرو و قوانین نیوتون • فشار جامدات و شاره‌ها • ماشین‌ها و اهرم‌ها</p>
                     </div>
                     <div class="flex items-center justify-between text-xs font-bold text-purple-400 pt-2 border-t border-slate-100 dark:border-slate-800">
-                        <span>۲ کتاب • ۴ فصل جامع فیزیک</span>
+                        <span>۲ کتاب • ۵ فصل تخصصی فیزیک و فضا</span>
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </div>
                 </div>
@@ -643,7 +643,7 @@ async function renderCurriculumView(container, gradeId = null) {
         const isPhysicsCh = (chNum) => {
             if (activeGradeId == 1) return [2, 8, 9, 10].includes(chNum);
             if (activeGradeId == 2) return [9, 10, 14, 15].includes(chNum);
-            if (activeGradeId == 3) return [4, 5, 8, 9].includes(chNum);
+            if (activeGradeId == 3) return [4, 5, 8, 9, 10].includes(chNum);
             return false;
         };
 
@@ -847,13 +847,7 @@ async function renderChapterDetailView(container, chapterId) {
                         </div>
 
                         <div class="flex items-center gap-2">
-                            ${simType ? `
-                            <button onclick="event.stopPropagation(); window.store.setView('simulators', { id: '${simType}' })" title="ورود مستقیم به شبیه‌ساز این مبحث" class="px-3.5 py-2.5 rounded-xl bg-teal-950/60 hover:bg-teal-900 border border-teal-600/50 text-teal-300 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
-                                <i data-lucide="flask-conical" class="w-3.5 h-3.5 text-teal-400"></i>
-                                <span class="hidden sm:inline">ورود به آزمایشگاه</span>
-                            </button>
-                            ` : ''}
-                            <button onclick="window.store.setView('lesson', { id: ${l.id} })" class="${l.is_completed ? 'btn-duo-blue' : 'btn-duo-green'} text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-sm whitespace-nowrap">
+                            <button onclick="window.store.setView('lesson', { id: ${l.id} })" class="${l.is_completed ? 'btn-duo-blue' : 'btn-duo-green'} text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-sm whitespace-nowrap hover:scale-105 transition-all">
                                 ${l.is_completed ? 'مرور مجدد' : 'شروع درس'}
                             </button>
                         </div>
@@ -1012,26 +1006,6 @@ function openAuthModal(mode = 'login') {
             </div>
         </form>
 
-        <!-- Quick Test Account Helpers for Easy Verification -->
-        ${mode === 'login' ? `
-        <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-[11px] text-slate-400 space-y-2">
-            <span class="font-bold text-slate-300 block">حساب‌های کاربری پیش‌فرض سامانه:</span>
-            <div class="flex flex-wrap gap-2">
-                <button type="button" onclick="fillQuickAuth('admin', 'AdminPhysics1405!')" class="px-2.5 py-1 rounded-lg bg-blue-950/60 border border-blue-500/30 text-blue-300 hover:bg-blue-900/60 transition-colors">
-                    مدیر سیستم: admin / AdminPhysics1405!
-                </button>
-                <button type="button" onclick="fillQuickAuth('QUANTUM CUT', 'AdminPhysics1405!')" class="px-2.5 py-1 rounded-lg bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 transition-colors">
-                    مدیر ویژه: QUANTUM CUT
-                </button>
-                <button type="button" onclick="fillQuickAuth('student_beheshti', 'Student1405!')" class="px-2.5 py-1 rounded-lg bg-amber-950/60 border border-amber-500/30 text-amber-300 hover:bg-amber-900/60 transition-colors">
-                    دانش‌آموز پایه ۷: student_beheshti
-                </button>
-                <button type="button" onclick="fillQuickAuth('AR_2012', 'Student1405!')" class="px-2.5 py-1 rounded-lg bg-purple-950/60 border border-purple-500/30 text-purple-300 hover:bg-purple-900/60 transition-colors">
-                    دانش‌آموز پایه ۹: AR_2012
-                </button>
-            </div>
-        </div>
-        ` : ''}
 
         <div class="text-center pt-3 border-t border-slate-800 text-xs">
             ${mode === 'login' ? `
