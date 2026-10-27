@@ -464,6 +464,353 @@ const SIMULATOR_CATALOG = [
         localFile: 'wave-on-a-string.html',
         localUrl: '/simulators/phet/wave-on-a-string.html',
         phetSlug: 'wave-on-a-string'
+    },
+// =========================================================================
+    // SPACE, ASTRONOMY & ASTROPHYSICS (فیزیک فضا، نجوم و اخترفیزیک)
+    // =========================================================================
+    {
+        id: 'gravity-and-orbits',
+        title: 'گرانش، مدارها و فضاپیما (منظومه شمسی)',
+        grade: 9,
+        gradeKey: 'space',
+        gradeTitle: 'فضا و نجوم',
+        gradeLabel: 'فضا و نجوم',
+        category: 'گرانش و فیزیک فضا',
+        topic: 'فصل ۱۰ نهم: نگاهی به فضا (منظومه شمسی و ماهواره‌ها)',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۱۰ (نگاهی به فضا)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — مبحث مدارهای گرانشی و بردار سرعت مداری',
+        icon: 'orbit',
+        desc: 'کاوش حرکت مداری زمین به دور خورشید، مدار ماه به دور زمین و چرخش ایستگاه فضایی بین‌المللی (ISS)، بررسی بردارهای سرعت مداری و نیروی گرانش، و پیامد خاموش کردن گرانش بر پرتاب مماس بر مسیر.',
+        description: 'کاوش حرکت مداری زمین به دور خورشید، مدار ماه به دور زمین و چرخش ایستگاه فضایی بین‌المللی (ISS)، بررسی بردارهای سرعت مداری و نیروی گرانش، و پیامد خاموش کردن گرانش بر پرتاب مماس بر مسیر.',
+        formula: 'v_{orbit} = \\sqrt{\\frac{G M}{r}} \\quad , \\quad F_g = G \\frac{m_1 m_2}{r^2} \\quad , \\quad T = 2\\pi \\sqrt{\\frac{r^3}{G M}}',
+        badge: 'فضا و نجوم — منظومه شمسی و ایستگاه فضایی',
+        goals: [
+            'مشاهده حرکت مداری زمین، ماه و ایستگاه فضایی در اثر نیروی جاذبه گرانشی',
+            'بررسی رابطه عکس مجذور فاصله با نیروی گرانش خورشید و سیارات',
+            'اثبات قانون اول نیوتون با غیرفعال کردن گرانش و حرکت راست‌خط یکنواخت مماس بر مدار'
+        ],
+        experimentSteps: [
+            'گزینه «Earth and Sun» را انتخاب کنید و تیک‌های «Gravity Force»، «Velocity» و «Path» را بزنید.',
+            'جرم ستاره یا سیاره را دو برابر کرده و اثر آن را روی سرعت و شعاع مدار رصد نمایید.',
+            'حالت «Space Station» (ایستگاه فضایی) را انتخاب کرده و نحوه گردش به دور زمین را بررسی کنید.',
+            'کلید خاموش کردن گرانش (Gravity Off) را بزنید و پرتاب شدن جسم در امتداد خط مماس را تماشا کنید.'
+        ],
+        misconceptions: 'اشتباه رایج: فضانوردان در ایستگاه فضایی به این دلیل معلق هستند که جاذبه زمین صفر است! خیر، در ارتفاع ۴۰۰ کیلومتری زمین نزدیک به ۹۰ درصد جاذبه زمین وجود دارد؛ دلیل معلق بودن فضانوردان سقوط آزاد پیوسته همراه با سرعت مماس مداری است.',
+        localFile: 'gravity-and-orbits.html',
+        localUrl: '/simulators/phet/gravity-and-orbits.html',
+        phetSlug: 'gravity-and-orbits'
+    },
+    {
+        id: 'my-solar-system',
+        title: 'کاوشگر منظومه شمسی و گرانش چندجرمی',
+        grade: 9,
+        gradeKey: 'space',
+        gradeTitle: 'فضا و نجوم',
+        gradeLabel: 'فضا و نجوم',
+        category: 'گرانش و فیزیک فضا',
+        topic: 'فصل ۱۰ نهم: نگاهی به فضا (سیارات، قمرها و ستاره‌های دوگانه)',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۱۰ (نگاهی به فضا)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — دینامیک چندجرمی و پایداری مدارهای منظومه شمسی',
+        icon: 'globe',
+        desc: 'شبیه‌ساز پیشرفته گرانش چندجرمی شامل خورشید، سیارات، قمرها، ستاره‌های دوگانه و سیارک‌ها با قابلیت تنظیم بردارهای موقعیت و سرعت اولیه و مشاهده مدارهای بیضوی، دایره‌ای و برخوردهای کیهانی.',
+        description: 'شبیه‌ساز پیشرفته گرانش چندجرمی شامل خورشید، سیارات، قمرها، ستاره‌های دوگانه و سیارک‌ها با قابلیت تنظیم بردارهای موقعیت و سرعت اولیه و مشاهده مدارهای بیضوی، دایره‌ای و برخوردهای کیهانی.',
+        formula: '\\vec{F}_i = \\sum_{j \\ne i} G \\frac{m_i m_j}{|\\vec{r}_{ij}|^2} \\hat{r}_{ij} \\quad , \\quad E_{total} = K + U_g = \\text{const}',
+        badge: 'فضا و نجوم — مدارهای چندجرمی و ستاره‌های دوگانه',
+        goals: [
+            'بررسی پایداری مدارهای چندجرمی خورشید، زمین و ماه',
+            'ایجاد مدارهای بیضوی و مشاهده تندی حضیض و اوج خورشیدی',
+            'شبیه‌سازی برهمکنش ستاره‌های دوگانه (Binary Stars) و سیاره سرگردان'
+        ],
+        experimentSteps: [
+            'از منوی بالا حالت «Sun, Planet, Moon» را انتخاب کنید.',
+            'تیک «Traces» (ردپای مدار) را فعال کنید تا خط سیر بیضوی هر جرم رسم شود.',
+            'سرعت اولیه سیاره را اندکی تغییر دهید و تغییر شکل مدار از دایره به بیضی کشیده را ببینید.'
+        ],
+        misconceptions: 'اشتباه رایج: مدارهای سیارات دایره‌ای بی‌نقص هستند! طبق قوانین کپلر و نیوتون، مدار تمام اجرام منظومه شمسی بیضی است که خورشید در یکی از کانون‌های آن قرار دارد.',
+        localFile: 'my-solar-system.html',
+        localUrl: '/simulators/phet/my-solar-system.html',
+        phetSlug: 'my-solar-system'
+    },
+    {
+        id: 'gravity-force-lab-basics',
+        title: 'قانون گرانش عمومی نیوتون بین دو جرم آسمانی',
+        grade: 9,
+        gradeKey: 'space',
+        gradeTitle: 'فضا و نجوم',
+        gradeLabel: 'فضا و نجوم',
+        category: 'گرانش و فیزیک فضا',
+        topic: 'فصل ۵ و ۱۰ نهم: قانون جاذبه عمومی نیوتون',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۵ و ۱۰ (نیرو، وزن و فضا)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — قانون گرانش نیوتون و ثابت جهانی G',
+        icon: 'disc',
+        desc: 'اندازه‌گیری کمی نیروی جاذبه گرانشی بین دو کره جرم‌دار در فضا، بررسی قانون عکس مجذور فاصله و وابستگی به جرم اجرام آسمانی.',
+        description: 'اندازه‌گیری کمی نیروی جاذبه گرانشی بین دو کره جرم‌دار در فضا، بررسی قانون عکس مجذور فاصله و وابستگی به جرم اجرام آسمانی.',
+        formula: 'F_g = G \\frac{m_1 m_2}{r^2} \\quad (G = 6.674 \\times 10^{-11} \\, \\text{N}\\cdot\\text{m}^2/\\text{kg}^2)',
+        badge: 'گرانش نیوتونی — جرم و فاصله اجرام آسمانی',
+        goals: [
+            'اثبات تجربی تناسب مستقیم نیروی گرانش با حاصل‌ضرب جرم‌ها (F ∝ m₁m₂)',
+            'اثبات تجربی قانون عکس مجذور فاصله (F ∝ 1/r²)',
+            'مشاهده برابری نیروی کنش و واکنش دو جرم طبق قانون سوم نیوتون'
+        ],
+        experimentSteps: [
+            'فاصله دو کره را با خط‌کش مجازی اندازه بگیرید و نیروی نمایش داده‌شده را یادداشت کنید.',
+            'فاصله را دو برابر کنید؛ مشاهده کنید نیرو دقیقاً ۴ برابر ضعیف می‌شود.',
+            'جرم یکی از کره‌ها را ۳ برابر کنید و سه برابر شدن نیرو را ثبت نمایید.'
+        ],
+        misconceptions: 'اشتباه رایج: جسم سنگین‌تر نیروی بیشتری به جسم سبک وارد می‌کند! طبق قانون سوم نیوتون، زمین و ماه نیروی گرانشی دقیقاً هم‌اندازه و خلاف جهت به یکدیگر وارد می‌کنند.',
+        localFile: 'gravity-force-lab-basics.html',
+        localUrl: '/simulators/phet/gravity-force-lab-basics.html',
+        phetSlug: 'gravity-force-lab-basics'
+    },
+    {
+        id: 'keplers-laws',
+        title: 'قوانین سه‌گانه کپلر در حرکت سیارات',
+        grade: 9,
+        gradeKey: 'space',
+        gradeTitle: 'فضا و نجوم',
+        gradeLabel: 'فضا و نجوم',
+        category: 'اخترفیزیک و نجوم',
+        topic: 'فصل ۱۰ نهم: حرکت مداری سیارات و قوانین کپلر',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۱۰ (نگاهی به فضا)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — قوانین اول، دوم و سوم کپلر',
+        icon: 'compass',
+        desc: 'تحلیل مدارهای بیضوی سیارات، کانون‌های مدار، قانون روبش مساحت‌های برابر در زمان‌های برابر و رابطه دوره تناوب با نیم‌قطر بزرگ مدار.',
+        description: 'تحلیل مدارهای بیضوی سیارات، کانون‌های مدار، قانون روبش مساحت‌های برابر در زمان‌های برابر و رابطه دوره تناوب با نیم‌قطر بزرگ مدار.',
+        formula: '\\frac{T^2}{a^3} = \\frac{4\\pi^2}{G M} \\quad , \\quad \\frac{dA}{dt} = \\frac{L}{2m} = \\text{ثابت}',
+        badge: 'کپلر و نجوم — قوانین حرکت سیارات',
+        goals: [
+            'بررسی قانون اول کپلر: مدار بیضوی سیارات با خورشید در یکی از کانون‌ها',
+            'بررسی قانون دوم کپلر: تندی بیشینه در حضیض و تندی کمینه در اوج مداری',
+            'بررسی قانون سوم کپلر: نسبت توان دوم دوره تناوب به توان سوم نیم‌قطر بزرگ'
+        ],
+        experimentSteps: [
+            'خروج از مرکز بیضی را تغییر دهید و تفاوت مدار دایره و بیضی کشیده را مشاهده نمایید.',
+            'ابزار مساحت‌روبی در بازه‌های زمانی معین را فعال کنید و برابری مساحت‌ها را بررسی کنید.'
+        ],
+        misconceptions: 'اشتباه رایج: علت پیدایش فصل‌ها نزدیک و دور شدن زمین از خورشید است! خیر، مدار زمین به دایره بسیار نزدیک است و انحراف ۲۳.۵ درجه‌ای محور زمین علت تغییر فصول است.',
+        localFile: 'keplers-laws.html',
+        localUrl: '/simulators/phet/keplers-laws.html',
+        phetSlug: 'keplers-laws'
+    },
+    {
+        id: 'blackbody-spectrum',
+        title: 'طیف تابش جسم سیاه و دمای ستارگان',
+        grade: 8,
+        gradeKey: 'space',
+        gradeTitle: 'فضا و نجوم',
+        gradeLabel: 'فضا و نجوم',
+        category: 'اخترفیزیک و اپتیک',
+        topic: 'فصل ۱۵ هشتم (طیف نور) و فصل ۱۰ نهم (دمای ستارگان)',
+        ministryBook: 'کتاب وزارتی علوم هشتم (فصل ۱۵) و علوم نهم (فصل ۱۰)',
+        sampadBook: 'کتاب تکمیلی سمپاد — قانون جابه‌جایی وین و طیف تابش ستارگان',
+        icon: 'sun',
+        desc: 'بررسی منحنی پیوسته تابش گرمایی، ارتباط دمای سطح ستارگان با رنگ نور آن‌ها، قانون جابه‌جایی وین و تابش فروسرخ، مرئی و فرابنفش.',
+        description: 'بررسی منحنی پیوسته تابش گرمایی، ارتباط دمای سطح ستارگان با رنگ نور آن‌ها، قانون جابه‌جایی وین و تابش فروسرخ، مرئی و فرابنفش.',
+        formula: '\\lambda_{max} \\cdot T = 2.898 \\times 10^{-3} \\, \\text{m}\\cdot\\text{K} \\quad , \\quad I = \\sigma T^4',
+        badge: 'اخترفیزیک — دمای ستارگان و طیف رنگی',
+        goals: [
+            'درک پیوند دمای سطح ستاره با رنگ نور گسیل‌شده از آن',
+            'مشاهده بیشینه تابش سطح خورشید (۵۸۰۰ کلوین) در ناحیه نور مرئی',
+            'مقایسه ستارگان سرد سرخ‌رنگ با ستارگان فوق‌العاده داغ آبی‌رنگ'
+        ],
+        experimentSteps: [
+            'دماسنج را روی ۵۸۰۰ کلوین (دمای سطح خورشید) تنظیم کرده و اوج نمودار را در ناحیه مرئی ببینید.',
+            'دما را تا ۱۰۰۰۰ کلوین بالا ببرید و آبی شدن رنگ ستاره را رصد کنید.',
+            'دما را روی ۳۰۰۰ کلوین کاهش دهید و غالب بودن پرتوهای نامرئی فروسرخ را تحلیل نمایید.'
+        ],
+        misconceptions: 'اشتباه رایج: ستارگان قرمز داغ‌ترین ستاره‌ها هستند! برعکس؛ در علم نجوم ستارگان آبی داغ‌ترین و ستارگان سرخ خنک‌ترین دمای سطحی را دارند.',
+        localFile: 'blackbody-spectrum.html',
+        localUrl: '/simulators/phet/blackbody-spectrum.html',
+        phetSlug: 'blackbody-spectrum'
+    },
+
+    // =========================================================================
+    // ADDITIONAL CORE CURRICULUM LABORATORIES (آزمایشگاه‌های تکمیلی کتب درسی)
+    // =========================================================================
+    {
+        id: 'pendulum-lab',
+        title: 'آزمایشگاه آونگ ساده، زمان‌سنجی و شتاب گرانش',
+        grade: 7,
+        gradeKey: 'grade_7',
+        gradeTitle: 'پایه هفتم',
+        gradeLabel: 'پایه هفتم',
+        category: 'اندازه‌گیری و نوسان',
+        topic: 'فصل ۲ هفتم (ابزارهای اندازه‌گیری زمان) و فصل ۵ نهم (گرانش)',
+        ministryBook: 'کتاب وزارتی علوم هفتم — فصل ۲ (اندازه‌گیری دقیق زمان)',
+        sampadBook: 'کتاب تکمیلی سمپاد — دوره تناوب آونگ و اندازه‌گیری g در زمین، ماه و مشتری',
+        icon: 'clock',
+        desc: 'بررسی دوره تناوب آونگ ساده، رابطه طول آونگ با زمان نوسان، استقلال دوره تناوب از جرم وزنه و اندازه‌گیری تجربی شتاب گرانش.',
+        description: 'بررسی دوره تناوب آونگ ساده، رابطه طول آونگ با زمان نوسان، استقلال دوره تناوب از جرم وزنه و اندازه‌گیری تجربی شتاب گرانش.',
+        formula: 'T = 2\\pi \\sqrt{\\frac{L}{g}} \\quad , \\quad f = \\frac{1}{T} \\quad , \\quad g = \\frac{4\\pi^2 L}{T^2}',
+        badge: 'وزارتی و سمپاد — آونگ، زمان و گرانش',
+        goals: [
+            'اثبات استقلال کامل دوره تناوب از جرم وزنه آونگ در دامنه‌های کوچک',
+            'اثبات رابطه مستقیم دوره تناوب با جذر طول طناب آونگ',
+            'محاسبه تجربی شتاب گرانش در زمین (۹.۸)، ماه (۱.۶) و مشتری (۲۴.۸)'
+        ],
+        experimentSteps: [
+            'کرنومتر و خط‌کش را فعال کنید.',
+            'طول طناب را روی ۱ متر تنظیم کنید و وزنه را تا زاویه ۱۰ درجه منحرف کرده و رها کنید.',
+            'زمان ۱۰ نوسان کامل را اندازه گرفته و دوره تناوب T را به دست آورید.',
+            'گرانش را به ماه یا مشتری تغییر داده و تفاوت در تندی نوسان را مقایسه کنید.'
+        ],
+        misconceptions: 'اشتباه رایج: وزنه سنگین‌تر سریع‌تر نوسان می‌کند! خیر، جرم هیچ نقشی در دوره تناوب آونگ ساده ندارد.',
+        localFile: 'pendulum-lab.html',
+        localUrl: '/simulators/phet/pendulum-lab.html',
+        phetSlug: 'pendulum-lab'
+    },
+    {
+        id: 'states-of-matter-basics',
+        title: 'حالت‌های ماده، جنبش مولکولی و گذار فاز',
+        grade: 7,
+        gradeKey: 'grade_7',
+        gradeTitle: 'پایه هفتم',
+        gradeLabel: 'پایه هفتم',
+        category: 'ترمودینامیک و ماده',
+        topic: 'فصل ۳ و ۱۰ هفتم: اتم‌ها، جنبش مولکولی، دما و گرما',
+        ministryBook: 'کتاب وزارتی علوم هفتم — فصل ۳ و ۱۰ (اتم‌ها و گرما)',
+        sampadBook: 'کتاب تکمیلی سمپاد هفتم — مدل ذره‌ای ماده، فشار گازها و دمای گذار فاز',
+        icon: 'box',
+        desc: 'مشاهده مستقیم آرایش و جنبش ذرات در سه حالت جامد، مایع و گاز، تغییرات فشار و دما، ذوب، تبخیر و میعان مواد مختلف (نئون، آرگون، اکسیژن و آب).',
+        description: 'مشاهده مستقیم آرایش و جنبش ذرات در سه حالت جامد، مایع و گاز، تغییرات فشار و دما، ذوب، تبخیر و میعان مواد مختلف (نئون، آرگون، اکسیژن و آب).',
+        formula: 'P \\cdot V = N k_B T \\quad , \\quad Q = m L_f \\quad (Q = m L_v)',
+        badge: 'وزارتی و سمپاد هفتم — حالت‌های ماده و گرما',
+        goals: [
+            'مشاهده نظم بلوری در جامدات، لغزش ذرات در مایعات و فاصله زیاد ذرات در گازها',
+            'بررسی اثر حرارت‌دادن بر افزایش تندی جنبش ذرات و انبساط حجمی',
+            'تحلیل رفتار استثنایی مولکول‌های آب در هنگام انجماد'
+        ],
+        experimentSteps: [
+            'ماده را روی آب (Water) بگذارید و به حالت جامد، مایع و گاز بروید.',
+            'چراغ حرارتی زیر ظرف را روشن کنید و افزایش تندی جنبش مولکول‌ها و فشار را رصد کنید.'
+        ],
+        misconceptions: 'اشتباه رایج: در گازها ذرات به هم چسبیده‌اند و ساکن هستند! در گازها فضای خالی بسیار زیادی بین ذرات وجود دارد و ذرات با سرعت صدها متر بر ثانیه در حرکتند.',
+        localFile: 'states-of-matter-basics.html',
+        localUrl: '/simulators/phet/states-of-matter-basics.html',
+        phetSlug: 'states-of-matter-basics'
+    },
+    {
+        id: 'coulombs-law',
+        title: 'آزمایشگاه قانون کولن و نیروی الکتریکی',
+        grade: 8,
+        gradeKey: 'grade_8',
+        gradeTitle: 'پایه هشتم',
+        gradeLabel: 'پایه هشتم',
+        category: 'الکتریسیته ساکن',
+        topic: 'فصل ۹ هشتم: نیروی جاذبه و دافعه بین بارهای الکتریکی',
+        ministryBook: 'کتاب وزارتی علوم هشتم — فصل ۹ (الکتریسیته)',
+        sampadBook: 'کتاب تکمیلی سمپاد هشتم — قانون کولن و محاسبات کمی نیرو',
+        icon: 'zap',
+        desc: 'بررسی دقیق رابطه قانون کولن، وابستگی نیروی جاذبه/دافعه به اندازه بارها و عکس مجذور فاصله در مقیاس ماکرو و اتمی.',
+        description: 'بررسی دقیق رابطه قانون کولن، وابستگی نیروی جاذبه/دافعه به اندازه بارها و عکس مجذور فاصله در مقیاس ماکرو و اتمی.',
+        formula: 'F_e = k \\frac{|q_1 q_2|}{r^2} \\quad (k = 8.988 \\times 10^9 \\, \\text{N}\\cdot\\text{m}^2/\\text{C}^2)',
+        badge: 'سمپاد هشتم — قانون کولن و نیروی بارها',
+        goals: [
+            'مشاهده دافعه بارهای همنام و جاذبه بارهای ناهمنام',
+            'محاسبه تجربی نیرو برحسب نیوتون با خط‌کش و ترازوهای حساس',
+            'اثبات قانون عمل و عکس‌العمل نیوتون برای نیروهای الکترواستاتیکی'
+        ],
+        experimentSteps: [
+            'بار q1 و q2 را تغییر دهید و علامت بردار نیروها را مشاهده کنید.',
+            'فاصله دو بار را نصف کنید؛ مشاهده کنید نیرو ۴ برابر افزایش می‌یابد.'
+        ],
+        misconceptions: 'اشتباه رایج: بار با مقدار بیشتر نیروی بزرگ‌تری به بار کوچک‌تر وارد می‌کند! طبق قانون سوم نیوتون و قانون کولن، هر دو بار نیروی کاملاً برابر به یکدیگر وارد می‌کنند.',
+        localFile: 'coulombs-law.html',
+        localUrl: '/simulators/phet/coulombs-law.html',
+        phetSlug: 'coulombs-law'
+    },
+    {
+        id: 'charges-and-fields',
+        title: 'بارها، خطوط میدان الکتریکی و سطوح هم‌پتانسیل',
+        grade: 8,
+        gradeKey: 'grade_8',
+        gradeTitle: 'پایه هشتم',
+        gradeLabel: 'پایه هشتم',
+        category: 'الکتریسیته و میدان‌ها',
+        topic: 'فصل ۹ هشتم: میدان الکتریکی و پتانسیل',
+        ministryBook: 'کتاب وزارتی علوم هشتم — فصل ۹ (الکتریسیته)',
+        sampadBook: 'کتاب تکمیلی سمپاد هشتم — خطوط میدان الکتریکی و سطوح هم‌پتانسیل',
+        icon: 'activity',
+        desc: 'قرار دادن بارهای مثبت و منفی، رسم خطوط جهت‌دار میدان الکتریکی، حسگر ولتاژ و رسم سطوح هم‌پتانسیل در فضا.',
+        description: 'قرار دادن بارهای مثبت و منفی، رسم خطوط جهت‌دار میدان الکتریکی، حسگر ولتاژ و رسم سطوح هم‌پتانسیل در فضا.',
+        formula: '\\vec{E} = k \\frac{q}{r^2} \\hat{r} \\quad , \\quad V = k \\frac{q}{r} \\quad , \\quad \\vec{E} = -\\vec{\\nabla} V',
+        badge: 'سمپاد هشتم — میدان و پتانسیل الکتریکی',
+        goals: [
+            'مشاهده خروج خطوط میدان از بار مثبت و ورود به بار منفی',
+            'شبیه‌سازی دوقطبی الکتریکی و میدان یکنواخت بین دو صفحه موازی',
+            'رسم سطوح هم‌پتانسیل دایره‌ای با ابزار ولت‌متر'
+        ],
+        experimentSteps: [
+            'یک بار مثبت ۱ نانوکولن را روی صفحه قرار دهید و تیک «Electric Field» را بزنید.',
+            'یک بار منفی در کنار آن قرار دهید و خطوط میدان دوقطبی را مشاهده کنید.',
+            'حسگر E-Field را حرکت داده و شدت میدان را در نقاط مختلف بخوانید.'
+        ],
+        misconceptions: 'اشتباه رایج: خطوط میدان الکتریکی می‌توانند یکدیگر را قطع کنند! هرگز؛ زیرا در نقطه تقاطع دو جهت برای بردار یکتای میدان به وجود می‌آید که غیرممکن است.',
+        localFile: 'charges-and-fields.html',
+        localUrl: '/simulators/phet/charges-and-fields.html',
+        phetSlug: 'charges-and-fields'
+    },
+    {
+        id: 'projectile-motion',
+        title: 'حرکت پرتابه‌ها، زاویه پرتاب و برد در گرانش‌های مختلف',
+        grade: 9,
+        gradeKey: 'grade_9',
+        gradeTitle: 'پایه نهم',
+        gradeLabel: 'پایه نهم',
+        category: 'سینماتیک و دینامیک',
+        topic: 'فصل ۴ و ۵ نهم: حرکت دوبعدی، پرتابه‌ها و گرانش',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۴ و ۵ (حرکت، تندی و شتاب)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — معادلات حرکت پرتابه و برد بیشینه',
+        icon: 'crosshair',
+        desc: 'شلیک توپ در زوایای مختلف، استقلال حرکت افقی یکنواخت و حرکت عمودی شتابدار با شتاب g، اثر جرم و مقاومت هوا، و تغییر گرانش به ماه و مشتری.',
+        description: 'شلیک توپ در زوایای مختلف، استقلال حرکت افقی یکنواخت و حرکت عمودی شتابدار با شتاب g، اثر جرم و مقاومت هوا، و تغییر گرانش به ماه و مشتری.',
+        formula: 'R = \\frac{v_0^2 \\sin(2\\theta)}{g} \\quad , \\quad H = \\frac{v_0^2 \\sin^2\\theta}{2g} \\quad , \\quad t_{total} = \\frac{2v_0 \\sin\\theta}{g}',
+        badge: 'سمپاد نهم — پرتابه‌ها و زاویه بهینه',
+        goals: [
+            'اثبات زاویه ۴۵ درجه برای بیشینه برد پرتابه در غیاب مقاومت هوا',
+            'برابری برد پرتابه‌ها برای زوایای متمم (مثلاً ۳۰ درجه و ۶۰ درجه)',
+            'مشاهده استقلال زمان سقوط از جرم در غیاب مقاومت هوا'
+        ],
+        experimentSteps: [
+            'زاویه لوله توپ را روی ۴۵ درجه بگذارید و شلیک کنید؛ نقطه اصابت را علامت‌گذاری کنید.',
+            'زاویه را یک‌بار روی ۳۰ درجه و بار دیگر روی ۶۰ درجه بگذارید و برابری محل فرود را ببینید.',
+            'مقاومت هوا را فعال کرده و تفاوت خط سیر را مقایسه کنید.'
+        ],
+        misconceptions: 'اشتباه رایج: پرتابه در بالاترین نقطه شتابش صفر می‌شود! شتاب پرتابه در تمام طول مسیر همواره ثابت و برابر با شتاب گرانش g به سمت پایین است؛ تنها سرعت عمودی در اوج صفر می‌شود.',
+        localFile: 'projectile-motion.html',
+        localUrl: '/simulators/phet/projectile-motion.html',
+        phetSlug: 'projectile-motion'
+    },
+    {
+        id: 'collision-lab',
+        title: 'برخوردها، پایستگی تکانه و انرژی جنبشی',
+        grade: 9,
+        gradeKey: 'grade_9',
+        gradeTitle: 'پایه نهم',
+        gradeLabel: 'پایه نهم',
+        category: 'دینامیک و تکانه',
+        topic: 'فصل ۴ و ۵ نهم: تکانه، ضربه و قوانین نیوتون',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۵ (قانون دوم و سوم نیوتون)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — تکانه (p=mv)، برخوردهای کشسان و ناکشسان',
+        icon: 'target',
+        desc: 'بررسی قانون پایستگی تکانه کل در برخوردهای یک‌بعدی و دوبعدی، مقایسه برخورد کاملاً کشسان (پایستگی انرژی جنبشی) و ناکشسان، و نمودارهای برداری تکانه.',
+        description: 'بررسی قانون پایستگی تکانه کل در برخوردهای یک‌بعدی و دوبعدی، مقایسه برخورد کاملاً کشسان (پایستگی انرژی جنبشی) و ناکشسان، و نمودارهای برداری تکانه.',
+        formula: '\\vec{p}_{tot} = m_1\\vec{v}_1 + m_2\\vec{v}_2 = \\text{ثابت} \\quad , \\quad K = \\frac{1}{2}mv^2 = \\frac{p^2}{2m}',
+        badge: 'سمپاد نهم — پایستگی تکانه و برخوردها',
+        goals: [
+            'اثبات پایستگی تکانه کل سیستم در تمام برخوردها (در غیاب نیروی خارجی)',
+            'بررسی پایستگی انرژی جنبشی در برخورد کشسان و تبدیل آن به گرما در برخورد ناکشسان',
+            'تحلیل بردار تکانه در برخوردهای دوبعدی'
+        ],
+        experimentSteps: [
+            'جرم دو گوی را برابر قرار دهید، گوی ۱ را با سرعت به سمت گوی ۲ ساکن حرکت دهید؛ انتقال کامل تکانه را ببینید.',
+            'جرم گوی ۱ را بسیار بیشتر از گوی ۲ کنید و سرعت بازگشت را بسنجید.',
+            'خاصیت کشسانی (Elasticity) را به صفر درصد تغییر دهید و به هم چسبیدن گوی‌ها را بررسی کنید.'
+        ],
+        misconceptions: 'اشتباه رایج: در تصادف دو خودرو، انرژی جنبشی پایسته می‌ماند! تصادف خودروها یک برخورد کاملاً ناکشسان است که بخش عمده انرژی جنبشی صرف دفرمه شدن فلزات، شکستن شیشه‌ها، تولید صدا و گرما می‌شود.',
+        localFile: 'collision-lab.html',
+        localUrl: '/simulators/phet/collision-lab.html',
+        phetSlug: 'collision-lab'
     }
 ];
 
@@ -482,7 +829,7 @@ class PhysicsSimulators {
         // Exact match
         if (this.catalog.some(s => s.id === raw)) return raw;
 
-        // Legacy aliases
+        // Legacy and shorthand aliases
         const aliasMap = {
             'calorimetry': 'energy-forms',
             'energy': 'energy-skate',
@@ -495,7 +842,23 @@ class PhysicsSimulators {
             'hooke': 'hookes-law',
             'pressure': 'under-pressure',
             'solid_pressure': 'under-pressure',
-            'waves': 'wave-on-a-string'
+            'waves': 'wave-on-a-string',
+            'space': 'gravity-and-orbits',
+            'orbits': 'gravity-and-orbits',
+            'orbit': 'gravity-and-orbits',
+            'solar': 'my-solar-system',
+            'solar-system': 'my-solar-system',
+            'gravity': 'gravity-force-lab-basics',
+            'kepler': 'keplers-laws',
+            'blackbody': 'blackbody-spectrum',
+            'pendulum': 'pendulum-lab',
+            'projectile': 'projectile-motion',
+            'collision': 'collision-lab',
+            'momentum': 'collision-lab',
+            'coulomb': 'coulombs-law',
+            'fields': 'charges-and-fields',
+            'matter': 'states-of-matter-basics',
+            'states': 'states-of-matter-basics'
         };
         if (aliasMap[raw]) return aliasMap[raw];
 
@@ -527,42 +890,50 @@ class PhysicsSimulators {
 
         // 0. Filter out purely non-physics biological, geological, or chemical topics
         const nonPhysicsChapters = [
-            'تفکر و تجربه', 'اتم‌ها، الفبای مواد', 'مواد پیرامون ما', 'از معدن تا خانه',
+            'تفکر و تجربه', 'مواد پیرامون ما', 'از معدن تا خانه',
             'سفر آب روی زمین', 'سفر آب درون زمین', 'یاخته و سازمان‌بندی', 'سفره سلامت',
             'سفر غذا', 'گردش مواد', 'تبادل با محیط',
             'مخلوط و جداسازی', 'تغییرهای شیمیایی', 'از درون اتم', 'تنظیم عصبی',
             'حس و حرکت', 'تنظیم هورمونی', 'الفبای زیست‌فناوری', 'تولید مثل در جانداران',
             'کانی‌ها', 'سنگ‌ها', 'هوازدگی',
             'مواد و نقش آنها', 'رفتار اتم‌ها با یکدیگر', 'به دنبال محیطی بهتر برای زندگی',
-            'زمین ساخت ورقه‌ای', 'آثاری از گذشته زمین', 'نگاهی به فضا',
+            'زمین ساخت ورقه‌ای', 'آثاری از گذشته زمین',
             'گوناگونی جانداران', 'دنیای گیاهان', 'جانوران بی‌مهره', 'جانوران مهره‌دار', 'با هم زیستن'
         ];
         if (nonPhysicsChapters.some(npc => chapterTitle.includes(npc))) {
             return null;
         }
 
-        // 1. Density & Archimedes (Grade 7 Ch 2: اندازه‌گیری)
+        // 1. States of Matter (Grade 7 Ch 3: اتم‌ها، الفبای مواد)
+        if (combined.includes('حالت‌های ماده') || combined.includes('حالت‌های سه‌گانه') || combined.includes('جنبش ذرات')) {
+            return 'states-of-matter-basics';
+        }
+
+        // 2. Density & Archimedes (Grade 7 Ch 2: اندازه‌گیری)
         if (chapterTitle.includes('اندازه‌گیری') || combined.includes('چگالی') || combined.includes('ارشمیدس') || combined.includes('شناوری') || combined.includes('استوانه مدرج') || combined.includes('سنجش حجم')) {
+            if (combined.includes('آونگ')) return 'pendulum-lab';
             return 'density';
         }
 
-        // 2. Work & Mechanical Energy Conservation (Grade 7 Ch 8: انرژی و تبدیل‌های آن)
+        // 3. Work & Mechanical Energy Conservation (Grade 7 Ch 8: انرژی و تبدیل‌های آن)
         if (chapterTitle.includes('انرژی و تبدیل') || lessonTitle.includes('مفهوم کار') || (lessonTitle.includes('انرژی جنبشی') && !chapterTitle.includes('گرما')) || lessonTitle.includes('پتانسیل گرانشی') || lessonTitle.includes('پایستگی انرژی') || combined.includes('اسکیت')) {
             return 'energy-skate';
         }
 
-        // 3. Heat & Thermodynamics (Grade 7 Ch 9 & 10: منابع انرژی، گرما و بهینه‌سازی مصرف)
+        // 4. Heat & Thermodynamics (Grade 7 Ch 9 & 10: منابع انرژی، گرما و بهینه‌سازی مصرف)
         if (chapterTitle.includes('گرما') || chapterTitle.includes('منابع انرژی') || lessonTitle.includes('دما') || lessonTitle.includes('گرما') || lessonTitle.includes('انرژی درونی') || lessonTitle.includes('تعادل گرمایی') || lessonTitle.includes('رسانش') || lessonTitle.includes('همرفت') || lessonTitle.includes('تابش') || lessonTitle.includes('دماسنج') || lessonTitle.includes('سوخت‌های فسیلی') || lessonTitle.includes('خورشیدی')) {
             return 'energy-forms';
         }
 
-        // 4. Magnetism & Faraday (Grade 8 Ch 10: مغناطیس)
+        // 5. Magnetism & Faraday (Grade 8 Ch 10: مغناطیس)
         if (chapterTitle.includes('مغناطیس') || lessonTitle.includes('آهن‌ربا') || lessonTitle.includes('آهنربا') || lessonTitle.includes('میدان مغناطیسی') || lessonTitle.includes('فارادی') || lessonTitle.includes('الکترومغناطیس') || lessonTitle.includes('قطب‌نما')) {
             return 'faradays-law';
         }
 
-        // 5. Electricity: Circuits vs Static (Grade 8 Ch 9: الکتریسیته)
+        // 6. Electricity: Circuits vs Static vs Coulombs & Fields (Grade 8 Ch 9: الکتریسیته)
         if (chapterTitle.includes('الکتریسیته')) {
+            if (lessonTitle.includes('کولن')) return 'coulombs-law';
+            if (lessonTitle.includes('میدان الکتریکی') || lessonTitle.includes('خطوط میدان') || lessonTitle.includes('سطوح هم‌پتانسیل')) return 'charges-and-fields';
             if (lessonTitle.includes('مدار') || lessonTitle.includes('جریان') || lessonTitle.includes('اهم') || lessonTitle.includes('ولتاژ') || lessonTitle.includes('مقاومت') || lessonTitle.includes('متوالی') || lessonTitle.includes('موازی')) {
                 return 'circuit-dc';
             }
@@ -572,12 +943,12 @@ class PhysicsSimulators {
             return 'circuit-dc';
         }
 
-        // 6. Light & Reflection (Grade 8 Ch 14: نور و ویژگی‌های آن)
+        // 7. Light & Reflection (Grade 8 Ch 14: نور و ویژگی‌های آن)
         if (chapterTitle.includes('نور و ویژگی') || lessonTitle.includes('بازتاب نور') || lessonTitle.includes('آینه‌های تخت') || lessonTitle.includes('آینه‌های کروی') || lessonTitle.includes('مقعر') || lessonTitle.includes('محدب') || lessonTitle.includes('سایه') || lessonTitle.includes('انتشار در خط مستقیم')) {
             return 'geometric-optics';
         }
 
-        // 7. Light Refraction & Lenses (Grade 8 Ch 15: شکست نور و عدسی‌ها)
+        // 8. Light Refraction & Lenses (Grade 8 Ch 15: شکست نور و عدسی‌ها)
         if (chapterTitle.includes('شکست نور')) {
             if (lessonTitle.includes('عدسی') || lessonTitle.includes('اصلاح دید') || lessonTitle.includes('آناتومی چشم')) {
                 return 'geometric-optics';
@@ -585,12 +956,13 @@ class PhysicsSimulators {
             return 'bending-light';
         }
 
-        // 8. Motion & Kinematics (Grade 9 Ch 4: حرکت چیست؟)
+        // 9. Motion & Kinematics (Grade 9 Ch 4: حرکت چیست؟)
         if (chapterTitle.includes('حرکت چیست') || lessonTitle.includes('مسافت') || lessonTitle.includes('جابه‌جایی') || lessonTitle.includes('تندی') || lessonTitle.includes('سرعت') || lessonTitle.includes('شتاب')) {
+            if (lessonTitle.includes('پرتابه')) return 'projectile-motion';
             return 'forces-motion';
         }
 
-        // 9. Forces, Newton Laws & Dynamics (Grade 9 Ch 5: نیرو و قوانین نیوتون)
+        // 10. Forces, Newton Laws & Dynamics (Grade 9 Ch 5: نیرو و قوانین نیوتون)
         if (chapterTitle.includes('نیرو')) {
             if (lessonTitle.includes('هوک') || lessonTitle.includes('کشسانی فنر')) {
                 return 'hookes-law';
@@ -598,20 +970,40 @@ class PhysicsSimulators {
             if (lessonTitle.includes('نوسان') || lessonTitle.includes('وزنه و فنر')) {
                 return 'masses-springs';
             }
+            if (lessonTitle.includes('تکانه') || lessonTitle.includes('برخورد')) {
+                return 'collision-lab';
+            }
+            if (lessonTitle.includes('پرتابه')) {
+                return 'projectile-motion';
+            }
             return 'forces-motion';
         }
 
-        // 10. Pressure & Fluids (Grade 9 Ch 8: فشار و آثار آن)
+        // 11. Pressure & Fluids (Grade 9 Ch 8: فشار و آثار آن)
         if (chapterTitle.includes('فشار') || lessonTitle.includes('فشار در جامدات') || lessonTitle.includes('مایعات ساکن') || lessonTitle.includes('اصل پاسکال') || lessonTitle.includes('هیدرولیک') || lessonTitle.includes('توریچلی') || lessonTitle.includes('مانومتر') || lessonTitle.includes('فشار هوا')) {
             return 'under-pressure';
         }
 
-        // 11. Machines & Levers (Grade 9 Ch 9: ماشین‌ها)
+        // 12. Machines & Levers (Grade 9 Ch 9: ماشین‌ها)
         if (chapterTitle.includes('ماشین') || lessonTitle.includes('ماشین‌های ساده') || lessonTitle.includes('گشتاور') || lessonTitle.includes('تعادل دورانی') || lessonTitle.includes('اهرم') || lessonTitle.includes('مزیت مکانیکی') || lessonTitle.includes('قرقره') || lessonTitle.includes('چرخ‌دنده') || lessonTitle.includes('بازده')) {
             return 'balancing-act';
         }
 
-        // 12. Mechanical Waves & Sound
+        // 13. Space, Astronomy & Solar System (Grade 9 Ch 10: نگاهی به فضا)
+        if (chapterTitle.includes('نگاهی به فضا') || chapterTitle.includes('فضا') || combined.includes('منظومه شمسی') || combined.includes('سیارات') || combined.includes('اجرام سرگردان') || combined.includes('صورت‌های فلکی') || combined.includes('کپلر') || combined.includes('ستاره')) {
+            if (combined.includes('کپلر') || combined.includes('اجرام سرگردان') || combined.includes('صورت‌های فلکی') || combined.includes('جهت‌یابی')) {
+                return 'keplers-laws';
+            }
+            if (combined.includes('ستاره') || combined.includes('طیف') || combined.includes('دمای ستارگان')) {
+                return 'blackbody-spectrum';
+            }
+            if (combined.includes('چندجرمی') || combined.includes('ستاره‌های دوگانه')) {
+                return 'my-solar-system';
+            }
+            return 'gravity-and-orbits';
+        }
+
+        // 14. Mechanical Waves & Sound
         if (combined.includes('موج') || combined.includes('صوت') || combined.includes('بسامد') || combined.includes('طول موج') || combined.includes('ارتعاش') || combined.includes('تشدید')) {
             return 'wave-on-a-string';
         }

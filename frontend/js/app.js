@@ -1669,21 +1669,25 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '7')"
                         class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '7' ? 'bg-amber-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                        🟡 پایه هفتم (۳ آزمایش)
+                        🟡 پایه هفتم (${simCatalog.filter(s => s.grade === 7 && s.gradeKey !== 'space').length} آزمایش)
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '8')"
                         class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '8' ? 'bg-blue-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                        🔵 پایه هشتم (۵ آزمایش)
+                        🔵 پایه هشتم (${simCatalog.filter(s => s.grade === 8 && s.gradeKey !== 'space').length} آزمایش)
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '9')"
                         class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '9' ? 'bg-purple-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                        🟣 پایه نهم (۶ آزمایش)
+                        🟣 پایه نهم (${simCatalog.filter(s => s.grade === 9 && s.gradeKey !== 'space').length} آزمایش)
+                    </button>
+                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'space')"
+                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === 'space' ? 'bg-cyan-500 text-slate-950 shadow-md font-black ring-2 ring-cyan-400/50' : 'bg-slate-800 text-cyan-400 hover:text-white border border-cyan-800/40'}">
+                        🚀 فضا و نجوم (${simCatalog.filter(s => s.gradeKey === 'space').length} آزمایش)
                     </button>
                 </div>
 
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>۱۴ شبیه‌ساز رسمی و آفلاین PhET بدون نیاز به فیلترشکن</span>
+                    <span>۲۵ شبیه‌ساز رسمی و آفلاین PhET دانشگاه کلرادو بدون نیاز به فیلترشکن</span>
                 </div>
             </div>
         </div>
@@ -1692,13 +1696,23 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
         <div class="space-y-3">
             <div class="flex items-center justify-between text-xs font-bold text-slate-400">
                 <span>انتخاب آزمایش از سرفصل دروس فیزیک (کتاب‌های وزارتی و تکمیلی سمپاد):</span>
-                <span>${simCatalog.filter(s => gradeFilter === 'all' || s.grade.toString() === gradeFilter).length} آزمایش در دسترس</span>
+                <span>${simCatalog.filter(s => {
+                    if (gradeFilter === 'all') return true;
+                    if (gradeFilter === 'space') return s.gradeKey === 'space';
+                    return s.grade.toString() === gradeFilter && s.gradeKey !== 'space';
+                }).length} آزمایش در دسترس</span>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
-                ${simCatalog.filter(s => gradeFilter === 'all' || s.grade.toString() === gradeFilter).map(s => {
+                ${simCatalog.filter(s => {
+                    if (gradeFilter === 'all') return true;
+                    if (gradeFilter === 'space') return s.gradeKey === 'space';
+                    return s.grade.toString() === gradeFilter && s.gradeKey !== 'space';
+                }).map(s => {
                     const isSelected = s.id === activeSim;
-                    const gradeColor = s.grade === 7 ? 'text-amber-400 bg-amber-950/60 border-amber-800/40' : (s.grade === 8 ? 'text-blue-400 bg-blue-950/60 border-blue-800/40' : 'text-purple-400 bg-purple-950/60 border-purple-800/40');
+                    const gradeColor = s.gradeKey === 'space'
+                        ? 'text-cyan-400 bg-cyan-950/60 border-cyan-800/40'
+                        : (s.grade === 7 ? 'text-amber-400 bg-amber-950/60 border-amber-800/40' : (s.grade === 8 ? 'text-blue-400 bg-blue-950/60 border-blue-800/40' : 'text-purple-400 bg-purple-950/60 border-purple-800/40'));
                     return `
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${s.id}', '${currentMode}', '${gradeFilter}')"
                         class="p-3 rounded-2xl border text-right transition-all flex flex-col justify-between group ${isSelected 
