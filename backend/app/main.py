@@ -110,8 +110,8 @@ async def add_security_headers(request: Request, call_next):
     if not request.url.path.startswith("/api/docs") and not request.url.path.startswith("/api/redoc"):
         response.headers["Content-Security-Policy"] = (
             "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com; "
-            "img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; "
-            "connect-src 'self' https://openrouter.ai https://api.openai.com; frame-ancestors 'self';"
+            "img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; "
+            "connect-src 'self' https://openrouter.ai https://api.openai.com; frame-src 'self' data: blob:; frame-ancestors 'self';"
         )
     return response
 
@@ -183,11 +183,15 @@ frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 if os.path.exists(frontend_dir):
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
 
+    simulators_dir = os.path.join(frontend_dir, "simulators")
+    if os.path.exists(simulators_dir):
+        app.mount("/simulators", StaticFiles(directory=simulators_dir), name="simulators")
+
     # Serve index.html for root and SPA client routes
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str):
-        # Do not intercept /api or /uploads routes
-        if full_path.startswith("api") or full_path.startswith("uploads"):
+        # Do not intercept /api, /uploads, or /simulators routes
+        if full_path.startswith("api") or full_path.startswith("uploads") or full_path.startswith("simulators"):
             return JSONResponse(status_code=404, content={"detail": "مسیریابی نامعتبر در API یا فایل یافت نشد."})
         
         file_candidate = os.path.join(frontend_dir, full_path)

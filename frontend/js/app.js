@@ -1661,30 +1661,21 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '7')"
                         class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '7' ? 'bg-amber-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                        🟡 پایه هفتم (اندازه‌گیری و گرما)
+                        🟡 پایه هفتم (۳ آزمایش)
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '8')"
                         class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '8' ? 'bg-blue-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                        🔵 پایه هشتم (مدار و اپتیک)
+                        🔵 پایه هشتم (۵ آزمایش)
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '9')"
                         class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '9' ? 'bg-purple-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                        🟣 پایه نهم (حرکت و فشار)
+                        🟣 پایه نهم (۶ آزمایش)
                     </button>
                 </div>
 
-                <!-- Mode Switcher (Native vs Sandbox) -->
-                <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs">
-                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', 'native', '${gradeFilter}')"
-                        class="px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 ${currentMode === 'native' ? 'bg-teal-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'}">
-                        <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-                        <span>شبیه‌ساز تعاملی بومی (بدون نیاز به فیلترشکن)</span>
-                    </button>
-                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', 'sandbox', '${gradeFilter}')"
-                        class="px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 ${(currentMode === 'sandbox' || currentMode === 'phet') ? 'bg-cyan-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-white'}">
-                        <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
-                        <span>میزکار تحلیل برداری و ثبت داده‌ها (سندباکس آزاد)</span>
-                    </button>
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>۱۴ شبیه‌ساز رسمی و آفلاین PhET بدون نیاز به فیلترشکن</span>
                 </div>
             </div>
         </div>
@@ -1692,22 +1683,22 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
         <!-- Experiment Selector Grid -->
         <div class="space-y-3">
             <div class="flex items-center justify-between text-xs font-bold text-slate-400">
-                <span>انتخاب آزمایش از سرفصل دروس فیزیک:</span>
+                <span>انتخاب آزمایش از سرفصل دروس فیزیک (کتاب‌های وزارتی و تکمیلی سمپاد):</span>
                 <span>${simCatalog.filter(s => gradeFilter === 'all' || s.grade.toString() === gradeFilter).length} آزمایش در دسترس</span>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
                 ${simCatalog.filter(s => gradeFilter === 'all' || s.grade.toString() === gradeFilter).map(s => {
                     const isSelected = s.id === activeSim;
                     const gradeColor = s.grade === 7 ? 'text-amber-400 bg-amber-950/60 border-amber-800/40' : (s.grade === 8 ? 'text-blue-400 bg-blue-950/60 border-blue-800/40' : 'text-purple-400 bg-purple-950/60 border-purple-800/40');
                     return `
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${s.id}', '${currentMode}', '${gradeFilter}')"
                         class="p-3 rounded-2xl border text-right transition-all flex flex-col justify-between group ${isSelected 
-                            ? 'bg-teal-500/15 border-teal-500 text-teal-300 font-bold shadow-lg shadow-teal-500/10 ring-2 ring-teal-500/30' 
-                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-teal-500/50 hover:bg-slate-50 dark:hover:bg-slate-850'}">
+                            ? 'bg-teal-500/20 border-teal-500 text-teal-300 font-bold shadow-lg shadow-teal-500/10 ring-2 ring-teal-500/40' 
+                            : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:border-teal-500/50 hover:bg-slate-850'}">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
-                                <i data-lucide="${s.icon || 'atom'}" class="w-4 h-4"></i>
+                            <span class="w-7 h-7 rounded-xl bg-slate-800 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
+                                <i data-lucide="${s.icon || 'atom'}" class="w-3.5 h-3.5"></i>
                             </span>
                             <span class="text-[9px] px-1.5 py-0.5 rounded border font-mono font-bold ${gradeColor}">
                                 ${s.gradeTitle}
@@ -1715,7 +1706,7 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                         </div>
                         <div>
                             <span class="text-xs font-bold block truncate leading-tight">${s.title}</span>
-                            <span class="text-[10px] text-slate-500 block truncate mt-0.5">${s.topic}</span>
+                            <span class="text-[10px] text-slate-400 block truncate mt-1">${s.topic}</span>
                         </div>
                     </button>
                     `;
@@ -1725,46 +1716,6 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
 
         <!-- Mount Point for the Active Simulator Apparatus -->
         <div id="catalog-sim-mount-point" class="w-full"></div>
-
-        <!-- Academic Learning Goals & Key Formulas Card -->
-        <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-white space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="book-open" class="w-4 h-4 text-teal-400"></i>
-                    <h3 class="font-extrabold text-sm sm:text-base text-white">اهداف آموزشی و روابط بنیادین: ${activeLab.title}</h3>
-                </div>
-                <span class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-teal-300 font-mono font-bold">
-                    ${activeLab.badge || 'فیزیک متوسطه اول'}
-                </span>
-            </div>
-
-            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed text-justify">
-                ${activeLab.desc}
-            </p>
-
-            ${activeLab.formula ? `
-            <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-center font-mono">
-                <span class="text-[11px] text-slate-400 block mb-1">فرمول و رابطه فیزیکی حاکم:</span>
-                <div class="katex-ltr-container text-base sm:text-lg text-cyan-300">
-                    $$${activeLab.formula}$$
-                </div>
-            </div>
-            ` : ''}
-
-            ${activeLab.goals && activeLab.goals.length > 0 ? `
-            <div>
-                <span class="text-xs font-bold text-slate-300 block mb-2">دستاوردهای یادگیری این آزمایش:</span>
-                <ul class="space-y-1.5 text-xs text-slate-400">
-                    ${activeLab.goals.map(g => `
-                    <li class="flex items-center gap-2">
-                        <i data-lucide="check-circle" class="w-3.5 h-3.5 text-teal-400 shrink-0"></i>
-                        <span>${g}</span>
-                    </li>
-                    `).join('')}
-                </ul>
-            </div>
-            ` : ''}
-        </div>
     </div>
     `;
 
