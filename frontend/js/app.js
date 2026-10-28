@@ -1659,7 +1659,7 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'featured')"
                         class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === 'featured' ? 'bg-amber-400 text-slate-950 shadow-md font-black ring-2 ring-amber-300' : 'bg-slate-800 text-amber-300 hover:text-white border border-amber-600/40'}">
-                        🌐 پلتفرم‌های منتخب (Walter Fendt, oPhysics, Physics Classroom)
+                        🌐 پلتفرم‌های منتخب (${simCatalog.filter(s => s.gradeKey === 'featured').length} پلتفرم)
                     </button>
                 </div>
 
@@ -1835,7 +1835,7 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                     if (gradeFilter === 'all') return true;
                     if (gradeFilter === 'space') return s.gradeKey === 'space';
                     if (gradeFilter === 'featured') return s.gradeKey === 'featured';
-                    return s.grade.toString() === gradeFilter && s.gradeKey !== 'space' && s.gradeKey !== 'featured';
+                    return s.grade.toString() === gradeFilter && s.gradeKey !== 'space';
                 }).length} آزمایش در دسترس</span>
             </div>
 
@@ -1844,7 +1844,7 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                     if (gradeFilter === 'all') return true;
                     if (gradeFilter === 'space') return s.gradeKey === 'space';
                     if (gradeFilter === 'featured') return s.gradeKey === 'featured';
-                    return s.grade.toString() === gradeFilter && s.gradeKey !== 'space' && s.gradeKey !== 'featured';
+                    return s.grade.toString() === gradeFilter && s.gradeKey !== 'space';
                 }).map(s => {
                     const isSelected = s.id === activeSim;
                     const gradeColor = s.gradeKey === 'space'

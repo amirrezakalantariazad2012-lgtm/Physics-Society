@@ -228,8 +228,11 @@
         const ctx = canvas.getContext('2d');
 
         function resizeCanvas() {
-            canvas.width = canvas.clientWidth * window.devicePixelRatio;
-            canvas.height = canvas.clientHeight * window.devicePixelRatio;
+            const w = canvas.clientWidth || 650;
+            const h = canvas.clientHeight || 360;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
             draw();
         }
         window.addEventListener('resize', resizeCanvas);
@@ -356,18 +359,22 @@
                 // Fulcrum in middle
                 const ratio = dR / (dR + dE);
                 fulcrumX = barStart + barLength * ratio;
-                rx = barStart;
-                ex = barStart + barLength;
+                rx = barStart + 25 * dpr;
+                ex = barStart + barLength - 25 * dpr;
             } else if (leverClass === 2) {
                 // Fulcrum at left, Load in middle, Effort at right
-                fulcrumX = barStart + 20 * dpr;
-                rx = fulcrumX + (barLength - 40 * dpr) * (dR / dE);
-                ex = barStart + barLength - 20 * dpr;
+                fulcrumX = barStart + 25 * dpr;
+                const maxD = Math.max(dE, dR);
+                const rRatio = Math.min(0.85, Math.max(0.15, dR / maxD));
+                rx = fulcrumX + (barLength - 50 * dpr) * rRatio;
+                ex = barStart + barLength - 25 * dpr;
             } else {
                 // Class 3: Fulcrum at left, Effort in middle, Load at right
-                fulcrumX = barStart + 20 * dpr;
-                ex = fulcrumX + (barLength - 40 * dpr) * (dE / dR);
-                rx = barStart + barLength - 20 * dpr;
+                fulcrumX = barStart + 25 * dpr;
+                const maxD = Math.max(dE, dR);
+                const eRatio = Math.min(0.85, Math.max(0.15, dE / maxD));
+                ex = fulcrumX + (barLength - 50 * dpr) * eRatio;
+                rx = barStart + barLength - 25 * dpr;
             }
 
             // Draw Base Support Triangle (Fulcrum)
@@ -614,6 +621,11 @@
             ctx.font = `bold ${9 * dpr}px sans-serif`;
             ctx.fillText('نیروی دست (E)', x, y - 30 * dpr);
         }
+
+        // Expose handlers globally
+        window.switchMode = switchMode;
+        window.setLeverClass = setLeverClass;
+        window.setPulleyType = setPulleyType;
 
         // Init
         window.addEventListener('load', () => {

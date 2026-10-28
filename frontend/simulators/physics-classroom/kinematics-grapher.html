@@ -232,10 +232,15 @@
         const ctxVT = canvasVT.getContext('2d');
 
         function resizeCanvases() {
-            canvasXT.width = canvasXT.clientWidth * window.devicePixelRatio;
-            canvasXT.height = canvasXT.clientHeight * window.devicePixelRatio;
-            canvasVT.width = canvasVT.clientWidth * window.devicePixelRatio;
-            canvasVT.height = canvasVT.clientHeight * window.devicePixelRatio;
+            const w1 = canvasXT.clientWidth || 320;
+            const h1 = canvasXT.clientHeight || 220;
+            const w2 = canvasVT.clientWidth || 320;
+            const h2 = canvasVT.clientHeight || 220;
+            const dpr = window.devicePixelRatio || 1;
+            canvasXT.width = w1 * dpr;
+            canvasXT.height = h1 * dpr;
+            canvasVT.width = w2 * dpr;
+            canvasVT.height = h2 * dpr;
             drawGraphs();
         }
         window.addEventListener('resize', resizeCanvases);
@@ -439,6 +444,8 @@
                 fb.textContent = '✗ نادرست؛ جهت حرکت توسط علامت سرعت تعیین می‌شود (چون v>0 است در جهت مثبت است) و چون شتاب منفی است، کندشونده است.';
             }
         }
+
+        window.checkAnswer = checkAnswer;
 
         // Init
         window.addEventListener('load', () => {
