@@ -1443,9 +1443,9 @@ class PhysicsSimulators {
         const frameHeight = isDuoPoint ? 'h-[500px]' : 'h-[640px] sm:h-[720px]';
 
         container.innerHTML = `
-        <div id="sim-master-card" class="rounded-3xl bg-slate-900 border border-teal-500/30 overflow-hidden shadow-2xl flex flex-col space-y-0 transition-all">
+        <div id="sim-master-card" class="rounded-3xl bg-slate-900 border border-slate-700/80 overflow-hidden shadow-2xl flex flex-col space-y-0 transition-all">
             <!-- Sleek Control Toolbar -->
-            <div class="p-3.5 sm:p-4 bg-slate-950/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            <div class="p-3.5 sm:p-4 bg-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-2.5">
                     <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shadow-lg shadow-emerald-500/50"></span>
                     <div>
@@ -1513,15 +1513,15 @@ class PhysicsSimulators {
             </div>
 
             <!-- Standalone IFrame Viewport (100% Offline, Same-Origin) -->
-            <div id="sim-viewport-frame-wrapper" class="relative w-full ${frameHeight} bg-slate-950 flex flex-col justify-center items-center overflow-hidden">
+            <div id="sim-viewport-frame-wrapper" class="relative w-full ${frameHeight} bg-slate-900 flex flex-col justify-center items-center overflow-hidden">
                 <!-- Smooth Loading Overlay -->
-                <div id="sim-frame-loader" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950 text-teal-400 gap-3 transition-opacity duration-300">
+                <div id="sim-frame-loader" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-900 text-teal-400 gap-3 transition-opacity duration-300">
                     <div class="w-10 h-10 border-4 border-teal-500/20 border-t-teal-400 rounded-full animate-spin"></div>
                     <span class="text-xs font-bold text-slate-300">در حال آماده‌سازی و بارگذاری شبیه‌ساز فیزیک...</span>
                 </div>
 
                 <!-- Resilient Error Boundary -->
-                <div id="sim-frame-error" class="hidden absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/95 text-slate-200 p-6 text-center gap-3">
+                <div id="sim-frame-error" class="hidden absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/95 text-slate-200 p-6 text-center gap-3">
                     <i data-lucide="alert-circle" class="w-10 h-10 text-amber-400"></i>
                     <h4 class="font-black text-sm text-white">عدم پاسخگویی شبیه‌ساز</h4>
                     <p class="text-xs text-slate-400 max-w-sm">در صورتی که شبیه‌ساز به درستی بارگذاری نشده است، می‌توانید آن را دوباره راه‌اندازی کنید یا در پنجره مجزا باز نمایید.</p>
@@ -1541,7 +1541,7 @@ class PhysicsSimulators {
                     id="sim-active-iframe"
                     src="${sim.localUrl}" 
                     title="${sim.title}"
-                    class="w-full h-full border-0 select-none bg-slate-950"
+                    class="w-full h-full border-0 select-none bg-slate-900"
                     allow="fullscreen; autoplay; accelerometer; gyroscope; clipboard-write; microphone; camera"
                     sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads"
                     onload="(function(){ const l = document.getElementById('sim-frame-loader'); if (l) l.classList.add('hidden'); if(window.lucide) window.lucide.createIcons(); })()"
@@ -1551,7 +1551,7 @@ class PhysicsSimulators {
             </div>
 
             <!-- Bottom Multi-Tab Educational Panel -->
-            <div class="p-4 sm:p-6 bg-slate-950/70 border-t border-slate-800 space-y-4">
+            <div class="p-4 sm:p-6 bg-slate-900/95 border-t border-slate-800 space-y-4">
                 <!-- Tab Selector -->
                 <div class="flex flex-wrap items-center gap-2 border-b border-slate-800/80 pb-3 text-xs font-bold">
                     <button onclick="window.physicsSimulators.switchInfoTab('steps')" id="sim-tab-btn-steps" 
