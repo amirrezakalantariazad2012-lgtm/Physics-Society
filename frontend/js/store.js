@@ -38,6 +38,21 @@ class AppStore {
         window.dispatchEvent(new CustomEvent('user-changed', { detail: user }));
     }
 
+    get user() {
+        return this.currentUser;
+    }
+
+    get isTeacher() {
+        if (!this.currentUser) return false;
+        const role = (this.currentUser.role || '').toLowerCase();
+        return role === 'teacher' || role === 'admin' || role === 'curator';
+    }
+
+    get isAdmin() {
+        if (!this.currentUser) return false;
+        return (this.currentUser.role || '').toLowerCase() === 'admin';
+    }
+
     async refreshUser() {
         if (!window.api || !window.api.token) return null;
         try {

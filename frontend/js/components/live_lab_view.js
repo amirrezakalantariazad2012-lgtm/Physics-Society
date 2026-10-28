@@ -453,10 +453,22 @@ class LiveLabComponent {
         this.hasVideoAudioTrack = false;
     }
 
+    getEffectiveUser() {
+        if (!window.store) return null;
+        return window.store.currentUser || window.store.user || null;
+    }
+
+    isTeacherOrAdmin(user) {
+        if (!user) return false;
+        const role = (user.role || '').toLowerCase();
+        return role === 'teacher' || role === 'admin' || role === 'curator' || role === 'manager';
+    }
+
     async render(container, roomCode = null) {
-        const user = window.store ? window.store.user : null;
-        this.userRole = (user && user.role === 'teacher') ? 'teacher' : 'student';
-        this.userName = user ? (user.full_name || user.name || 'کاربر') : (this.userRole === 'teacher' ? 'دبیر فیزیک سمپاد' : 'دانش‌آموز');
+        const user = this.getEffectiveUser();
+        const isPresenter = this.isTeacherOrAdmin(user);
+        this.userRole = isPresenter ? 'teacher' : 'student';
+        this.userName = user ? (user.full_name || user.name || user.username || (isPresenter ? 'دبیر فیزیک سمپاد' : 'دانش‌آموز')) : (isPresenter ? 'دبیر فیزیک سمپاد' : 'دانش‌آموز');
 
         if (roomCode) {
             await this.joinRoom(container, roomCode);
@@ -824,6 +836,17 @@ class LiveLabComponent {
         this.currentSimId = details.sim_id || 'motion-1d';
         this.isStudentLocked = details.is_locked !== undefined ? Boolean(details.is_locked) : true;
         this.isStreaming = Boolean(details.is_streaming);
+
+        // Ensure both admin and teacher roles receive full presenter host privileges
+        const user = this.getEffectiveUser();
+        const isPresenter = this.isTeacherOrAdmin(user) || (user && (user.full_name === details.teacher_name || user.username === details.teacher_name));
+        if (isPresenter) {
+            this.userRole = 'teacher';
+            if (user) {
+                this.userName = user.full_name || user.name || user.username || 'دبیر فیزیک سمپاد';
+            }
+        }
+
         const currentLab = getLabInfo(this.currentSimId);
 
         container.innerHTML = `
@@ -861,13 +884,6 @@ class LiveLabComponent {
                         class="px-4 py-2 rounded-xl ${this.isStreaming ? 'bg-rose-600 hover:bg-rose-700 text-white animate-pulse' : 'bg-emerald-600 hover:bg-emerald-700 text-white'} font-bold text-xs shadow-md flex items-center gap-2 transition-all">
                         <i data-lucide="${this.isStreaming ? 'video-off' : 'video'}" class="w-4 h-4"></i>
                         <span id="main-stream-btn-text">${this.isStreaming ? '⏹️ توقف اشتراک تصویر' : '🖥️ شروع اشتراک زنده آزمایشگاه (Meet)'}</span>
-                    </button>
-
-                    <!-- Teacher Microphone Button -->
-                    <button id="btn-main-mic" onclick="window.liveLab.toggleMicrophone()" 
-                        class="px-3.5 py-2 rounded-xl ${!this.isMicMuted ? 'bg-emerald-500 text-white ring-2 ring-emerald-300' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'} font-bold text-xs border border-slate-300 dark:border-slate-700 flex items-center gap-1.5 transition-all">
-                        <i data-lucide="${!this.isMicMuted ? 'mic' : 'mic-off'}" class="w-4 h-4"></i>
-                        <span id="main-mic-text">${!this.isMicMuted ? 'میکروفون: فعال' : 'میکروفون'}</span>
                     </button>
 
                     <!-- Switch Laboratory Button (All 28 Labs) -->
@@ -980,7 +996,7 @@ class LiveLabComponent {
                         <div id="student-stream-viewport" class="relative w-full h-full flex items-center justify-center bg-slate-950">
                             
                             <!-- Live WebRTC Video Element (High-Resolution Google Meet Feed) -->
-                            <video id="live-meet-video" autoplay playsinline 
+                            <video id="live-meet-video" autoplay playsinline muted 
                                 class="${this.isStreaming && this.activeViewMode === 'stream' ? 'block' : 'hidden'} w-full h-full object-contain bg-slate-950"></video>
                             
                             <!-- Live High-Speed Canvas Mirror (Direct real-time simulation broadcast) -->
@@ -990,13 +1006,6 @@ class LiveLabComponent {
                             <!-- Live Fallback Canvas (Instant frame snapshot receiver) -->
                             <canvas id="live-fallback-canvas" 
                                 class="hidden w-full h-full object-contain bg-slate-950"></canvas>
-
-                            <!-- Unmute Audio Prompt (When browser blocks audio autoplay) -->
-                            <button id="video-unmute-btn" onclick="window.liveLab.unmuteVideo()" 
-                                class="hidden absolute bottom-5 left-5 z-30 px-4 py-2 rounded-xl bg-blue-600/90 hover:bg-blue-600 text-white font-bold text-xs shadow-xl flex items-center gap-2 backdrop-blur animate-bounce">
-                                <i data-lucide="volume-2" class="w-4 h-4"></i>
-                                <span>🔊 برای شنیدن صدای دبیر کلیک نمایید</span>
-                            </button>
 
                             <!-- Student Solo Mode iframe (Available only when unlocked) -->
                             <iframe id="live-sim-iframe" 
@@ -1268,23 +1277,16 @@ class LiveLabComponent {
             const stream = await navigator.mediaDevices.getDisplayMedia({
                 video: {
                     displaySurface: "browser",
-                    frameRate: { ideal: 60, max: 60 },
+                    frameRate: { ideal: 30, max: 60 },
                     width: { ideal: 1920 },
                     height: { ideal: 1080 },
                     cursor: "always"
                 },
-                audio: true
+                audio: false
             });
 
             this.localStream = stream;
             this.isStreaming = true;
-
-            // If microphone stream was already open, mix in mic audio track
-            if (this.micStream) {
-                this.micStream.getAudioTracks().forEach(track => {
-                    this.localStream.addTrack(track);
-                });
-            }
 
             // Handle when teacher stops sharing via browser bar
             const videoTrack = stream.getVideoTracks()[0];
@@ -1299,13 +1301,13 @@ class LiveLabComponent {
                 this.socket.send(JSON.stringify({
                     type: "stream_started",
                     stream_type: "screen",
-                    has_audio: Boolean(stream.getAudioTracks().length)
+                    has_audio: false
                 }));
             }
 
             this.updateTeacherStreamUI(true);
             this.startFallbackFrameCapture();
-            this.showToast("پخش زنده Full HD آغاز شد! تصویر و آزمایش‌های شما به صورت زنده برای همه دانش‌آموزان پخش می‌شود.");
+            this.showToast("اشتراک زنده صفحه و آزمایشگاه آغاز شد! همه دانش‌آموزان به صورت زنده تصویر شما را مشاهده می‌کنند.");
         } catch (err) {
             console.error("Screen share error:", err);
             if (err.name !== "NotAllowedError") {
@@ -1357,61 +1359,23 @@ class LiveLabComponent {
         if (window.lucide) window.lucide.createIcons();
     }
 
-    // Teacher Microphone Toggle
+    // Audio / Microphone: disabled per institutional request (Voice is not needed)
     async toggleMicrophone() {
-        if (!this.isMicMuted && this.micStream) {
-            // Mute mic
-            this.micStream.getAudioTracks().forEach(t => t.stop());
-            this.micStream = null;
-            this.isMicMuted = true;
-            this.updateMicUI(false);
-            this.showToast("میکروفون خاموش شد.");
-        } else {
-            // Request mic
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                this.micStream = stream;
-                this.isMicMuted = false;
-
-                // Add to localStream if streaming
-                if (this.localStream) {
-                    const audioTrack = stream.getAudioTracks()[0];
-                    if (audioTrack) {
-                        this.localStream.addTrack(audioTrack);
-                        // Add to all active WebRTC peers
-                        this.peerConnections.forEach(pc => {
-                            pc.addTrack(audioTrack, this.localStream);
-                        });
-                    }
-                }
-
-                this.updateMicUI(true);
-                this.showToast("میکروفون دبیر وصل شد و صدای شما در کلاس پخش می‌شود.");
-            } catch (err) {
-                console.error("Microphone error:", err);
-                this.showToast("دسترسی به میکروفون داده نشد.");
-            }
-        }
+        return;
     }
 
     updateMicUI(active) {
-        const btn = document.getElementById('btn-main-mic');
-        const txt = document.getElementById('main-mic-text');
-        if (btn && txt) {
-            if (active) {
-                btn.className = "px-3.5 py-2 rounded-xl bg-emerald-500 text-white ring-2 ring-emerald-300 font-bold text-xs border border-emerald-400 flex items-center gap-1.5 transition-all";
-                txt.textContent = "میکروفون: فعال";
-            } else {
-                btn.className = "px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-300 dark:border-slate-700 flex items-center gap-1.5 transition-all";
-                txt.textContent = "میکروفون";
-            }
-        }
-        if (window.lucide) window.lucide.createIcons();
+        return;
     }
 
     // WebRTC: Teacher handling student connection request
     async handleStudentStreamRequest(studentSessionId, studentName) {
         if (!this.localStream) return;
+        // Limit P2P WebRTC mesh connections to at most 3 peers to avoid freezing the teacher's browser with 150 concurrent viewers
+        // All 150+ students receive real-time updates via WebSocket canvas mirror + synchronized local 60 FPS simulator iframe!
+        if (this.peerConnections.size >= 3) {
+            return;
+        }
         try {
             if (this.peerConnections.has(studentSessionId)) {
                 this.peerConnections.get(studentSessionId).close();
@@ -1481,11 +1445,8 @@ class LiveLabComponent {
                 const videoEl = document.getElementById('live-meet-video');
                 if (videoEl && event.streams && event.streams[0]) {
                     videoEl.srcObject = event.streams[0];
-                    videoEl.play().catch(() => {
-                        // Show tap to unmute button if browser blocked autoplay sound
-                        const unmuteBtn = document.getElementById('video-unmute-btn');
-                        if (unmuteBtn) unmuteBtn.classList.remove('hidden');
-                    });
+                    videoEl.muted = true;
+                    videoEl.play().catch(() => {});
                     this.showVideoScreen(true);
                 }
             };
@@ -1549,13 +1510,7 @@ class LiveLabComponent {
     }
 
     unmuteVideo() {
-        const videoEl = document.getElementById('live-meet-video');
-        if (videoEl) {
-            videoEl.muted = false;
-            videoEl.play();
-        }
-        const unmuteBtn = document.getElementById('video-unmute-btn');
-        if (unmuteBtn) unmuteBtn.classList.add('hidden');
+        // Voice is not required
     }
 
     showVideoScreen(hasStream) {
@@ -1564,13 +1519,20 @@ class LiveLabComponent {
         const badge = document.getElementById('student-stream-badge');
         const badgeText = document.getElementById('student-stream-badge-text');
 
-        if (video && lounge) {
+        if (lounge) {
             if (hasStream && this.activeViewMode === 'stream') {
-                video.classList.remove('hidden');
                 lounge.classList.add('hidden');
             } else if (!hasStream && this.activeViewMode === 'stream') {
-                video.classList.add('hidden');
                 lounge.classList.remove('hidden');
+                if (video) video.classList.add('hidden');
+                const canvas = document.getElementById('live-auto-mirror-canvas') || document.getElementById('live-fallback-canvas');
+                if (canvas) canvas.classList.add('hidden');
+            }
+        }
+
+        if (video) {
+            if (hasStream && video.srcObject && this.activeViewMode === 'stream') {
+                video.classList.remove('hidden');
             }
         }
 
@@ -1585,7 +1547,7 @@ class LiveLabComponent {
         }
     }
 
-    // Ultra-reliable Canvas Snapshot Fallback
+    // Ultra-reliable Canvas Snapshot Fallback (Adaptive for 150+ concurrent viewers)
     startFallbackFrameCapture() {
         if (this.fallbackTimer) clearInterval(this.fallbackTimer);
         const hiddenVideo = document.createElement('video');
@@ -1594,8 +1556,8 @@ class LiveLabComponent {
         hiddenVideo.play().catch(() => {});
 
         const canvas = document.createElement('canvas');
-        canvas.width = 1280;
-        canvas.height = 720;
+        canvas.width = 960;
+        canvas.height = 540;
         const ctx = canvas.getContext('2d');
 
         this.fallbackTimer = setInterval(() => {
@@ -1605,8 +1567,8 @@ class LiveLabComponent {
             }
             try {
                 if (hiddenVideo.readyState >= 2) {
-                    ctx.drawImage(hiddenVideo, 0, 0, 1280, 720);
-                    const frame = canvas.toDataURL('image/jpeg', 0.60);
+                    ctx.drawImage(hiddenVideo, 0, 0, 960, 540);
+                    const frame = canvas.toDataURL('image/jpeg', 0.50);
                     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
                         this.socket.send(JSON.stringify({
                             type: "stream_frame",
@@ -1615,12 +1577,18 @@ class LiveLabComponent {
                     }
                 }
             } catch (e) {}
-        }, 100); // 10 fps snapshot mirror
+        }, 260); // ~3.8 FPS (optimized lightweight bandwidth for 150+ concurrent viewers)
     }
 
     renderFallbackFrame(frameData) {
+        if (!frameData) return;
         const lounge = document.getElementById('stream-waiting-lounge');
         if (lounge) lounge.classList.add('hidden');
+
+        const video = document.getElementById('live-meet-video');
+        if (video && !video.srcObject) {
+            video.classList.add('hidden');
+        }
 
         // Render to live-auto-mirror-canvas or fallbackCanvas
         let canvas = document.getElementById('live-auto-mirror-canvas') || document.getElementById('live-fallback-canvas');
@@ -1629,7 +1597,7 @@ class LiveLabComponent {
             if (viewport) {
                 canvas = document.createElement('canvas');
                 canvas.id = 'live-auto-mirror-canvas';
-                canvas.className = "w-full h-full object-contain bg-white rounded-2xl shadow-inner";
+                canvas.className = "w-full h-full object-contain bg-slate-900 rounded-2xl shadow-inner";
                 const laser = document.getElementById('live-laser-canvas');
                 if (laser && laser.parentNode) {
                     laser.parentNode.insertBefore(canvas, laser);
@@ -2158,6 +2126,59 @@ class LiveLabComponent {
                 }
             }
         });
+    }
+
+    hookTeacherSimulator(iframe) {
+        if (!iframe) return;
+        try {
+            const attachListeners = () => {
+                try {
+                    const iDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                    if (!iDoc) return;
+                    const relayAction = (type, e) => {
+                        if (!this.socket || this.socket.readyState !== WebSocket.OPEN) return;
+                        const rect = iframe.getBoundingClientRect();
+                        const x = rect.width ? (e.clientX - rect.left) / rect.width : 0;
+                        const y = rect.height ? (e.clientY - rect.top) / rect.height : 0;
+                        this.socket.send(JSON.stringify({
+                            type: 'sim_interaction',
+                            action: type,
+                            x: Math.max(0, Math.min(1, x)),
+                            y: Math.max(0, Math.min(1, y)),
+                            timestamp: Date.now()
+                        }));
+                    };
+                    iDoc.addEventListener('pointerdown', (e) => relayAction('down', e), { passive: true });
+                    iDoc.addEventListener('pointerup', (e) => relayAction('up', e), { passive: true });
+                } catch (e) {
+                    // Sandboxed or cross-origin PhET frame handled via canvas mirror or postMessage
+                }
+            };
+
+            if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+                attachListeners();
+            } else {
+                iframe.addEventListener('load', attachListeners);
+            }
+        } catch (e) {
+            console.debug('hookTeacherSimulator notice:', e);
+        }
+    }
+
+    handleSimInteraction(data) {
+        if (!data) return;
+        if (data.x !== undefined && data.y !== undefined) {
+            this.renderLaserDot(data.x, data.y);
+        }
+        const iframe = document.getElementById('live-sim-iframe');
+        if (iframe && iframe.contentWindow) {
+            try {
+                iframe.contentWindow.postMessage({
+                    type: 'SIM_REMOTE_ACTION',
+                    payload: data
+                }, '*');
+            } catch (e) {}
+        }
     }
 
     startSyncPoller(roomCode) {

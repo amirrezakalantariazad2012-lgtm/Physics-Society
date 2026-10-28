@@ -136,6 +136,11 @@ local_sockets: Dict[str, Set[WebSocket]] = {}
 session_sockets: Dict[str, WebSocket] = {}
 last_handled_event_id: int = 0
 
+# In-memory fast frame & ping cache to eliminate SQLite lock contention under 150+ concurrent users
+latest_room_frames: Dict[str, Dict[str, Any]] = {}
+last_frame_db_save: Dict[str, float] = {}
+last_viewer_db_ping: Dict[str, float] = {}
+
 async def broadcast_to_local_sockets(room_code: str, message: dict, exclude: Optional[WebSocket] = None):
     sockets = local_sockets.get(room_code, set())
     if not sockets:
@@ -213,10 +218,14 @@ async def event_bus_listener():
                             room = r["room_code"]
                             if r["event_type"] == "stream_frame":
                                 if room in local_sockets and local_sockets[room]:
-                                    cur_f = conn.execute("SELECT frame_data FROM live_frames WHERE room_code = ?", (room,))
-                                    row_f = cur_f.fetchone()
-                                    if row_f and row_f["frame_data"]:
-                                        await broadcast_to_local_sockets(room, {"type": "stream_frame", "frame": row_f["frame_data"]})
+                                    mem_f = latest_room_frames.get(room)
+                                    if mem_f and mem_f.get("frame"):
+                                        await broadcast_to_local_sockets(room, {"type": "stream_frame", "frame": mem_f["frame"]})
+                                    else:
+                                        cur_f = conn.execute("SELECT frame_data FROM live_frames WHERE room_code = ?", (room,))
+                                        row_f = cur_f.fetchone()
+                                        if row_f and row_f["frame_data"]:
+                                            await broadcast_to_local_sockets(room, {"type": "stream_frame", "frame": row_f["frame_data"]})
                             else:
                                 payload = json.loads(r["payload_json"])
                                 target = payload.get("target_session_id")
@@ -598,9 +607,14 @@ async def live_lab_websocket(
         cur = conn.execute("SELECT sim_id, COALESCE(sim_title, '') as sim_title, COALESCE(is_locked, 1) as is_locked, COALESCE(is_streaming, 0) as is_streaming, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json FROM rooms WHERE room_code = ?", (room_code,))
         row = cur.fetchone()
 
-        cur_f = conn.execute("SELECT frame_data FROM live_frames WHERE room_code = ? AND updated_at > ?", (room_code, now - 120))
-        row_f = cur_f.fetchone()
-        init_frame = row_f["frame_data"] if row_f else None
+        init_frame = None
+        mem_f = latest_room_frames.get(room_code)
+        if mem_f and (now - mem_f.get("time", 0)) < 180:
+            init_frame = mem_f.get("frame")
+        else:
+            cur_f = conn.execute("SELECT frame_data FROM live_frames WHERE room_code = ? AND updated_at > ?", (room_code, now - 180))
+            row_f = cur_f.fetchone()
+            init_frame = row_f["frame_data"] if row_f else None
 
         if row:
             await websocket.send_text(json.dumps({
@@ -767,15 +781,23 @@ async def live_lab_websocket(
                 publish_event(room_code, "lock_toggled", lock_event)
                 await broadcast_to_local_sockets(room_code, {"type": "lock_toggled", **lock_event})
 
-            # 11. Ping Heartbeat & Viewer Update
+            # 11. Ping Heartbeat & Viewer Update (Optimized for 150+ concurrent users)
             elif msg_type == "ping":
                 now_t = time.time()
-                with get_db() as conn:
-                    conn.execute("UPDATE active_viewers SET last_ping = ? WHERE session_id = ?", (now_t, session_id))
-                    conn.commit()
-                    c = conn.execute("SELECT COUNT(*) as cnt FROM active_viewers WHERE room_code = ? AND last_ping > ?", (room_code, now_t - 20))
-                    row_c = c.fetchone()
-                    total_viewers = max(row_c["cnt"] if row_c else 1, len(local_sockets.get(room_code, set())))
+                total_viewers = max(len(local_sockets.get(room_code, set())), 1)
+                last_db_p = last_viewer_db_ping.get(session_id, 0.0)
+                if now_t - last_db_p > 12.0:
+                    last_viewer_db_ping[session_id] = now_t
+                    try:
+                        with get_db() as conn:
+                            conn.execute("UPDATE active_viewers SET last_ping = ? WHERE session_id = ?", (now_t, session_id))
+                            conn.commit()
+                            c = conn.execute("SELECT COUNT(*) as cnt FROM active_viewers WHERE room_code = ? AND last_ping > ?", (room_code, now_t - 25))
+                            row_c = c.fetchone()
+                            if row_c and row_c["cnt"]:
+                                total_viewers = max(row_c["cnt"], total_viewers)
+                    except Exception:
+                        pass
                 await websocket.send_text(json.dumps({"type": "pong", "viewers_count": total_viewers}))
 
             # 12. Stream Started by Teacher (Google Meet Video Broadcast)
@@ -852,17 +874,25 @@ async def live_lab_websocket(
                     }
                     await send_to_session(target, ice_payload, room_code)
 
-            # 18. Fast Canvas Frame Fallback (Zero-configuration instant screen mirror across all workers)
+            # 18. Fast Canvas Frame Fallback (Zero-disk-latency instant screen mirror across all workers)
             elif msg_type == "stream_frame":
                 frame_val = data.get("frame")
                 if frame_val:
                     now_f = time.time()
-                    with get_db() as conn:
-                        conn.execute("INSERT OR REPLACE INTO live_frames (room_code, frame_data, updated_at) VALUES (?, ?, ?)",
-                                     (room_code, frame_val, now_f))
-                        conn.commit()
-                    publish_event(room_code, "stream_frame", {"timestamp": now_f})
+                    latest_room_frames[room_code] = {"frame": frame_val, "time": now_f}
+                    # Ultra-fast in-memory broadcast to connected students with zero disk I/O lock
                     await broadcast_to_local_sockets(room_code, {"type": "stream_frame", "frame": frame_val}, exclude=websocket)
+                    # Periodic lightweight persistence (at most once every 3.5s) so newly joined students get init_frame
+                    last_save = last_frame_db_save.get(room_code, 0.0)
+                    if now_f - last_save > 3.5:
+                        last_frame_db_save[room_code] = now_f
+                        try:
+                            with get_db() as conn:
+                                conn.execute("INSERT OR REPLACE INTO live_frames (room_code, frame_data, updated_at) VALUES (?, ?, ?)",
+                                             (room_code, frame_val, now_f))
+                                conn.commit()
+                        except Exception as e:
+                            logger.debug(f"Frame DB cache save error: {e}")
 
             # 19. Real-Time Interactive Simulator Action Mirroring (Ultra-fast, zero-lag pointer & actions)
             elif msg_type in ["sim_interaction", "teacher_interaction", "sim_pointer"]:
