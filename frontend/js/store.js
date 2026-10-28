@@ -8,24 +8,25 @@ class AppStore {
         this.viewParams = {};
         this.grades = [];
         this.selectedGrade = null;
-        this.theme = localStorage.getItem('theme') || 'light';
+        // Temporarily disable dark theme and strictly enforce clean academic light theme
+        this.theme = 'light';
+        try { localStorage.setItem('theme', 'light'); } catch (e) {}
         this.initTheme();
     }
 
     initTheme() {
+        this.theme = 'light';
+        try { localStorage.setItem('theme', 'light'); } catch (e) {}
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
         const metaTheme = document.querySelector('meta[name="theme-color"]');
-        if (this.theme === 'dark') {
-            document.documentElement.classList.add('dark');
-            if (metaTheme) metaTheme.setAttribute('content', '#070A18');
-        } else {
-            document.documentElement.classList.remove('dark');
-            if (metaTheme) metaTheme.setAttribute('content', '#f8fafc');
-        }
+        if (metaTheme) metaTheme.setAttribute('content', '#f8fafc');
     }
 
     toggleTheme() {
-        this.theme = this.theme === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('theme', this.theme);
+        // Dark theme is temporarily disabled per user request; maintain crisp light theme
+        this.theme = 'light';
+        try { localStorage.setItem('theme', 'light'); } catch (e) {}
         this.initTheme();
         if (window.updateNavbar) {
             window.updateNavbar();

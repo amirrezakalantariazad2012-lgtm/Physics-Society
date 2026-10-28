@@ -29,14 +29,14 @@ async function renderLeaderboardsView(containerId) {
             ${list.length >= 3 ? `
             <div class="grid grid-cols-3 gap-3 items-end pt-8 pb-4 text-center">
                 <!-- 2nd Place -->
-                <div class="bg-slate-900/95 rounded-3xl p-4 border border-slate-800 shadow-xl space-y-2 h-[170px] flex flex-col justify-end">
+                <div class="bg-white dark:bg-slate-900/95 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-md space-y-2 h-[170px] flex flex-col justify-end">
                     <span class="w-7 h-7 mx-auto rounded-full bg-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center">۲</span>
                     <span class="font-bold text-xs text-slate-800 dark:text-white block truncate">${list[1].display_name}</span>
                     <span class="text-[11px] text-slate-400 block">${list[1].grade_title_fa}</span>
                     <span class="text-xs font-bold text-sky-400 font-sans font-bold">${list[1].total_xp} XP</span>
                 </div>
                 <!-- 1st Place -->
-                <div class="bg-gradient-to-t from-amber-500/10 to-transparent dark:from-slate-900/90 dark:to-slate-950 rounded-3xl p-4 border border-amber-500/50 shadow-xl space-y-2 h-[200px] flex flex-col justify-end relative">
+                <div class="bg-white dark:bg-slate-900/95 rounded-3xl p-4 border border-amber-500/50 shadow-md space-y-2 h-[200px] flex flex-col justify-end relative">
                     <i data-lucide="crown" class="w-6 h-6 text-amber-500 absolute -top-3 left-1/2 -translate-x-1/2"></i>
                     <span class="w-8 h-8 mx-auto rounded-full bg-amber-400 text-slate-900 font-black text-sm flex items-center justify-center shadow">۱</span>
                     <span class="font-extrabold text-sm text-slate-900 dark:text-white block truncate">${list[0].display_name}</span>
@@ -44,7 +44,7 @@ async function renderLeaderboardsView(containerId) {
                     <span class="text-sm font-black text-amber-500 font-sans">${list[0].total_xp} XP</span>
                 </div>
                 <!-- 3rd Place -->
-                <div class="bg-slate-900/95 rounded-3xl p-4 border border-slate-800 shadow-xl space-y-2 h-[150px] flex flex-col justify-end">
+                <div class="bg-white dark:bg-slate-900/95 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-md space-y-2 h-[150px] flex flex-col justify-end">
                     <span class="w-7 h-7 mx-auto rounded-full bg-amber-700 text-white font-bold text-xs flex items-center justify-center">۳</span>
                     <span class="font-bold text-xs text-slate-800 dark:text-white block truncate">${list[2].display_name}</span>
                     <span class="text-[11px] text-slate-400 block">${list[2].grade_title_fa}</span>

@@ -37,9 +37,9 @@ async function renderCompetitionsView(containerId, activeTab = 'leagues', select
         let compsHtml = '';
         if (comps.length === 0) {
             compsHtml = `
-            <div class="text-center py-16 bg-slate-900/90 rounded-3xl border border-slate-800 p-8 space-y-3">
+            <div class="text-center py-16 bg-white dark:bg-slate-900/90 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-8 space-y-3">
                 <i data-lucide="trophy" class="w-12 h-12 text-slate-600 mx-auto"></i>
-                <h3 class="font-bold text-white text-lg">در حال حاضر رقابت فعالی در این لیگ ثبت نشده است</h3>
+                <h3 class="font-bold text-slate-800 dark:text-white text-lg">در حال حاضر رقابت فعالی در این لیگ ثبت نشده است</h3>
                 <p class="text-xs text-slate-400">مراحل جدید لیگ هفتگی و ماهانه توسط اساتید و داوران در حال تنظیم می‌باشد.</p>
             </div>
             `;
@@ -52,7 +52,7 @@ async function renderCompetitionsView(containerId, activeTab = 'leagues', select
                 const tierName = c.league_tier === 'plasma' ? 'سطح پلاسما' : (c.league_tier === 'photon' ? 'سطح فوتون' : 'سطح کوانتوم');
 
                 return `
-                <div class="physics-card bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-800 hover:border-sky-500/50 transition-all duration-300 shadow-xl space-y-4 relative overflow-hidden">
+                <div class="physics-card bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm hover:border-sky-500/50 transition-all duration-300 shadow-xl space-y-4 relative overflow-hidden">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             <span class="px-3 py-1 rounded-full text-xs font-bold ${c.is_active ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/40' : (c.is_closed ? 'bg-slate-800 text-slate-400' : 'bg-amber-950/60 text-amber-300')}">
@@ -71,7 +71,7 @@ async function renderCompetitionsView(containerId, activeTab = 'leagues', select
                     </div>
 
                     <div>
-                        <h3 class="text-xl font-black text-white mb-1.5 flex items-center gap-2">
+                        <h3 class="text-xl font-black text-slate-900 dark:text-white mb-1.5 flex items-center gap-2">
                             <span>${c.title_fa}</span>
                             ${c.theme_fa ? `<span class="text-xs font-normal text-sky-400 font-sans">• ${c.theme_fa}</span>` : ''}
                         </h3>
@@ -122,10 +122,10 @@ async function renderCompetitionsView(containerId, activeTab = 'leagues', select
         if (activeTab === 'standings' && standingsData) {
             const list = standingsData.standings || [];
             standingsHtml = `
-            <div class="bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-6">
+            <div class="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm shadow-xl space-y-6">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="text-lg font-black text-white">جدول رده‌بندی فصل لیگ فیزیک</h3>
+                        <h3 class="text-lg font-black text-slate-900 dark:text-white">جدول رده‌بندی فصل لیگ فیزیک</h3>
                         <span class="text-xs text-sky-400 font-sans">Official Quantum Championship Standings</span>
                     </div>
                     <span class="px-3 py-1 rounded-full text-xs font-bold bg-sky-950/80 text-sky-300 border border-sky-800/60">
@@ -154,7 +154,7 @@ async function renderCompetitionsView(containerId, activeTab = 'leagues', select
                                         ${item.rank}
                                     </span>
                                 </td>
-                                <td class="py-3 font-bold text-white">${item.display_name}</td>
+                                <td class="py-3 font-bold text-slate-900 dark:text-white">${item.display_name}</td>
                                 <td class="py-3 text-slate-400">${item.grade_title_fa}</td>
                                 <td class="py-3 text-center font-mono">${item.competitions_entered}</td>
                                 <td class="py-3 text-left pl-2 font-mono font-bold text-sky-400 text-sm">${item.total_score}</td>
@@ -175,14 +175,14 @@ async function renderCompetitionsView(containerId, activeTab = 'leagues', select
                     <i data-lucide="zap" class="w-4 h-4 text-sky-400 fill-sky-400"></i>
                     <span>لیگ‌ها و چالش‌های علمی انجمن فیزیک شهید بهشتی دو دوره اول</span>
                 </div>
-                <h1 class="text-3xl sm:text-4xl font-extrabold text-white">میدان رقابت و لیگ‌های فیزیک</h1>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">میدان رقابت و لیگ‌های فیزیک</h1>
                 <p class="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
                     با حل مسائل چالش‌برانگیز در زمان مشخص، سرعت عمل و دقت علمی خود را محک بزنید، مدال‌های ویژه کوانتوم دریافت کنید و در صدر تالار افتخارات قرار گیرید.
                 </p>
 
                 <!-- Navigation Tabs: Leagues vs Standings -->
                 <div class="flex justify-center pt-2">
-                    <div class="inline-flex p-1.5 rounded-2xl bg-slate-900 border border-slate-800 text-xs font-bold">
+                    <div class="inline-flex p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold">
                         <button onclick="renderCompetitionsView('${containerId}', 'leagues', '${selectedLeagueType}')" 
                             class="px-5 py-2 rounded-xl transition-all ${activeTab === 'leagues' ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'text-slate-400 hover:text-white'}">
                             رقابت‌های فعال
@@ -270,7 +270,7 @@ async function openCompetitionModal(compId) {
         const cachedAnswers = canTakeExam ? JSON.parse(localStorage.getItem(cacheKey) || '{}') : {};
 
         modalDiv.innerHTML = `
-        <div class="bg-slate-900 text-white w-full max-w-2xl rounded-3xl p-6 sm:p-8 border border-sky-800/60 shadow-xl shadow-2xl max-h-[92vh] overflow-y-auto space-y-6 relative">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-2xl rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-sky-800/60 shadow-2xl max-h-[92vh] overflow-y-auto space-y-6 relative">
             
             <!-- Anti-Cheat Focus Warning Banner -->
             <div id="comp-blur-warning" class="hidden p-3 rounded-xl bg-rose-950/80 border border-rose-500/60 text-rose-200 text-xs font-bold flex items-center gap-2 animate-shake">
@@ -290,7 +290,7 @@ async function openCompetitionModal(compId) {
                         </span>
                         ` : ''}
                     </div>
-                    <h3 class="font-black text-xl text-white">${comp.title_fa}</h3>
+                    <h3 class="font-black text-xl text-slate-900 dark:text-white">${comp.title_fa}</h3>
                     <span class="text-xs text-slate-400">مهلت پایان: ${window.formatPersianDate ? window.formatPersianDate(comp.ends_at) : new Date(comp.ends_at).toLocaleDateString('fa-IR')}</span>
                 </div>
                 <button onclick="closeCompetitionModal()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors">
@@ -344,7 +344,7 @@ async function openCompetitionModal(compId) {
                             <span class="text-xs text-slate-400 font-sans"><span class="font-mono">${q.points}</span> نمره</span>
                         </div>
 
-                        <p class="text-sm font-bold text-white leading-relaxed">${q.prompt_fa}</p>
+                        <p class="text-sm font-bold text-slate-900 dark:text-white leading-relaxed">${q.prompt_fa}</p>
 
                         ${q.question_type === 'mcq' ? `
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
@@ -390,7 +390,7 @@ async function openCompetitionModal(compId) {
             <!-- Leaderboard -->
             <div class="space-y-3 pt-2">
                 <div class="flex items-center justify-between">
-                    <h4 class="font-black text-sm text-white">جدول برترین‌های این رقابت:</h4>
+                    <h4 class="font-black text-sm text-slate-900 dark:text-white">جدول برترین‌های این رقابت:</h4>
                     <span class="text-[11px] text-slate-400">امتیاز بالاتر • زمان کمتر</span>
                 </div>
 
@@ -401,7 +401,7 @@ async function openCompetitionModal(compId) {
                             <span class="w-6 h-6 rounded-full font-bold flex items-center justify-center ${b.rank === 1 ? 'bg-amber-400 text-slate-900 shadow-sm shadow-amber-400/20' : (b.rank === 2 ? 'bg-slate-300 text-slate-900' : (b.rank === 3 ? 'bg-amber-700 text-white' : 'bg-slate-700 text-slate-300'))}">
                                 ${b.rank}
                             </span>
-                            <span class="font-bold text-white">${b.display_name}</span>
+                            <span class="font-bold text-slate-900 dark:text-white">${b.display_name}</span>
                             <span class="text-slate-400 text-[11px]">(${b.grade_title_fa})</span>
                         </div>
                         <div class="flex items-center gap-3">
