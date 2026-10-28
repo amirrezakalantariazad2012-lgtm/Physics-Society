@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Physics Classroom | تحلیل نمودار و اتصال مفهوم به مسئله</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: local('Vazirmatn'), local('Tahoma');
+        }
+        body {
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col p-3 sm:p-5">
+
+    <!-- Top Header & Platform Badge -->
+    <header class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-slate-900 border border-teal-500/30 mb-4 shadow-xl">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center font-black text-xl border border-teal-500/30">
+                📈
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-base sm:text-lg font-black text-white">The Physics Classroom</h1>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-700 font-bold">
+                        تحلیل نمودار و اتصال مفهوم به مسئله
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700 font-bold">
+                        بدون فیلترشکن
+                    </span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">کارگاه تحلیلی نمودارهای حرکت ۱ بعدی (سینماتیک) — سرفصل فصل ۴ علوم نهم و کتاب تکمیلی سمپاد</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <a href="https://www.physicsclassroom.com/Physics-Interactives/1-D-Kinematics" target="_blank" rel="noopener noreferrer"
+               class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all shadow">
+                <span>ورود به سایت اصلی The Physics Classroom</span>
+                <span>↗</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+        
+        <!-- Left/Top: Animation & Graphs Area (8 cols) -->
+        <div class="lg:col-span-8 flex flex-col gap-4">
+            
+            <!-- 1. Motion Track Animation -->
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 shadow-lg flex flex-col justify-between">
+                <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+                    <span class="font-bold text-slate-300">مسیر حرکت متحرک (محور افقی x):</span>
+                    <span id="motion-readout" class="font-mono text-teal-300 font-bold text-sm">t = 0.00 s | x = 0.0 m | v = 0.0 m/s</span>
+                </div>
+                <div class="relative w-full h-24 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden flex items-center">
+                    <!-- Coordinate Grid Marks -->
+                    <div class="absolute inset-x-0 bottom-2 flex justify-between px-6 text-[10px] text-slate-500 font-mono">
+                        <span>-20m</span>
+                        <span>-15m</span>
+                        <span>-10m</span>
+                        <span>-5m</span>
+                        <span class="text-amber-400 font-bold">0m</span>
+                        <span>+5m</span>
+                        <span>+10m</span>
+                        <span>+15m</span>
+                        <span>+20m</span>
+                    </div>
+                    <!-- Center origin line -->
+                    <div class="absolute left-1/2 top-0 bottom-6 w-0.5 bg-amber-500/40"></div>
+                    <!-- Moving Cart -->
+                    <div id="sim-cart" class="absolute top-4 -ml-6 w-12 h-10 rounded-lg bg-teal-500 text-slate-950 flex flex-col items-center justify-center font-black text-xs shadow-lg shadow-teal-500/30 transition-all duration-75">
+                        <span>🚗</span>
+                        <div id="cart-vel-arrow" class="text-[9px] font-bold text-slate-900">→</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Dual Synchronized Graphs -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-[300px]">
+                <!-- Graph 1: Position-Time (x-t) -->
+                <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 shadow-lg flex flex-col">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-black text-cyan-400 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                            نمودار مکان - زمان (x - t)
+                        </span>
+                        <span class="text-[11px] text-slate-400 font-mono">شیب = سرعت لحظه‌ای (v)</span>
+                    </div>
+                    <canvas id="canvas-xt" class="w-full flex-1 rounded-xl bg-slate-950 border border-slate-800"></canvas>
+                </div>
+
+                <!-- Graph 2: Velocity-Time (v-t) -->
+                <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 shadow-lg flex flex-col">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-black text-emerald-400 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                            نمودار سرعت - زمان (v - t)
+                        </span>
+                        <span class="text-[11px] text-slate-400 font-mono">مساحت = جابه‌جایی (Δx)</span>
+                    </div>
+                    <canvas id="canvas-vt" class="w-full flex-1 rounded-xl bg-slate-950 border border-slate-800"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right/Controls & Concept Analyzer (4 cols) -->
+        <div class="lg:col-span-4 flex flex-col gap-4">
+            
+            <!-- Controls Panel -->
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-lg space-y-4">
+                <h3 class="font-extrabold text-sm text-white flex items-center gap-2 border-b border-slate-800 pb-2">
+                    <span>🎛️</span>
+                    <span>تنظیم متغیرهای حرکت متحرک</span>
+                </h3>
+
+                <!-- Initial Position -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300">مکان اولیه (x₀):</span>
+                        <span id="label-x0" class="font-mono text-cyan-300 font-bold">0.0 m</span>
+                    </div>
+                    <input type="range" id="slider-x0" min="-15" max="15" value="0" step="1" 
+                           class="w-full accent-cyan-500 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Initial Velocity -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300">سرعت اولیه (v₀):</span>
+                        <span id="label-v0" class="font-mono text-emerald-300 font-bold">4.0 m/s</span>
+                    </div>
+                    <input type="range" id="slider-v0" min="-10" max="10" value="4" step="0.5" 
+                           class="w-full accent-emerald-500 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Acceleration -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300">شتاب ثابت (a):</span>
+                        <span id="label-a" class="font-mono text-amber-300 font-bold">-1.0 m/s²</span>
+                    </div>
+                    <input type="range" id="slider-a" min="-4" max="4" value="-1" step="0.2" 
+                           class="w-full accent-amber-500 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Action Controls: Play / Pause / Reset -->
+                <div class="grid grid-cols-3 gap-2 pt-2">
+                    <button id="btn-play" class="py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs shadow-md transition-all flex items-center justify-center gap-1.5">
+                        <span id="play-icon">▶</span>
+                        <span id="play-text">اجرا</span>
+                    </button>
+                    <button id="btn-step" class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition-all">
+                        گام به جلو (⏭)
+                    </button>
+                    <button id="btn-reset" class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs border border-slate-700 transition-all">
+                        بازنشانی (↺)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Concept Builder & Problem Connector Box -->
+            <div class="rounded-2xl bg-gradient-to-br from-slate-900 to-teal-950/40 border border-teal-500/20 p-4 sm:p-5 shadow-lg flex-1 flex flex-col justify-between space-y-3">
+                <div>
+                    <div class="flex items-center gap-2 text-xs font-bold text-amber-400 mb-1.5">
+                        <span>💡</span>
+                        <span>اتصال مفهوم فیزیکی به مسئله:</span>
+                    </div>
+                    <div id="concept-explanation" class="text-xs text-slate-300 leading-relaxed space-y-2">
+                        <p class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 font-medium">
+                            <span class="text-teal-400 font-bold">وضعیت فعلی:</span>
+                            <span id="motion-type-desc">حرکت شتاب‌دار کندشونده در جهت مثبت</span>
+                        </p>
+                        <ul class="text-[11px] text-slate-400 space-y-1 list-disc list-inside">
+                            <li><span class="text-slate-200">تحلیل شیب x-t:</span> شیب مماس بر نمودار مکان-زمان نشان‌دهنده سرعت است. با کاهش شیب، تندی کاهش می‌یابد.</li>
+                            <li><span class="text-slate-200">تحلیل مساحت v-t:</span> مساحت زیر نمودار سرعت-زمان برابر با جابه‌جایی متحرک (Δx) است.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Quick Quiz / Challenge -->
+                <div class="p-3 rounded-xl bg-slate-950/80 border border-teal-500/30 text-xs space-y-2">
+                    <span class="text-teal-300 font-bold block">🎯 چالش تستی مفهومی:</span>
+                    <p id="challenge-question" class="text-slate-300 text-[11px] leading-relaxed">
+                        اگر علامت سرعت مثبت و علامت شتاب منفی باشد، وضعیت حرکت چگونه خواهد بود؟
+                    </p>
+                    <div class="grid grid-cols-2 gap-1.5 pt-1 text-[11px]">
+                        <button onclick="checkAnswer(false)" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">تندشونده در جهت منفی</button>
+                        <button onclick="checkAnswer(true)" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">کندشونده در جهت مثبت</button>
+                    </div>
+                    <div id="challenge-feedback" class="hidden text-[11px] font-bold mt-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let x0 = 0;
+        let v0 = 4;
+        let a = -1;
+        let t = 0;
+        let isRunning = false;
+        let animFrame = null;
+        const maxTime = 10; // seconds
+        let dataPoints = [];
+
+        const sliderX0 = document.getElementById('slider-x0');
+        const sliderV0 = document.getElementById('slider-v0');
+        const sliderA = document.getElementById('slider-a');
+        const labelX0 = document.getElementById('label-x0');
+        const labelV0 = document.getElementById('label-v0');
+        const labelA = document.getElementById('label-a');
+        const btnPlay = document.getElementById('btn-play');
+        const btnStep = document.getElementById('btn-step');
+        const btnReset = document.getElementById('btn-reset');
+        const playIcon = document.getElementById('play-icon');
+        const playText = document.getElementById('play-text');
+        const simCart = document.getElementById('sim-cart');
+        const cartArrow = document.getElementById('cart-vel-arrow');
+        const readout = document.getElementById('motion-readout');
+        const motionDesc = document.getElementById('motion-type-desc');
+
+        const canvasXT = document.getElementById('canvas-xt');
+        const ctxXT = canvasXT.getContext('2d');
+        const canvasVT = document.getElementById('canvas-vt');
+        const ctxVT = canvasVT.getContext('2d');
+
+        function resizeCanvases() {
+            canvasXT.width = canvasXT.clientWidth * window.devicePixelRatio;
+            canvasXT.height = canvasXT.clientHeight * window.devicePixelRatio;
+            canvasVT.width = canvasVT.clientWidth * window.devicePixelRatio;
+            canvasVT.height = canvasVT.clientHeight * window.devicePixelRatio;
+            drawGraphs();
+        }
+        window.addEventListener('resize', resizeCanvases);
+
+        function updateFromInputs() {
+            x0 = parseFloat(sliderX0.value);
+            v0 = parseFloat(sliderV0.value);
+            a = parseFloat(sliderA.value);
+            labelX0.textContent = x0.toFixed(1) + ' m';
+            labelV0.textContent = v0.toFixed(1) + ' m/s';
+            labelA.textContent = a.toFixed(1) + ' m/s²';
+            updateMotionDescription();
+            resetSimulation();
+        }
+
+        sliderX0.addEventListener('input', updateFromInputs);
+        sliderV0.addEventListener('input', updateFromInputs);
+        sliderA.addEventListener('input', updateFromInputs);
+
+        function updateMotionDescription() {
+            if (a === 0) {
+                motionDesc.textContent = v0 === 0 ? 'ساکن (بدون حرکت)' : (v0 > 0 ? 'حرکت یکنواخت (تندی ثابت) در جهت مثبت' : 'حرکت یکنواخت در جهت منفی');
+            } else if ((v0 > 0 && a > 0) || (v0 < 0 && a < 0)) {
+                motionDesc.textContent = 'حرکت مستقیم‌الخط شتاب‌دار تندشونده';
+            } else if ((v0 > 0 && a < 0) || (v0 < 0 && a > 0)) {
+                motionDesc.textContent = 'حرکت مستقیم‌الخط شتاب‌دار کندشونده (سپس بازگشت)';
+            } else {
+                motionDesc.textContent = 'شروع از سکون با شتاب ثابت';
+            }
+        }
+
+        function calculateState(timeVal) {
+            const currentX = x0 + v0 * timeVal + 0.5 * a * timeVal * timeVal;
+            const currentV = v0 + a * timeVal;
+            return { x: currentX, v: currentV };
+        }
+
+        function updateCart() {
+            const state = calculateState(t);
+            // Map x from [-20, 20] to [0%, 100%]
+            const clampedX = Math.max(-20, Math.min(20, state.x));
+            const pct = ((clampedX + 20) / 40) * 100;
+            simCart.style.left = `${pct}%`;
+            cartArrow.textContent = state.v > 0.1 ? '→' : (state.v < -0.1 ? '←' : '•');
+            readout.textContent = `t = ${t.toFixed(2)} s | x = ${state.x.toFixed(1)} m | v = ${state.v.toFixed(1)} m/s`;
+        }
+
+        function drawGraphs() {
+            drawGraph(ctxXT, canvasXT, 'x(t) [مکان - m]', -25, 25, '#22d3ee', (pt) => pt.x);
+            drawGraph(ctxVT, canvasVT, 'v(t) [سرعت - m/s]', -15, 15, '#34d399', (pt) => pt.v);
+        }
+
+        function drawGraph(ctx, canvas, title, yMin, yMax, strokeColor, valExtractor) {
+            const w = canvas.width;
+            const h = canvas.height;
+            const dpr = window.devicePixelRatio || 1;
+            ctx.clearRect(0, 0, w, h);
+
+            // Background Grid
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1 * dpr;
+            ctx.beginPath();
+            for (let i = 0; i <= maxTime; i += 2) {
+                const gx = (i / maxTime) * (w - 60 * dpr) + 40 * dpr;
+                ctx.moveTo(gx, 20 * dpr);
+                ctx.lineTo(gx, h - 30 * dpr);
+            }
+            // Horizontal origin line (y=0)
+            const zeroY = h - 30 * dpr - ((0 - yMin) / (yMax - yMin)) * (h - 50 * dpr);
+            ctx.moveTo(40 * dpr, zeroY);
+            ctx.lineTo(w - 20 * dpr, zeroY);
+            ctx.stroke();
+
+            // Axis labels
+            ctx.fillStyle = '#64748b';
+            ctx.font = `${10 * dpr}px monospace`;
+            ctx.fillText(title, 40 * dpr, 16 * dpr);
+            ctx.fillText('t (s)', w - 30 * dpr, zeroY + 14 * dpr);
+            ctx.fillText('0', 25 * dpr, zeroY + 4 * dpr);
+
+            // Shading under curve for v-t (Displacement Area)
+            if (title.includes('v(t)') && dataPoints.length > 1) {
+                ctx.fillStyle = 'rgba(52, 211, 153, 0.15)';
+                ctx.beginPath();
+                const startX = 40 * dpr;
+                ctx.moveTo(startX, zeroY);
+                dataPoints.forEach(pt => {
+                    const gx = (pt.t / maxTime) * (w - 60 * dpr) + 40 * dpr;
+                    const val = valExtractor(pt);
+                    const gy = h - 30 * dpr - ((val - yMin) / (yMax - yMin)) * (h - 50 * dpr);
+                    ctx.lineTo(gx, gy);
+                });
+                const lastPt = dataPoints[dataPoints.length - 1];
+                const lastX = (lastPt.t / maxTime) * (w - 60 * dpr) + 40 * dpr;
+                ctx.lineTo(lastX, zeroY);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // Curve Line
+            if (dataPoints.length > 1) {
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = 2.5 * dpr;
+                ctx.beginPath();
+                dataPoints.forEach((pt, idx) => {
+                    const gx = (pt.t / maxTime) * (w - 60 * dpr) + 40 * dpr;
+                    const val = valExtractor(pt);
+                    const gy = h - 30 * dpr - ((val - yMin) / (yMax - yMin)) * (h - 50 * dpr);
+                    if (idx === 0) ctx.moveTo(gx, gy);
+                    else ctx.lineTo(gx, gy);
+                });
+                ctx.stroke();
+
+                // Current point marker
+                const current = dataPoints[dataPoints.length - 1];
+                const cx = (current.t / maxTime) * (w - 60 * dpr) + 40 * dpr;
+                const cVal = valExtractor(current);
+                const cy = h - 30 * dpr - ((cVal - yMin) / (yMax - yMin)) * (h - 50 * dpr);
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(cx, cy, 4.5 * dpr, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function resetSimulation() {
+            isRunning = false;
+            cancelAnimationFrame(animFrame);
+            t = 0;
+            dataPoints = [];
+            const initial = calculateState(0);
+            dataPoints.push({ t: 0, x: initial.x, v: initial.v });
+            playIcon.textContent = '▶';
+            playText.textContent = 'اجرا';
+            updateCart();
+            drawGraphs();
+        }
+
+        function stepSimulation(dt = 0.05) {
+            t += dt;
+            if (t > maxTime) {
+                t = maxTime;
+                isRunning = false;
+                playIcon.textContent = '▶';
+                playText.textContent = 'اجرا';
+            }
+            const st = calculateState(t);
+            dataPoints.push({ t: t, x: st.x, v: st.v });
+            updateCart();
+            drawGraphs();
+        }
+
+        let lastTimestamp = 0;
+        function loop(timestamp) {
+            if (!isRunning) return;
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const delta = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+
+            stepSimulation(Math.min(delta, 0.1));
+            if (isRunning && t < maxTime) {
+                animFrame = requestAnimationFrame(loop);
+            }
+        }
+
+        btnPlay.addEventListener('click', () => {
+            if (t >= maxTime) resetSimulation();
+            isRunning = !isRunning;
+            if (isRunning) {
+                lastTimestamp = 0;
+                playIcon.textContent = '⏸';
+                playText.textContent = 'توقف';
+                animFrame = requestAnimationFrame(loop);
+            } else {
+                playIcon.textContent = '▶';
+                playText.textContent = 'ادامه';
+                cancelAnimationFrame(animFrame);
+            }
+        });
+
+        btnStep.addEventListener('click', () => {
+            if (isRunning) {
+                isRunning = false;
+                cancelAnimationFrame(animFrame);
+                playIcon.textContent = '▶';
+                playText.textContent = 'ادامه';
+            }
+            stepSimulation(0.2);
+        });
+
+        btnReset.addEventListener('click', resetSimulation);
+
+        function checkAnswer(isCorrect) {
+            const fb = document.getElementById('challenge-feedback');
+            fb.classList.remove('hidden');
+            if (isCorrect) {
+                fb.className = 'text-[11px] font-bold text-emerald-400 mt-1';
+                fb.textContent = '✓ آفرین! چون علامت سرعت و شتاب مخالف یکدیگرند (v>0 و a<0)، حرکت کندشونده در جهت مثبت است.';
+            } else {
+                fb.className = 'text-[11px] font-bold text-rose-400 mt-1';
+                fb.textContent = '✗ نادرست؛ جهت حرکت توسط علامت سرعت تعیین می‌شود (چون v>0 است در جهت مثبت است) و چون شتاب منفی است، کندشونده است.';
+            }
+        }
+
+        // Init
+        window.addEventListener('load', () => {
+            resizeCanvases();
+            updateFromInputs();
+        });
+    </script>
+</body>
+</html>

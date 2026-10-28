@@ -875,6 +875,115 @@ const SIMULATOR_CATALOG = [
         localFile: 'vector-addition.html',
         localUrl: '/simulators/phet/vector-addition.html',
         phetSlug: 'vector-addition'
+    },
+
+    // =========================================================================
+    // FEATURED EXTERNAL & INTEGRATED PLATFORMS (پلتفرم‌های منتخب و کاربردی فیزیک)
+    // =========================================================================
+    {
+        id: 'physics-classroom',
+        title: 'تحلیل نمودار و اتصال مفهوم به مسئله (The Physics Classroom)',
+        platformName: 'The Physics Classroom',
+        grade: 9,
+        gradeKey: 'featured',
+        gradeTitle: 'پایه نهم و تکمیلی سمپاد',
+        gradeLabel: 'پایه نهم',
+        category: 'سینماتیک و نمودارها',
+        topic: 'فصل ۴ علوم نهم: حرکت چیست؟',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۴ (تندی متوسط، سرعت و شتاب)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — تحلیل تخصصی نمودارهای x-t و v-t و درک مفهومی مسائل',
+        icon: 'trending-up',
+        desc: 'شبیه‌ساز تخصصی تحلیل نمودارهای حرکت یک‌بعدی، ارتباط عمیق بین فرمول ریاضی و مفهوم فیزیکی، استخراج سرعت از شیب مماس x-t و استخراج جابه‌جایی از مساحت زیر منحنی v-t.',
+        description: 'شبیه‌ساز تخصصی تحلیل نمودارهای حرکت یک‌بعدی، ارتباط عمیق بین فرمول ریاضی و مفهوم فیزیکی، استخراج سرعت از شیب مماس x-t و استخراج جابه‌جایی از مساحت زیر منحنی v-t.',
+        formula: 'v = \\frac{\\Delta x}{\\Delta t} = \\text{شیب } x-t \\quad , \\quad a = \\frac{\\Delta v}{\\Delta t} \\quad , \\quad \\Delta x = \\text{مساحت زیر } v-t',
+        badge: 'The Physics Classroom — تحلیل مفهومی نمودار',
+        languageFa: 'خیر (انگلیسی ساده)',
+        needsVpn: 'خیر (دسترسی آزاد)',
+        externalUrl: 'https://www.physicsclassroom.com/Physics-Interactives/1-D-Kinematics',
+        goals: [
+            'تحلیل رفتار متحرک با شتاب ثابت مثبت و منفی و بررسی شرط تندشونده یا کندشونده بودن',
+            'استخراج شهودی جابه‌جایی با محاسبه مساحت زیر نمودار سرعت-زمان (v-t)',
+            'اتصال مفاهیم متنی مسائل فیزیک به مشخصه‌های نموداری'
+        ],
+        experimentSteps: [
+            'مکان اولیه (x₀) و سرعت اولیه (v₀) و شتاب (a) را با لغزنده‌ها تعیین کنید.',
+            'دکمه «اجرا» را فشار دهید و حرکت همزمان خودرو و رسم نمودارهای x-t و v-t را مشاهده کنید.',
+            'به مساحت رنگی زیر نمودار v-t توجه کنید و با جابه‌جایی کل مقایسه نمایید.',
+            'در چالش تستی مفهومی شرکت کرده و درک خود را از علامت سرعت و شتاب بسنجید.'
+        ],
+        misconceptions: 'اشتباه رایج: شتاب منفی همیشه به معنای کم شدن تندی (کندشونده) است! خیر؛ اگر سرعت نیز منفی باشد (v < 0 و a < 0)، تندی متحرک افزایش یافته و حرکت «تندشونده در جهت منفی» است.',
+        localFile: 'kinematics-grapher.html',
+        localUrl: '/simulators/physics-classroom/kinematics-grapher.html'
+    },
+    {
+        id: 'walter-fendt',
+        title: 'ماشین‌های ساده، اهرم‌ها و قرقره‌ها (Walter Fendt)',
+        platformName: 'Walter Fendt',
+        grade: 9,
+        gradeKey: 'featured',
+        gradeTitle: 'پایه نهم',
+        gradeLabel: 'پایه نهم',
+        category: 'ماشین‌ها و مزیت مکانیکی',
+        topic: 'فصل ۹ علوم نهم: ماشین‌ها',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۹ (ماشین‌ها، اهرم‌ها و قرقره‌ها)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — گشتاور نیرو، مزیت مکانیکی کامل و سیستم قرقره‌های مرکب',
+        icon: 'settings',
+        desc: 'شبیه‌سازی کامل و دقیق اهرم‌های نوع اول، دوم و سوم بر اساس تعادل گشتاورها، به همراه شبیه‌ساز سیستم قرقره‌های ثابت، متحرک و مرکب (Block and Tackle) با مزیت‌های مکانیکی متنوع.',
+        description: 'شبیه‌سازی کامل و دقیق اهرم‌های نوع اول، دوم و سوم بر اساس تعادل گشتاورها، به همراه شبیه‌ساز سیستم قرقره‌های ثابت، متحرک و مرکب (Block and Tackle) با مزیت‌های مکانیکی متنوع.',
+        formula: 'R \\cdot d_R = E \\cdot d_E \\quad , \\quad A = \\frac{R}{E} = \\frac{d_E}{d_R} \\quad , \\quad A_{\\text{pulley}} = n \\text{ (طناب‌های حامی)}',
+        badge: 'Walter Fendt — ماشین‌های ساده، اهرم و قرقره',
+        languageFa: 'خیر (چندزبانه)',
+        needsVpn: 'خیر (دسترسی آزاد)',
+        externalUrl: 'https://www.walter-fendt.de/html5/phen/lever_en.htm',
+        goals: [
+            'بررسی قانون تعادل گشتاور نیروها در اهرم‌های نوع اول، دوم و سوم',
+            'آشنایی با نحوه عملکرد قرقره ثابت (تغییر جهت نیرو) و قرقره متحرک (نصف کردن نیروی لازم)',
+            'محاسبه تجربی مزیت مکانیکی در سیستم قرقره‌های مرکب ۴ طنابه'
+        ],
+        experimentSteps: [
+            'بین دو حالت «اهرم‌ها» و «قرقره‌ها» سوییچ کنید.',
+            'در حالت اهرم، نوع اهرم (اول، دوم یا سوم) را انتخاب کرده و با تغییر بازوی محرک (dE)، مزیت مکانیکی را تحلیل کنید.',
+            'در حالت قرقره، با کشیدن طناب مشاهده کنید چگونه وزن بار بین طناب‌های حامی تقسیم می‌شود.',
+            'قانون پایستگی کار را بررسی کنید: نیروی محرک کمتر با مسافت کشش بیشتر جبران می‌شود.'
+        ],
+        misconceptions: 'اشتباه رایج: ماشین‌ها کار را کاهش می‌دهند یا انرژی خلق می‌کنند! خیر؛ طبق پایستگی انرژی، کار ورودی با کار خروجی (در غیاب اصطکاک) برابر است و ماشین‌ها فقط با تغییر نیرو یا جهت، کار را آسان می‌کنند.',
+        localFile: 'simple-machines.html',
+        localUrl: '/simulators/walter-fendt/simple-machines.html'
+    },
+    {
+        id: 'ophysics',
+        title: 'رسم دیاگرام‌های نیرو (FBD) و سینماتیک (oPhysics)',
+        platformName: 'oPhysics',
+        grade: 9,
+        gradeKey: 'featured',
+        gradeTitle: 'پایه نهم و تکمیلی سمپاد',
+        gradeLabel: 'پایه نهم',
+        category: 'نیرو و سینماتیک',
+        topic: 'فصل ۵ علوم نهم: نیرو و قوانین نیوتون',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۵ (نیرو، قانون دوم نیوتون و اصطکاک)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — تجزیه برداری نیروها، نیروی عمودی سطح و دیاگرام جسم آزاد روی سطح شیب‌دار',
+        icon: 'compass',
+        desc: 'کارگاه تعاملی رسم زنده دیاگرام جسم آزاد (Free Body Diagram) روی سطح افقی و شیب‌دار، تجزیه بردار وزن به مؤلفه‌های سینوسی و کسینوسی، نیروی عمودی سطح (N)، اصطکاک و قانون دوم نیوتون.',
+        description: 'کارگاه تعاملی رسم زنده دیاگرام جسم آزاد (Free Body Diagram) روی سطح افقی و شیب‌دار، تجزیه بردار وزن به مؤلفه‌های سینوسی و کسینوسی، نیروی عمودی سطح (N)، اصطکاک و قانون دوم نیوتون.',
+        formula: '\\sum \\vec{F} = m\\vec{a} \\quad , \\quad N = mg \\cos\\theta \\quad , \\quad f_s \\le \\mu_s N \\quad , \\quad f_k = \\mu_k N',
+        badge: 'oPhysics — دیاگرام جسم آزاد (FBD) و شیب',
+        languageFa: 'خیر',
+        needsVpn: 'خیر (دسترسی آزاد)',
+        externalUrl: 'https://www.ophysics.com/f1.html',
+        goals: [
+            'رسم و درک برداری ۴ نیروی اصلی وارد بر جسم: وزن (W)، عمودی سطح (N)، اصطکاک (f) و نیروی اعمالی (F)',
+            'تجزیه بردار وزن روی سطح شیب‌دار با زاویه دلخواه (θ)',
+            'محاسبه شتاب حرکت جسم با استفاده از معادله حرکت قانون دوم نیوتون'
+        ],
+        experimentSteps: [
+            'زاویه سطح شیب‌دار (θ) را از ۰ تا ۶۰ درجه تغییر دهید و تغییر طول بردار N و مؤلفه mg sinθ را رصد کنید.',
+            'ضرایب اصطکاک ایستایی (μs) و جنبشی (μk) را تنظیم نمایید.',
+            'نیروی اعمالی (F) را اضافه کرده و آستانه حرکت جسم را بررسی کنید.',
+            'دکمه «شبیه‌سازی حرکت» را بزنید تا لغزش جسم طبق قانون نیوتون را تماشا کنید.'
+        ],
+        misconceptions: 'اشتباه رایج: نیروی عمودی تکیه‌گاه (N) همیشه برابر با وزن جسم (mg) است! خیر؛ روی سطح شیب‌دار N = mg cosθ است و هر چه شیب بیشتر شود، نیروی عمودی سطح کمتر می‌شود.',
+        localFile: 'free-body-diagrams.html',
+        localUrl: '/simulators/ophysics/free-body-diagrams.html'
     }
 ];
 
@@ -897,7 +1006,22 @@ class PhysicsSimulators {
         const aliasMap = {
             'calorimetry': 'energy-forms',
             'energy': 'energy-skate',
-            'levers': 'balancing-act',
+            'levers': 'walter-fendt',
+            'lever': 'walter-fendt',
+            'pulley': 'walter-fendt',
+            'pulleys': 'walter-fendt',
+            'simple-machines': 'walter-fendt',
+            'walter-fendt': 'walter-fendt',
+            'walterfendt': 'walter-fendt',
+            'fendt': 'walter-fendt',
+            'fbd': 'ophysics',
+            'free-body-diagram': 'ophysics',
+            'freebody': 'ophysics',
+            'ophysics': 'ophysics',
+            'physics-classroom': 'physics-classroom',
+            'physicsclassroom': 'physics-classroom',
+            'the-physics-classroom': 'physics-classroom',
+            'kinematics-grapher': 'physics-classroom',
             'circuit': 'circuit-dc',
             'electrostatics': 'balloons-static',
             'optics': 'bending-light',

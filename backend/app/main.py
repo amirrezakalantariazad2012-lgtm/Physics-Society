@@ -136,8 +136,8 @@ async def add_security_headers(request: Request, call_next):
             "img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; "
             "media-src 'self' data: blob:; "
             "worker-src 'self' blob: data:; "
-            "child-src 'self' blob: data:; "
-            "connect-src 'self' https://openrouter.ai https://api.openai.com; frame-src 'self' data: blob:; frame-ancestors 'self';"
+            "connect-src 'self' https://openrouter.ai https://api.openai.com https://www.physicsclassroom.com https://www.walter-fendt.de https://www.ophysics.com; "
+            "frame-src 'self' data: blob: https://www.physicsclassroom.com https://www.walter-fendt.de https://www.ophysics.com; frame-ancestors 'self';"
         )
     return response
 

@@ -1657,12 +1657,173 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                         class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === 'space' ? 'bg-cyan-500 text-slate-950 shadow-md font-black ring-2 ring-cyan-400/50' : 'bg-slate-800 text-cyan-400 hover:text-white border border-cyan-800/40'}">
                         🚀 فضا و نجوم (${simCatalog.filter(s => s.gradeKey === 'space').length} آزمایش)
                     </button>
+                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'featured')"
+                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === 'featured' ? 'bg-amber-400 text-slate-950 shadow-md font-black ring-2 ring-amber-300' : 'bg-slate-800 text-amber-300 hover:text-white border border-amber-600/40'}">
+                        🌐 پلتفرم‌های منتخب (Walter Fendt, oPhysics, Physics Classroom)
+                    </button>
                 </div>
 
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>۲۷ شبیه‌ساز رسمی و آفلاین PhET دانشگاه کلرادو بدون نیاز به فیلترشکن</span>
+                    <span>۲۷ شبیه‌ساز آفلاین PhET + ۳ پلتفرم منتخب بین‌المللی بدون فیلترشکن</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- Featured Platforms Comparison & Direct Access Table -->
+        <div class="rounded-3xl bg-slate-900 border border-slate-800 p-5 sm:p-6 shadow-xl space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm">
+                        ⭐
+                    </span>
+                    <div>
+                        <h3 class="font-extrabold text-sm sm:text-base text-white">پلتفرم‌های منتخب و کاربردی فیزیک (بدون فیلترشکن و متصل به سرفصل‌ها)</h3>
+                        <p class="text-[11px] text-slate-400">ابزارهای تحلیلی تخصصی برای اتصال مفهوم به مسئله، ماشین‌های ساده، و رسم دیاگرام نیرو (FBD)</p>
+                    </div>
+                </div>
+                <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">
+                    ۱۰۰٪ دسترسی مستقیم در شبکه ملی و مدارس
+                </span>
+            </div>
+
+            <!-- Table matching user reference -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-slate-400 font-bold bg-slate-950/60">
+                            <th class="p-3 rounded-r-xl">نام پلتفرم / ابزار</th>
+                            <th class="p-3">کاربرد و تمرکز اصلی</th>
+                            <th class="p-3 text-center">زبان فارسی دارد؟</th>
+                            <th class="p-3 text-center">نیاز به فیلترشکن؟</th>
+                            <th class="p-3 text-center rounded-l-xl">عملیات و اجرای مستقیم</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 font-medium">
+                        <!-- Row 1: The Physics Classroom -->
+                        <tr class="hover:bg-slate-850/60 transition-colors">
+                            <td class="p-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold">📈</span>
+                                    <div>
+                                        <strong class="text-white block">The Physics Classroom</strong>
+                                        <span class="text-[10px] text-slate-400">کلاس درس فیزیک (سینماتیک)</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                <span class="text-slate-200 font-bold">تحلیل نمودار و اتصال مفهوم به مسئله</span>
+                                <span class="text-[10px] text-slate-400 block mt-0.5">تحلیل نمودارهای مکان-زمان و سرعت-زمان، درک مفهومی شرط تندشونده/کندشونده</span>
+                            </td>
+                            <td class="p-3 text-center">
+                                <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-bold text-[11px]">
+                                    خیر (انگلیسی ساده)
+                                </span>
+                            </td>
+                            <td class="p-3 text-center">
+                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-black text-xs">
+                                    خیر
+                                </span>
+                            </td>
+                            <td class="p-3 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), 'physics-classroom', '${currentMode}', '${gradeFilter}')"
+                                        class="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center gap-1 shadow transition-all hover:scale-105">
+                                        <span>اجرا در آزمایشگاه</span>
+                                        <span>⚡</span>
+                                    </button>
+                                    <a href="https://www.physicsclassroom.com/Physics-Interactives/1-D-Kinematics" target="_blank" rel="noopener noreferrer"
+                                       class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 text-xs">
+                                        <span>سایت اصلی</span>
+                                        <span>↗</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 2: Walter Fendt -->
+                        <tr class="hover:bg-slate-850/60 transition-colors">
+                            <td class="p-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">⚙️</span>
+                                    <div>
+                                        <strong class="text-white block">Walter Fendt</strong>
+                                        <span class="text-[10px] text-slate-400">شبیه‌سازهای والتر فنت</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                <span class="text-slate-200 font-bold">ماشین‌های ساده، اهرم‌ها و قرقره‌ها</span>
+                                <span class="text-[10px] text-slate-400 block mt-0.5">اهرم‌های نوع ۱ و ۲ و ۳، سیستم قرقره‌های ثابت و مرکب (A=1,2,4)، مزیت مکانیکی و پایستگی کار</span>
+                            </td>
+                            <td class="p-3 text-center">
+                                <span class="px-2 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-800 font-bold text-[11px]">
+                                    خیر (چندزبانه)
+                                </span>
+                            </td>
+                            <td class="p-3 text-center">
+                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-black text-xs">
+                                    خیر
+                                </span>
+                            </td>
+                            <td class="p-3 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), 'walter-fendt', '${currentMode}', '${gradeFilter}')"
+                                        class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center gap-1 shadow transition-all hover:scale-105">
+                                        <span>اجرا در آزمایشگاه</span>
+                                        <span>⚡</span>
+                                    </button>
+                                    <a href="https://www.walter-fendt.de/html5/phen/lever_en.htm" target="_blank" rel="noopener noreferrer"
+                                       class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs">
+                                        <span>سایت اصلی</span>
+                                        <span>↗</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Row 3: oPhysics -->
+                        <tr class="hover:bg-slate-850/60 transition-colors">
+                            <td class="p-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">📐</span>
+                                    <div>
+                                        <strong class="text-white block">oPhysics</strong>
+                                        <span class="text-[10px] text-slate-400">شبیه‌سازهای تام والش</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                <span class="text-slate-200 font-bold">رسم دیاگرام‌های نیرو (FBD) و سینماتیک</span>
+                                <span class="text-[10px] text-slate-400 block mt-0.5">رسم دیاگرام جسم آزاد، تجزیه وزن mg به مؤلفه‌ها، نیروی عمودی تکیه‌گاه، اصطکاک و قانون دوم نیوتون</span>
+                            </td>
+                            <td class="p-3 text-center">
+                                <span class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-bold text-[11px]">
+                                    خیر
+                                </span>
+                            </td>
+                            <td class="p-3 text-center">
+                                <span class="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-black text-xs">
+                                    خیر
+                                </span>
+                            </td>
+                            <td class="p-3 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), 'ophysics', '${currentMode}', '${gradeFilter}')"
+                                        class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1 shadow transition-all hover:scale-105">
+                                        <span>اجرا در آزمایشگاه</span>
+                                        <span>⚡</span>
+                                    </button>
+                                    <a href="https://www.ophysics.com/f1.html" target="_blank" rel="noopener noreferrer"
+                                       class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-purple-300 border border-slate-700 text-xs">
+                                        <span>سایت اصلی</span>
+                                        <span>↗</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -1673,7 +1834,8 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                 <span>${simCatalog.filter(s => {
                     if (gradeFilter === 'all') return true;
                     if (gradeFilter === 'space') return s.gradeKey === 'space';
-                    return s.grade.toString() === gradeFilter && s.gradeKey !== 'space';
+                    if (gradeFilter === 'featured') return s.gradeKey === 'featured';
+                    return s.grade.toString() === gradeFilter && s.gradeKey !== 'space' && s.gradeKey !== 'featured';
                 }).length} آزمایش در دسترس</span>
             </div>
 
@@ -1681,12 +1843,13 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                 ${simCatalog.filter(s => {
                     if (gradeFilter === 'all') return true;
                     if (gradeFilter === 'space') return s.gradeKey === 'space';
-                    return s.grade.toString() === gradeFilter && s.gradeKey !== 'space';
+                    if (gradeFilter === 'featured') return s.gradeKey === 'featured';
+                    return s.grade.toString() === gradeFilter && s.gradeKey !== 'space' && s.gradeKey !== 'featured';
                 }).map(s => {
                     const isSelected = s.id === activeSim;
                     const gradeColor = s.gradeKey === 'space'
                         ? 'text-cyan-400 bg-cyan-950/60 border-cyan-800/40'
-                        : (s.grade === 7 ? 'text-amber-400 bg-amber-950/60 border-amber-800/40' : (s.grade === 8 ? 'text-blue-400 bg-blue-950/60 border-blue-800/40' : 'text-purple-400 bg-purple-950/60 border-purple-800/40'));
+                        : (s.gradeKey === 'featured' ? 'text-amber-300 bg-amber-950/60 border-amber-800/40' : (s.grade === 7 ? 'text-amber-400 bg-amber-950/60 border-amber-800/40' : (s.grade === 8 ? 'text-blue-400 bg-blue-950/60 border-blue-800/40' : 'text-purple-400 bg-purple-950/60 border-purple-800/40')));
                     return `
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${s.id}', '${currentMode}', '${gradeFilter}')"
                         class="p-3 rounded-2xl border text-right transition-all flex flex-col justify-between group ${isSelected 

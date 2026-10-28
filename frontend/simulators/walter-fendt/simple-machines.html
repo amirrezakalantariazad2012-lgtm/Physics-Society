@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walter Fendt | ماشین‌های ساده، اهرم‌ها و قرقره‌ها</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: local('Vazirmatn'), local('Tahoma');
+        }
+        body {
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col p-3 sm:p-5">
+
+    <!-- Top Header & Platform Badge -->
+    <header class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-slate-900 border border-amber-500/30 mb-4 shadow-xl">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-xl border border-amber-500/30">
+                ⚙️
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-base sm:text-lg font-black text-white">Walter Fendt (والتر فنت)</h1>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold">
+                        ماشین‌های ساده، اهرم‌ها و قرقره‌ها
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-700 font-bold">
+                        چندزبانه (Multilingual)
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700 font-bold">
+                        بدون فیلترشکن
+                    </span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">شبیه‌ساز تحلیلی ماشین‌های ساده، گشتاور و مزیت مکانیکی — سرفصل فصل ۹ علوم نهم و تکمیلی سمپاد</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <a href="https://www.walter-fendt.de/html5/phen/lever_en.htm" target="_blank" rel="noopener noreferrer"
+               class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all shadow">
+                <span>سایت اصلی اهرم‌ها (Fendt)</span>
+                <span>↗</span>
+            </a>
+            <a href="https://www.walter-fendt.de/html5/phen/pulleysystem_en.htm" target="_blank" rel="noopener noreferrer"
+               class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all shadow">
+                <span>سایت اصلی قرقره‌ها</span>
+                <span>↗</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Mode Switcher Tabs (Levers vs Pulleys) -->
+    <div class="flex items-center gap-2 mb-4 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 text-xs font-bold w-fit">
+        <button id="tab-lever" onclick="switchMode('lever')" class="px-5 py-2 rounded-xl bg-amber-500 text-slate-950 font-black shadow transition-all">
+            ⚖️ شبیه‌ساز اهرم‌ها و گشتاور
+        </button>
+        <button id="tab-pulley" onclick="switchMode('pulley')" class="px-5 py-2 rounded-xl text-slate-400 hover:text-white transition-all">
+            🏗️ شبیه‌ساز قرقره‌ها (ثابت، متحرک و مرکب)
+        </button>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+        
+        <!-- Interactive Canvas Area (8 cols) -->
+        <div class="lg:col-span-8 flex flex-col gap-4">
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 shadow-lg flex-1 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-xs text-slate-400 mb-2 border-b border-slate-800 pb-2">
+                    <span id="canvas-title" class="font-bold text-slate-200">نمای گرافیکی اهرم و بردار نیروها:</span>
+                    <span id="advantage-badge" class="font-bold px-2.5 py-1 rounded-lg bg-teal-950 text-teal-300 border border-teal-800 font-mono text-xs">
+                        مزیت مکانیکی (A) = 2.00
+                    </span>
+                </div>
+                
+                <canvas id="machine-canvas" class="w-full flex-1 min-h-[360px] rounded-xl bg-slate-950 border border-slate-800"></canvas>
+                
+                <!-- Live Analytical Metrics Bar -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 text-center">
+                    <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span class="block text-[10px] text-slate-400">نیروی مقاوم (R):</span>
+                        <span id="metric-r" class="font-mono text-cyan-400 font-black text-sm">100 N</span>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span class="block text-[10px] text-slate-400">نیروی محرک (E):</span>
+                        <span id="metric-e" class="font-mono text-emerald-400 font-black text-sm">50 N</span>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span class="block text-[10px] text-slate-400">مزیت مکانیکی کامل (A):</span>
+                        <span id="metric-a" class="font-mono text-amber-400 font-black text-sm">2.00</span>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span class="block text-[10px] text-slate-400">وضعیت تعادل:</span>
+                        <span id="metric-status" class="text-xs font-bold text-teal-300">در حال تعادل کامل</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls & Educational Theory (4 cols) -->
+        <div class="lg:col-span-4 flex flex-col gap-4">
+            
+            <!-- Controls Box -->
+            <div id="controls-lever" class="rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-lg space-y-4">
+                <h3 class="font-extrabold text-sm text-white flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span>تنظیمات اهرم</span>
+                    <span class="text-[11px] text-amber-400 font-bold" id="lever-class-name">اهرم نوع اول</span>
+                </h3>
+
+                <!-- Lever Class Selection -->
+                <div class="grid grid-cols-3 gap-1.5 text-xs font-bold">
+                    <button onclick="setLeverClass(1)" id="btn-lc-1" class="p-2 rounded-xl bg-amber-500 text-slate-950 font-black">نوع اول (تکیه‌گاه وسط)</button>
+                    <button onclick="setLeverClass(2)" id="btn-lc-2" class="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white">نوع دوم (بار وسط)</button>
+                    <button onclick="setLeverClass(3)" id="btn-lc-3" class="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white">نوع سوم (نیرو وسط)</button>
+                </div>
+
+                <!-- Load Force (R) -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300">نیروی مقاوم / وزنه (R):</span>
+                        <span id="lbl-r" class="font-mono text-cyan-300 font-bold">100 N</span>
+                    </div>
+                    <input type="range" id="input-r" min="20" max="300" value="100" step="10" 
+                           class="w-full accent-cyan-500 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Resistance Arm (dR) -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300">بازوی مقاوم (d_R):</span>
+                        <span id="lbl-dr" class="font-mono text-cyan-300 font-bold">1.0 m</span>
+                    </div>
+                    <input type="range" id="input-dr" min="0.2" max="3" value="1.0" step="0.1" 
+                           class="w-full accent-cyan-500 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Effort Arm (dE) -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300">بازوی محرک (d_E):</span>
+                        <span id="lbl-de" class="font-mono text-emerald-300 font-bold">2.0 m</span>
+                    </div>
+                    <input type="range" id="input-de" min="0.2" max="3" value="2.0" step="0.1" 
+                           class="w-full accent-emerald-500 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+            </div>
+
+            <!-- Pulley Controls (Hidden initially) -->
+            <div id="controls-pulley" class="hidden rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-lg space-y-4">
+                <h3 class="font-extrabold text-sm text-white border-b border-slate-800 pb-2">
+                    تنظیمات سیستم قرقره‌ها
+                </h3>
+                <div class="space-y-2">
+                    <label class="text-xs text-slate-300 font-bold block">نوع چیدمان قرقره:</label>
+                    <div class="grid grid-cols-1 gap-2 text-xs font-bold">
+                        <button onclick="setPulleyType('fixed')" id="btn-pt-fixed" class="p-2.5 rounded-xl bg-cyan-600 text-white flex items-center justify-between">
+                            <span>قرقره ثابت (Single Fixed)</span>
+                            <span class="font-mono text-[11px]">A = 1</span>
+                        </button>
+                        <button onclick="setPulleyType('movable')" id="btn-pt-movable" class="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between">
+                            <span>قرقره متحرک (Movable)</span>
+                            <span class="font-mono text-[11px]">A = 2</span>
+                        </button>
+                        <button onclick="setPulleyType('compound4')" id="btn-pt-compound4" class="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center justify-between">
+                            <span>قرقره مرکب ۴ طنابه (Block & Tackle)</span>
+                            <span class="font-mono text-[11px]">A = 4</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300">وزن بار (Load):</span>
+                        <span id="lbl-pulley-load" class="font-mono text-amber-300 font-bold">200 N</span>
+                    </div>
+                    <input type="range" id="input-pulley-load" min="50" max="600" value="200" step="10" 
+                           class="w-full accent-amber-500 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300">کشش طناب توسط کاربر:</span>
+                        <span id="lbl-pull-pos" class="font-mono text-emerald-300 font-bold">0 cm</span>
+                    </div>
+                    <input type="range" id="input-pull-pos" min="0" max="100" value="30" step="1" 
+                           class="w-full accent-emerald-500 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+            </div>
+
+            <!-- Formula & Theory Scaffolding -->
+            <div class="rounded-2xl bg-gradient-to-br from-slate-900 to-amber-950/30 border border-amber-500/20 p-4 sm:p-5 shadow-lg flex-1 flex flex-col justify-between space-y-3">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2 text-xs font-bold text-amber-400">
+                        <span>📐</span>
+                        <span>فرمول‌های تحلیلی حاکم بر ماشین:</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-xs font-mono text-slate-200 space-y-1">
+                        <div class="text-teal-300 font-bold">قانون تعادل گشتاور: R × d_R = E × d_E</div>
+                        <div class="text-amber-300 font-bold">مزیت مکانیکی: A = R / E = d_E / d_R</div>
+                        <div class="text-cyan-300">پایستگی کار: W_ورودی = W_خروجی (در غیاب اصطکاک)</div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
+                    <strong class="text-amber-300 block mb-0.5">نکته تستی تکمیلی سمپاد:</strong>
+                    ماشین‌های ساده انرژی یا کار اضافه تولید نمی‌کنند؛ بلکه با افزایش بازوی محرک (افزایش مسافت جابه‌جایی نیرو)، نیروی لازم را کاهش می‌دهند یا با تغییر جهت نیرو، انجام کار را آسان می‌سازند.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'lever'; // 'lever' or 'pulley'
+        let leverClass = 1;
+        let R = 100; // Load force (N)
+        let dR = 1.0; // Resistance arm (m)
+        let dE = 2.0; // Effort arm (m)
+        let pulleyType = 'fixed';
+        let pulleyLoad = 200;
+        let pullPercent = 30;
+
+        const canvas = document.getElementById('machine-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = canvas.clientWidth * window.devicePixelRatio;
+            canvas.height = canvas.clientHeight * window.devicePixelRatio;
+            draw();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function switchMode(mode) {
+            currentMode = mode;
+            if (mode === 'lever') {
+                document.getElementById('tab-lever').className = 'px-5 py-2 rounded-xl bg-amber-500 text-slate-950 font-black shadow transition-all';
+                document.getElementById('tab-pulley').className = 'px-5 py-2 rounded-xl text-slate-400 hover:text-white transition-all';
+                document.getElementById('controls-lever').classList.remove('hidden');
+                document.getElementById('controls-pulley').classList.add('hidden');
+                document.getElementById('canvas-title').textContent = 'نمای شماتیک اهرم، گشتاور و بردارهای نیرو:';
+            } else {
+                document.getElementById('tab-lever').className = 'px-5 py-2 rounded-xl text-slate-400 hover:text-white transition-all';
+                document.getElementById('tab-pulley').className = 'px-5 py-2 rounded-xl bg-cyan-600 text-white font-black shadow transition-all';
+                document.getElementById('controls-lever').classList.add('hidden');
+                document.getElementById('controls-pulley').classList.remove('hidden');
+                document.getElementById('canvas-title').textContent = 'نمای سیستم قرقره‌ها و جابه‌جایی طناب:';
+            }
+            updateMetrics();
+            draw();
+        }
+
+        function setLeverClass(cls) {
+            leverClass = cls;
+            ['1', '2', '3'].forEach(c => {
+                document.getElementById(`btn-lc-${c}`).className = (c == cls)
+                    ? 'p-2 rounded-xl bg-amber-500 text-slate-950 font-black'
+                    : 'p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white';
+            });
+            const names = { 1: 'اهرم نوع اول (تکیه‌گاه در وسط)', 2: 'اهرم نوع دوم (نیروی مقاوم در وسط)', 3: 'اهرم نوع سوم (نیروی محرک در وسط)' };
+            document.getElementById('lever-class-name').textContent = names[cls];
+            updateMetrics();
+            draw();
+        }
+
+        function setPulleyType(type) {
+            pulleyType = type;
+            ['fixed', 'movable', 'compound4'].forEach(t => {
+                document.getElementById(`btn-pt-${t}`).className = (t === type)
+                    ? 'p-2.5 rounded-xl bg-cyan-600 text-white flex items-center justify-between font-bold'
+                    : 'p-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-between';
+            });
+            updateMetrics();
+            draw();
+        }
+
+        // Inputs
+        const inputR = document.getElementById('input-r');
+        const inputDr = document.getElementById('input-dr');
+        const inputDe = document.getElementById('input-de');
+        const inputPulleyLoad = document.getElementById('input-pulley-load');
+        const inputPullPos = document.getElementById('input-pull-pos');
+
+        function updateFromInputs() {
+            R = parseFloat(inputR.value);
+            dR = parseFloat(inputDr.value);
+            dE = parseFloat(inputDe.value);
+            pulleyLoad = parseFloat(inputPulleyLoad.value);
+            pullPercent = parseFloat(inputPullPos.value);
+
+            document.getElementById('lbl-r').textContent = R + ' N';
+            document.getElementById('lbl-dr').textContent = dR.toFixed(1) + ' m';
+            document.getElementById('lbl-de').textContent = dE.toFixed(1) + ' m';
+            document.getElementById('lbl-pulley-load').textContent = pulleyLoad + ' N';
+            document.getElementById('lbl-pull-pos').textContent = pullPercent + ' cm';
+
+            updateMetrics();
+            draw();
+        }
+
+        [inputR, inputDr, inputDe, inputPulleyLoad, inputPullPos].forEach(inp => {
+            inp.addEventListener('input', updateFromInputs);
+        });
+
+        function updateMetrics() {
+            if (currentMode === 'lever') {
+                const E = (R * dR) / dE;
+                const A = dE / dR;
+                document.getElementById('metric-r').textContent = R.toFixed(0) + ' N';
+                document.getElementById('metric-e').textContent = E.toFixed(1) + ' N';
+                document.getElementById('metric-a').textContent = A.toFixed(2);
+                document.getElementById('advantage-badge').textContent = `مزیت مکانیکی (A) = ${A.toFixed(2)}`;
+                document.getElementById('metric-status').textContent = 'تعادل گشتاورها برقرار است';
+                document.getElementById('metric-status').className = 'text-xs font-bold text-emerald-400';
+            } else {
+                let A = 1;
+                if (pulleyType === 'movable') A = 2;
+                if (pulleyType === 'compound4') A = 4;
+                const E = pulleyLoad / A;
+
+                document.getElementById('metric-r').textContent = pulleyLoad.toFixed(0) + ' N';
+                document.getElementById('metric-e').textContent = E.toFixed(1) + ' N';
+                document.getElementById('metric-a').textContent = A.toFixed(2);
+                document.getElementById('advantage-badge').textContent = `مزیت مکانیکی (A) = ${A.toFixed(0)}`;
+                document.getElementById('metric-status').textContent = `نیروی لازم ۱/${A} وزن بار`;
+                document.getElementById('metric-status').className = 'text-xs font-bold text-cyan-400';
+            }
+        }
+
+        function draw() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const dpr = window.devicePixelRatio || 1;
+            ctx.clearRect(0, 0, w, h);
+
+            if (currentMode === 'lever') {
+                drawLever(w, h, dpr);
+            } else {
+                drawPulley(w, h, dpr);
+            }
+        }
+
+        function drawLever(w, h, dpr) {
+            const centerY = h * 0.55;
+            const barLength = w * 0.75;
+            const barStart = (w - barLength) / 2;
+
+            let fulcrumX = 0;
+            let rx = 0;
+            let ex = 0;
+
+            if (leverClass === 1) {
+                // Fulcrum in middle
+                const ratio = dR / (dR + dE);
+                fulcrumX = barStart + barLength * ratio;
+                rx = barStart;
+                ex = barStart + barLength;
+            } else if (leverClass === 2) {
+                // Fulcrum at left, Load in middle, Effort at right
+                fulcrumX = barStart + 20 * dpr;
+                rx = fulcrumX + (barLength - 40 * dpr) * (dR / dE);
+                ex = barStart + barLength - 20 * dpr;
+            } else {
+                // Class 3: Fulcrum at left, Effort in middle, Load at right
+                fulcrumX = barStart + 20 * dpr;
+                ex = fulcrumX + (barLength - 40 * dpr) * (dE / dR);
+                rx = barStart + barLength - 20 * dpr;
+            }
+
+            // Draw Base Support Triangle (Fulcrum)
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.moveTo(fulcrumX, centerY);
+            ctx.lineTo(fulcrumX - 25 * dpr, centerY + 50 * dpr);
+            ctx.lineTo(fulcrumX + 25 * dpr, centerY + 50 * dpr);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#d97706';
+            ctx.lineWidth = 2 * dpr;
+            ctx.stroke();
+
+            // Ground line
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 3 * dpr;
+            ctx.beginPath();
+            ctx.moveTo(w * 0.05, centerY + 50 * dpr);
+            ctx.lineTo(w * 0.95, centerY + 50 * dpr);
+            ctx.stroke();
+
+            // Main Lever Bar
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 14 * dpr;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(barStart, centerY);
+            ctx.lineTo(barStart + barLength, centerY);
+            ctx.stroke();
+
+            // Fulcrum Pivot Pin
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(fulcrumX, centerY, 6 * dpr, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2 * dpr;
+            ctx.stroke();
+
+            // Resistance Weight Box at rx
+            const rSize = Math.min(50 * dpr, Math.max(30 * dpr, (R / 300) * 50 * dpr));
+            ctx.fillStyle = '#06b6d4';
+            ctx.fillRect(rx - rSize / 2, centerY - rSize, rSize, rSize);
+            ctx.fillStyle = '#020617';
+            ctx.font = `bold ${10 * dpr}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText('R', rx, centerY - rSize / 2 + 4 * dpr);
+
+            // Effort Force Arrow at ex
+            const E = (R * dR) / dE;
+            const arrowLen = Math.min(60 * dpr, Math.max(25 * dpr, (E / 150) * 60 * dpr));
+            const arrowDir = (leverClass === 3 || leverClass === 2) ? -1 : 1; // Downward or Upward
+            
+            ctx.strokeStyle = '#10b981';
+            ctx.fillStyle = '#10b981';
+            ctx.lineWidth = 3 * dpr;
+            ctx.beginPath();
+            const arrowStartY = centerY;
+            const arrowEndY = centerY + (arrowLen * arrowDir);
+            ctx.moveTo(ex, arrowStartY);
+            ctx.lineTo(ex, arrowEndY);
+            ctx.stroke();
+            // Arrowhead
+            ctx.beginPath();
+            ctx.moveTo(ex, arrowEndY);
+            ctx.lineTo(ex - 6 * dpr, arrowEndY - (8 * dpr * arrowDir));
+            ctx.lineTo(ex + 6 * dpr, arrowEndY - (8 * dpr * arrowDir));
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.font = `bold ${11 * dpr}px sans-serif`;
+            ctx.fillText(`نیروی محرک E = ${E.toFixed(1)} N`, ex, arrowEndY + (16 * dpr * arrowDir));
+            ctx.fillText(`بار مقاوم R = ${R} N`, rx, centerY - rSize - 8 * dpr);
+        }
+
+        function drawPulley(w, h, dpr) {
+            const centerX = w * 0.5;
+            const ceilingY = 30 * dpr;
+            const pulleyRadius = 24 * dpr;
+
+            // Draw ceiling
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 4 * dpr;
+            ctx.beginPath();
+            ctx.moveTo(w * 0.2, ceilingY);
+            ctx.lineTo(w * 0.8, ceilingY);
+            ctx.stroke();
+
+            const pullOffset = (pullPercent / 100) * 80 * dpr;
+
+            if (pulleyType === 'fixed') {
+                // Fixed Pulley mounted to ceiling
+                const py = ceilingY + 40 * dpr;
+                // Bracket
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 3 * dpr;
+                ctx.beginPath();
+                ctx.moveTo(centerX, ceilingY);
+                ctx.lineTo(centerX, py);
+                ctx.stroke();
+
+                // Pulley wheel
+                drawWheel(centerX, py, pulleyRadius, dpr);
+
+                // Rope
+                const loadY = py + 120 * dpr - pullOffset;
+                const effortY = py + 80 * dpr + pullOffset;
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 2.5 * dpr;
+                ctx.beginPath();
+                ctx.moveTo(centerX - pulleyRadius, loadY);
+                ctx.lineTo(centerX - pulleyRadius, py);
+                ctx.arc(centerX, py, pulleyRadius, Math.PI, 0, false);
+                ctx.lineTo(centerX + pulleyRadius, effortY);
+                ctx.stroke();
+
+                // Load Box
+                drawLoadBox(centerX - pulleyRadius, loadY, 40 * dpr, `${pulleyLoad} N`, dpr);
+
+                // Hand/Arrow pulling down
+                drawPullHandle(centerX + pulleyRadius, effortY, dpr);
+
+            } else if (pulleyType === 'movable') {
+                // Movable Pulley
+                const fixedX = centerX + 40 * dpr;
+                const movableY = ceilingY + 120 * dpr - (pullOffset / 2);
+
+                // Fixed rope attached to ceiling at (centerX - 40)
+                const anchorX = centerX - 40 * dpr;
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 2.5 * dpr;
+                ctx.beginPath();
+                ctx.moveTo(anchorX, ceilingY);
+                ctx.lineTo(anchorX, movableY);
+                ctx.arc(centerX, movableY, 40 * dpr, Math.PI, 0, true);
+                ctx.lineTo(fixedX, ceilingY + 40 * dpr);
+                ctx.stroke();
+
+                // Movable Pulley wheel
+                drawWheel(centerX, movableY, 26 * dpr, dpr);
+
+                // Load hanging under movable pulley
+                drawLoadBox(centerX, movableY + 50 * dpr, 46 * dpr, `${pulleyLoad} N`, dpr);
+
+                // Effort arrow pulling up
+                drawPullHandleUp(fixedX, ceilingY + 40 * dpr, dpr);
+
+            } else {
+                // Compound 4 Pulley (Block and Tackle)
+                const py1 = ceilingY + 40 * dpr;
+                const movableY = ceilingY + 150 * dpr - (pullOffset / 4);
+
+                drawWheel(centerX - 18 * dpr, py1, 22 * dpr, dpr);
+                drawWheel(centerX + 18 * dpr, py1, 22 * dpr, dpr);
+                drawWheel(centerX, movableY, 26 * dpr, dpr);
+
+                // Ropes looping between blocks
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 2 * dpr;
+                ctx.beginPath();
+                ctx.moveTo(centerX - 18 * dpr, py1);
+                ctx.lineTo(centerX - 18 * dpr, movableY);
+                ctx.lineTo(centerX + 18 * dpr, py1);
+                ctx.lineTo(centerX + 18 * dpr, movableY);
+                ctx.stroke();
+
+                drawLoadBox(centerX, movableY + 55 * dpr, 50 * dpr, `${pulleyLoad} N (A=4)`, dpr);
+            }
+        }
+
+        function drawWheel(x, y, r, dpr) {
+            ctx.fillStyle = '#334155';
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2 * dpr;
+            ctx.stroke();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(x, y, 4 * dpr, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawLoadBox(x, y, size, label, dpr) {
+            ctx.fillStyle = '#0284c7';
+            ctx.fillRect(x - size / 2, y, size, size);
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2 * dpr;
+            ctx.strokeRect(x - size / 2, y, size, size);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${9 * dpr}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(label, x, y + size / 2 + 3 * dpr);
+        }
+
+        function drawPullHandle(x, y, dpr) {
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(x, y, 6 * dpr, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Down arrow
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2 * dpr;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, y + 25 * dpr);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y + 25 * dpr);
+            ctx.lineTo(x - 4 * dpr, y + 18 * dpr);
+            ctx.lineTo(x + 4 * dpr, y + 18 * dpr);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.font = `bold ${9 * dpr}px sans-serif`;
+            ctx.fillText('نیروی دست (E)', x, y + 36 * dpr);
+        }
+
+        function drawPullHandleUp(x, y, dpr) {
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(x, y, 6 * dpr, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Up arrow
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2 * dpr;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, y - 25 * dpr);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y - 25 * dpr);
+            ctx.lineTo(x - 4 * dpr, y - 18 * dpr);
+            ctx.lineTo(x + 4 * dpr, y - 18 * dpr);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.font = `bold ${9 * dpr}px sans-serif`;
+            ctx.fillText('نیروی دست (E)', x, y - 30 * dpr);
+        }
+
+        // Init
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            updateFromInputs();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>oPhysics | رسم دیاگرام‌های نیرو (FBD) و سینماتیک</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: local('Vazirmatn'), local('Tahoma');
+        }
+        body {
+            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col p-3 sm:p-5">
+
+    <!-- Top Header & Platform Badge -->
+    <header class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-slate-900 border border-purple-500/30 mb-4 shadow-xl">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-black text-xl border border-purple-500/30">
+                📐
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-base sm:text-lg font-black text-white">oPhysics (اُ-فیزیکس تام والش)</h1>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-700 font-bold">
+                        رسم دیاگرام‌های نیرو (FBD) و سینماتیک
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700 font-bold">
+                        بدون فیلترشکن
+                    </span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">کارگاه رسم دیاگرام جسم آزاد، برآیند برداری نیروها، اصطکاک و شتاب — منطبق بر فصل ۵ علوم نهم و سمپاد</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <a href="https://www.ophysics.com/f1.html" target="_blank" rel="noopener noreferrer"
+               class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-purple-300 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all shadow">
+                <span>سایت اصلی oPhysics FBD</span>
+                <span>↗</span>
+            </a>
+            <a href="https://www.ophysics.com/f2.html" target="_blank" rel="noopener noreferrer"
+               class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all shadow">
+                <span>سطح شیب‌دار oPhysics</span>
+                <span>↗</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+        
+        <!-- Canvas & FBD Display (8 cols) -->
+        <div class="lg:col-span-8 flex flex-col gap-4">
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 shadow-lg flex-1 flex flex-col justify-between">
+                <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 mb-2 border-b border-slate-800 pb-2">
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-slate-200">دیاگرام نیروهای وارد بر جسم (Free Body Diagram):</span>
+                        <label class="flex items-center gap-1 text-[11px] text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="chk-components" checked class="accent-purple-500 rounded">
+                            <span>نمایش مؤلفه‌های بردار وزن (mg sinθ و mg cosθ)</span>
+                        </label>
+                    </div>
+                    <span id="motion-state-badge" class="font-bold px-2.5 py-1 rounded-lg bg-teal-950 text-teal-300 border border-teal-800 font-mono text-xs">
+                        شتاب = 0.00 m/s² (ساکن)
+                    </span>
+                </div>
+
+                <canvas id="fbd-canvas" class="w-full flex-1 min-h-[380px] rounded-xl bg-slate-950 border border-slate-800"></canvas>
+
+                <!-- Vector Legend & Physics Quantities Bar -->
+                <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 pt-3 text-center text-[11px]">
+                    <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span class="block text-rose-400 font-bold">وزن (W):</span>
+                        <span id="leg-w" class="font-mono text-white font-black">98.0 N</span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span class="block text-emerald-400 font-bold">نیروی عمودی (N):</span>
+                        <span id="leg-n" class="font-mono text-white font-black">84.9 N</span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span class="block text-cyan-400 font-bold">نیروی واردشده (F):</span>
+                        <span id="leg-fapp" class="font-mono text-white font-black">0.0 N</span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span class="block text-amber-400 font-bold">اصطکاک (f):</span>
+                        <span id="leg-f" class="font-mono text-white font-black">49.0 N</span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span class="block text-purple-400 font-bold">برآیند نیروها (ΣF):</span>
+                        <span id="leg-net" class="font-mono text-white font-black">0.0 N</span>
+                    </div>
+                    <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">
+                        <span class="block text-teal-400 font-bold">سرعت لحظه‌ای (v):</span>
+                        <span id="leg-v" class="font-mono text-white font-black">0.0 m/s</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Box & Free Body Logic (4 cols) -->
+        <div class="lg:col-span-4 flex flex-col gap-4">
+            
+            <!-- Controls Panel -->
+            <div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 sm:p-5 shadow-lg space-y-3.5">
+                <h3 class="font-extrabold text-sm text-white flex items-center justify-between border-b border-slate-800 pb-2">
+                    <span>تنظیمات جسم و سطح شیب‌دار</span>
+                    <span class="text-[11px] text-purple-400 font-bold">قانون دوم نیوتون</span>
+                </h3>
+
+                <!-- Incline Angle (Theta) -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300">زاویه شیب سطح (θ):</span>
+                        <span id="lbl-theta" class="font-mono text-purple-300 font-bold">30°</span>
+                    </div>
+                    <input type="range" id="input-theta" min="0" max="60" value="30" step="1" 
+                           class="w-full accent-purple-500 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Mass (m) -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300">جرم جسم (m):</span>
+                        <span id="lbl-mass" class="font-mono text-cyan-300 font-bold">10.0 kg</span>
+                    </div>
+                    <input type="range" id="input-mass" min="1" max="30" value="10" step="1" 
+                           class="w-full accent-cyan-500 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Applied External Force (F_app) -->
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300">نیروی اعمالی در راستای سطح (F):</span>
+                        <span id="lbl-fapp" class="font-mono text-emerald-300 font-bold">0.0 N</span>
+                    </div>
+                    <input type="range" id="input-fapp" min="-150" max="150" value="0" step="5" 
+                           class="w-full accent-emerald-500 bg-slate-800 rounded-lg cursor-pointer">
+                </div>
+
+                <!-- Coefficient of Friction (mu) -->
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-300">اصطکاک ایستایی (μₛ):</span>
+                            <span id="lbl-mus" class="font-mono text-amber-300 font-bold">0.50</span>
+                        </div>
+                        <input type="range" id="input-mus" min="0" max="0.8" value="0.5" step="0.05" 
+                               class="w-full accent-amber-500 bg-slate-800 rounded-lg cursor-pointer">
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-300">اصطکاک جنبشی (μₖ):</span>
+                            <span id="lbl-muk" class="font-mono text-amber-300 font-bold">0.40</span>
+                        </div>
+                        <input type="range" id="input-muk" min="0" max="0.8" value="0.4" step="0.05" 
+                               class="w-full accent-amber-500 bg-slate-800 rounded-lg cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Play / Reset Buttons -->
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button id="btn-play" class="py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs shadow-md transition-all flex items-center justify-center gap-1.5">
+                        <span id="play-icon">▶</span>
+                        <span id="play-text">شبیه‌سازی حرکت</span>
+                    </button>
+                    <button id="btn-reset" class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition-all">
+                        بازنشانی موقعیت (↺)
+                    </button>
+                </div>
+            </div>
+
+            <!-- FBD Theory & Newton's Law Scaffolding -->
+            <div class="rounded-2xl bg-gradient-to-br from-slate-900 to-purple-950/30 border border-purple-500/20 p-4 sm:p-5 shadow-lg flex-1 flex flex-col justify-between space-y-3">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2 text-xs font-bold text-purple-300">
+                        <span>🎯</span>
+                        <span>مراحل رسم دیاگرام جسم آزاد (FBD):</span>
+                    </div>
+                    <ol class="text-[11px] text-slate-300 leading-relaxed space-y-1 list-decimal list-inside">
+                        <li><strong class="text-rose-400">نیروی وزن (W = mg):</strong> همواره عمود به سطح زمین و روبه‌پایین است.</li>
+                        <li><strong class="text-emerald-400">نیروی عمودی تکیه‌گاه (N):</strong> همیشه عمود بر سطح تماس است (N = mg cosθ).</li>
+                        <li><strong class="text-amber-400">نیروی اصطکاک (f):</strong> در خلاف جهت لغزش جسم یا تمایل به لغزش وارد می‌شود.</li>
+                        <li><strong class="text-purple-400">قانون دوم نیوتون:</strong> شتاب جسم در امتداد سطح برابر با a = ΣF / m است.</li>
+                    </ol>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 leading-relaxed font-mono">
+                    <span class="text-cyan-400 font-bold block mb-0.5 font-sans">معادله دیفرانسیلی حرکت:</span>
+                    m · a = F_app - mg·sin(θ) ± f_k
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const g = 9.8; // m/s^2
+        let thetaDeg = 30;
+        let mass = 10;
+        let Fapp = 0;
+        let muS = 0.5;
+        let muK = 0.4;
+        let showComponents = true;
+
+        // Kinematics State
+        let pos = 0; // distance along ramp (meters)
+        let vel = 0; // velocity along ramp (m/s)
+        let isRunning = false;
+        let animFrame = null;
+        let lastTime = 0;
+
+        const canvas = document.getElementById('fbd-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = canvas.clientWidth * window.devicePixelRatio;
+            canvas.height = canvas.clientHeight * window.devicePixelRatio;
+            draw();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        // Inputs
+        const inputTheta = document.getElementById('input-theta');
+        const inputMass = document.getElementById('input-mass');
+        const inputFapp = document.getElementById('input-fapp');
+        const inputMuS = document.getElementById('input-mus');
+        const inputMuK = document.getElementById('input-muk');
+        const chkComponents = document.getElementById('chk-components');
+        const btnPlay = document.getElementById('btn-play');
+        const btnReset = document.getElementById('btn-reset');
+        const playIcon = document.getElementById('play-icon');
+        const playText = document.getElementById('play-text');
+
+        function updateFromInputs() {
+            thetaDeg = parseFloat(inputTheta.value);
+            mass = parseFloat(inputMass.value);
+            Fapp = parseFloat(inputFapp.value);
+            muS = parseFloat(inputMuS.value);
+            muK = parseFloat(inputMuK.value);
+            showComponents = chkComponents.checked;
+
+            document.getElementById('lbl-theta').textContent = thetaDeg + '°';
+            document.getElementById('lbl-mass').textContent = mass.toFixed(1) + ' kg';
+            document.getElementById('lbl-fapp').textContent = Fapp.toFixed(1) + ' N';
+            document.getElementById('lbl-mus').textContent = muS.toFixed(2);
+            document.getElementById('lbl-muk').textContent = muK.toFixed(2);
+
+            draw();
+        }
+
+        [inputTheta, inputMass, inputFapp, inputMuS, inputMuK].forEach(i => i.addEventListener('input', updateFromInputs));
+        chkComponents.addEventListener('change', updateFromInputs);
+
+        function calculateForces() {
+            const rad = (thetaDeg * Math.PI) / 180;
+            const W = mass * g;
+            const Wpar = W * Math.sin(rad); // down the ramp (+)
+            const Wperp = W * Math.cos(rad); // into the ramp
+            const N = Wperp; // normal force
+            const maxFs = muS * N;
+
+            // Total driving force along ramp (let down-the-ramp be positive, up be negative)
+            // Fapp: positive is up the ramp, negative is down the ramp
+            const drivingForce = Wpar - Fapp;
+
+            let f = 0;
+            let netF = 0;
+            let accel = 0;
+
+            if (Math.abs(vel) < 0.01) {
+                // Static check
+                if (Math.abs(drivingForce) <= maxFs) {
+                    // Stays at rest
+                    f = drivingForce;
+                    netF = 0;
+                    accel = 0;
+                } else {
+                    // Overcomes static friction, starts moving
+                    const sign = drivingForce > 0 ? 1 : -1;
+                    f = sign * muK * N;
+                    netF = drivingForce - f;
+                    accel = netF / mass;
+                }
+            } else {
+                // Kinetic friction opposes velocity
+                const sign = vel > 0 ? 1 : -1;
+                f = sign * muK * N;
+                netF = drivingForce - f;
+                accel = netF / mass;
+            }
+
+            return { W, Wpar, Wperp, N, f, netF, accel, maxFs };
+        }
+
+        function draw() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const dpr = window.devicePixelRatio || 1;
+            ctx.clearRect(0, 0, w, h);
+
+            const forces = calculateForces();
+
+            // Update legend and readouts
+            document.getElementById('leg-w').textContent = forces.W.toFixed(1) + ' N';
+            document.getElementById('leg-n').textContent = forces.N.toFixed(1) + ' N';
+            document.getElementById('leg-fapp').textContent = Math.abs(Fapp).toFixed(1) + ' N';
+            document.getElementById('leg-f').textContent = Math.abs(forces.f).toFixed(1) + ' N';
+            document.getElementById('leg-net').textContent = Math.abs(forces.netF).toFixed(1) + ' N';
+            document.getElementById('leg-v').textContent = vel.toFixed(2) + ' m/s';
+
+            const badge = document.getElementById('motion-state-badge');
+            if (Math.abs(forces.accel) < 0.05 && Math.abs(vel) < 0.01) {
+                badge.textContent = 'ساکن در تعادل (a = 0.0 m/s²)';
+                badge.className = 'font-bold px-2.5 py-1 rounded-lg bg-teal-950 text-teal-300 border border-teal-800 font-mono text-xs';
+            } else if (forces.accel > 0) {
+                badge.textContent = `شتاب به سمت پایین سطح: ${forces.accel.toFixed(2)} m/s²`;
+                badge.className = 'font-bold px-2.5 py-1 rounded-lg bg-amber-950 text-amber-300 border border-amber-800 font-mono text-xs';
+            } else {
+                badge.textContent = `شتاب به سمت بالای سطح: ${Math.abs(forces.accel).toFixed(2)} m/s²`;
+                badge.className = 'font-bold px-2.5 py-1 rounded-lg bg-purple-950 text-purple-300 border border-purple-800 font-mono text-xs';
+            }
+
+            // Ramp Geometry
+            const rampBaseX = w * 0.15;
+            const rampBaseY = h * 0.82;
+            const rampLength = w * 0.65;
+            const rad = (thetaDeg * Math.PI) / 180;
+            const rampTopX = rampBaseX + rampLength * Math.cos(rad);
+            const rampTopY = rampBaseY - rampLength * Math.sin(rad);
+
+            // Draw Ground
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 3 * dpr;
+            ctx.beginPath();
+            ctx.moveTo(w * 0.05, rampBaseY);
+            ctx.lineTo(w * 0.95, rampBaseY);
+            ctx.stroke();
+
+            // Draw Ramp Triangle
+            ctx.fillStyle = 'rgba(30, 41, 59, 0.6)';
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 2 * dpr;
+            ctx.beginPath();
+            ctx.moveTo(rampBaseX, rampBaseY);
+            ctx.lineTo(rampTopX, rampTopY);
+            ctx.lineTo(rampTopX, rampBaseY);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Angle arc θ
+            if (thetaDeg > 5) {
+                ctx.strokeStyle = '#c084fc';
+                ctx.lineWidth = 2 * dpr;
+                ctx.beginPath();
+                ctx.arc(rampBaseX, rampBaseY, 35 * dpr, 0, -rad, true);
+                ctx.stroke();
+                ctx.fillStyle = '#c084fc';
+                ctx.font = `bold ${10 * dpr}px sans-serif`;
+                ctx.fillText(`θ = ${thetaDeg}°`, rampBaseX + 42 * dpr, rampBaseY - 8 * dpr);
+            }
+
+            // Block on Ramp position
+            // pos maps from 0 (top) to rampLength - margin
+            const maxPosPixels = rampLength - 70 * dpr;
+            const blockPixelsFromTop = Math.max(10 * dpr, Math.min(maxPosPixels, 70 * dpr + pos * 20 * dpr));
+            const blockCenterDist = rampLength - blockPixelsFromTop;
+
+            const blockX = rampBaseX + blockCenterDist * Math.cos(rad);
+            const blockY = rampBaseY - blockCenterDist * Math.sin(rad);
+            const blockSize = Math.min(48 * dpr, Math.max(32 * dpr, Math.sqrt(mass) * 10 * dpr));
+
+            ctx.save();
+            ctx.translate(blockX, blockY);
+            ctx.rotate(-rad);
+
+            // Draw Block
+            ctx.fillStyle = '#a855f7';
+            ctx.fillRect(-blockSize / 2, -blockSize, blockSize, blockSize);
+            ctx.strokeStyle = '#e9d5ff';
+            ctx.lineWidth = 2 * dpr;
+            ctx.strokeRect(-blockSize / 2, -blockSize, blockSize, blockSize);
+
+            // Center of Mass Dot
+            const cmX = 0;
+            const cmY = -blockSize / 2;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(cmX, cmY, 3.5 * dpr, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Mass label
+            ctx.fillStyle = '#0f172a';
+            ctx.font = `bold ${9 * dpr}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(`${mass} kg`, cmX, cmY + 3 * dpr);
+
+            // Vectors in Block Local Coordinates (x along ramp down, y perpendicular up)
+            const scale = 0.8 * dpr;
+
+            // 1. Normal Force N (Perpendicular upward from surface, local -y direction)
+            const nLen = forces.N * scale;
+            drawVector(ctx, cmX, cmY, 0, -nLen, '#34d399', `N = ${forces.N.toFixed(0)}N`, dpr, 'top');
+
+            // 2. Friction Force f (along ramp)
+            // forces.f is positive down the ramp, friction opposes so vector is in -forces.f direction
+            if (Math.abs(forces.f) > 0.5) {
+                const fLen = -forces.f * scale;
+                drawVector(ctx, cmX, cmY, fLen, 0, '#fbbf24', `f = ${Math.abs(forces.f).toFixed(0)}N`, dpr, 'side');
+            }
+
+            // 3. Applied Force Fapp (positive is up the ramp -> negative x local)
+            if (Math.abs(Fapp) > 1) {
+                const fappLen = -Fapp * scale;
+                drawVector(ctx, cmX, cmY, fappLen, 0, '#38bdf8', `F_app = ${Math.abs(Fapp).toFixed(0)}N`, dpr, 'side');
+            }
+
+            // 4. Parallel Gravity Component (down the ramp -> positive x local)
+            if (showComponents && thetaDeg > 0) {
+                const wparLen = forces.Wpar * scale;
+                drawDashedVector(ctx, cmX, cmY, wparLen, 0, '#fb923c', `mg·sinθ (${forces.Wpar.toFixed(0)}N)`, dpr);
+                const wperpLen = forces.Wperp * scale;
+                drawDashedVector(ctx, cmX, cmY, 0, wperpLen, '#60a5fa', `mg·cosθ (${forces.Wperp.toFixed(0)}N)`, dpr);
+            }
+
+            ctx.restore();
+
+            // 5. True Weight Vector (Straight Downward in Global Canvas coordinates)
+            const wLen = forces.W * scale;
+            const globalCmY = blockY - (blockSize / 2) * Math.cos(rad);
+            const globalCmX = blockX - (blockSize / 2) * Math.sin(rad);
+            drawGlobalVector(ctx, globalCmX, globalCmY, 0, wLen, '#f43f5e', `W = mg (${forces.W.toFixed(0)}N)`, dpr);
+        }
+
+        function drawVector(ctx, x1, y1, dx, dy, color, label, dpr, labelPos) {
+            const x2 = x1 + dx;
+            const y2 = y1 + dy;
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2.5 * dpr;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            // Arrow head
+            const angle = Math.atan2(dy, dx);
+            const headLen = 7 * dpr;
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 6), y2 - headLen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 6), y2 - headLen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.font = `bold ${9 * dpr}px sans-serif`;
+            if (labelPos === 'top') {
+                ctx.fillText(label, x2, y2 - 6 * dpr);
+            } else {
+                ctx.fillText(label, x2 + (dx > 0 ? 8 * dpr : -8 * dpr), y2 - 4 * dpr);
+            }
+        }
+
+        function drawDashedVector(ctx, x1, y1, dx, dy, color, label, dpr) {
+            ctx.save();
+            ctx.setLineDash([4 * dpr, 3 * dpr]);
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2 * dpr;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x1 + dx, y1 + dy);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.font = `${9 * dpr}px sans-serif`;
+            ctx.fillStyle = color;
+            ctx.fillText(label, x1 + dx + 6 * dpr, y1 + dy + 12 * dpr);
+        }
+
+        function drawGlobalVector(ctx, x1, y1, dx, dy, color, label, dpr) {
+            drawVector(ctx, x1, y1, dx, dy, color, label, dpr, 'side');
+        }
+
+        // Kinematic Loop
+        function loop(timestamp) {
+            if (!isRunning) return;
+            if (!lastTime) lastTime = timestamp;
+            const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+            lastTime = timestamp;
+
+            const forces = calculateForces();
+            vel += forces.accel * dt;
+            pos += vel * dt;
+
+            // Boundary clamp
+            if (pos > 8) {
+                pos = 8;
+                vel = 0;
+            } else if (pos < -2) {
+                pos = -2;
+                vel = 0;
+            }
+
+            draw();
+            animFrame = requestAnimationFrame(loop);
+        }
+
+        btnPlay.addEventListener('click', () => {
+            isRunning = !isRunning;
+            if (isRunning) {
+                lastTime = 0;
+                playIcon.textContent = '⏸';
+                playText.textContent = 'توقف حرکت';
+                animFrame = requestAnimationFrame(loop);
+            } else {
+                playIcon.textContent = '▶';
+                playText.textContent = 'ادامه حرکت';
+                cancelAnimationFrame(animFrame);
+            }
+        });
+
+        btnReset.addEventListener('click', () => {
+            isRunning = false;
+            cancelAnimationFrame(animFrame);
+            playIcon.textContent = '▶';
+            playText.textContent = 'شبیه‌سازی حرکت';
+            pos = 0;
+            vel = 0;
+            draw();
+        });
+
+        // Init
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            updateFromInputs();
+        });
+    </script>
+</body>
+</html>
