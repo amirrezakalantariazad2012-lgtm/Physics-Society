@@ -1658,14 +1658,14 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                         🚀 فضا و نجوم (${simCatalog.filter(s => s.gradeKey === 'space').length} آزمایش)
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'featured')"
-                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === 'featured' ? 'bg-amber-400 text-slate-950 shadow-md font-black ring-2 ring-amber-300' : 'bg-slate-800 text-amber-300 hover:text-white border border-amber-600/40'}">
-                        🌐 پلتفرم‌های منتخب (${simCatalog.filter(s => s.gradeKey === 'featured').length} پلتفرم)
+                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === 'featured' ? 'bg-sky-500 text-slate-950 shadow-md font-black ring-2 ring-sky-400/50' : 'bg-slate-800 text-sky-300 hover:text-white border border-sky-800/40'}">
+                        آزمایشگاه‌های تحلیلی (${simCatalog.filter(s => s.gradeKey === 'featured').length} پلتفرم)
                     </button>
                 </div>
 
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>۲۷ شبیه‌ساز بومی PhET + ۳ پلتفرم تحلیلی منتخب بین‌المللی</span>
+                    <span>۳۰ آزمایشگاه تعاملی (۲۷ شبیه‌ساز رسمی PhET + ۳ آزمایشگاه تحلیلی مکمل)</span>
                 </div>
             </div>
         </div>
@@ -1692,7 +1692,7 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                     const isSelected = s.id === activeSim;
                     const gradeColor = s.gradeKey === 'space'
                         ? 'text-cyan-400 bg-cyan-950/60 border-cyan-800/40'
-                        : (s.gradeKey === 'featured' ? 'text-amber-300 bg-amber-950/60 border-amber-800/40' : (s.grade === 7 ? 'text-amber-400 bg-amber-950/60 border-amber-800/40' : (s.grade === 8 ? 'text-blue-400 bg-blue-950/60 border-blue-800/40' : 'text-purple-400 bg-purple-950/60 border-purple-800/40')));
+                        : (s.gradeKey === 'featured' ? 'text-sky-300 bg-sky-950/60 border-sky-800/40' : (s.grade === 7 ? 'text-amber-400 bg-amber-950/60 border-amber-800/40' : (s.grade === 8 ? 'text-blue-400 bg-blue-950/60 border-blue-800/40' : 'text-purple-400 bg-purple-950/60 border-purple-800/40')));
                     return `
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${s.id}', '${currentMode}', '${gradeFilter}')"
                         class="p-3 rounded-2xl border text-right transition-all flex flex-col justify-between group ${isSelected 
