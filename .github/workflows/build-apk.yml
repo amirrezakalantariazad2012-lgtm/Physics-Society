@@ -92,3 +92,4 @@ jobs:
           files: release-output/physics-society.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
