@@ -62,6 +62,10 @@ def init_live_db():
             conn.execute("ALTER TABLE rooms ADD COLUMN is_locked INTEGER DEFAULT 1;")
         except Exception:
             pass
+        try:
+            conn.execute("ALTER TABLE rooms ADD COLUMN is_streaming INTEGER DEFAULT 0;")
+        except Exception:
+            pass
         conn.execute("""
         CREATE TABLE IF NOT EXISTS chat_messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -120,6 +124,8 @@ init_live_db()
 
 # Local worker socket connections map: room_code -> Set[WebSocket]
 local_sockets: Dict[str, Set[WebSocket]] = {}
+# Session ID to WebSocket map for 1-to-1 WebRTC signaling
+session_sockets: Dict[str, WebSocket] = {}
 last_handled_event_id: int = 0
 
 async def broadcast_to_local_sockets(room_code: str, message: dict, exclude: Optional[WebSocket] = None):
@@ -136,6 +142,19 @@ async def broadcast_to_local_sockets(room_code: str, message: dict, exclude: Opt
                 dead.add(ws)
     for ws in dead:
         sockets.discard(ws)
+
+async def send_to_session(target_session_id: str, message: dict, room_code: str):
+    """Delivers message directly to target session if connected locally, or dispatches across workers"""
+    ws = session_sockets.get(target_session_id)
+    if ws:
+        try:
+            await ws.send_text(json.dumps(message))
+            return True
+        except Exception:
+            session_sockets.pop(target_session_id, None)
+    # Broadcast through cross-worker SQLite event bus
+    publish_event(room_code, message.get("type", "targeted_msg"), {**message, "target_session_id": target_session_id})
+    return False
 
 def publish_event(room_code: str, event_type: str, payload: dict):
     """Publishes an event to the shared SQLite WAL event bus, accessible by all 4 worker processes"""
@@ -172,7 +191,7 @@ async def event_bus_listener():
     while True:
         try:
             active_rooms = list(local_sockets.keys())
-            if active_rooms:
+            if active_rooms or session_sockets:
                 with get_db() as conn:
                     cur = conn.execute(
                         "SELECT id, room_code, sender_pid, event_type, payload_json FROM live_events WHERE id > ? ORDER BY id ASC LIMIT 50",
@@ -184,10 +203,19 @@ async def event_bus_listener():
                         # Only broadcast if originated from another worker OR needs broadcast
                         if int(r["sender_pid"]) != CURRENT_PID:
                             room = r["room_code"]
-                            if room in local_sockets and local_sockets[room]:
-                                payload = json.loads(r["payload_json"])
-                                payload["type"] = r["event_type"]
-                                await broadcast_to_local_sockets(room, payload)
+                            payload = json.loads(r["payload_json"])
+                            target = payload.get("target_session_id")
+                            if target:
+                                ws = session_sockets.get(target)
+                                if ws:
+                                    try:
+                                        await ws.send_text(json.dumps(payload))
+                                    except Exception:
+                                        session_sockets.pop(target, None)
+                            else:
+                                if room in local_sockets and local_sockets[room]:
+                                    payload["type"] = r["event_type"]
+                                    await broadcast_to_local_sockets(room, payload)
         except Exception as e:
             logger.debug(f"Event bus loop tick error: {e}")
         await asyncio.sleep(0.04)  # 40ms polling tick (butter-smooth real-time)
@@ -262,6 +290,7 @@ async def list_live_rooms():
     return {"rooms": result}
 
 @router.post("/create")
+@router.post("/rooms")
 async def create_live_room(req: RoomCreateRequest):
     """Creates a new synchronized live classroom broadcast"""
     ensure_event_listener_started()
@@ -283,13 +312,17 @@ async def create_live_room(req: RoomCreateRequest):
         """, (code, req.title, req.sim_id, req.sim_title or "", req.grade, req.teacher_name, default_state, default_notes, now, now))
         conn.commit()
 
-    return {
-        "success": True,
+    room_dict = {
         "room_code": code,
         "title": req.title,
         "sim_id": req.sim_id,
         "sim_title": req.sim_title or "",
         "share_url": f"/#live-lab/{code}"
+    }
+    return {
+        "success": True,
+        **room_dict,
+        "room": room_dict
     }
 
 @router.get("/rooms/{room_code}")
@@ -298,7 +331,7 @@ async def get_room_details(room_code: str):
     ensure_event_listener_started()
     now = time.time()
     with get_db() as conn:
-        cur = conn.execute("SELECT room_code, title, sim_id, COALESCE(sim_title, '') as sim_title, COALESCE(is_locked, 1) as is_locked, grade, teacher_name, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, created_at FROM rooms WHERE room_code = ?", (room_code,))
+        cur = conn.execute("SELECT room_code, title, sim_id, COALESCE(sim_title, '') as sim_title, COALESCE(is_locked, 1) as is_locked, COALESCE(is_streaming, 0) as is_streaming, grade, teacher_name, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, created_at FROM rooms WHERE room_code = ?", (room_code,))
         row = cur.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="اتاق پخش زنده یافت نشد.")
@@ -322,6 +355,7 @@ async def get_room_details(room_code: str):
             "sim_id": row["sim_id"],
             "sim_title": row["sim_title"],
             "is_locked": bool(row["is_locked"]),
+            "is_streaming": bool(row["is_streaming"]),
             "grade": row["grade"],
             "teacher_name": row["teacher_name"],
             "viewers_count": viewers_count,
@@ -520,6 +554,7 @@ async def live_lab_websocket(
     if room_code not in local_sockets:
         local_sockets[room_code] = set()
     local_sockets[room_code].add(websocket)
+    session_sockets[session_id] = websocket
 
     # Register active viewer in shared DB
     try:
@@ -545,16 +580,18 @@ async def live_lab_websocket(
 
     # Send initial room state to newly joined user
     with get_db() as conn:
-        cur = conn.execute("SELECT sim_id, COALESCE(sim_title, '') as sim_title, COALESCE(is_locked, 1) as is_locked, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json FROM rooms WHERE room_code = ?", (room_code,))
+        cur = conn.execute("SELECT sim_id, COALESCE(sim_title, '') as sim_title, COALESCE(is_locked, 1) as is_locked, COALESCE(is_streaming, 0) as is_streaming, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json FROM rooms WHERE room_code = ?", (room_code,))
         row = cur.fetchone()
         if row:
             await websocket.send_text(json.dumps({
                 "type": "welcome",
                 "room_code": room_code,
                 "role": role,
+                "session_id": session_id,
                 "sim_id": row["sim_id"],
                 "sim_title": row["sim_title"],
                 "is_locked": bool(row["is_locked"]),
+                "is_streaming": bool(row["is_streaming"]),
                 "viewers_count": total_viewers,
                 "state": json.loads(row["current_state_json"]),
                 "notes": json.loads(row["teacher_notes_json"]),
@@ -720,8 +757,91 @@ async def live_lab_websocket(
                     total_viewers = max(row_c["cnt"] if row_c else 1, len(local_sockets.get(room_code, set())))
                 await websocket.send_text(json.dumps({"type": "pong", "viewers_count": total_viewers}))
 
+            # 12. Stream Started by Teacher (Google Meet Video Broadcast)
+            elif msg_type == "stream_started":
+                now_t = time.time()
+                with get_db() as conn:
+                    conn.execute("UPDATE rooms SET is_streaming = 1, updated_at = ? WHERE room_code = ?", (now_t, room_code))
+                    conn.commit()
+                stream_payload = {
+                    "teacher_session_id": session_id,
+                    "teacher_name": name,
+                    "stream_type": data.get("stream_type", "screen"),
+                    "has_audio": bool(data.get("has_audio", False)),
+                    "timestamp": now_t
+                }
+                publish_event(room_code, "stream_started", stream_payload)
+                await broadcast_to_local_sockets(room_code, {"type": "stream_started", **stream_payload}, exclude=websocket)
+
+            # 13. Stream Stopped by Teacher
+            elif msg_type == "stream_stopped":
+                now_t = time.time()
+                with get_db() as conn:
+                    conn.execute("UPDATE rooms SET is_streaming = 0, updated_at = ? WHERE room_code = ?", (now_t, room_code))
+                    conn.commit()
+                stop_payload = {"teacher_session_id": session_id, "timestamp": now_t}
+                publish_event(room_code, "stream_stopped", stop_payload)
+                await broadcast_to_local_sockets(room_code, {"type": "stream_stopped", **stop_payload}, exclude=websocket)
+
+            # 14. Request Stream (Student requesting connection to Teacher's active broadcast)
+            elif msg_type == "request_stream":
+                req_payload = {
+                    "student_session_id": session_id,
+                    "student_name": name,
+                    "timestamp": time.time()
+                }
+                publish_event(room_code, "request_stream", req_payload)
+                await broadcast_to_local_sockets(room_code, {"type": "request_stream", **req_payload}, exclude=websocket)
+
+            # 15. WebRTC Offer (Teacher -> Student)
+            elif msg_type == "webrtc_offer":
+                target = data.get("target_session_id")
+                if target:
+                    offer_payload = {
+                        "type": "webrtc_offer",
+                        "offer": data.get("offer"),
+                        "sender_session_id": session_id,
+                        "sender_name": name,
+                        "target_session_id": target
+                    }
+                    await send_to_session(target, offer_payload, room_code)
+
+            # 16. WebRTC Answer (Student -> Teacher)
+            elif msg_type == "webrtc_answer":
+                target = data.get("target_session_id")
+                if target:
+                    ans_payload = {
+                        "type": "webrtc_answer",
+                        "answer": data.get("answer"),
+                        "sender_session_id": session_id,
+                        "sender_name": name,
+                        "target_session_id": target
+                    }
+                    await send_to_session(target, ans_payload, room_code)
+
+            # 17. WebRTC ICE Candidate (Bidirectional)
+            elif msg_type == "webrtc_ice":
+                target = data.get("target_session_id")
+                if target:
+                    ice_payload = {
+                        "type": "webrtc_ice",
+                        "candidate": data.get("candidate"),
+                        "sender_session_id": session_id,
+                        "target_session_id": target
+                    }
+                    await send_to_session(target, ice_payload, room_code)
+
+            # 18. Fast Canvas Frame Fallback (Zero-configuration instant screen mirror)
+            elif msg_type == "stream_frame":
+                frame_data = {
+                    "frame": data.get("frame"),
+                    "timestamp": time.time()
+                }
+                await broadcast_to_local_sockets(room_code, {"type": "stream_frame", **frame_data}, exclude=websocket)
+
     except WebSocketDisconnect:
         local_sockets.get(room_code, set()).discard(websocket)
+        session_sockets.pop(session_id, None)
         try:
             with get_db() as conn:
                 conn.execute("DELETE FROM active_viewers WHERE session_id = ?", (session_id,))
@@ -735,6 +855,7 @@ async def live_lab_websocket(
     except Exception as e:
         logger.error(f"WebSocket error in {room_code}: {e}")
         local_sockets.get(room_code, set()).discard(websocket)
+        session_sockets.pop(session_id, None)
         try:
             with get_db() as conn:
                 conn.execute("DELETE FROM active_viewers WHERE session_id = ?", (session_id,))

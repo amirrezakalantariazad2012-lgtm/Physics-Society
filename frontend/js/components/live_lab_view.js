@@ -422,14 +422,27 @@ function getLabUrl(simId, role = 'student') {
     return `/simulators/phet/${info.file}?v=${buster}&live=1&role=${role}`;
 }
 
+
 class LiveLabComponent {
     constructor() {
         this.currentRoom = null;
         this.socket = null;
+        this.sessionId = null;
         this.userRole = 'student'; // 'teacher' or 'student'
         this.userName = 'دانش‌آموز';
         this.currentSimId = 'motion-1d';
         this.isStudentLocked = true;
+        this.isStreaming = false;
+        this.localStream = null;
+        this.micStream = null;
+        this.isMicMuted = true;
+        this.peerConnections = new Map(); // studentSessionId -> RTCPeerConnection
+        this.studentPeerConnection = null;
+        this.fallbackTimer = null;
+        this.activeViewMode = 'stream'; // 'stream' or 'solo'
+        this.mediaRecorder = null;
+        this.recordedChunks = [];
+        this.isRecording = false;
         this.isLaserActive = false;
         this.simIframe = null;
         this.laserOverlay = null;
@@ -437,13 +450,13 @@ class LiveLabComponent {
         this.syncPoller = null;
         this.lastSyncTime = 0;
         this.votedPollIndex = null;
+        this.hasVideoAudioTrack = false;
     }
 
     async render(container, roomCode = null) {
-        if (!container) return;
-        const user = window.store.currentUser;
-        this.userRole = (user && (user.role === 'teacher' || user.role === 'admin')) ? 'teacher' : 'student';
-        this.userName = (user && user.full_name) || (this.userRole === 'teacher' ? 'دبیر فیزیک' : 'دانش‌آموز سمپاد');
+        const user = window.store ? window.store.user : null;
+        this.userRole = (user && user.role === 'teacher') ? 'teacher' : 'student';
+        this.userName = user ? (user.full_name || user.name || 'کاربر') : (this.userRole === 'teacher' ? 'دبیر فیزیک سمپاد' : 'دانش‌آموز');
 
         if (roomCode) {
             await this.joinRoom(container, roomCode);
@@ -472,14 +485,14 @@ class LiveLabComponent {
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-bold">
                         <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
-                        <span>پخش زنده و همگام ۲۸ آزمایشگاه فیزیک سمپاد (Live Physics Classroom)</span>
+                        <span>پخش زنده و میت کلاسی ۲۸ آزمایشگاه فیزیک سمپاد (Google Meet Classroom)</span>
                     </div>
 
                     ${this.userRole === 'teacher' ? `
                     <button onclick="window.liveLab.openCreateModal()" 
                         class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all hover:scale-105">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                        <span>شروع پخش زنده آزمایشگاه (ویژه دبیران)</span>
+                        <span>شروع جلسه زنده تدریس آزمایشگاهی (ویژه دبیران)</span>
                     </button>
                     ` : `
                     <button onclick="window.liveLab.openCreateModal()" 
@@ -492,10 +505,10 @@ class LiveLabComponent {
 
                 <div>
                     <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-                        آزمایشگاه زنده دبیر و کلاس‌های تعاملی برخط فیزیک
+                        میت تعاملی و پخش زنده آزمایشگاه‌های فیزیک
                     </h1>
                     <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 max-w-2xl leading-relaxed">
-                        دبیران گرامی با یک کلیک می‌توانند بین ۲۸ آزمایشگاه تعاملی سوئیچ کرده، دستگاه‌های آزمایشگاهی را به طور زنده کنترل کنند، با لیزر پوینتر مفاهیم را تدریس نمایند و کوییزهای برخط مفهومی برگزار کنند.
+                        دبیران گرامی می‌توانند در یک محیط مشابه Google Meet تمام ۲۸ آزمایشگاه فیزیک پایه‌های هفتم، هشتم و نهم سمپاد را به طور زنده با کیفیت Full HD و ۶۰ فریم بر ثانیه به اشتراک بگذارند. دانش‌آموزان تک‌تک آزمایش‌ها، اتصالات مدار و نمودارها را به صورت زنده و همگام مشاهده می‌کنند.
                     </p>
                 </div>
 
@@ -518,35 +531,35 @@ class LiveLabComponent {
             <div class="space-y-4">
                 <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
                     <span class="flex items-center gap-2">
-                        <i data-lucide="radio" class="w-4 h-4 text-rose-500"></i>
-                        <span>کلاس‌های در حال پخش زنده (${rooms.length}):</span>
+                        <i data-lucide="radio" class="w-4 h-4 text-rose-500 animate-pulse"></i>
+                        <span>جلسات زنده و در حال برگزاری (${rooms.length})</span>
                     </span>
-                    <button onclick="window.liveLab.render(document.getElementById('app-main-content'))" class="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                        <i data-lucide="rotate-cw" class="w-3 h-3"></i>
-                        <span>بروزرسانی لیست</span>
+                    <button onclick="window.liveLab.renderLobby(document.getElementById('app-main-content'))" class="text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1">
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                        <span>بروزرسانی</span>
                     </button>
                 </div>
 
                 ${rooms.length === 0 ? `
-                <div class="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-3">
-                    <i data-lucide="radio" class="w-10 h-10 text-slate-400 mx-auto opacity-50"></i>
-                    <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">در حال حاضر کلاسی در حال پخش زنده نیست</h4>
-                    <p class="text-xs text-slate-500 max-w-sm mx-auto">می‌توانید با دکمه بالا یک کلاس پخش زنده جدید بسازید یا وارد کلاس دائمی نمونه شوید.</p>
-                    <button onclick="window.store.setView('live-lab', { id: 'SMP-404' })" 
-                        class="px-4 py-2 rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800 font-bold text-xs inline-flex items-center gap-2">
-                        <span>ورود به آزمایشگاه دائمی سینماتیک سمپاد (SMP-404)</span>
-                    </button>
+                <div class="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-12 text-center space-y-3">
+                    <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
+                        <i data-lucide="tv" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">در حال حاضر هیچ پخش زنده‌ای فعال نیست</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                        دبیران گرامی می‌توانند با کلیک بر روی دکمه «شروع جلسه زنده تدریس»، کلاس آنلاین ۲۸ آزمایشگاه را آغاز کنند.
+                    </p>
                 </div>
                 ` : `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     ${rooms.map(r => {
                         const lab = getLabInfo(r.sim_id);
                         return `
-                        <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 shadow-sm transition-all space-y-4">
+                        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-shadow space-y-3 relative overflow-hidden group">
                             <div class="flex items-center justify-between">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-bold text-[10px] border border-rose-200 dark:border-rose-900">
-                                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                                    <span>زنده</span>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${r.is_streaming ? 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'} text-[11px] font-bold">
+                                    <span class="w-2 h-2 rounded-full ${r.is_streaming ? 'bg-rose-500 animate-ping' : 'bg-slate-400'}"></span>
+                                    <span>${r.is_streaming ? 'در حال پخش زنده' : 'آماده برگزاری'}</span>
                                 </span>
                                 <span class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg">${r.room_code}</span>
                             </div>
@@ -610,27 +623,29 @@ class LiveLabComponent {
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">نام دبیر / ارائه‌دهنده:</label>
+                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">نام دبیر / مدرس ارائه‌دهنده:</label>
                             <input id="create-room-teacher" type="text" value="${this.userName}" 
                                 class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500">
                         </div>
                         <div>
-                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">جستجوی سریع آزمایشگاه (از بین ۲۸ آزمایشگاه):</label>
-                            <input id="create-room-search" type="text" placeholder="مثال: کولن، اسکیت، فشار، مدار..." 
-                                oninput="window.liveLab.filterCreateLabs(this.value)"
-                                class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500">
+                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">پایه تحصیلی هدف:</label>
+                            <select id="create-room-grade" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500">
+                                <option value="9" selected>پایه نهم (سینماتیک، دینامیک، فشار و نجوم)</option>
+                                <option value="8">پایه هشتم (الکتریسیته، مغناطیس و شکست نور)</option>
+                                <option value="7">پایه هفتم (اندازه‌گیری، چگالی، گرما و انرژی)</option>
+                            </select>
                         </div>
                     </div>
 
-                    <!-- Grade Filter Tabs -->
-                    <div class="space-y-2">
+                    <!-- 28 Laboratories Browser -->
+                    <div class="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
                         <div class="flex items-center justify-between">
-                            <label class="font-bold text-slate-700 dark:text-slate-300">انتخاب آزمایشگاه پایه:</label>
-                            <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-[11px]">
-                                <button onclick="window.liveLab.filterGradeTab(0)" id="grade-tab-0" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold bg-white dark:bg-slate-700 text-blue-600 dark:text-sky-300 shadow-sm">همه (۲۸)</button>
-                                <button onclick="window.liveLab.filterGradeTab(7)" id="grade-tab-7" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold text-slate-600 dark:text-slate-400">پایه هفتم (۵)</button>
+                            <label class="font-bold text-slate-700 dark:text-slate-300">انتخاب آزمایشگاه آغازین از بین ۲۸ آزمایشگاه رسمی:</label>
+                            <div class="flex items-center gap-1 text-[11px]">
+                                <button onclick="window.liveLab.filterGradeTab(0)" id="grade-tab-0" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold bg-blue-600 text-white">همه (۲۸)</button>
+                                <button onclick="window.liveLab.filterGradeTab(7)" id="grade-tab-7" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold text-slate-600 dark:text-slate-400">پایه هفتم (۴)</button>
                                 <button onclick="window.liveLab.filterGradeTab(8)" id="grade-tab-8" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold text-slate-600 dark:text-slate-400">پایه هشتم (۸)</button>
-                                <button onclick="window.liveLab.filterGradeTab(9)" id="grade-tab-9" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold text-slate-600 dark:text-slate-400">پایه نهم (۱۵)</button>
+                                <button onclick="window.liveLab.filterGradeTab(9)" id="grade-tab-9" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold text-slate-600 dark:text-slate-400">پایه نهم (۱۶)</button>
                             </div>
                         </div>
 
@@ -669,7 +684,7 @@ class LiveLabComponent {
                         <button onclick="window.liveLab.closeCreateModal()" class="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-400 font-bold text-xs hover:bg-slate-200 dark:hover:bg-slate-800">انصراف</button>
                         <button onclick="window.liveLab.submitCreateRoom()" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md flex items-center gap-1.5">
                             <i data-lucide="radio" class="w-4 h-4"></i>
-                            <span>ایجاد و شروع پخش زنده</span>
+                            <span>ایجاد و ورود به کلاس</span>
                         </button>
                     </div>
                 </div>
@@ -698,13 +713,12 @@ class LiveLabComponent {
         const card = document.getElementById(`create-lab-card-${simId}`);
         if (card) {
             card.classList.add('border-blue-500', 'bg-blue-50/80', 'dark:bg-blue-950/60', 'ring-2', 'ring-blue-400');
-            card.classList.remove('border-slate-200', 'dark:border-slate-800');
         }
-        const hiddenInp = document.getElementById('selected-create-sim-id');
-        if (hiddenInp) hiddenInp.value = simId;
+        const input = document.getElementById('selected-create-sim-id');
+        if (input) input.value = simId;
         const info = getLabInfo(simId);
         const preview = document.getElementById('selected-lab-preview-name');
-        if (preview) {
+        if (preview && info) {
             preview.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i><span>انتخاب شده: ${info.title}</span>`;
             if (window.lucide) window.lucide.createIcons();
         }
@@ -712,16 +726,17 @@ class LiveLabComponent {
 
     filterGradeTab(grade) {
         document.querySelectorAll('.grade-filter-btn').forEach(btn => {
-            btn.classList.remove('bg-white', 'dark:bg-slate-700', 'text-blue-600', 'dark:text-sky-300', 'shadow-sm');
+            btn.classList.remove('bg-blue-600', 'text-white');
             btn.classList.add('text-slate-600', 'dark:text-slate-400');
         });
         const activeBtn = document.getElementById(`grade-tab-${grade}`);
         if (activeBtn) {
-            activeBtn.classList.add('bg-white', 'dark:bg-slate-700', 'text-blue-600', 'dark:text-sky-300', 'shadow-sm');
             activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400');
+            activeBtn.classList.add('bg-blue-600', 'text-white');
         }
+
         document.querySelectorAll('.create-lab-card').forEach(card => {
-            const cardGrade = Number(card.getAttribute('data-grade'));
+            const cardGrade = parseInt(card.getAttribute('data-grade'));
             if (grade === 0 || cardGrade === grade) {
                 card.classList.remove('hidden');
             } else {
@@ -730,220 +745,304 @@ class LiveLabComponent {
         });
     }
 
-    filterCreateLabs(query) {
-        const q = (query || '').trim().toLowerCase();
-        document.querySelectorAll('.create-lab-card').forEach(card => {
-            const title = (card.getAttribute('data-title') || '').toLowerCase();
-            if (!q || title.includes(q)) {
-                card.classList.remove('hidden');
-            } else {
-                card.classList.add('hidden');
-            }
-        });
-    }
-
     async submitCreateRoom() {
-        const title = document.getElementById('create-room-title')?.value?.trim();
-        const simId = document.getElementById('selected-create-sim-id')?.value || 'motion-1d';
-        const teacher = document.getElementById('create-room-teacher')?.value?.trim() || this.userName;
-        const labInfo = getLabInfo(simId);
+        const titleInput = document.getElementById('create-room-title');
+        const teacherInput = document.getElementById('create-room-teacher');
+        const gradeInput = document.getElementById('create-room-grade');
+        const simInput = document.getElementById('selected-create-sim-id');
 
+        const title = titleInput ? titleInput.value.trim() : '';
         if (!title) {
-            alert('لطفاً عنوان و موضوع جلسه آزمایش را وارد فرمایید.');
+            alert('لطفاً عنوان جلسه تدریس را وارد نمایید.');
             return;
         }
 
+        const simId = simInput ? simInput.value : 'motion-1d';
+        const lab = getLabInfo(simId);
+
         try {
-            const res = await fetch('/api/live-lab/create', {
+            const res = await fetch('/api/live-lab/rooms', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    title, 
-                    sim_id: simId, 
-                    sim_title: labInfo.title,
-                    teacher_name: teacher, 
-                    grade: labInfo.grade 
+                body: JSON.stringify({
+                    title: title,
+                    sim_id: simId,
+                    sim_title: lab.title,
+                    grade: gradeInput ? parseInt(gradeInput.value) : 9,
+                    teacher_name: teacherInput ? teacherInput.value.trim() : 'دبیر فیزیک سمپاد'
                 })
             });
 
             if (res.ok) {
                 const data = await res.json();
                 this.closeCreateModal();
-                this.userRole = 'teacher';
-                window.store.setView('live-lab', { id: data.room_code });
+                window.store.setView('live-lab', { id: data.room.room_code });
             } else {
-                alert('خطا در ایجاد اتاق پخش زنده.');
+                alert('خطا در ایجاد کلاس. لطفاً مجدداً تلاش فرمایید.');
             }
         } catch (e) {
-            console.error('Error creating room:', e);
-            alert('خطای ارتباط با سرور.');
+            console.error('Error creating live room:', e);
+            alert('اتصال به سرور برقرار نشد.');
         }
     }
 
     joinFromInput() {
-        const code = document.getElementById('quick-room-code-input')?.value?.trim();
+        const inp = document.getElementById('quick-room-code-input');
+        const code = inp ? inp.value.trim().toUpperCase() : '';
         if (code) {
             window.store.setView('live-lab', { id: code });
         }
     }
 
     async joinRoom(container, roomCode) {
-        this.cleanupSession();
+        this.currentRoom = roomCode;
         let details = null;
         try {
             const res = await fetch(`/api/live-lab/rooms/${roomCode}`);
             if (res.ok) {
                 details = await res.json();
-            } else {
-                alert(`اتاق پخش زنده با کد ${roomCode} یافت نشد.`);
-                this.renderLobby(container);
-                return;
             }
         } catch (e) {
-            console.error('Error fetching room details:', e);
-            alert('خطا در بارگذاری اطلاعات کلاس.');
+            console.warn('Could not fetch room details:', e);
+        }
+
+        if (!details) {
+            container.innerHTML = `
+            <div class="max-w-md mx-auto my-16 p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4">
+                <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-slate-800 dark:text-white">کلاس یافت نشد</h3>
+                <p class="text-xs text-slate-500">شناسه کلاس نامعتبر است یا جلسه به اتمام رسیده است.</p>
+                <button onclick="window.store.setView('live-lab')" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold">بازگشت به فهرست کلاس‌ها</button>
+            </div>
+            `;
+            if (window.lucide) window.lucide.createIcons();
             return;
         }
 
-        this.currentRoom = details;
         this.currentSimId = details.sim_id || 'motion-1d';
-        this.isStudentLocked = (details.is_locked !== undefined) ? details.is_locked : true;
-        this.isLaserActive = false;
-        this.lastSyncTime = Date.now() / 1000;
-        this.votedPollIndex = null;
-
+        this.isStudentLocked = details.is_locked !== undefined ? Boolean(details.is_locked) : true;
+        this.isStreaming = Boolean(details.is_streaming);
         const currentLab = getLabInfo(this.currentSimId);
-        const iframeSrc = getLabUrl(this.currentSimId, this.userRole);
 
         container.innerHTML = `
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 space-y-5 font-sans">
-            <!-- Room Header Strip -->
-            <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-4 font-sans">
+            
+            <!-- Classroom Header & Meet Control Bar -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
-                    <span class="w-3.5 h-3.5 rounded-full bg-rose-500 animate-pulse shadow-md shadow-rose-500/50"></span>
+                    <span class="w-3.5 h-3.5 rounded-full ${this.isStreaming ? 'bg-rose-500 animate-ping' : 'bg-emerald-500'}"></span>
                     <div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <h2 class="font-black text-sm sm:text-base text-slate-900 dark:text-white" id="live-header-room-title">${details.title}</h2>
-                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-900 font-bold">
-                                پخش زنده برخط
-                            </span>
-                            <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-900 font-bold font-mono">
-                                ${details.room_code}
-                            </span>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">${details.title}</h2>
+                            <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold">${details.room_code}</span>
                         </div>
-                        <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            <span class="font-medium text-blue-600 dark:text-teal-400">مدرس: ${details.teacher_name}</span>
+                        <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="user-check" class="w-3.5 h-3.5 text-blue-500"></i>
+                                <span>دبیر: <b>${details.teacher_name}</b></span>
+                            </span>
                             <span>•</span>
-                            <span id="live-participants-badge" class="font-mono text-emerald-600 dark:text-emerald-400 font-bold">${details.viewers_count} دانش‌آموز متصل</span>
+                            <span id="room-active-lab-name" class="font-bold text-blue-600 dark:text-sky-400">${currentLab.title}</span>
                             <span>•</span>
-                            <span id="live-active-sim-badge" class="text-slate-600 dark:text-slate-300 font-bold">${currentLab.title}</span>
+                            <span class="flex items-center gap-1 font-mono">
+                                <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-500"></i>
+                                <span id="header-viewers-count">${details.viewers_count}</span> نفر آنلاین
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex items-center flex-wrap gap-2">
-                    ${this.userRole === 'student' ? `
-                    <button onclick="window.liveLab.sendRaiseHand()" 
-                        id="btn-raise-hand"
-                        class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all hover:scale-105">
-                        <i data-lucide="hand" class="w-3.5 h-3.5"></i>
-                        <span>✋ اجازه / دست بلند کردن</span>
+                    ${this.userRole === 'teacher' ? `
+                    <!-- Teacher Live Streaming Action Button (Google Meet) -->
+                    <button id="btn-main-stream" onclick="window.liveLab.toggleScreenBroadcast()" 
+                        class="px-4 py-2 rounded-xl ${this.isStreaming ? 'bg-rose-600 hover:bg-rose-700 text-white animate-pulse' : 'bg-emerald-600 hover:bg-emerald-700 text-white'} font-bold text-xs shadow-md flex items-center gap-2 transition-all">
+                        <i data-lucide="${this.isStreaming ? 'video-off' : 'video'}" class="w-4 h-4"></i>
+                        <span id="main-stream-btn-text">${this.isStreaming ? '⏹️ توقف اشتراک تصویر' : '🖥️ شروع اشتراک زنده آزمایشگاه (Meet)'}</span>
                     </button>
-                    ` : ''}
 
-                    <!-- Share Classroom & QR Modal Button -->
-                    <button onclick="window.liveLab.openShareModal()" 
-                        class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-bold text-xs border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5 shadow-sm">
+                    <!-- Teacher Microphone Button -->
+                    <button id="btn-main-mic" onclick="window.liveLab.toggleMicrophone()" 
+                        class="px-3.5 py-2 rounded-xl ${!this.isMicMuted ? 'bg-emerald-500 text-white ring-2 ring-emerald-300' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'} font-bold text-xs border border-slate-300 dark:border-slate-700 flex items-center gap-1.5 transition-all">
+                        <i data-lucide="${!this.isMicMuted ? 'mic' : 'mic-off'}" class="w-4 h-4"></i>
+                        <span id="main-mic-text">${!this.isMicMuted ? 'میکروفون: فعال' : 'میکروفون'}</span>
+                    </button>
+
+                    <!-- Switch Laboratory Button (All 28 Labs) -->
+                    <button onclick="window.liveLab.openSimSwitcherModal()" 
+                        class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5">
+                        <i data-lucide="repeat" class="w-4 h-4"></i>
+                        <span>🧪 تعویض آزمایشگاه (${ALL_LABORATORIES.length})</span>
+                    </button>
+                    ` : `
+                    <!-- Student Stream Status Pill -->
+                    <span id="student-stream-badge" class="px-3 py-1.5 rounded-xl ${this.isStreaming ? 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'} font-bold text-xs flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full ${this.isStreaming ? 'bg-rose-500 animate-ping' : 'bg-slate-400'}"></span>
+                        <span id="student-stream-badge-text">${this.isStreaming ? '🔴 در حال تماشای زنده تدریس دبیر' : '⚪ در انتظار اشتراک تصویر دبیر'}</span>
+                    </span>
+
+                    <!-- Student View Mode Toggle (Stream vs Solo) -->
+                    <div id="student-view-mode-group" class="${this.isStudentLocked ? 'opacity-60 pointer-events-none' : ''} flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                        <button onclick="window.liveLab.setStudentViewMode('stream')" id="mode-btn-stream" 
+                            class="px-2.5 py-1 rounded-lg ${this.activeViewMode === 'stream' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                            📺 تصویر زنده دبیر
+                        </button>
+                        <button onclick="window.liveLab.setStudentViewMode('solo')" id="mode-btn-solo" 
+                            class="px-2.5 py-1 rounded-lg ${this.activeViewMode === 'solo' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                            🧪 کار انفرادی
+                        </button>
+                    </div>
+                    `}
+
+                    <!-- Fullscreen & Share -->
+                    <button onclick="window.liveLab.toggleFullscreen()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700" title="تمام‌صفحه">
+                        <i data-lucide="maximize" class="w-4 h-4"></i>
+                    </button>
+
+                    <button onclick="window.liveLab.openShareModal()" class="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-bold text-xs border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5 shadow-sm">
                         <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
-                        <span>اشتراک‌گذاری و QR</span>
+                        <span>اشتراک</span>
                     </button>
 
-                    <button onclick="window.store.setView('live-lab')" 
-                        class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 font-bold text-xs border border-rose-200 dark:border-rose-900 flex items-center gap-1.5">
+                    <button onclick="window.store.setView('live-lab')" class="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 font-bold text-xs border border-rose-200 dark:border-rose-900 flex items-center gap-1.5">
                         <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-                        <span>خروج از کلاس</span>
+                        <span>خروج</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Main Live Stage (Viewport + Telemetry + Classroom Sidebar) -->
+            <!-- Main Stage (Left 8 cols: Video/Workbench, Right 4 cols: Classroom Sidecar) -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
                 
-                <!-- Left Column (8 cols): Synchronized Simulator Viewport & Educational Telemetry -->
+                <!-- Left Column (8 cols): Google Meet Cinema Screen or Laboratory Workbench -->
                 <div class="lg:col-span-8 space-y-4">
                     
-                    <!-- Live Simulator Frame Container -->
-                    <div id="live-stage-wrapper" class="relative w-full h-[540px] sm:h-[620px] rounded-2xl bg-white border border-slate-200 dark:border-slate-800 shadow-lg overflow-hidden select-none">
+                    <div id="live-stage-wrapper" class="relative w-full h-[540px] sm:h-[640px] rounded-2xl bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden select-none flex items-center justify-center">
                         
-                        <!-- Teacher Controls Toolbar Overlay (When Teacher) -->
+                        <!-- Teacher Controls Toolbar (Inside Stage) -->
                         ${this.userRole === 'teacher' ? `
-                        <div class="absolute top-3 left-3 right-3 z-30 flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900/90 backdrop-blur text-white border border-slate-700 text-xs shadow-xl">
-                            <div class="flex items-center gap-2 font-bold text-emerald-400">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span>شما کنترل‌کننده پخش زنده این جلسه هستید</span>
+                        <div class="absolute top-3 left-3 right-3 z-30 flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-slate-900/90 backdrop-blur text-white border border-slate-700 text-xs shadow-xl">
+                            <div class="flex items-center gap-2 font-bold ${this.isStreaming ? 'text-rose-400' : 'text-slate-400'}">
+                                <span class="w-2.5 h-2.5 rounded-full ${this.isStreaming ? 'bg-rose-500 animate-ping' : 'bg-slate-500'}"></span>
+                                <span id="teacher-stream-indicator">${this.isStreaming ? 'پخش زنده ۶۰ فریم فعال است' : 'آماده اشتراک تصویر'}</span>
                             </div>
-                            <div class="flex items-center flex-wrap gap-2">
-                                <!-- Switch Laboratory Live -->
-                                <button onclick="window.liveLab.openSimSwitcherModal()" 
-                                    class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 font-bold text-[11px] flex items-center gap-1.5 shadow-sm">
-                                    <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
-                                    <span>🔄 تعویض آزمایشگاه (${ALL_LABORATORIES.length})</span>
+
+                            <div class="flex items-center flex-wrap gap-1.5">
+                                <!-- Record Button -->
+                                <button onclick="window.liveLab.toggleRecording()" id="btn-stage-record" 
+                                    class="px-2.5 py-1 rounded-lg ${this.isRecording ? 'bg-rose-600 text-white animate-pulse' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'} font-bold text-[11px] flex items-center gap-1">
+                                    <i data-lucide="disc" class="w-3.5 h-3.5"></i>
+                                    <span id="record-text">${this.isRecording ? 'توقف ضبط' : 'ضبط ویدیو'}</span>
                                 </button>
 
                                 <!-- Toggle Student Lock -->
                                 <button onclick="window.liveLab.toggleStudentLock()" 
                                     id="btn-toggle-student-lock"
-                                    class="px-2.5 py-1.5 rounded-lg ${this.isStudentLocked ? 'bg-amber-600 hover:bg-amber-500' : 'bg-slate-700 hover:bg-slate-600'} font-bold text-[11px] flex items-center gap-1">
+                                    class="px-2.5 py-1 rounded-lg ${this.isStudentLocked ? 'bg-amber-600 hover:bg-amber-500' : 'bg-slate-800 hover:bg-slate-700'} font-bold text-[11px] flex items-center gap-1">
                                     <i data-lucide="${this.isStudentLocked ? 'lock' : 'unlock'}" class="w-3 h-3"></i>
-                                    <span id="btn-lock-text">${this.isStudentLocked ? 'قفل دانش‌آموز: فعال' : 'اجازه آزمایش آزاد'}</span>
+                                    <span id="btn-lock-text">${this.isStudentLocked ? 'قفل کلاس: فعال' : 'آزمایش آزاد'}</span>
                                 </button>
 
                                 <!-- Laser Pointer Mode -->
                                 <button onclick="window.liveLab.toggleLaserMode()" 
                                     id="btn-toggle-laser"
-                                    class="px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 font-bold text-[11px] flex items-center gap-1">
+                                    class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 font-bold text-[11px] flex items-center gap-1">
                                     <i data-lucide="sparkles" class="w-3 h-3"></i>
                                     <span id="btn-laser-text">🔦 لیزر تدریس</span>
                                 </button>
 
-                                <button onclick="window.liveLab.promptAddTeacherNote()" class="px-2.5 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 font-bold text-[11px] flex items-center gap-1">
-                                    <i data-lucide="edit-3" class="w-3 h-3"></i>
+                                <button onclick="window.liveLab.promptAddTeacherNote()" class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 font-bold text-[11px] flex items-center gap-1">
+                                    <i data-lucide="plus" class="w-3 h-3"></i>
                                     <span>نکته تخته</span>
                                 </button>
-                                <button onclick="window.liveLab.promptStartPoll()" class="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-[11px] flex items-center gap-1">
+
+                                <button onclick="window.liveLab.promptStartPoll()" class="px-2 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-[11px] flex items-center gap-1">
                                     <i data-lucide="help-circle" class="w-3 h-3"></i>
-                                    <span>طرح پرسش</span>
+                                    <span>کوییز کلاسی</span>
                                 </button>
                             </div>
                         </div>
-                        ` : `
-                        <!-- Student Mode Banner -->
-                        <div id="student-lock-banner" class="absolute top-3 right-3 z-30 px-3 py-1.5 rounded-full bg-slate-900/85 backdrop-blur text-white text-[11px] font-bold border border-slate-700 flex items-center gap-1.5 shadow">
-                            <span class="w-2 h-2 rounded-full ${this.isStudentLocked ? 'bg-amber-400' : 'bg-emerald-400'} animate-pulse"></span>
-                            <span id="student-lock-status-text">${this.isStudentLocked ? '🔒 تخته در دست دبیر است' : '🔓 امکان تعامل آزاد با آزمایشگاه فعال است'}</span>
-                        </div>
-                        `}
 
-                        <!-- Glowing Laser Pointer Element -->
-                        <div id="live-laser-pointer" class="hidden absolute pointer-events-none z-40 w-5 h-5 rounded-full bg-rose-600 shadow-xl shadow-rose-500 ring-4 ring-rose-400/70 -translate-x-1/2 -translate-y-1/2 transition-all duration-75"></div>
-
-                        <!-- Transparent Laser Capture Surface (Active when teacher turns on laser mode) -->
-                        <div id="teacher-laser-capture" class="hidden absolute inset-0 z-20 cursor-crosshair bg-transparent"></div>
-
-                        <!-- Student Interaction Blocker Layer (Active when isStudentLocked is true for student) -->
-                        <div id="student-interaction-blocker" class="${(this.userRole === 'student' && this.isStudentLocked) ? '' : 'hidden'} absolute inset-0 z-10 bg-transparent"></div>
-
-                        <!-- Iframe Viewport Loading PhET Simulator -->
-                        <iframe 
-                            id="live-sync-iframe"
-                            src="${iframeSrc}"
-                            class="w-full h-full border-0 bg-white"
-                            allow="fullscreen"
+                        <!-- Teacher Laboratory Workbench (Interactive iframe) -->
+                        <iframe id="live-sim-iframe" 
+                            src="${getLabUrl(this.currentSimId, 'teacher')}" 
+                            class="w-full h-full border-0 rounded-2xl bg-white" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                             loading="eager">
                         </iframe>
+
+                        <!-- Laser Pointer Overlay Surface -->
+                        <canvas id="live-laser-canvas" class="absolute inset-0 z-20 pointer-events-none w-full h-full"></canvas>
+                        ` : `
+                        <!-- Student Meet Stage -->
+                        <div id="student-stream-viewport" class="relative w-full h-full flex items-center justify-center bg-slate-950">
+                            
+                            <!-- Live WebRTC Video Element (High-Resolution Google Meet Feed) -->
+                            <video id="live-meet-video" autoplay playsinline 
+                                class="${this.isStreaming && this.activeViewMode === 'stream' ? 'block' : 'hidden'} w-full h-full object-contain bg-slate-950"></video>
+                            
+                            <!-- Live Fallback Canvas (Instant frame snapshot receiver) -->
+                            <canvas id="live-fallback-canvas" 
+                                class="hidden w-full h-full object-contain bg-slate-950"></canvas>
+
+                            <!-- Unmute Audio Prompt (When browser blocks audio autoplay) -->
+                            <button id="video-unmute-btn" onclick="window.liveLab.unmuteVideo()" 
+                                class="hidden absolute bottom-5 left-5 z-30 px-4 py-2 rounded-xl bg-blue-600/90 hover:bg-blue-600 text-white font-bold text-xs shadow-xl flex items-center gap-2 backdrop-blur animate-bounce">
+                                <i data-lucide="volume-2" class="w-4 h-4"></i>
+                                <span>🔊 برای شنیدن صدای دبیر کلیک نمایید</span>
+                            </button>
+
+                            <!-- Student Solo Mode iframe (Available only when unlocked) -->
+                            <iframe id="live-sim-iframe" 
+                                src="${getLabUrl(this.currentSimId, 'student')}" 
+                                class="${this.activeViewMode === 'solo' && !this.isStudentLocked ? 'block' : 'hidden'} w-full h-full border-0 bg-white" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                loading="eager">
+                            </iframe>
+
+                            <!-- Virtual Classroom Waiting Lounge (Shown when stream is not yet broadcasting) -->
+                            <div id="stream-waiting-lounge" class="${!this.isStreaming && this.activeViewMode === 'stream' ? 'flex' : 'hidden'} flex-col items-center justify-center p-8 text-center text-white space-y-4 max-w-lg">
+                                <div class="relative">
+                                    <div class="w-20 h-20 rounded-2xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                                        <i data-lucide="video" class="w-10 h-10 animate-pulse"></i>
+                                    </div>
+                                    <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-950"></span>
+                                </div>
+                                <h3 class="font-extrabold text-lg text-white">کلاس فیزیک زنده سمپاد در حال برگزاری است</h3>
+                                <p class="text-xs text-slate-400 leading-relaxed">
+                                    دبیر محترم (${details.teacher_name}) در حال آماده‌سازی آزمایشگاه است.<br>
+                                    به محض شروع اشتراک تصویر، پخش زنده به صورت خودکار با کیفیت Full HD در این قاب نمایش داده خواهد شد.
+                                </p>
+                                <div class="flex items-center gap-3 pt-2">
+                                    <span class="px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800 text-[11px] font-mono font-bold flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                        <span>سرور سمپاد آنلاین • پینگ &lt; 5ms</span>
+                                    </span>
+                                    <span class="px-3 py-1 rounded-full bg-slate-900 text-slate-300 border border-slate-800 text-[11px] font-mono">
+                                        حاضرین: <span id="lounge-viewers-count">${details.viewers_count}</span> نفر
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Student Interaction Lock Blocker (When in Solo mode and Teacher locks) -->
+                            <div id="student-lock-blocker" class="${this.isStudentLocked && this.activeViewMode === 'solo' ? 'flex' : 'hidden'} absolute inset-0 z-20 flex-col items-center justify-center p-6 text-center bg-slate-950/85 backdrop-blur-sm text-white space-y-3">
+                                <div class="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+                                    <i data-lucide="lock" class="w-6 h-6"></i>
+                                </div>
+                                <h3 class="font-bold text-sm">توجه کلاسی: آزمایشگاه قفل شد</h3>
+                                <p class="text-xs text-slate-300 max-w-sm leading-relaxed">دبیر محترم دسترسی به آزمایشگاه انفرادی را قفل نمودند. لطفاً تصویر زنده تدریس را دنبال فرمایید.</p>
+                                <button onclick="window.liveLab.setStudentViewMode('stream')" class="px-4 py-1.5 rounded-xl bg-blue-600 text-white font-bold text-xs">تماشای تصویر زنده دبیر</button>
+                            </div>
+
+                            <!-- Laser Pointer Overlay Surface for Student -->
+                            <canvas id="live-laser-canvas" class="absolute inset-0 z-20 pointer-events-none w-full h-full"></canvas>
+                        </div>
+                        `}
                     </div>
 
-                    <!-- Dynamic Educational Context Bar (نوار تحلیل و فرمول‌های آزمایش فعال) -->
+                    <!-- Dynamic Educational Context Bar (نوار تحلیل و فرمول‌های علمی آزمایشگاه فعال) -->
                     <div id="live-educational-card" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 shadow-sm space-y-3 font-sans">
                         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
                             <div class="flex items-center gap-2">
@@ -998,50 +1097,53 @@ class LiveLabComponent {
                     </div>
 
                     <!-- Teacher Live Chalkboard Notes Card -->
-                    <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 space-y-3">
-                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                            <h3 class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
-                                <i data-lucide="clipboard-list" class="w-4 h-4 text-teal-500"></i>
-                                <span>تخته نکات و فرمول‌های دبیر</span>
-                            </h3>
+                    <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                <i data-lucide="file-text" class="w-4 h-4 text-indigo-500"></i>
+                                <span>تخته یادداشت‌های دبیر</span>
+                            </span>
                             ${this.userRole === 'teacher' ? `
-                            <button onclick="window.liveLab.clearTeacherNotes()" class="text-[10px] text-rose-500 hover:underline">
-                                پاک کردن همه
-                            </button>
+                            <button onclick="window.liveLab.clearTeacherNotes()" class="text-[10px] text-rose-500 hover:underline">پاک کردن همه</button>
                             ` : ''}
                         </div>
-                        <div id="live-teacher-notes-list" class="space-y-2 max-h-48 overflow-y-auto">
-                            ${(details.teacher_notes || []).map(n => `
-                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 leading-relaxed text-[11px]">
+                        <div id="teacher-notes-list" class="space-y-2 max-h-48 overflow-y-auto text-xs pr-1">
+                            ${(!details.notes || details.notes.length === 0) ? `
+                            <p class="text-[11px] text-slate-400 text-center py-3">یادداشتی ثبت نشده است.</p>
+                            ` : details.notes.map(n => `
+                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 leading-relaxed text-[11px]">
                                 ${n}
                             </div>
                             `).join('')}
                         </div>
                     </div>
 
-                    <!-- Live Academic Chat Card -->
-                    <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-[400px]">
-                        <div class="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                            <span class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <!-- Classroom Academic Chat -->
+                    <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-[340px] overflow-hidden">
+                        <div class="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold">
+                            <span class="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
                                 <i data-lucide="message-square" class="w-4 h-4 text-blue-500"></i>
                                 <span>گفتگوی علمی کلاس</span>
                             </span>
-                            <span class="text-[10px] text-slate-400">انتقال سریع پیام‌ها</span>
+                            <button onclick="window.liveLab.sendRaiseHand()" class="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-[11px] border border-amber-200 dark:border-amber-900 flex items-center gap-1">
+                                <span>✋ اجازه گرفتن</span>
+                            </button>
                         </div>
 
-                        <!-- Chat Messages Feed -->
-                        <div id="live-chat-messages-container" class="flex-1 p-3 space-y-2 overflow-y-auto">
-                            ${(details.chat_history || []).map(msg => this.formatChatMessageHtml(msg)).join('')}
+                        <!-- Chat Messages Container -->
+                        <div id="live-chat-messages" class="flex-1 p-3 overflow-y-auto space-y-2 text-xs">
+                            <div class="text-[10px] text-slate-400 text-center py-2">
+                                به گفتگوی برخط کلاس فیزیک سمپاد خوش آمدید.
+                            </div>
                         </div>
 
-                        <!-- Chat Input Bar -->
-                        <div class="p-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
-                            <input id="live-chat-input" type="text" placeholder="پیام علمی یا سوال خود را بنویسید..." 
+                        <!-- Chat Input Box -->
+                        <div class="p-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-1.5 bg-slate-50 dark:bg-slate-850">
+                            <input id="live-chat-input" type="text" placeholder="پیام یا پرسش علمی خود را بنویسید..." 
                                 onkeydown="if(event.key==='Enter') window.liveLab.sendChatMessage()"
-                                class="flex-1 p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-blue-500">
-                            <button onclick="window.liveLab.sendChatMessage()" 
-                                class="p-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all hover:scale-105">
-                                <i data-lucide="send" class="w-4 h-4"></i>
+                                class="flex-1 p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none text-xs font-sans">
+                            <button onclick="window.liveLab.sendChatMessage()" class="p-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+                                <i data-lucide="send" class="w-3.5 h-3.5 rotate-180"></i>
                             </button>
                         </div>
                     </div>
@@ -1049,148 +1151,635 @@ class LiveLabComponent {
             </div>
         </div>
 
-        <!-- Live Laboratory Switcher Modal (For Teachers) -->
-        <div id="live-lab-switcher-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm overflow-y-auto">
-            <div class="w-full max-w-3xl max-h-[90vh] flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden font-sans">
+        <!-- Simulator Switcher Modal (All 28 Laboratories) -->
+        <div id="live-sim-switcher-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm overflow-y-auto">
+            <div class="w-full max-w-3xl max-h-[85vh] flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden font-sans">
                 <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <i data-lucide="repeat" class="w-5 h-5 text-blue-500"></i>
-                        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">
-                            تغییر آنی آزمایشگاه زنده (اشتراک‌گذاری در کلاس)
+                        <h3 class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                            تغییر فوری آزمایشگاه تدریس (تمام ۲۸ آزمایشگاه فیزیک سمپاد)
                         </h3>
                     </div>
                     <button onclick="window.liveLab.closeSimSwitcherModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
-
-                <div class="p-4 space-y-3 flex-1 overflow-y-auto">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <p class="text-xs text-slate-500">با انتخاب هر آزمایشگاه، تصویر صفحه تمامی دانش‌آموزان به صورت زنده و بلادرنگ به آزمایشگاه جدید تغییر می‌یابد:</p>
-                        <input id="switcher-search-input" type="text" placeholder="جستجو بین ۲۸ آزمایشگاه..." 
-                            oninput="window.liveLab.filterSwitcherLabs(this.value)"
-                            class="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs w-48 outline-none focus:border-blue-500">
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 max-h-[60vh] overflow-y-auto p-1">
-                        ${ALL_LABORATORIES.map(lab => `
-                        <div onclick="window.liveLab.changeSimulator('${lab.id}')"
-                            data-title="${lab.title}"
-                            class="switcher-lab-card p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/40 cursor-pointer transition-all space-y-1.5 ${lab.id === this.currentSimId ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/70 ring-2 ring-blue-400' : ''}">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lab.grade === 9 ? 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300' : lab.grade === 8 ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300' : 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300'}">
-                                    ${lab.gradeLabel}
-                                </span>
-                                ${lab.id === this.currentSimId ? '<span class="text-[10px] text-blue-600 dark:text-sky-400 font-bold">آزمایشگاه فعال</span>' : ''}
-                            </div>
-                            <h4 class="font-bold text-xs text-slate-900 dark:text-white line-clamp-1">${lab.title}</h4>
-                            <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">${lab.topic}</p>
-                        </div>
-                        `).join('')}
+                
+                <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-850 text-xs">
+                    <input id="switcher-search-input" type="text" placeholder="جستجو بر اساس نام آزمایشگاه یا مبحث درسی..." 
+                        oninput="window.liveLab.filterSwitcherLabs(this.value)"
+                        class="flex-1 p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                    <div class="flex items-center gap-1 font-bold">
+                        <button onclick="window.liveLab.filterSwitcherGrade(0)" id="switch-tab-0" class="switch-grade-tab px-2.5 py-1 rounded-lg bg-blue-600 text-white">همه (۲۸)</button>
+                        <button onclick="window.liveLab.filterSwitcherGrade(7)" id="switch-tab-7" class="switch-grade-tab px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400">هفتم (۴)</button>
+                        <button onclick="window.liveLab.filterSwitcherGrade(8)" id="switch-tab-8" class="switch-grade-tab px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400">هشتم (۸)</button>
+                        <button onclick="window.liveLab.filterSwitcherGrade(9)" id="switch-tab-9" class="switch-grade-tab px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400">نهم و سمپاد (۱۶)</button>
                     </div>
                 </div>
 
-                <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex justify-end">
-                    <button onclick="window.liveLab.closeSimSwitcherModal()" class="px-4 py-1.5 rounded-xl text-slate-600 dark:text-slate-400 font-bold text-xs hover:bg-slate-200 dark:hover:bg-slate-800">
-                        بستن
-                    </button>
+                <div id="switcher-labs-grid" class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 overflow-y-auto flex-1 max-h-[50vh]">
+                    ${ALL_LABORATORIES.map(lab => `
+                    <div onclick="window.liveLab.changeSimulator('${lab.id}')" 
+                        data-grade="${lab.grade}"
+                        data-title="${lab.title}"
+                        data-topic="${lab.topic}"
+                        class="switcher-lab-card p-3 rounded-xl border text-right cursor-pointer transition-all ${lab.id === this.currentSimId 
+                            ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 ring-2 ring-blue-400' 
+                            : 'border-slate-200 dark:border-slate-800 hover:border-blue-400 bg-slate-50/50 dark:bg-slate-800/40'}">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full ${lab.grade === 9 ? 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300' : lab.grade === 8 ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300' : 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300'}">
+                                ${lab.gradeLabel}
+                            </span>
+                            <span class="text-[9px] text-slate-400 font-mono">${lab.file}</span>
+                        </div>
+                        <h4 class="font-bold text-xs text-slate-900 dark:text-white truncate">${lab.title}</h4>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${lab.topic}</p>
+                    </div>
+                    `).join('')}
                 </div>
             </div>
         </div>
 
-        <!-- Share Classroom Link & QR Code Modal -->
-        <div id="live-lab-share-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
-            <div class="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-2xl text-center font-sans">
-                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                    <h3 class="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                        <i data-lucide="share-2" class="w-4 h-4 text-blue-500"></i>
-                        <span>اشتراک‌گذاری مستقیم کلاس</span>
-                    </h3>
-                    <button onclick="window.liveLab.closeShareModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
+        <!-- Share Classroom Modal -->
+        <div id="live-share-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+            <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-2xl space-y-4 font-sans text-center">
+                <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-sky-400 flex items-center justify-center mx-auto">
+                    <i data-lucide="share-2" class="w-6 h-6"></i>
                 </div>
-
-                <!-- QR Code Display -->
-                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 inline-block shadow-inner">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(window.location.origin + '/#live-lab/' + details.room_code)}" 
-                        alt="QR Code" class="w-44 h-44 rounded-xl mx-auto shadow-sm">
-                    <span class="text-[10px] text-slate-500 dark:text-slate-400 block mt-2">اسکن با دوربین گوشی یا تبلت جهت ورود آنی</span>
+                <div>
+                    <h3 class="font-extrabold text-base text-slate-900 dark:text-white">اشتراک‌گذاری کلاس با دانش‌آموزان</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">شناسه و نشانی این کلاس را برای حضور همزمان دانش‌آموزان ارسال فرمایید:</p>
                 </div>
-
-                <!-- Direct URL with Copy Button -->
-                <div class="space-y-1.5 text-right">
-                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300">لینک اختصاصی کلاس:</label>
-                    <div class="flex items-center gap-1.5">
-                        <input id="share-class-url-input" type="text" readonly 
-                            value="${window.location.origin}/#live-lab/${details.room_code}"
-                            class="w-full p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[11px] text-slate-700 dark:text-slate-300 font-mono outline-none">
-                        <button onclick="window.liveLab.copyShareUrl()" 
-                            class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow flex items-center gap-1 whitespace-nowrap">
-                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                            <span>کپی</span>
-                        </button>
-                    </div>
+                <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center font-mono font-black text-lg text-blue-600 dark:text-sky-400">
+                    ${details.room_code}
                 </div>
-
-                <div class="pt-2 text-center">
-                    <span class="text-xs text-slate-500">شناسه کلاس: <strong class="font-mono text-sm text-blue-600 dark:text-sky-400">${details.room_code}</strong></span>
+                <div class="flex items-center gap-2">
+                    <input id="share-url-input" type="text" readonly value="${window.location.origin}/#live-lab/${details.room_code}" 
+                        class="flex-1 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono outline-none">
+                    <button onclick="window.liveLab.copyShareUrl()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs">کپی لینک</button>
                 </div>
+                <button onclick="window.liveLab.closeShareModal()" class="w-full py-2 rounded-xl text-slate-500 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800">بستن</button>
             </div>
         </div>
         `;
 
-        if (window.lucide) window.lucide.createIcons();
-        if (window.renderMathInPage) window.renderMathInPage(document.getElementById('live-educational-card'));
+        this.simIframe = document.getElementById('live-sim-iframe');
+        this.laserOverlay = document.getElementById('live-laser-canvas');
 
-        this.simIframe = document.getElementById('live-sync-iframe');
-        this.laserOverlay = document.getElementById('live-laser-pointer');
+        if (window.lucide) window.lucide.createIcons();
+        if (window.renderScientificFormulas) {
+            setTimeout(window.renderScientificFormulas, 60);
+        }
+
+        // Initialize Live WebSocket & Bridge
+        this.connectWebSocket(roomCode);
+        this.setupLaserCaptureSurface();
+        this.setupIframeMessageBridge();
+        this.startSyncPoller(roomCode);
 
         if (details.active_poll) {
             this.renderPollUI(details.active_poll, details.poll_votes || {});
         }
-
-        // Connect WebSocket and Listeners
-        this.connectWebSocket(details.room_code);
-        this.setupIframeMessageBridge();
-        this.setupLaserCaptureSurface();
-        this.startSyncPoller(details.room_code);
     }
 
-    openShareModal() {
-        const m = document.getElementById('live-lab-share-modal');
-        if (m) m.classList.remove('hidden');
-    }
+    // =========================================================================
+    // GOOGLE MEET VIDEO & SCREEN BROADCAST ENGINE (Full HD 60fps WebRTC)
+    // =========================================================================
 
-    closeShareModal() {
-        const m = document.getElementById('live-lab-share-modal');
-        if (m) m.classList.add('hidden');
-    }
-
-    copyShareUrl() {
-        const inp = document.getElementById('share-class-url-input');
-        if (inp) {
-            inp.select();
-            navigator.clipboard.writeText(inp.value);
-            alert('لینک مستقیم کلاس کپی شد:\n' + inp.value);
+    async toggleScreenBroadcast() {
+        if (this.isStreaming) {
+            this.stopScreenBroadcast();
+        } else {
+            await this.startScreenBroadcast();
         }
     }
 
+    async startScreenBroadcast() {
+        try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    displaySurface: "browser",
+                    frameRate: { ideal: 60, max: 60 },
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    cursor: "always"
+                },
+                audio: true
+            });
+
+            this.localStream = stream;
+            this.isStreaming = true;
+
+            // If microphone stream was already open, mix in mic audio track
+            if (this.micStream) {
+                this.micStream.getAudioTracks().forEach(track => {
+                    this.localStream.addTrack(track);
+                });
+            }
+
+            // Handle when teacher stops sharing via browser bar
+            const videoTrack = stream.getVideoTracks()[0];
+            if (videoTrack) {
+                videoTrack.onended = () => {
+                    this.stopScreenBroadcast();
+                };
+            }
+
+            // Notify classroom via WebSocket
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                this.socket.send(JSON.stringify({
+                    type: "stream_started",
+                    stream_type: "screen",
+                    has_audio: Boolean(stream.getAudioTracks().length)
+                }));
+            }
+
+            this.updateTeacherStreamUI(true);
+            this.startFallbackFrameCapture();
+            this.showToast("پخش زنده Full HD آغاز شد! تصویر و آزمایش‌های شما به صورت زنده برای همه دانش‌آموزان پخش می‌شود.");
+        } catch (err) {
+            console.error("Screen share error:", err);
+            if (err.name !== "NotAllowedError") {
+                this.showToast("خطا در آغاز اشتراک تصویر: " + err.message);
+            }
+        }
+    }
+
+    stopScreenBroadcast() {
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(t => t.stop());
+            this.localStream = null;
+        }
+        if (this.fallbackTimer) {
+            clearInterval(this.fallbackTimer);
+            this.fallbackTimer = null;
+        }
+
+        // Close all peer connections
+        this.peerConnections.forEach(pc => pc.close());
+        this.peerConnections.clear();
+
+        this.isStreaming = false;
+
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(JSON.stringify({ type: "stream_stopped" }));
+        }
+
+        this.updateTeacherStreamUI(false);
+        this.showToast("پخش زنده متوقف شد.");
+    }
+
+    updateTeacherStreamUI(active) {
+        const btn = document.getElementById('btn-main-stream');
+        const txt = document.getElementById('main-stream-btn-text');
+        const indicator = document.getElementById('teacher-stream-indicator');
+        if (btn && txt) {
+            if (active) {
+                btn.className = "px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all animate-pulse";
+                txt.textContent = "⏹️ توقف اشتراک تصویر";
+            } else {
+                btn.className = "px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md flex items-center gap-2 transition-all";
+                txt.textContent = "🖥️ شروع اشتراک زنده آزمایشگاه (Meet)";
+            }
+        }
+        if (indicator) {
+            indicator.textContent = active ? "پخش زنده ۶۰ فریم فعال است" : "آماده اشتراک تصویر";
+        }
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    // Teacher Microphone Toggle
+    async toggleMicrophone() {
+        if (!this.isMicMuted && this.micStream) {
+            // Mute mic
+            this.micStream.getAudioTracks().forEach(t => t.stop());
+            this.micStream = null;
+            this.isMicMuted = true;
+            this.updateMicUI(false);
+            this.showToast("میکروفون خاموش شد.");
+        } else {
+            // Request mic
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                this.micStream = stream;
+                this.isMicMuted = false;
+
+                // Add to localStream if streaming
+                if (this.localStream) {
+                    const audioTrack = stream.getAudioTracks()[0];
+                    if (audioTrack) {
+                        this.localStream.addTrack(audioTrack);
+                        // Add to all active WebRTC peers
+                        this.peerConnections.forEach(pc => {
+                            pc.addTrack(audioTrack, this.localStream);
+                        });
+                    }
+                }
+
+                this.updateMicUI(true);
+                this.showToast("میکروفون دبیر وصل شد و صدای شما در کلاس پخش می‌شود.");
+            } catch (err) {
+                console.error("Microphone error:", err);
+                this.showToast("دسترسی به میکروفون داده نشد.");
+            }
+        }
+    }
+
+    updateMicUI(active) {
+        const btn = document.getElementById('btn-main-mic');
+        const txt = document.getElementById('main-mic-text');
+        if (btn && txt) {
+            if (active) {
+                btn.className = "px-3.5 py-2 rounded-xl bg-emerald-500 text-white ring-2 ring-emerald-300 font-bold text-xs border border-emerald-400 flex items-center gap-1.5 transition-all";
+                txt.textContent = "میکروفون: فعال";
+            } else {
+                btn.className = "px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-300 dark:border-slate-700 flex items-center gap-1.5 transition-all";
+                txt.textContent = "میکروفون";
+            }
+        }
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    // WebRTC: Teacher handling student connection request
+    async handleStudentStreamRequest(studentSessionId, studentName) {
+        if (!this.localStream) return;
+        try {
+            if (this.peerConnections.has(studentSessionId)) {
+                this.peerConnections.get(studentSessionId).close();
+            }
+
+            const pc = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' }
+                ]
+            });
+
+            this.peerConnections.set(studentSessionId, pc);
+
+            // Add all video & audio tracks
+            this.localStream.getTracks().forEach(track => {
+                pc.addTrack(track, this.localStream);
+            });
+
+            // ICE Candidate dispatch
+            pc.onicecandidate = (event) => {
+                if (event.candidate && this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({
+                        type: "webrtc_ice",
+                        candidate: event.candidate,
+                        target_session_id: studentSessionId
+                    }));
+                }
+            };
+
+            const offer = await pc.createOffer({
+                offerToReceiveVideo: false,
+                offerToReceiveAudio: false
+            });
+            await pc.setLocalDescription(offer);
+
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                this.socket.send(JSON.stringify({
+                    type: "webrtc_offer",
+                    offer: offer,
+                    target_session_id: studentSessionId
+                }));
+            }
+        } catch (err) {
+            console.error("WebRTC offer creation error:", err);
+        }
+    }
+
+    // WebRTC: Student handling teacher offer
+    async handleWebRTCOffer(offer, teacherSessionId) {
+        try {
+            if (this.studentPeerConnection) {
+                this.studentPeerConnection.close();
+            }
+
+            const pc = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' }
+                ]
+            });
+            this.studentPeerConnection = pc;
+
+            pc.ontrack = (event) => {
+                const videoEl = document.getElementById('live-meet-video');
+                if (videoEl && event.streams && event.streams[0]) {
+                    videoEl.srcObject = event.streams[0];
+                    videoEl.play().catch(() => {
+                        // Show tap to unmute button if browser blocked autoplay sound
+                        const unmuteBtn = document.getElementById('video-unmute-btn');
+                        if (unmuteBtn) unmuteBtn.classList.remove('hidden');
+                    });
+                    this.showVideoScreen(true);
+                }
+            };
+
+            pc.onicecandidate = (event) => {
+                if (event.candidate && this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({
+                        type: "webrtc_ice",
+                        candidate: event.candidate,
+                        target_session_id: teacherSessionId
+                    }));
+                }
+            };
+
+            await pc.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                this.socket.send(JSON.stringify({
+                    type: "webrtc_answer",
+                    answer: answer,
+                    target_session_id: teacherSessionId
+                }));
+            }
+        } catch (err) {
+            console.error("WebRTC student answer error:", err);
+        }
+    }
+
+    // WebRTC: Teacher handling student answer
+    async handleWebRTCAnswer(answer, studentSessionId) {
+        const pc = this.peerConnections.get(studentSessionId);
+        if (pc) {
+            try {
+                await pc.setRemoteDescription(new RTCSessionDescription(answer));
+            } catch (err) {
+                console.error("WebRTC remote description error:", err);
+            }
+        }
+    }
+
+    // WebRTC: Handling ICE Candidate
+    async handleICECandidate(candidate, senderSessionId) {
+        const pc = this.userRole === 'teacher' 
+            ? this.peerConnections.get(senderSessionId) 
+            : this.studentPeerConnection;
+        if (pc && candidate) {
+            try {
+                await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            } catch (e) {
+                console.warn("Could not add ICE candidate:", e);
+            }
+        }
+    }
+
+    requestStreamFromTeacher() {
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(JSON.stringify({ type: "request_stream" }));
+        }
+    }
+
+    unmuteVideo() {
+        const videoEl = document.getElementById('live-meet-video');
+        if (videoEl) {
+            videoEl.muted = false;
+            videoEl.play();
+        }
+        const unmuteBtn = document.getElementById('video-unmute-btn');
+        if (unmuteBtn) unmuteBtn.classList.add('hidden');
+    }
+
+    showVideoScreen(hasStream) {
+        const video = document.getElementById('live-meet-video');
+        const lounge = document.getElementById('stream-waiting-lounge');
+        const badge = document.getElementById('student-stream-badge');
+        const badgeText = document.getElementById('student-stream-badge-text');
+
+        if (video && lounge) {
+            if (hasStream && this.activeViewMode === 'stream') {
+                video.classList.remove('hidden');
+                lounge.classList.add('hidden');
+            } else if (!hasStream && this.activeViewMode === 'stream') {
+                video.classList.add('hidden');
+                lounge.classList.remove('hidden');
+            }
+        }
+
+        if (badge && badgeText) {
+            if (hasStream) {
+                badge.className = "px-3 py-1.5 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800 font-bold text-xs flex items-center gap-1.5";
+                badgeText.textContent = "🔴 در حال تماشای زنده تدریس دبیر";
+            } else {
+                badge.className = "px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 font-bold text-xs flex items-center gap-1.5";
+                badgeText.textContent = "⚪ در انتظار اشتراک تصویر دبیر";
+            }
+        }
+    }
+
+    // Ultra-reliable Canvas Snapshot Fallback
+    startFallbackFrameCapture() {
+        if (this.fallbackTimer) clearInterval(this.fallbackTimer);
+        const hiddenVideo = document.createElement('video');
+        hiddenVideo.srcObject = this.localStream;
+        hiddenVideo.muted = true;
+        hiddenVideo.play().catch(() => {});
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 1280;
+        canvas.height = 720;
+        const ctx = canvas.getContext('2d');
+
+        this.fallbackTimer = setInterval(() => {
+            if (!this.isStreaming || !this.localStream) {
+                clearInterval(this.fallbackTimer);
+                return;
+            }
+            try {
+                if (hiddenVideo.readyState >= 2) {
+                    ctx.drawImage(hiddenVideo, 0, 0, 1280, 720);
+                    const frame = canvas.toDataURL('image/jpeg', 0.60);
+                    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                        this.socket.send(JSON.stringify({
+                            type: "stream_frame",
+                            frame: frame
+                        }));
+                    }
+                }
+            } catch (e) {}
+        }, 100); // 10 fps snapshot mirror
+    }
+
+    renderFallbackFrame(frameData) {
+        const video = document.getElementById('live-meet-video');
+        const fallbackCanvas = document.getElementById('live-fallback-canvas');
+        // Only render fallback canvas if video is not actively streaming
+        if (video && (!video.srcObject || video.paused) && fallbackCanvas && this.activeViewMode === 'stream') {
+            const lounge = document.getElementById('stream-waiting-lounge');
+            if (lounge) lounge.classList.add('hidden');
+            fallbackCanvas.classList.remove('hidden');
+
+            const img = new Image();
+            img.onload = () => {
+                fallbackCanvas.width = img.width;
+                fallbackCanvas.height = img.height;
+                const ctx = fallbackCanvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = frameData;
+        }
+    }
+
+    // Student View Mode Toggle (Stream vs Solo)
+    setStudentViewMode(mode) {
+        if (this.isStudentLocked && mode === 'solo') {
+            this.showToast("آزمایشگاه توسط دبیر قفل است. لطفاً تدریس زنده را دنبال کنید.");
+            return;
+        }
+
+        this.activeViewMode = mode;
+        const btnStream = document.getElementById('mode-btn-stream');
+        const btnSolo = document.getElementById('mode-btn-solo');
+        const video = document.getElementById('live-meet-video');
+        const fallback = document.getElementById('live-fallback-canvas');
+        const lounge = document.getElementById('stream-waiting-lounge');
+        const iframe = document.getElementById('live-sim-iframe');
+
+        if (btnStream && btnSolo) {
+            if (mode === 'stream') {
+                btnStream.className = "px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-sm";
+                btnSolo.className = "px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+                if (iframe) iframe.classList.add('hidden');
+                if (this.isStreaming) {
+                    if (video) video.classList.remove('hidden');
+                    if (lounge) lounge.classList.add('hidden');
+                } else {
+                    if (video) video.classList.add('hidden');
+                    if (fallback) fallback.classList.add('hidden');
+                    if (lounge) lounge.classList.remove('hidden');
+                }
+            } else {
+                btnSolo.className = "px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-sm";
+                btnStream.className = "px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+                if (video) video.classList.add('hidden');
+                if (fallback) fallback.classList.add('hidden');
+                if (lounge) lounge.classList.add('hidden');
+                if (iframe) iframe.classList.remove('hidden');
+            }
+        }
+    }
+
+    // Local WebM Video Recording
+    toggleRecording() {
+        if (this.isRecording) {
+            this.stopRecording();
+        } else {
+            this.startRecording();
+        }
+    }
+
+    startRecording() {
+        if (!this.localStream) {
+            this.showToast("لطفاً ابتدا اشتراک تصویر آزمایشگاه را فعال نمایید.");
+            return;
+        }
+
+        try {
+            this.recordedChunks = [];
+            this.mediaRecorder = new MediaRecorder(this.localStream, { mimeType: 'video/webm;codecs=vp9' });
+            this.mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) this.recordedChunks.push(e.data);
+            };
+            this.mediaRecorder.onstop = () => {
+                const blob = new Blob(this.recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `SAMPAD-Physics-Lab-${Date.now()}.webm`;
+                a.click();
+                URL.revokeObjectURL(url);
+                this.showToast("ویدیوی ضبط‌شده آزمایشگاه آماده و دانلود شد!");
+            };
+            this.mediaRecorder.start(1000);
+            this.isRecording = true;
+
+            const recBtn = document.getElementById('btn-stage-record');
+            const recTxt = document.getElementById('record-text');
+            if (recBtn && recTxt) {
+                recBtn.className = "px-2.5 py-1 rounded-lg bg-rose-600 text-white animate-pulse font-bold text-[11px] flex items-center gap-1";
+                recTxt.textContent = "توقف ضبط";
+            }
+            this.showToast("ضبط ویدیویی جلسه تدریس آغاز شد.");
+        } catch (err) {
+            console.error("Recording error:", err);
+            this.showToast("امکان ضبط در این مرورگر وجود ندارد.");
+        }
+    }
+
+    stopRecording() {
+        if (this.mediaRecorder && this.isRecording) {
+            this.mediaRecorder.stop();
+            this.isRecording = false;
+            const recBtn = document.getElementById('btn-stage-record');
+            const recTxt = document.getElementById('record-text');
+            if (recBtn && recTxt) {
+                recBtn.className = "px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] flex items-center gap-1";
+                recTxt.textContent = "ضبط ویدیو";
+            }
+        }
+    }
+
+    toggleFullscreen() {
+        const stage = document.getElementById('live-stage-wrapper');
+        if (!stage) return;
+        if (!document.fullscreenElement) {
+            stage.requestFullscreen().catch(() => {});
+        } else {
+            document.exitFullscreen().catch(() => {});
+        }
+    }
+
+    // =========================================================================
+    // 28 LABORATORIES SWITCHER ENGINE (Fast Switching Across All Experiments)
+    // =========================================================================
+
     openSimSwitcherModal() {
-        const m = document.getElementById('live-lab-switcher-modal');
+        const m = document.getElementById('live-sim-switcher-modal');
         if (m) m.classList.remove('hidden');
     }
 
     closeSimSwitcherModal() {
-        const m = document.getElementById('live-lab-switcher-modal');
+        const m = document.getElementById('live-sim-switcher-modal');
         if (m) m.classList.add('hidden');
     }
 
     filterSwitcherLabs(query) {
-        const q = (query || '').trim().toLowerCase();
+        const q = (query || '').toLowerCase().trim();
         document.querySelectorAll('.switcher-lab-card').forEach(card => {
             const title = (card.getAttribute('data-title') || '').toLowerCase();
-            if (!q || title.includes(q)) {
+            const topic = (card.getAttribute('data-topic') || '').toLowerCase();
+            if (!q || title.includes(q) || topic.includes(q)) {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+    }
+
+    filterSwitcherGrade(grade) {
+        document.querySelectorAll('.switch-grade-tab').forEach(b => {
+            b.classList.remove('bg-blue-600', 'text-white');
+            b.classList.add('text-slate-600', 'dark:text-slate-400');
+        });
+        const activeBtn = document.getElementById(`switch-tab-${grade}`);
+        if (activeBtn) {
+            activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400');
+            activeBtn.classList.add('bg-blue-600', 'text-white');
+        }
+
+        document.querySelectorAll('.switcher-lab-card').forEach(card => {
+            const cardGrade = parseInt(card.getAttribute('data-grade'));
+            if (grade === 0 || cardGrade === grade) {
                 card.classList.remove('hidden');
             } else {
                 card.classList.add('hidden');
@@ -1202,188 +1791,243 @@ class LiveLabComponent {
         const lab = getLabInfo(newSimId);
         this.closeSimSwitcherModal();
 
-        // 1. Send via WebSocket if open
+        // 1. Send to server via WebSocket
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify({
-                type: 'change_simulator',
+                type: "change_simulator",
                 sim_id: newSimId,
                 sim_title: lab.title
             }));
         }
 
-        // 2. Fallback REST
+        // 2. Also persist via REST endpoint
         if (this.currentRoom) {
-            fetch(`/api/live-lab/rooms/${this.currentRoom.room_code}/change-simulator`, {
+            fetch(`/api/live-lab/rooms/${this.currentRoom}/change-simulator`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sim_id: newSimId, sim_title: lab.title })
-            }).catch(e => console.warn(e));
+            }).catch(() => {});
         }
 
-        // 3. Switch locally immediately
+        // 3. Update local display immediately
         this.switchSimulatorLocally(newSimId, lab.title);
+        this.showToast(`آزمایشگاه به «${lab.title}» تغییر یافت.`);
     }
 
     switchSimulatorLocally(newSimId, newSimTitle) {
         this.currentSimId = newSimId;
         const lab = getLabInfo(newSimId);
 
-        // Update iframe source
-        if (this.simIframe) {
-            this.simIframe.src = getLabUrl(newSimId, this.userRole);
+        // Update iframe if exists
+        const iframe = document.getElementById('live-sim-iframe');
+        if (iframe) {
+            iframe.src = getLabUrl(newSimId, this.userRole);
         }
 
-        // Update active badge
-        const badge = document.getElementById('live-active-sim-badge');
-        if (badge) badge.textContent = lab.title;
+        // Update header & educational cards
+        const headerName = document.getElementById('room-active-lab-name');
+        if (headerName) headerName.textContent = lab.title;
 
-        // Update Educational Context Card
         const gradeEl = document.getElementById('edu-lab-grade');
-        const titleEl = document.getElementById('edu-lab-title');
-        const topicEl = document.getElementById('edu-lab-topic');
-        const formulaEl = document.getElementById('edu-lab-formula');
-        const goalsEl = document.getElementById('edu-lab-goals');
-        const miscEl = document.getElementById('edu-lab-misconception');
-
         if (gradeEl) gradeEl.textContent = lab.gradeLabel;
+
+        const titleEl = document.getElementById('edu-lab-title');
         if (titleEl) titleEl.textContent = lab.title;
+
+        const topicEl = document.getElementById('edu-lab-topic');
         if (topicEl) topicEl.textContent = lab.topic;
-        if (formulaEl) {
-            formulaEl.innerHTML = `$$${lab.formula}$$`;
-            if (window.renderMathInPage) window.renderMathInPage(formulaEl);
-        }
+
+        const goalsEl = document.getElementById('edu-lab-goals');
         if (goalsEl) goalsEl.textContent = lab.goals;
+
+        const miscEl = document.getElementById('edu-lab-misconception');
         if (miscEl) miscEl.textContent = lab.misconception;
 
-        // Audio and notification toast
-        if (window.store && window.store.playSound) window.store.playSound('correct');
-        this.showToast(`🔬 آزمایشگاه زنده به «${lab.title}» تغییر یافت.`);
+        const formulaEl = document.getElementById('edu-lab-formula');
+        if (formulaEl) {
+            formulaEl.innerHTML = `$$${lab.formula}$$`;
+            if (window.renderScientificFormulas) {
+                setTimeout(window.renderScientificFormulas, 40);
+            }
+        }
     }
 
-    toggleStudentLock() {
-        this.isStudentLocked = !this.isStudentLocked;
+    // =========================================================================
+    // STUDENT INTERACTION LOCK & TEACHER CONTROLS
+    // =========================================================================
 
-        // Send event via WebSocket
+    toggleStudentLock() {
+        const nextState = !this.isStudentLocked;
+        this.isStudentLocked = nextState;
+
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify({
-                type: 'toggle_lock',
-                is_locked: this.isStudentLocked
+                type: "toggle_lock",
+                is_locked: nextState
             }));
-        } else if (this.currentRoom) {
-            fetch(`/api/live-lab/rooms/${this.currentRoom.room_code}/toggle-lock`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ is_locked: this.isStudentLocked })
-            }).catch(e => console.warn(e));
         }
 
-        this.applyStudentLockUI(this.isStudentLocked);
+        if (this.currentRoom) {
+            fetch(`/api/live-lab/rooms/${this.currentRoom}/toggle-lock`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_locked: nextState })
+            }).catch(() => {});
+        }
+
+        this.applyStudentLockUI(nextState);
+        this.showToast(nextState ? "آزمایشگاه برای دانش‌آموزان قفل شد (تصویر زنده اجباری)." : "اجازه آزمایش آزاد به دانش‌آموزان داده شد.");
     }
 
     applyStudentLockUI(isLocked) {
         this.isStudentLocked = isLocked;
-        // Teacher button
         const btn = document.getElementById('btn-toggle-student-lock');
         const txt = document.getElementById('btn-lock-text');
         if (btn && txt) {
             if (isLocked) {
-                btn.className = 'px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-[11px] flex items-center gap-1';
-                txt.textContent = 'قفل دانش‌آموز: فعال';
+                btn.className = "px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-[11px] flex items-center gap-1";
+                txt.textContent = "قفل کلاس: فعال";
             } else {
-                btn.className = 'px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-bold text-[11px] flex items-center gap-1';
-                txt.textContent = 'اجازه آزمایش آزاد';
+                btn.className = "px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 font-bold text-[11px] flex items-center gap-1";
+                txt.textContent = "آزمایش آزاد";
             }
         }
 
-        // Student blocker layer
-        const blocker = document.getElementById('student-interaction-blocker');
-        if (blocker) {
-            if (this.userRole === 'student' && isLocked) {
-                blocker.classList.remove('hidden');
+        const modeGroup = document.getElementById('student-view-mode-group');
+        if (modeGroup && this.userRole === 'student') {
+            if (isLocked) {
+                modeGroup.classList.add('opacity-60', 'pointer-events-none');
+                this.setStudentViewMode('stream');
             } else {
-                blocker.classList.add('hidden');
+                modeGroup.classList.remove('opacity-60', 'pointer-events-none');
             }
-        }
-
-        // Student status text
-        const statusText = document.getElementById('student-lock-status-text');
-        if (statusText) {
-            statusText.textContent = isLocked ? '🔒 تخته در دست دبیر است' : '🔓 امکان تعامل آزاد با آزمایشگاه فعال است';
         }
     }
 
+    // Laser Pointer Mode
     toggleLaserMode() {
         this.isLaserActive = !this.isLaserActive;
         const btn = document.getElementById('btn-toggle-laser');
         const txt = document.getElementById('btn-laser-text');
-        const capture = document.getElementById('teacher-laser-capture');
-
-        if (this.isLaserActive) {
-            if (btn) btn.className = 'px-2.5 py-1.5 rounded-lg bg-rose-500 ring-2 ring-rose-300 font-bold text-[11px] flex items-center gap-1';
-            if (txt) txt.textContent = '🔦 در حال اشاره با لیزر...';
-            if (capture) capture.classList.remove('hidden');
-        } else {
-            if (btn) btn.className = 'px-2.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 font-bold text-[11px] flex items-center gap-1';
-            if (txt) txt.textContent = '🔦 لیزر تدریس';
-            if (capture) capture.classList.add('hidden');
-            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-                this.socket.send(JSON.stringify({ type: 'laser_pointer', active: false }));
+        if (btn && txt) {
+            if (this.isLaserActive) {
+                btn.className = "px-2.5 py-1 rounded-lg bg-rose-500 ring-2 ring-rose-300 font-bold text-[11px] flex items-center gap-1";
+                txt.textContent = "🔴 لیزر فعال است";
+                this.showToast("نشانگر لیزری فعال شد. موس خود را روی شبیه‌ساز حرکت دهید.");
+            } else {
+                btn.className = "px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 font-bold text-[11px] flex items-center gap-1";
+                txt.textContent = "🔦 لیزر تدریس";
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({ type: "laser_pointer", active: false }));
+                }
             }
         }
     }
 
     setupLaserCaptureSurface() {
-        const capture = document.getElementById('teacher-laser-capture');
-        if (!capture) return;
+        const stage = document.getElementById('live-stage-wrapper');
+        const canvas = document.getElementById('live-laser-canvas');
+        if (!stage || !canvas) return;
 
-        let lastSendTime = 0;
-        capture.addEventListener('mousemove', (e) => {
-            if (!this.isLaserActive || this.userRole !== 'teacher') return;
-            const now = Date.now();
-            if (now - lastSendTime < 35) return; // ~30 fps throttle
-            lastSendTime = now;
+        const resizeCanvas = () => {
+            canvas.width = stage.clientWidth;
+            canvas.height = stage.clientHeight;
+        };
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
 
-            const rect = capture.getBoundingClientRect();
-            const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-            const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+        if (this.userRole === 'teacher') {
+            stage.addEventListener('mousemove', (e) => {
+                if (!this.isLaserActive) return;
+                const rect = stage.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
 
-            // Move local laser
-            if (this.laserOverlay) {
-                this.laserOverlay.style.left = `${x * 100}%`;
-                this.laserOverlay.style.top = `${y * 100}%`;
-                this.laserOverlay.classList.remove('hidden');
-            }
+                this.renderLaserDot(x, y);
 
-            // Broadcast via WebSocket
-            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-                this.socket.send(JSON.stringify({
-                    type: 'laser_pointer',
-                    x: x,
-                    y: y,
-                    active: true
-                }));
-            }
-        });
+                if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    const now = Date.now();
+                    if (now - this.lastSyncTime > 40) {
+                        this.lastSyncTime = now;
+                        this.socket.send(JSON.stringify({
+                            type: "laser_pointer",
+                            x: x,
+                            y: y,
+                            active: true
+                        }));
+                    }
+                }
+            });
 
-        capture.addEventListener('mouseleave', () => {
-            if (this.laserOverlay) this.laserOverlay.classList.add('hidden');
-            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-                this.socket.send(JSON.stringify({ type: 'laser_pointer', active: false }));
-            }
-        });
+            stage.addEventListener('mouseleave', () => {
+                if (this.isLaserActive && this.socket && this.socket.readyState === WebSocket.OPEN) {
+                    this.socket.send(JSON.stringify({ type: "laser_pointer", active: false }));
+                }
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+        }
+    }
+
+    renderLaserDot(nx, ny) {
+        const canvas = document.getElementById('live-laser-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const x = nx * canvas.width;
+        const y = ny * canvas.height;
+
+        // Outer glow
+        const grad = ctx.createRadialGradient(x, y, 2, x, y, 28);
+        grad.addColorStop(0, 'rgba(239, 68, 68, 0.95)');
+        grad.addColorStop(0.4, 'rgba(239, 68, 68, 0.5)');
+        grad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(x, y, 28, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sharp bright center
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Modal helpers
+    openShareModal() {
+        const m = document.getElementById('live-share-modal');
+        if (m) m.classList.remove('hidden');
+    }
+
+    closeShareModal() {
+        const m = document.getElementById('live-share-modal');
+        if (m) m.classList.add('hidden');
+    }
+
+    copyShareUrl() {
+        const inp = document.getElementById('share-url-input');
+        if (inp) {
+            inp.select();
+            navigator.clipboard.writeText(inp.value).then(() => {
+                this.showToast("نشانی کلاس کپی شد!");
+            });
+        }
     }
 
     showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'fixed bottom-6 left-6 z-50 px-4 py-2.5 rounded-2xl bg-slate-900/90 text-white border border-slate-700 text-xs font-bold shadow-2xl flex items-center gap-2 animate-bounce';
-        toast.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span><span>${message}</span>`;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 4000);
+        if (window.appToast) {
+            window.appToast.success(message);
+        } else {
+            console.log("[LIVE LAB]", message);
+        }
     }
 
     cleanupSession() {
         if (this.socket) {
-            try { this.socket.close(); } catch (e) {}
+            this.socket.close();
             this.socket = null;
         }
         if (this.pingTimer) {
@@ -1394,12 +2038,33 @@ class LiveLabComponent {
             clearInterval(this.syncPoller);
             this.syncPoller = null;
         }
-        this.currentRoom = null;
+        if (this.fallbackTimer) {
+            clearInterval(this.fallbackTimer);
+            this.fallbackTimer = null;
+        }
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(t => t.stop());
+            this.localStream = null;
+        }
+        if (this.micStream) {
+            this.micStream.getAudioTracks().forEach(t => t.stop());
+            this.micStream = null;
+        }
+        this.peerConnections.forEach(pc => pc.close());
+        this.peerConnections.clear();
+        if (this.studentPeerConnection) {
+            this.studentPeerConnection.close();
+            this.studentPeerConnection = null;
+        }
     }
+
+    // =========================================================================
+    // WEBSOCKET REAL-TIME COMMUNICATIONS
+    // =========================================================================
 
     connectWebSocket(roomCode) {
         if (this.socket) {
-            try { this.socket.close(); } catch (e) {}
+            this.socket.close();
         }
 
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -1408,13 +2073,13 @@ class LiveLabComponent {
         this.socket = new WebSocket(wsUrl);
 
         this.socket.onopen = () => {
-            console.log(`[LiveLab] Connected to Live Lab WebSocket: ${roomCode}`);
-            if (this.pingTimer) clearInterval(this.pingTimer);
+            console.log(`[LIVE LAB WS] Connected to room ${roomCode}`);
+            // Heartbeat ping every 10 seconds
             this.pingTimer = setInterval(() => {
                 if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-                    this.socket.send(JSON.stringify({ type: 'ping' }));
+                    this.socket.send(JSON.stringify({ type: "ping" }));
                 }
-            }, 8000);
+            }, 10000);
         };
 
         this.socket.onmessage = (event) => {
@@ -1422,25 +2087,25 @@ class LiveLabComponent {
                 const data = JSON.parse(event.data);
                 this.handleIncomingSocketMessage(data);
             } catch (err) {
-                console.error('[LiveLab] Error parsing WebSocket message:', err);
+                console.warn("[LIVE LAB WS] Parse error:", err);
             }
         };
 
         this.socket.onclose = () => {
-            console.log('[LiveLab] WebSocket disconnected. Fast polling will maintain synchronization.');
+            console.log("[LIVE LAB WS] Disconnected.");
         };
     }
 
     setupIframeMessageBridge() {
         window.addEventListener('message', (event) => {
-            if (!event.data || typeof event.data !== 'object') return;
             const msg = event.data;
+            if (!msg || typeof msg !== 'object') return;
 
             if (msg.type === 'TEACHER_SIM_STATE_UPDATE' && this.userRole === 'teacher') {
                 if (this.socket && this.socket.readyState === WebSocket.OPEN) {
                     this.socket.send(JSON.stringify({
-                        type: 'state_update',
-                        payload: msg.payload
+                        type: "state_update",
+                        payload: msg.payload || {}
                     }));
                 }
             }
@@ -1448,10 +2113,10 @@ class LiveLabComponent {
             if (msg.type === 'TEACHER_LASER_MOVE' && this.userRole === 'teacher') {
                 if (this.socket && this.socket.readyState === WebSocket.OPEN) {
                     this.socket.send(JSON.stringify({
-                        type: 'laser_pointer',
-                        x: msg.payload.x,
-                        y: msg.payload.y,
-                        active: msg.payload.active
+                        type: "laser_pointer",
+                        x: msg.x,
+                        y: msg.y,
+                        active: true
                     }));
                 }
             }
@@ -1463,359 +2128,321 @@ class LiveLabComponent {
         this.syncPoller = setInterval(async () => {
             if (!this.currentRoom) return;
             try {
-                const res = await fetch(`/api/live-lab/rooms/${roomCode}/sync?since=${this.lastSyncTime}`);
+                const res = await fetch(`/api/live-lab/rooms/${roomCode}`);
                 if (res.ok) {
                     const data = await res.json();
-                    this.lastSyncTime = Date.now() / 1000;
-
-                    // Simulator changed check
                     if (data.sim_id && data.sim_id !== this.currentSimId) {
                         this.switchSimulatorLocally(data.sim_id, data.sim_title);
                     }
-
-                    // Lock changed check
                     if (data.is_locked !== undefined && data.is_locked !== this.isStudentLocked) {
                         this.applyStudentLockUI(data.is_locked);
                     }
-
-                    // Chat messages
-                    if (Array.isArray(data.new_messages) && data.new_messages.length > 0) {
-                        data.new_messages.forEach(m => this.appendChatMessage(m));
+                    if (data.is_streaming !== undefined && data.is_streaming !== this.isStreaming) {
+                        this.isStreaming = Boolean(data.is_streaming);
+                        if (this.userRole === 'student') {
+                            this.showVideoScreen(this.isStreaming);
+                            if (this.isStreaming) this.requestStreamFromTeacher();
+                        }
                     }
-
-                    // Notes
-                    if (Array.isArray(data.teacher_notes)) {
-                        this.refreshNotesList(data.teacher_notes);
-                    }
-
-                    // Poll
-                    if (data.active_poll) {
-                        this.renderPollUI(data.active_poll, data.poll_votes || {});
+                    const badge = document.getElementById('header-viewers-count');
+                    if (badge && data.viewers_count !== undefined) {
+                        badge.textContent = data.viewers_count;
                     }
                 }
-            } catch (err) {
-                // silent
-            }
-        }, 1200);
+            } catch (e) {}
+        }, 5000);
     }
 
     handleIncomingSocketMessage(data) {
         const type = data.type;
 
-        // 1. Welcome or State Sync
         if (type === 'welcome') {
+            this.sessionId = data.session_id;
+            this.isStreaming = Boolean(data.is_streaming);
+
             if (data.sim_id && data.sim_id !== this.currentSimId) {
                 this.switchSimulatorLocally(data.sim_id, data.sim_title);
             }
             if (data.is_locked !== undefined) {
                 this.applyStudentLockUI(data.is_locked);
             }
-            if (data.notes && Array.isArray(data.notes)) {
-                this.refreshNotesList(data.notes);
-            }
             if (data.active_poll) {
                 this.renderPollUI(data.active_poll, data.poll_votes || {});
             }
+
+            // If student joined and teacher is streaming, request feed immediately
+            if (this.userRole === 'student' && this.isStreaming) {
+                this.showVideoScreen(true);
+                this.requestStreamFromTeacher();
+            }
         }
 
-        // 2. Simulator Changed (Teacher switched experiment)
-        if (type === 'simulator_changed') {
+        // Live Meet Stream Events
+        else if (type === 'stream_started') {
+            this.isStreaming = true;
+            if (this.userRole === 'student') {
+                this.showVideoScreen(true);
+                this.requestStreamFromTeacher();
+                this.showToast("دبیر پخش زنده آزمایشگاه را آغاز کرد!");
+            }
+        }
+
+        else if (type === 'stream_stopped') {
+            this.isStreaming = false;
+            if (this.userRole === 'student') {
+                this.showVideoScreen(false);
+                if (this.studentPeerConnection) {
+                    this.studentPeerConnection.close();
+                    this.studentPeerConnection = null;
+                }
+                this.showToast("پخش زنده پایان یافت.");
+            }
+        }
+
+        else if (type === 'request_stream' && this.userRole === 'teacher') {
+            this.handleStudentStreamRequest(data.student_session_id, data.student_name);
+        }
+
+        else if (type === 'webrtc_offer' && this.userRole === 'student') {
+            this.handleWebRTCOffer(data.offer, data.sender_session_id);
+        }
+
+        else if (type === 'webrtc_answer' && this.userRole === 'teacher') {
+            this.handleWebRTCAnswer(data.answer, data.sender_session_id);
+        }
+
+        else if (type === 'webrtc_ice') {
+            this.handleICECandidate(data.candidate, data.sender_session_id);
+        }
+
+        else if (type === 'stream_frame' && this.userRole === 'student') {
+            this.renderFallbackFrame(data.frame);
+        }
+
+        else if (type === 'simulator_changed') {
             this.switchSimulatorLocally(data.sim_id, data.sim_title);
         }
 
-        // 3. Lock Toggled
-        if (type === 'lock_toggled') {
+        else if (type === 'lock_toggled') {
             this.applyStudentLockUI(data.is_locked);
         }
 
-        // 4. Viewers count update
-        if (data.viewers_count !== undefined) {
-            const badge = document.getElementById('live-participants-badge');
-            if (badge) {
-                badge.textContent = `${data.viewers_count} دانش‌آموز متصل`;
+        else if (type === 'user_joined' || type === 'user_left' || type === 'pong') {
+            if (data.viewers_count !== undefined) {
+                const badge = document.getElementById('header-viewers-count');
+                if (badge) badge.textContent = data.viewers_count;
+                const loungeCnt = document.getElementById('lounge-viewers-count');
+                if (loungeCnt) loungeCnt.textContent = data.viewers_count;
+            }
+            if (type === 'user_joined' && data.name) {
+                this.appendChatMessage({ sender: 'سیستم', role: 'system', message: `${data.name} وارد کلاس شد.` });
             }
         }
 
-        // 5. Laser Pointer
-        if (type === 'laser_pointer' && this.laserOverlay) {
+        else if (type === 'laser_pointer') {
             if (data.active === false) {
-                this.laserOverlay.classList.add('hidden');
+                const canvas = document.getElementById('live-laser-canvas');
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
             } else {
-                this.laserOverlay.style.left = `${(data.x || 0.5) * 100}%`;
-                this.laserOverlay.style.top = `${(data.y || 0.5) * 100}%`;
-                this.laserOverlay.classList.remove('hidden');
+                this.renderLaserDot(data.x, data.y);
             }
         }
 
-        // 6. Teacher Note Added
-        if (type === 'teacher_note_added') {
-            const notesList = document.getElementById('live-teacher-notes-list');
+        else if (type === 'teacher_note_added') {
+            const notesList = document.getElementById('teacher-notes-list');
             if (notesList && data.note) {
-                const noteDiv = document.createElement('div');
-                noteDiv.className = 'p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800/70 border border-blue-200 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 leading-relaxed text-[11px] animate-fade-in';
-                noteDiv.textContent = data.note;
-                notesList.prepend(noteDiv);
-                if (window.renderMathInPage) window.renderMathInPage(noteDiv);
-                if (window.store && window.store.playSound) window.store.playSound('correct');
+                const p = notesList.querySelector('p');
+                if (p) p.remove();
+                const div = document.createElement('div');
+                div.className = "p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 leading-relaxed text-[11px] animate-fadeIn";
+                div.textContent = data.note;
+                notesList.prepend(div);
             }
         }
 
-        // 7. Notes Cleared
-        if (type === 'notes_cleared') {
-            const notesList = document.getElementById('live-teacher-notes-list');
+        else if (type === 'notes_cleared') {
+            const notesList = document.getElementById('teacher-notes-list');
             if (notesList) {
-                notesList.innerHTML = '<p class="text-slate-400 text-[11px] py-2 text-center">هنوز یادداشتی از سوی دبیر ارسال نشده است.</p>';
+                notesList.innerHTML = '<p class="text-[11px] text-slate-400 text-center py-3">یادداشتی ثبت نشده است.</p>';
             }
         }
 
-        // 8. Poll Started
-        if (type === 'poll_started') {
+        else if (type === 'poll_started') {
             this.votedPollIndex = null;
-            this.renderPollUI(data, data.votes || {});
-            if (window.store && window.store.playSound) window.store.playSound('correct');
+            this.renderPollUI({ question: data.question, options: data.options }, data.votes || {});
         }
 
-        // 9. Poll Update
-        if (type === 'poll_update') {
-            this.updatePollBars(data.votes || {}, data.total || 0);
+        else if (type === 'poll_update') {
+            this.updatePollBars(data.votes, data.total);
         }
 
-        // 10. Student Raised Hand
-        if (type === 'student_raised_hand') {
+        else if (type === 'student_raised_hand') {
             this.appendChatMessage({
-                sender: 'سامانه سمپاد',
-                role: 'system',
-                message: `✋ دانش‌آموز «${data.sender}» اجازه گرفت / دست بلند کرد.`
+                sender: data.sender,
+                role: 'hand',
+                message: '✋ دست خود را برای پرسش علمی بالا برد.'
             });
-            if (this.userRole === 'teacher' && window.store && window.store.playSound) {
-                window.store.playSound('wrong');
+            if (this.userRole === 'teacher') {
+                this.showToast(`✋ ${data.sender} اجازه صحبت خواست.`);
             }
         }
 
-        // 11. Chat Message
-        if (type === 'chat_message') {
+        else if (type === 'chat_message') {
             this.appendChatMessage(data);
         }
     }
 
+    // Classroom Polls
     renderPollUI(pollData, votes) {
         const card = document.getElementById('live-poll-card');
         const qEl = document.getElementById('live-poll-question');
         const optsContainer = document.getElementById('live-poll-options');
         const totalEl = document.getElementById('live-poll-total');
+
         if (!card || !qEl || !optsContainer) return;
-
         card.classList.remove('hidden');
-        qEl.textContent = pollData.question || 'پرسش کلاسی:';
-        
-        const total = Object.values(votes).reduce((a, b) => a + Number(b), 0);
-        if (totalEl) totalEl.textContent = `${total} پاسخ`;
+        qEl.textContent = pollData.question;
 
-        optsContainer.innerHTML = (pollData.options || []).map((opt, idx) => {
-            const count = Number(votes[idx] || 0);
-            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+        const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
+        if (totalEl) totalEl.textContent = `${totalVotes} پاسخ`;
+
+        optsContainer.innerHTML = pollData.options.map((opt, idx) => {
+            const voteCount = votes[idx] || 0;
+            const pct = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
             const isVoted = this.votedPollIndex === idx;
 
             return `
             <button onclick="window.liveLab.submitVote(${idx})" 
-                ${this.votedPollIndex !== null ? 'disabled' : ''}
-                class="w-full relative overflow-hidden text-right p-2 rounded-xl border text-xs font-bold transition-all ${isVoted 
-                    ? 'border-amber-500 bg-amber-100 dark:bg-amber-950/80 text-amber-950 dark:text-amber-100 ring-2 ring-amber-400' 
-                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:border-amber-400'}">
-                <div class="absolute inset-y-0 right-0 bg-amber-200/50 dark:bg-amber-600/30 transition-all duration-300" style="width: ${pct}%"></div>
-                <div class="relative z-10 flex items-center justify-between">
-                    <span>${opt}</span>
-                    <span class="font-mono text-[11px] text-slate-600 dark:text-slate-300">${pct}% (${count})</span>
-                </div>
+                class="w-full relative overflow-hidden p-2.5 rounded-xl border ${isVoted ? 'border-amber-500 ring-2 ring-amber-400 bg-amber-100/50 dark:bg-amber-950/60' : 'border-amber-200 dark:border-amber-900/80 bg-white dark:bg-slate-900 hover:bg-amber-50/50'} text-right transition-all flex items-center justify-between text-xs font-bold">
+                <div class="absolute inset-y-0 right-0 bg-amber-400/20 dark:bg-amber-500/20 pointer-events-none transition-all duration-500" style="width: ${pct}%"></div>
+                <span class="relative z-10 text-slate-800 dark:text-slate-100 truncate">${opt}</span>
+                <span class="relative z-10 text-[10px] font-mono text-amber-700 dark:text-amber-300 mr-2">${pct}٪ (${voteCount})</span>
             </button>
             `;
         }).join('');
     }
 
     updatePollBars(votes, total) {
-        const card = document.getElementById('live-poll-card');
-        if (!card || card.classList.contains('hidden')) return;
         const totalEl = document.getElementById('live-poll-total');
         if (totalEl) totalEl.textContent = `${total} پاسخ`;
-
         const buttons = document.querySelectorAll('#live-poll-options button');
         buttons.forEach((btn, idx) => {
-            const count = Number(votes[idx] || 0);
+            const count = votes[idx] || 0;
             const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-            const bar = btn.querySelector('div');
-            const pctSpan = btn.querySelector('span:last-child');
+            const bar = btn.querySelector('.pointer-events-none');
+            const pctSpan = btn.querySelectorAll('span')[1];
             if (bar) bar.style.width = `${pct}%`;
-            if (pctSpan) pctSpan.textContent = `${pct}% (${count})`;
+            if (pctSpan) pctSpan.textContent = `${pct}٪ (${count})`;
         });
     }
 
     submitVote(optionIdx) {
-        if (this.votedPollIndex !== null) return;
         this.votedPollIndex = optionIdx;
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             this.socket.send(JSON.stringify({
-                type: 'poll_vote',
+                type: "poll_vote",
                 option_index: optionIdx
             }));
-        } else if (this.currentRoom) {
-            fetch(`/api/live-lab/rooms/${this.currentRoom.room_code}/vote`, {
+        }
+        if (this.currentRoom) {
+            fetch(`/api/live-lab/rooms/${this.currentRoom}/vote`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ option_index: optionIdx })
-            });
+            }).catch(() => {});
         }
-        if (window.store && window.store.playSound) window.store.playSound('click');
     }
 
     sendRaiseHand() {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(JSON.stringify({ type: 'raise_hand' }));
+            this.socket.send(JSON.stringify({ type: "raise_hand" }));
+            this.showToast("دست شما بالا برده شد.");
         }
-        const btn = document.getElementById('btn-raise-hand');
-        if (btn) {
-            btn.classList.add('opacity-50', 'pointer-events-none');
-            btn.innerHTML = '<span>دست شما بلند شد ✔</span>';
-            setTimeout(() => {
-                if (btn) {
-                    btn.classList.remove('opacity-50', 'pointer-events-none');
-                    btn.innerHTML = '<i data-lucide="hand" class="w-3.5 h-3.5"></i><span>✋ اجازه / دست بلند کردن</span>';
-                    if (window.lucide) window.lucide.createIcons();
-                }
-            }, 6000);
-        }
-    }
-
-    formatChatMessageHtml(data) {
-        const isMe = data.sender === this.userName;
-        const isTeacher = data.role === 'teacher';
-        const isSystem = data.role === 'system';
-
-        if (isSystem) {
-            return `
-            <div class="p-2 rounded-xl text-[11px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 font-bold text-center">
-                ${data.message}
-            </div>
-            `;
-        }
-
-        return `
-        <div class="p-2 rounded-xl text-[11px] leading-relaxed ${isTeacher 
-            ? 'bg-amber-50 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200' 
-            : isMe 
-                ? 'bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-900 text-blue-900 dark:text-blue-200 mr-3' 
-                : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 ml-3'}">
-            <div class="flex items-center justify-between mb-1 text-[10px] font-bold">
-                <span class="flex items-center gap-1 ${isTeacher ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500'}">
-                    ${isTeacher ? '<i data-lucide="award" class="w-3 h-3"></i> دبیر: ' : ''}${data.sender}
-                </span>
-                <span class="text-slate-400 font-mono">${data.time || ''}</span>
-            </div>
-            <div>${data.message}</div>
-        </div>
-        `;
     }
 
     appendChatMessage(data) {
-        const chatContainer = document.getElementById('live-chat-messages-container');
-        if (chatContainer) {
-            const div = document.createElement('div');
-            div.innerHTML = this.formatChatMessageHtml(data);
-            chatContainer.appendChild(div.firstElementChild);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            if (window.lucide) window.lucide.createIcons();
+        const chatContainer = document.getElementById('live-chat-messages');
+        if (!chatContainer) return;
+        const msgDiv = document.createElement('div');
+        msgDiv.className = "p-2 rounded-xl text-xs space-y-0.5 " + 
+            (data.role === 'teacher' ? 'bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800' :
+             data.role === 'system' ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 text-center text-[10px]' :
+             data.role === 'hand' ? 'bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-200' :
+             'bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800');
+
+        if (data.role !== 'system') {
+            msgDiv.innerHTML = `
+            <div class="flex items-center justify-between font-bold text-[10px]">
+                <span class="${data.role === 'teacher' ? 'text-blue-600 dark:text-sky-400' : 'text-slate-700 dark:text-slate-300'}">${data.sender}</span>
+                <span class="text-slate-400 font-mono">${data.time || ''}</span>
+            </div>
+            <p class="text-slate-800 dark:text-slate-200 text-[11px] leading-relaxed">${data.message}</p>
+            `;
+        } else {
+            msgDiv.textContent = data.message;
         }
+
+        chatContainer.appendChild(msgDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     sendChatMessage() {
         const inp = document.getElementById('live-chat-input');
-        const text = inp?.value?.trim();
+        const text = inp ? inp.value.trim() : '';
         if (text) {
             if (this.socket && this.socket.readyState === WebSocket.OPEN) {
                 this.socket.send(JSON.stringify({
-                    type: 'chat_message',
+                    type: "chat_message",
                     message: text
                 }));
-            } else if (this.currentRoom) {
-                fetch(`/api/live-lab/rooms/${this.currentRoom.room_code}/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        sender: this.userName,
-                        role: this.userRole,
-                        message: text
-                    })
-                });
             }
             inp.value = '';
         }
     }
 
     promptAddTeacherNote() {
-        const note = prompt('نکته آموزشی یا فرمول مورد نظر خود را جهت درج روی تخته زنده وارد فرمایید:');
+        const note = prompt("نکته یا معادله تخته را وارد نمایید:");
         if (note && note.trim()) {
             if (this.socket && this.socket.readyState === WebSocket.OPEN) {
                 this.socket.send(JSON.stringify({
-                    type: 'teacher_note',
+                    type: "teacher_note",
                     note: note.trim()
                 }));
-            } else if (this.currentRoom) {
-                fetch(`/api/live-lab/rooms/${this.currentRoom.room_code}/note`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ note: note.trim() })
-                });
             }
         }
     }
 
     clearTeacherNotes() {
-        if (confirm('آیا از پاک کردن تمامی نکات تخته اطمینان دارید؟')) {
+        if (confirm("آیا از پاک کردن تمامی یادداشت‌های تخته اطمینان دارید؟")) {
             if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-                this.socket.send(JSON.stringify({ type: 'clear_notes' }));
+                this.socket.send(JSON.stringify({ type: "clear_notes" }));
             }
         }
     }
 
     promptStartPoll() {
-        const q = prompt('متن پرسش کلاسی را وارد فرمایید:', 'اگر جرم دو برابر شود، دوره تناوب آونگ ساده چه تغییری می‌کند؟');
+        const q = prompt("صورت سوال کوییز مفهومی را وارد نمایید:");
         if (!q || !q.trim()) return;
-        const opt1 = prompt('گزینه ۱:', 'تغییری نمی‌کند (مستقل از جرم است)') || 'تغییری نمی‌کند (مستقل از جرم است)';
-        const opt2 = prompt('گزینه ۲:', 'دو برابر می‌شود') || 'دو برابر می‌شود';
-        const opt3 = prompt('گزینه ۳:', 'نصف می‌شود') || 'نصف می‌شود';
-        const opt4 = prompt('گزینه ۴:', 'رادیکال ۲ برابر می‌شود') || 'رادیکال ۲ برابر می‌شود';
+        const opt1 = prompt("گزینه ۱:");
+        const opt2 = prompt("گزینه ۲:");
+        const opt3 = prompt("گزینه ۳ (اختیاری):");
+        const opt4 = prompt("گزینه ۴ (اختیاری):");
 
-        const pollPayload = {
-            question: q.trim(),
-            options: [opt1.trim(), opt2.trim(), opt3.trim(), opt4.trim()]
-        };
-
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(JSON.stringify({
-                type: 'start_poll',
-                ...pollPayload
-            }));
-        } else if (this.currentRoom) {
-            fetch(`/api/live-lab/rooms/${this.currentRoom.room_code}/poll`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pollPayload)
-            });
+        const options = [opt1, opt2, opt3, opt4].filter(o => o && o.trim());
+        if (options.length >= 2) {
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                this.socket.send(JSON.stringify({
+                    type: "start_poll",
+                    question: q.trim(),
+                    options: options
+                }));
+            }
+        } else {
+            alert("حداقل دو گزینه برای نظرسنجی الزامی است.");
         }
-    }
-
-    refreshNotesList(notes) {
-        const notesList = document.getElementById('live-teacher-notes-list');
-        if (!notesList) return;
-        if (!notes || notes.length === 0) {
-            notesList.innerHTML = '<p class="text-slate-400 text-[11px] py-2 text-center">هنوز یادداشتی از سوی دبیر ارسال نشده است.</p>';
-            return;
-        }
-        notesList.innerHTML = notes.map(n => `
-            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 leading-relaxed text-[11px]">
-                ${n}
-            </div>
-        `).join('');
-        if (window.renderMathInPage) window.renderMathInPage(notesList);
     }
 }
 

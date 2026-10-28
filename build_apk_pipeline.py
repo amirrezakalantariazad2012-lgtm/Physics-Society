@@ -3,9 +3,8 @@ import sys
 import paramiko
 from PIL import Image, ImageDraw
 
-def generate_local_icon():
-    os.makedirs("android_src/res/drawable", exist_ok=True)
-    icon_path = "android_src/res/drawable/ic_launcher.png"
+def generate_local_icons():
+    # Base icon 512x512
     icon = Image.new("RGBA", (512, 512), (0, 0, 0, 0))
     draw = ImageDraw.Draw(icon)
     # Background circle with deep navy tone
@@ -20,8 +19,23 @@ def generate_local_icon():
     draw.ellipse([408, 244, 432, 268], fill=(250, 204, 21, 255))
     draw.ellipse([244, 80, 268, 104], fill=(244, 63, 94, 255))
     draw.ellipse([244, 408, 268, 432], fill=(244, 63, 94, 255))
-    icon.save(icon_path)
-    print(f"Generated local launcher icon at {icon_path}")
+
+    densities = {
+        "res/drawable": (512, 512),
+        "res/mipmap-mdpi": (48, 48),
+        "res/mipmap-hdpi": (72, 72),
+        "res/mipmap-xhdpi": (96, 96),
+        "res/mipmap-xxhdpi": (144, 144),
+        "res/mipmap-xxxhdpi": (192, 192),
+    }
+
+    for folder, size in densities.items():
+        dir_path = os.path.join("android_src", folder)
+        os.makedirs(dir_path, exist_ok=True)
+        img_resized = icon.resize(size, Image.Resampling.LANCZOS)
+        out_file = os.path.join(dir_path, "ic_launcher.png")
+        img_resized.save(out_file)
+        print(f"Generated {out_file} ({size[0]}x{size[1]})")
 
 def upload_directory(sftp, local_dir, remote_dir):
     try:
@@ -37,9 +51,10 @@ def upload_directory(sftp, local_dir, remote_dir):
             sftp.put(local_path, remote_path)
 
 def main():
-    generate_local_icon()
+    print("=== Step 1: Generating standard Android mipmap launcher icons ===")
+    generate_local_icons()
 
-    print("Connecting to server 192.168.1.150...")
+    print("\n=== Step 2: Connecting to server 192.168.1.150 ===")
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect('192.168.1.150', username='mp', password='Mp13911391!')
@@ -47,7 +62,7 @@ def main():
     stdin, stdout, stderr = ssh.exec_command('rm -rf /tmp/sampad_apk_build && mkdir -p /tmp/sampad_apk_build')
     stdout.read()
 
-    print("Uploading Android source files...")
+    print("Uploading Android project files...")
     sftp = ssh.open_sftp()
     upload_directory(sftp, "android_src", "/tmp/sampad_apk_build")
     sftp.close()
@@ -55,7 +70,10 @@ def main():
     bash_build_script = """#!/usr/bin/env bash
 set -e
 BUILD_DIR="/tmp/sampad_apk_build"
-ANDROID_JAR="/usr/lib/android-sdk/platforms/android-23/android.jar"
+ANDROID_JAR="/tmp/android-34.jar"
+if [ ! -f "$ANDROID_JAR" ]; then
+    ANDROID_JAR="/usr/lib/android-sdk/platforms/android-23/android.jar"
+fi
 AAPT="/usr/bin/aapt"
 DX="/usr/local/bin/dx"
 ZIPALIGN="/usr/bin/zipalign"
@@ -67,38 +85,41 @@ mkdir -p "$BUILD_DIR/bin"
 mkdir -p "$BUILD_DIR/classes"
 mkdir -p "$BUILD_DIR/gen"
 
-echo "=== Step 1: Generating R.java with AAPT ==="
+echo "=== Compiling with AAPT & Platform: $ANDROID_JAR ==="
 $AAPT package -f -m -J "$BUILD_DIR/gen" -M "$BUILD_DIR/AndroidManifest.xml" -S "$BUILD_DIR/res" -I "$ANDROID_JAR"
 
-echo "=== Step 2: Compiling Java source files ==="
+echo "=== Compiling Java source files ==="
 $JAVAC -source 8 -target 8 -bootclasspath "$ANDROID_JAR" -d "$BUILD_DIR/classes" \\
     "$BUILD_DIR/gen/ir/sampad/physicssociety/R.java" \\
     "$BUILD_DIR/ir/sampad/physicssociety/MainActivity.java"
 
-echo "=== Step 3: Translating bytecode to Dalvik DEX ==="
+echo "=== Translating bytecode to Dalvik DEX ==="
 $DX --dex --output="$BUILD_DIR/bin/classes.dex" "$BUILD_DIR/classes"
 
-echo "=== Step 4: Packaging resource APK ==="
+echo "=== Packaging resources APK ==="
 $AAPT package -f -M "$BUILD_DIR/AndroidManifest.xml" -S "$BUILD_DIR/res" -I "$ANDROID_JAR" -F "$BUILD_DIR/bin/unaligned.apk"
 
-echo "=== Step 5: Adding classes.dex to APK ==="
+echo "=== Adding classes.dex to APK ==="
 cd "$BUILD_DIR/bin"
 $AAPT add unaligned.apk classes.dex
 
-echo "=== Step 6: 4-byte Zipalign ==="
-$ZIPALIGN -f -p 4 unaligned.apk aligned.apk
+echo "=== 4-byte Standard Zipalign ==="
+$ZIPALIGN -f 4 unaligned.apk aligned.apk
 
-echo "=== Step 7: Generating Release Keystore ==="
+echo "=== Generating Release Keystore if missing ==="
 KEYSTORE="$BUILD_DIR/sampad.keystore"
 if [ ! -f "$KEYSTORE" ]; then
     $KEYTOOL -genkeypair -v -keystore "$KEYSTORE" -storepass sampad1403 -alias sampad_key -keypass sampad1403 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=SampadPhysics, OU=PhysicsSociety, O=Sampad, L=Tehran, ST=Tehran, C=IR"
 fi
 
-echo "=== Step 8: Signing APK with apksigner (v1 + v2) ==="
-$APKSIGNER sign --ks "$KEYSTORE" --ks-pass pass:sampad1403 --key-pass pass:sampad1403 --out physics-society-signed.apk --v1-signing-enabled true --v2-signing-enabled true aligned.apk
+echo "=== Signing APK with apksigner (v1, v2, v3 schemes) ==="
+$APKSIGNER sign --ks "$KEYSTORE" --ks-pass pass:sampad1403 --key-pass pass:sampad1403 --out physics-society-signed.apk --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true aligned.apk
 
-echo "=== Step 9: Verifying APK Signature ==="
+echo "=== Verifying APK Signature ==="
 $APKSIGNER verify --verbose physics-society-signed.apk
+
+echo "=== AAPT Badging Summary ==="
+$AAPT dump badging physics-society-signed.apk
 
 ls -lh physics-society-signed.apk
 """
@@ -117,9 +138,9 @@ ls -lh physics-society-signed.apk
     if err:
         print("STDERR:\n", err)
 
-    print("Deploying APK to web downloads directory on server...")
+    print("\nDeploying APK to server host and docker container...")
     deploy_cmd = (
-        "cp /tmp/sampad_apk_build/bin/physics-society-signed.apk /home/mp/Physics-Society/frontend/downloads/physics-society.apk && "
+        "cp /tmp/sampad_apk_build/bin/physics-society-signed.apk /home/mp/physics-society/source/frontend/downloads/physics-society.apk && "
         "docker cp /tmp/sampad_apk_build/bin/physics-society-signed.apk physics-society-app:/app/frontend/downloads/physics-society.apk"
     )
     stdin, stdout, stderr = ssh.exec_command(deploy_cmd)
