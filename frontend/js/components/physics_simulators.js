@@ -44,6 +44,7 @@ const SIMULATOR_CATALOG = [
 
     {
         id: "energy-skate",
+        aliases: ["energy-skate-park", "energy-skate", "skate", "energy"],
         title: "پایستگی و تبدیل‌های انرژی مکانیکی (اسکیت‌پارک)",
         grade: 7,
         gradeKey: "grade_7",

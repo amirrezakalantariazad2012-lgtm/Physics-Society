@@ -384,7 +384,7 @@ async function renderLandingView(container) {
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Grade 7 Card -->
-                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 1 })" 
+                <div onclick="window.store.setView('curriculum', { id: 1 })" 
                      class="academic-card p-6 cursor-pointer space-y-5 relative overflow-hidden group">
                     <div class="flex items-center justify-between">
                         <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center justify-center font-black text-xl group-hover:scale-105 transition-transform">
@@ -409,7 +409,7 @@ async function renderLandingView(container) {
                 </div>
 
                 <!-- Grade 8 Card -->
-                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 2 })" 
+                <div onclick="window.store.setView('curriculum', { id: 2 })" 
                      class="academic-card p-6 cursor-pointer space-y-5 relative overflow-hidden group">
                     <div class="flex items-center justify-between">
                         <div class="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-950/80 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800 flex items-center justify-center font-black text-xl group-hover:scale-105 transition-transform">
@@ -434,7 +434,7 @@ async function renderLandingView(container) {
                 </div>
 
                 <!-- Grade 9 Card -->
-                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 3 })" 
+                <div onclick="window.store.setView('curriculum', { id: 3 })" 
                      class="academic-card p-6 cursor-pointer space-y-5 relative overflow-hidden group">
                     <div class="flex items-center justify-between">
                         <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center font-black text-xl group-hover:scale-105 transition-transform">
@@ -820,15 +820,9 @@ async function renderCurriculumView(container, gradeId = null) {
         const grades = await window.api.getGrades();
         const user = window.store.currentUser;
 
-        // Strict Grade Scoping: If user is a student, lock strictly to their registered grade
-        let activeGradeId;
-        let isGradeLocked = false;
-        if (user && user.role === 'student' && user.grade_id) {
-            activeGradeId = user.grade_id;
-            isGradeLocked = true;
-        } else {
-            activeGradeId = gradeId || (grades[0] ? grades[0].id : 1);
-        }
+        // Active grade selection: default to student's grade if not specified, but allow switching
+        let activeGradeId = gradeId ? parseInt(gradeId) : (user && user.grade_id ? user.grade_id : (grades[0] ? grades[0].id : 1));
+        const isRegisteredGrade = Boolean(user && user.grade_id && (user.grade_id === activeGradeId));
 
         const books = await window.api.getBooks(activeGradeId);
         const currentGradeObj = grades.find(g => g.id == activeGradeId) || { title_fa: 'پایه تحصیلی' };
@@ -910,8 +904,24 @@ async function renderCurriculumView(container, gradeId = null) {
 
         container.innerHTML = `
         <div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
-            <!-- Header section based on grade locking -->
-            ${isGradeLocked ? `
+            <!-- Grade Switcher Tabs for All Users -->
+            <div class="flex flex-col items-center justify-center gap-4 text-center">
+                <div class="inline-flex items-center gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 shadow-md">
+                    ${grades.map(g => `
+                    <button onclick="window.store.setView('curriculum', { id: ${g.id} })" class="px-5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 ${g.id == activeGradeId ? 'btn-duo-blue text-white shadow-md' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'}">
+                        <span>${g.title_fa}</span>
+                        ${user && user.grade_id === g.id ? '<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 font-bold border border-emerald-500/30">پایه شما</span>' : ''}
+                    </button>
+                    `).join('')}
+                </div>
+                ${!user ? `
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    دانش‌آموز عزیز؛ برای ذخیره پیشرفت درسی و شرکت در آزمون‌ها، لطفاً <button onclick="window.openAuthModal('login')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">وارد شوید</button> یا <button onclick="window.openAuthModal('register')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">ثبت‌نام کنید</button>.
+                </p>
+                ` : ''}
+            </div>
+
+            <!-- Grade Informational Banner -->
             <div class="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-slate-900/50 border border-blue-500/30 backdrop-blur-md shadow-lg">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
@@ -920,10 +930,10 @@ async function renderCurriculumView(container, gradeId = null) {
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
-                                <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-bold border border-blue-400/30">
-                                    پایه تحصیلی اختصاصی شما
+                                <span class="text-xs px-2.5 py-0.5 rounded-full ${isRegisteredGrade ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' : 'bg-blue-500/20 text-blue-300 border border-blue-400/30'} font-bold">
+                                    ${isRegisteredGrade ? 'پایه تحصیلی ثبت‌نامی شما' : 'مطالعه و کاوش علمی سرفصل‌ها'}
                                 </span>
-                                <span class="text-xs text-slate-400">• ۲ منبع آموزشی کامل (فصول تخصصی فیزیک)</span>
+                                <span class="text-xs text-slate-300">• ۲ منبع آموزشی کامل (فصول تخصصی فیزیک)</span>
                             </div>
                             <h2 class="text-xl sm:text-2xl font-black text-white mt-1">
                                 برنامه درسی فیزیک ${currentGradeObj.title_fa}
@@ -931,29 +941,14 @@ async function renderCurriculumView(container, gradeId = null) {
                             <p class="text-xs text-slate-300 mt-0.5">مطابق سرفصل‌های کتاب رسمی آموزش و پرورش و کتاب علوم تکمیلی سمپاد</p>
                         </div>
                     </div>
+                    ${isRegisteredGrade ? `
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold self-start sm:self-center">
                         <i data-lucide="shield-check" class="w-4 h-4"></i>
                         <span>ثبت‌نام رسمی در این پایه</span>
                     </span>
+                    ` : ''}
                 </div>
             </div>
-            ` : `
-            <!-- Grade Switcher Tabs (For Admin or Guest) -->
-            <div class="flex flex-col items-center justify-center gap-4 text-center">
-                <div class="inline-flex items-center gap-2 p-1.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-md">
-                    ${grades.map(g => `
-                    <button onclick="window.store.setView('curriculum', { id: ${g.id} })" class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${g.id == activeGradeId ? 'btn-duo-blue text-white shadow-md' : 'text-slate-300 hover:text-white'}">
-                        ${g.title_fa}
-                    </button>
-                    `).join('')}
-                </div>
-                ${!user ? `
-                <p class="text-xs text-slate-400">
-                    دانش‌آموز عزیز؛ برای ذخیره پیشرفت درسی و شرکت در آزمون‌ها، لطفاً <button onclick="window.openAuthModal('login')" class="text-blue-400 font-bold hover:underline">وارد شوید</button> یا <button onclick="window.openAuthModal('register')" class="text-blue-400 font-bold hover:underline">ثبت‌نام کنید</button>.
-                </p>
-                ` : ''}
-            </div>
-            `}
 
             <!-- Supplementary Study Materials Banner -->
             <div class="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
@@ -1791,7 +1786,8 @@ async function handleAiTutorSubmit(e) {
 
 async function renderSimulatorsCatalogView(container, activeSim = 'density', currentMode = 'native', gradeFilter = 'all') {
     const simCatalog = window.physicsSimulators ? window.physicsSimulators.catalog : [];
-    const activeLab = simCatalog.find(s => s.id === activeSim) || simCatalog[0] || {
+    const normalizedSimId = (activeSim === 'energy-skate-park') ? 'energy-skate' : activeSim;
+    const activeLab = simCatalog.find(s => s.id === normalizedSimId || s.id === activeSim || (s.aliases && s.aliases.includes(activeSim))) || simCatalog[0] || {
         id: 'density', title: 'چگالی و ارشمیدس', gradeTitle: 'پایه هفتم', grade: 7,
         desc: 'بررسی جرم، حجم و نیروی شناوری ارشمیدس', formula: '\\rho = m/V', goals: []
     };
