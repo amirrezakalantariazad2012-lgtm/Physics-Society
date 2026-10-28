@@ -190,9 +190,11 @@ def get_lab_progress(
     today_claimed_actions = set()
 
     for t in txs:
-        if t.reference_id and t.reference_id.startswith("lab_"):
-            parts = t.reference_id.split("_")
-            # format: lab_{sim_type}_{action_type}_{user_id}_{date_key}
+        if not t.reference_id:
+            continue
+        if t.reference_id.startswith("lab::"):
+            parts = t.reference_id.split("::")
+            # format: lab::{sim_type}::{action_type}::{user_id}::{date_key}
             if len(parts) >= 5:
                 sim_id = parts[1]
                 action_type = parts[2]
@@ -200,9 +202,15 @@ def get_lab_progress(
                 completed_sims.add(sim_id)
                 if date_k == today_str:
                     today_claimed_actions.add(f"{sim_id}_{action_type}")
-            elif len(parts) >= 4:
+        elif t.reference_id.startswith("lab_"):
+            parts = t.reference_id.split("_")
+            if len(parts) >= 4:
                 sim_id = parts[1]
+                date_k = parts[-1]
                 completed_sims.add(sim_id)
+                action_type = "_".join(parts[2:-2]) if len(parts) >= 5 else "experiment_run"
+                if date_k == today_str:
+                    today_claimed_actions.add(f"{sim_id}_{action_type}")
 
     profile = current_user.profile
     return LabProgressResponse(
@@ -244,7 +252,7 @@ def record_lab_activity(
 
     # Daily unique idempotency key per action per simulation
     date_key = datetime.utcnow().strftime('%Y%m%d')
-    ref_id = f"lab_{data.sim_type}_{action_type}_{current_user.id}_{date_key}"
+    ref_id = f"lab::{data.sim_type}::{action_type}::{current_user.id}::{date_key}"
 
     tx = award_xp(
         db, current_user.id,
