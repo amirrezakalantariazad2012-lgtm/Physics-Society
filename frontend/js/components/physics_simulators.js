@@ -669,6 +669,41 @@ const SIMULATOR_CATALOG = [
     },
 
     {
+        id: "motion-1d",
+        title: "حرکت بر روی خط راست: نمودار مکان، سرعت و شتاب (آزمایشگاه PhET)",
+        grade: 9,
+        gradeKey: "grade_9",
+        gradeTitle: "پایه نهم",
+        gradeLabel: "پایه نهم",
+        category: "سینماتیک و نمودارهای حرکت",
+        topic: "فصل ۴ نهم: حرکت بر روی خط راست و نمودارهای مکان، سرعت و شتاب",
+        ministryBook: "کتاب وزارتی علوم نهم — فصل ۴ (حرکت چیست؟ — مسافت، جابه‌جایی، تندی و سرعت)",
+        sampadBook: "کتاب تکمیلی سمپاد نهم — فصل ۴ (معادله حرکت با شتاب ثابت، تحلیل همزمان نمودارهای x-t و v-t و a-t)",
+        icon: "trending-up",
+        desc: "آزمایشگاه استاندارد و فوق‌العاده دقیق حرکت یک‌بعدی بر روی خط راست مطابق استانداردهای PhET: کنترل مستقیم و عددی شتاب، سرعت اولیه و مکان اولیه متحرک، رسم همزمان سه نمودار x(t)، v(t) و a(t)، خط مماس شیب لحظه‌ای و مساحت زیر نمودار (انتگرال جابه‌جایی).",
+        description: "آزمایشگاه استاندارد و فوق‌العاده دقیق حرکت یک‌بعدی بر روی خط راست مطابق استانداردهای PhET: کنترل مستقیم و عددی شتاب، سرعت اولیه و مکان اولیه متحرک، رسم همزمان سه نمودار x(t)، v(t) و a(t)، خط مماس شیب لحظه‌ای و مساحت زیر نمودار (انتگرال جابه‌جایی).",
+        formula: "x(t) = \\frac{1}{2}at^2 + v_0t + x_0 \\quad , \\quad v(t) = at + v_0 \\quad , \\quad v^2 - v_0^2 = 2a\\Delta x \\quad , \\quad \\Delta x = \\int v\\,dt",
+        badge: "وزارتی و سمپاد نهم — سینماتیک و حرکت خطی",
+        goals: [
+            "مشاهده همزمان حرکت فیزیکی متحرک روی محور خط راست و تغییرات بردارهای مکان، سرعت و شتاب",
+            "بررسی رابطه سهمی نمودار مکان-زمان در حرکت با شتاب ثابت و شیب خط آن به عنوان سرعت لحظه‌ای",
+            "محاسبه جابه‌جایی (Δx) از روی مساحت سطح زیر نمودار سرعت-زمان و تغییر سرعت (Δv) از سطح زیر نمودار شتاب-زمان",
+            "وارد کردن مقادیر دلخواه عددی برای شتاب و سرعت و تحلیل سناریوهای ترمز، شتاب‌گیری و تغییر جهت حرکت"
+        ],
+        experimentSteps: [
+            "مقادیر اولیه مکان (x₀)، سرعت اولیه (v₀) و شتاب (a) را در کادرهای عددی پنل وارد کنید (یا از لغزنده‌ها استفاده کنید).",
+            "تیک بردارهای مکان (سبز)، سرعت (آبی) و شتاب (نارنجی) را فعال کنید تا جهت و اندازه بردارها را به صورت زنده روی مسیر ببینید.",
+            "دکمه «شروع حرکت» را بزنید و رسم همگام سه نمودار مکان-زمان، سرعت-زمان و شتاب-زمان را بررسی کنید.",
+            "گزینه «شیب مماس» و «مساحت زیر منحنی» را روشن کنید تا مساحت انتگرال و شیب مشتق را در هر لحظه بسنجید.",
+            "از دکمه‌های سناریوهای آماده (حرکت یکنواخت، شتاب ثابت تندشونده، ترمز و توقف، حرکت رفت و برگشتی) برای مقایسه با مسائل کتاب درسی استفاده کنید."
+        ],
+        misconceptions: "اشتباه رایج: هرگاه شتاب متحرک منفی باشد متحرک حتماً کندشونده است! خیر؛ علامت شتاب به جهت بردار بستگی دارد؛ اگر سرعت متحرک هم منفی باشد (حرکت در جهت منفی محور)، شتاب منفی به معنای تندشونده بودن حرکت در جهت منفی است (هم‌علامت بودن a و v شرط تندشوندگی است).",
+        localFile: "motion-1d.html",
+        localUrl: "/simulators/phet/motion-1d.html",
+        phetSlug: "motion-1d"
+    },
+
+    {
         id: "calculus-grapher",
         title: "تحلیل نمودارهای حرکت، شیب و جابه‌جایی (سینماتیک)",
         grade: 9,
@@ -933,7 +968,14 @@ class PhysicsSimulators {
             'physics-classroom': 'calculus-grapher',
             'physicsclassroom': 'calculus-grapher',
             'kinematics-grapher': 'calculus-grapher',
-            'kinematics-1d': 'calculus-grapher',
+            'motion-1d': 'motion-1d',
+            'moving-man': 'motion-1d',
+            'kinematics-1d': 'motion-1d',
+            'kinematics': 'motion-1d',
+            'motion-graphs': 'motion-1d',
+            'straight-line': 'motion-1d',
+            'straight-line-motion': 'motion-1d',
+            'linear-motion': 'motion-1d',
             'circuit': 'circuit-dc',
             'electrostatics': 'balloons-static',
             'optics': 'bending-light',
@@ -1090,9 +1132,9 @@ class PhysicsSimulators {
         }
 
         // 10. Motion & Kinematics (Grade 9 Ch 4: حرکت چیست؟)
-        if (chapterTitle.includes('حرکت چیست') || chapterTitle.includes('سینماتیک') || lessonTitle.includes('مسافت') || lessonTitle.includes('جابه‌جایی') || lessonTitle.includes('تندی') || lessonTitle.includes('سرعت') || lessonTitle.includes('شتاب')) {
-            if (lessonTitle.includes('نمودار') || lessonTitle.includes('مکان - زمان') || lessonTitle.includes('سرعت - زمان') || lessonTitle.includes('تندی متوسط') || lessonTitle.includes('تندی لحظه‌ای')) {
-                return 'calculus-grapher';
+        if (chapterTitle.includes('حرکت چیست') || chapterTitle.includes('سینماتیک') || lessonTitle.includes('مسافت') || lessonTitle.includes('جابه‌جایی') || lessonTitle.includes('تندی') || lessonTitle.includes('سرعت') || lessonTitle.includes('شتاب') || lessonTitle.includes('حرکت')) {
+            if (lessonTitle.includes('نمودار') || lessonTitle.includes('مکان - زمان') || lessonTitle.includes('سرعت - زمان') || lessonTitle.includes('شتاب - زمان') || lessonTitle.includes('تندی متوسط') || lessonTitle.includes('تندی لحظه‌ای') || lessonTitle.includes('مسیر مستقیم') || lessonTitle.includes('خط راست')) {
+                return 'motion-1d';
             }
             if (lessonTitle.includes('مسافت') || lessonTitle.includes('جابه‌جایی') || lessonTitle.includes('بردار')) {
                 return 'vector-addition';
@@ -1100,7 +1142,7 @@ class PhysicsSimulators {
             if (lessonTitle.includes('پرتابه')) {
                 return 'projectile-motion';
             }
-            return 'calculus-grapher';
+            return 'motion-1d';
         }
 
         // 11. Pressure & Fluids (Grade 9 Ch 8: فشار و آثار آن)
@@ -1235,6 +1277,17 @@ class PhysicsSimulators {
                 ],
                 correct: 2,
                 explanation: 'پاسخ صحیح گزینه ۳ است. بسامد نور ویژگی ذاتی چشمه تولیدکننده است و با تغییر محیط مادی هرگز تغییر نمی‌کند.'
+            },
+            'motion-1d': {
+                q: 'متحرکی از مکان اولیه x₀ = -4 متر با سرعت اولیه v₀ = +2 متر بر ثانیه و شتاب ثابت a = +1 متر بر مجذور ثانیه روی خط راست به حرکت درمی‌آید. مکان متحرک در لحظه t = 4 ثانیه کجاست؟',
+                options: [
+                    'مکان x = +4 متر',
+                    'مکان x = +12 متر',
+                    'مکان x = +8 متر',
+                    'مکان x = -2 متر'
+                ],
+                correct: 1,
+                explanation: 'پاسخ صحیح گزینه ۲ است. طبق معادله حرکت با شتاب ثابت: x = 1/2·a·t² + v₀·t + x₀. با جایگذاری: x = 1/2(1)(4²) + (2)(4) + (-4) = 8 + 8 - 4 = +12 متر.'
             },
             'kinematics-1d': {
                 q: 'در نمودار مکان-زمان (x-t) متحرکی که روی خط راست حرکت می‌کند، شیب خط مماس بر نمودار در هر لحظه نشان‌دهنده کدام کمیت فیزیکی است؟',

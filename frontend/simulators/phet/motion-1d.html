@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>حرکت روی مسیر مستقیم — نمودارهای مکان، سرعت و شتاب (PhET Standard)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #070b14;
+            --bg-card: rgba(15, 23, 42, 0.95);
+            --border-slate: #1e293b;
+            --border-highlight: #0284c7;
+            --phet-blue: #0284c7;
+            --phet-sky: #38bdf8;
+            --phet-green: #10b981;
+            --phet-amber: #f59e0b;
+            --phet-rose: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mono-num {
+            font-family: 'JetBrains Mono', 'Vazirmatn', monospace;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        /* Top Header (PhET Style) */
+        header {
+            background: #0b1120;
+            border-bottom: 1px solid var(--border-slate);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 48px;
+            flex-shrink: 0;
+        }
+
+        .sim-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sim-title h1 {
+            font-size: 14px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+
+        .phet-badge {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-btn-group {
+            display: flex;
+            gap: 6px;
+            background: #070b14;
+            padding: 3px;
+            border-radius: 10px;
+            border: 1px solid var(--border-slate);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .tab-btn.active {
+            background: var(--phet-blue);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+        }
+
+        /* Main Workspace Layout */
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 10px;
+            padding: 10px;
+            overflow: hidden;
+            height: calc(100vh - 48px);
+        }
+
+        @media (max-width: 900px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr auto;
+                overflow-y: auto;
+            }
+        }
+
+        /* Canvas Stage Area */
+        .stage-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        /* Physical Track Section */
+        .track-box {
+            background: #0b1329;
+            border: 1px solid var(--border-slate);
+            border-radius: 16px;
+            padding: 10px 14px;
+            position: relative;
+            flex-shrink: 0;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .track-canvas {
+            width: 100%;
+            height: 140px;
+            cursor: grab;
+        }
+
+        .track-canvas:active {
+            cursor: grabbing;
+        }
+
+        /* Kinematics Graphs Container */
+        .graphs-wrapper {
+            flex: 1;
+            background: #0b1329;
+            border: 1px solid var(--border-slate);
+            border-radius: 16px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .graphs-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .graphs-header-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--phet-sky);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .graph-selectors {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .graph-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .graph-checkbox input {
+            accent-color: var(--phet-blue);
+            cursor: pointer;
+        }
+
+        .graphs-canvas-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #graphs-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Control Panel Sidebar */
+        .controls-sidebar {
+            background: #0b1329;
+            border: 1px solid var(--border-slate);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .control-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-slate);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .control-label {
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .num-input {
+            width: 76px;
+            background: #030712;
+            border: 1px solid #334155;
+            color: #fff;
+            padding: 5px 8px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            direction: ltr;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .num-input:focus {
+            border-color: var(--phet-blue);
+            box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.3);
+        }
+
+        .slider-range {
+            flex: 1;
+            accent-color: var(--phet-blue);
+            cursor: pointer;
+            height: 5px;
+        }
+
+        /* Live HUD Stats */
+        .hud-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            background: #030712;
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid #1e293b;
+        }
+
+        .hud-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hud-item-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .hud-item-val {
+            font-size: 13px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        /* Playback Toolbar */
+        .playback-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 6px;
+            background: #030712;
+            border-radius: 12px;
+            border: 1px solid var(--border-slate);
+        }
+
+        .phet-btn {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .phet-btn:hover {
+            background: #334155;
+            border-color: var(--phet-blue);
+        }
+
+        .phet-btn.primary {
+            background: var(--phet-blue);
+            border-color: var(--border-highlight);
+            color: #fff;
+        }
+
+        .phet-btn.primary:hover {
+            background: #0270a6;
+        }
+
+        .phet-btn.danger {
+            background: #450a0a;
+            border-color: #7f1d1d;
+            color: #fca5a5;
+        }
+
+        .phet-btn.danger:hover {
+            background: #7f1d1d;
+            color: #fff;
+        }
+
+        /* Presets Select */
+        .preset-select {
+            background: #030712;
+            border: 1px solid #334155;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-family: inherit;
+            width: 100%;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .preset-select:focus {
+            border-color: var(--phet-blue);
+        }
+
+        /* Vectors Toggle Strip */
+        .vectors-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            font-size: 11px;
+            padding: 6px 8px;
+            background: #030712;
+            border-radius: 8px;
+            border: 1px solid #1e293b;
+        }
+
+        /* Scrubbing Tooltip */
+        .scrub-info {
+            position: absolute;
+            top: 10px;
+            left: 14px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--phet-blue);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            color: var(--phet-sky);
+            display: none;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="sim-title">
+            <span class="phet-badge">PhET 1D</span>
+            <h1>حرکت روی مسیر مستقیم (The Moving Man — سینماتیک نهم سمپاد)</h1>
+        </div>
+
+        <div class="tab-btn-group">
+            <button class="tab-btn active" id="tab-both" onclick="setGraphLayout('all')">۳ نمودار همزمان</button>
+            <button class="tab-btn" id="tab-xt" onclick="setGraphLayout('x')">مکان (x-t)</button>
+            <button class="tab-btn" id="tab-vt" onclick="setGraphLayout('v')">سرعت (v-t)</button>
+            <button class="tab-btn" id="tab-at" onclick="setGraphLayout('a')">شتاب (a-t)</button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+        
+        <!-- Left: Physical Stage & Graphs -->
+        <div class="stage-container">
+            <!-- 1. Physical Track Canvas -->
+            <div class="track-box">
+                <canvas id="track-canvas" class="track-canvas"></canvas>
+            </div>
+
+            <!-- 2. Kinematics Graphs -->
+            <div class="graphs-wrapper">
+                <div class="graphs-header">
+                    <div class="graphs-header-title">
+                        <span>📈 نمودارهای دینامیک لحظه‌ای</span>
+                        <span id="live-time-pill" class="mono-num" style="font-size: 11px; color: #fff; background: #030712; padding: 2px 6px; border-radius: 4px; border: 1px solid #334155;">t = 0.00 s</span>
+                    </div>
+
+                    <div class="graph-selectors">
+                        <label class="graph-checkbox" style="color: var(--phet-sky);">
+                            <input type="checkbox" id="chk-show-x" checked onchange="redrawGraphs()">
+                            <span>مکان x(t)</span>
+                        </label>
+                        <label class="graph-checkbox" style="color: var(--phet-green);">
+                            <input type="checkbox" id="chk-show-v" checked onchange="redrawGraphs()">
+                            <span>سرعت v(t)</span>
+                        </label>
+                        <label class="graph-checkbox" style="color: var(--phet-amber);">
+                            <input type="checkbox" id="chk-show-a" checked onchange="redrawGraphs()">
+                            <span>شتاب a(t)</span>
+                        </label>
+                        <label class="graph-checkbox" style="color: #cbd5e1;">
+                            <input type="checkbox" id="chk-show-area" checked onchange="redrawGraphs()">
+                            <span>مساحت زیر منحنی (Δx)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="graphs-canvas-container">
+                    <canvas id="graphs-canvas"></canvas>
+                    <div id="scrub-tooltip" class="scrub-info"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Professional Scientific Control Dock -->
+        <div class="controls-sidebar">
+            
+            <!-- Preset Scenarios -->
+            <div class="control-card">
+                <div class="control-card-header">
+                    <span class="control-label">📚 سناریوهای استاندارد کتاب درسی:</span>
+                </div>
+                <select id="sim-preset-select" class="preset-select" onchange="applyPreset(this.value)">
+                    <option value="custom">-- انتخاب سناریو یا تنظیم دستی --</option>
+                    <option value="uniform">۱. حرکت با سرعت ثابت (v = 2.0 m/s , a = 0)</option>
+                    <option value="accel_from_rest">۲. حرکت تندشونده از حال سکون (v₀ = 0 , a = +1.5 m/s²)</option>
+                    <option value="decel_to_stop">۳. حرکت کندشونده تا توقف کامل (v₀ = 6.0 m/s , a = -1.5 m/s²)</option>
+                    <option value="reverse_direction">۴. تغییر جهت و بازگشت (x₀ = -6 m , v₀ = +5 m/s , a = -1.2 m/s²)</option>
+                    <option value="negative_accel">۵. شتاب منفی از مبدا صفر (v₀ = 0 , a = -2.0 m/s²)</option>
+                </select>
+            </div>
+
+            <!-- Position Control (x) -->
+            <div class="control-card" style="border-right: 3px solid var(--phet-sky);">
+                <div class="control-card-header">
+                    <span class="control-label" style="color: var(--phet-sky);">
+                        <span>📍 مکان اولیه (x₀):</span>
+                    </span>
+                    <div class="control-input-group">
+                        <input type="number" id="num-pos" class="num-input" step="0.1" min="-10" max="10" value="0.0" oninput="onInputPos(this.value)">
+                        <span style="font-size: 11px; color: var(--text-muted);">m</span>
+                    </div>
+                </div>
+                <input type="range" id="slider-pos" class="slider-range" min="-10" max="10" step="0.1" value="0" oninput="onSliderPos(this.value)">
+            </div>
+
+            <!-- Velocity Control (v) -->
+            <div class="control-card" style="border-right: 3px solid var(--phet-green);">
+                <div class="control-card-header">
+                    <span class="control-label" style="color: var(--phet-green);">
+                        <span>⚡ سرعت اولیه (v₀):</span>
+                    </span>
+                    <div class="control-input-group">
+                        <input type="number" id="num-vel" class="num-input" step="0.1" min="-10" max="10" value="0.0" oninput="onInputVel(this.value)">
+                        <span style="font-size: 11px; color: var(--text-muted);">m/s</span>
+                    </div>
+                </div>
+                <input type="range" id="slider-vel" class="slider-range" min="-10" max="10" step="0.1" value="0" oninput="onSliderVel(this.value)">
+            </div>
+
+            <!-- Acceleration Control (a) -->
+            <div class="control-card" style="border-right: 3px solid var(--phet-amber);">
+                <div class="control-card-header">
+                    <span class="control-label" style="color: var(--phet-amber);">
+                        <span>🚀 شتاب ثابت (a):</span>
+                    </span>
+                    <div class="control-input-group">
+                        <input type="number" id="num-acc" class="num-input" step="0.1" min="-5" max="5" value="0.0" oninput="onInputAcc(this.value)">
+                        <span style="font-size: 11px; color: var(--text-muted);">m/s²</span>
+                    </div>
+                </div>
+                <input type="range" id="slider-acc" class="slider-range" min="-5" max="5" step="0.1" value="0" oninput="onSliderAcc(this.value)">
+            </div>
+
+            <!-- Vector Display Toggles -->
+            <div class="vectors-strip">
+                <span style="font-weight: 700; color: var(--text-muted);">نمایش بردارها:</span>
+                <label style="display: flex; align-items: center; gap: 3px; cursor: pointer; color: var(--phet-green);">
+                    <input type="checkbox" id="chk-vec-v" checked onchange="redrawTrack()">
+                    <span>سرعت (v)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 3px; cursor: pointer; color: var(--phet-amber);">
+                    <input type="checkbox" id="chk-vec-a" checked onchange="redrawTrack()">
+                    <span>شتاب (a)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 3px; cursor: pointer; color: var(--phet-sky);">
+                    <input type="checkbox" id="chk-vec-x" onchange="redrawTrack()">
+                    <span>مکان (x)</span>
+                </label>
+            </div>
+
+            <!-- Live Digital HUD (Readouts) -->
+            <div class="hud-grid">
+                <div class="hud-item">
+                    <span class="hud-item-label">زمان سپری‌شده (t):</span>
+                    <span id="hud-t" class="hud-item-val mono-num">0.00 s</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-item-label">مکان لحظه‌ای (x):</span>
+                    <span id="hud-x" class="hud-item-val mono-num" style="color: var(--phet-sky);">0.00 m</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-item-label">سرعت لحظه‌ای (v):</span>
+                    <span id="hud-v" class="hud-item-val mono-num" style="color: var(--phet-green);">0.00 m/s</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-item-label">شتاب لحظه‌ای (a):</span>
+                    <span id="hud-a" class="hud-item-val mono-num" style="color: var(--phet-amber);">0.00 m/s²</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-item-label">جابه‌جایی کل (Δx):</span>
+                    <span id="hud-dx" class="hud-item-val mono-num">0.00 m</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-item-label">مسافت پیموده‌شده (d):</span>
+                    <span id="hud-d" class="hud-item-val mono-num">0.00 m</span>
+                </div>
+            </div>
+
+            <!-- Playback Controls -->
+            <div class="playback-bar">
+                <button id="btn-play" class="phet-btn primary" onclick="togglePlay()">
+                    <span id="play-icon">▶</span>
+                    <span id="play-text">شروع حرکت</span>
+                </button>
+                <button class="phet-btn" onclick="stepForward(0.1)" title="گام رو به جلو (+0.1 ثانیه)">
+                    ⏭ گام
+                </button>
+                <button class="phet-btn" onclick="clearData()" title="پاک کردن تاریخچه نمودارها">
+                    🧹 پاک‌سازی
+                </button>
+                <button class="phet-btn danger" onclick="resetAll()" title="بازنشانی کامل">
+                    🔄 بازنشانی
+                </button>
+            </div>
+
+            <!-- Speed Toggle -->
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; padding: 0 4px;">
+                <span style="color: var(--text-muted); font-weight: 600;">سرعت انیمیشن:</span>
+                <div style="display: flex; gap: 6px;">
+                    <button class="phet-btn" id="speed-slow" onclick="setSimSpeed(0.4)" style="padding: 2px 8px; font-size: 10px;">۰.۴× آهسته</button>
+                    <button class="phet-btn" id="speed-normal" onclick="setSimSpeed(1.0)" style="padding: 2px 8px; font-size: 10px; background: var(--phet-blue);">۱.۰× عادی</button>
+                </div>
+            </div>
+
+            <!-- Textbook Formulas Reference -->
+            <div style="background: #030712; border: 1px solid var(--border-slate); padding: 8px; border-radius: 10px; font-size: 10px; color: var(--text-muted); line-height: 1.6;">
+                <span style="color: #fff; font-weight: 700; display: block; margin-bottom: 2px;">📐 روابط حاکم در حرکت با شتاب ثابت:</span>
+                <div class="mono-num" style="display: block; color: var(--phet-sky);">x(t) = 1/2·a·t² + v₀·t + x₀</div>
+                <div class="mono-num" style="display: block; color: var(--phet-green);">v(t) = a·t + v₀</div>
+                <div class="mono-num" style="display: block; color: var(--phet-amber);">v² - v₀² = 2·a·Δx &nbsp;|&nbsp; Δx = (v + v₀)/2 · t</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Kinematics Engine Script -->
+    <script>
+        // Physics State Variables
+        let x0 = 0.0;
+        let v0 = 0.0;
+        let aConst = 0.0;
+
+        let curX = 0.0;
+        let curV = 0.0;
+        let curA = 0.0;
+        let curT = 0.0;
+
+        let totalDistance = 0.0;
+        let lastX = 0.0;
+
+        let isRunning = false;
+        let simSpeed = 1.0;
+        let lastTimestamp = null;
+
+        // Data recording for graphs
+        // Array of { t, x, v, a }
+        let trajectory = [];
+
+        // UI & Layout
+        let activeGraphMode = 'all'; // 'all', 'x', 'v', 'a'
+        let isDraggingGlider = false;
+
+        // Canvases
+        const trackCanvas = document.getElementById('track-canvas');
+        const trackCtx = trackCanvas.getContext('2d');
+
+        const graphsCanvas = document.getElementById('graphs-canvas');
+        const graphsCtx = graphsCanvas.getContext('2d');
+
+        // Resize Handlers
+        function resizeCanvases() {
+            const trackRect = trackCanvas.parentElement.getBoundingClientRect();
+            trackCanvas.width = trackRect.width * window.devicePixelRatio;
+            trackCanvas.height = 140 * window.devicePixelRatio;
+
+            const graphRect = graphsCanvas.parentElement.getBoundingClientRect();
+            graphsCanvas.width = graphRect.width * window.devicePixelRatio;
+            graphsCanvas.height = graphRect.height * window.devicePixelRatio;
+
+            redrawTrack();
+            redrawGraphs();
+        }
+
+        window.addEventListener('resize', resizeCanvases);
+
+        // Initialization
+        function init() {
+            curX = x0;
+            curV = v0;
+            curA = aConst;
+            curT = 0.0;
+            totalDistance = 0.0;
+            lastX = curX;
+            trajectory = [{ t: 0, x: curX, v: curV, a: curA }];
+            updateHUD();
+            resizeCanvases();
+        }
+
+        // ==========================================
+        // Physics Simulation Loop
+        // ==========================================
+        function simStep(dt) {
+            if (!isRunning) return;
+
+            const nextT = curT + dt;
+            
+            // Analytical kinematics for 100% precision without numerical drift
+            const nextV = v0 + aConst * nextT;
+            const nextX = x0 + v0 * nextT + 0.5 * aConst * nextT * nextT;
+
+            // Boundary collision handling [-10, 10]
+            if (nextX > 10.0) {
+                curX = 10.0;
+                curV = 0.0;
+                isRunning = false;
+                updatePlayBtn();
+            } else if (nextX < -10.0) {
+                curX = -10.0;
+                curV = 0.0;
+                isRunning = false;
+                updatePlayBtn();
+            } else {
+                totalDistance += Math.abs(nextX - curX);
+                curX = nextX;
+                curV = nextV;
+                curA = aConst;
+                curT = nextT;
+            }
+
+            trajectory.push({ t: curT, x: curX, v: curV, a: curA });
+
+            updateHUD();
+            redrawTrack();
+            redrawGraphs();
+        }
+
+        function animationLoop(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const deltaMs = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+
+            if (isRunning) {
+                const dt = Math.min(deltaMs / 1000, 0.05) * simSpeed;
+                simStep(dt);
+            }
+
+            requestAnimationFrame(animationLoop);
+        }
+
+        requestAnimationFrame(animationLoop);
+
+        // ==========================================
+        // Track Drawing (Visual World)
+        // ==========================================
+        function metersToTrackPx(m, width) {
+            // Track spans from -10 to +10 meters (total 20m)
+            const margin = 50 * window.devicePixelRatio;
+            const usableWidth = width - margin * 2;
+            const normalized = (m + 10) / 20; // 0.0 at -10m, 1.0 at +10m
+            return margin + normalized * usableWidth;
+        }
+
+        function trackPxToMeters(px, width) {
+            const margin = 50 * window.devicePixelRatio;
+            const usableWidth = width - margin * 2;
+            const normalized = (px - margin) / usableWidth;
+            const m = normalized * 20 - 10;
+            return Math.max(-10, Math.min(10, m));
+        }
+
+        function redrawTrack() {
+            const w = trackCanvas.width;
+            const h = trackCanvas.height;
+            const ctx = trackCtx;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const baselineY = h - 35 * window.devicePixelRatio;
+
+            // Draw Background Gradients & Sky
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, baselineY);
+            skyGrad.addColorStop(0, '#070f26');
+            skyGrad.addColorStop(1, '#0e1d40');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, w, baselineY);
+
+            // Draw Ground
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, baselineY, w, h - baselineY);
+
+            // Draw Calibrated Track Line
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 3 * window.devicePixelRatio;
+            ctx.beginPath();
+            ctx.moveTo(metersToTrackPx(-10, w), baselineY);
+            ctx.lineTo(metersToTrackPx(10, w), baselineY);
+            ctx.stroke();
+
+            // Draw Calibrated Meter Ticks and Labels
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = `${10 * window.devicePixelRatio}px 'JetBrains Mono', sans-serif`;
+            ctx.textAlign = 'center';
+
+            for (let m = -10; m <= 10; m += 1) {
+                const px = metersToTrackPx(m, w);
+                const isMajor = (m % 2 === 0);
+                const tickLen = isMajor ? 12 * window.devicePixelRatio : 6 * window.devicePixelRatio;
+
+                ctx.strokeStyle = isMajor ? (m === 0 ? '#38bdf8' : '#64748b') : '#334155';
+                ctx.lineWidth = isMajor ? (m === 0 ? 3 * window.devicePixelRatio : 1.5 * window.devicePixelRatio) : 1 * window.devicePixelRatio;
+
+                ctx.beginPath();
+                ctx.moveTo(px, baselineY);
+                ctx.lineTo(px, baselineY + tickLen);
+                ctx.stroke();
+
+                if (isMajor) {
+                    ctx.fillStyle = m === 0 ? '#38bdf8' : '#cbd5e1';
+                    ctx.fillText(`${m}m`, px, baselineY + tickLen + 12 * window.devicePixelRatio);
+                }
+            }
+
+            // Draw Landmarks (Home at -8m, Tree at 0m, School at +8m)
+            drawLandmark(ctx, metersToTrackPx(-8, w), baselineY, '🏠 خانه (-8m)');
+            drawLandmark(ctx, metersToTrackPx(0, w), baselineY, '🌳 مبدأ (0m)');
+            drawLandmark(ctx, metersToTrackPx(8, w), baselineY, '🏁 مقصد (+8m)');
+
+            // Position Vector (Arrow from 0m to curX)
+            const showVecX = document.getElementById('chk-vec-x').checked;
+            if (showVecX && Math.abs(curX) > 0.1) {
+                const originPx = metersToTrackPx(0, w);
+                const targetPx = metersToTrackPx(curX, w);
+                drawVectorArrow(ctx, originPx, baselineY - 45 * window.devicePixelRatio, targetPx, baselineY - 45 * window.devicePixelRatio, '#38bdf8', `x = ${curX.toFixed(2)}m`);
+            }
+
+            // Draw Moving Glider / Character at curX
+            const gliderPx = metersToTrackPx(curX, w);
+            const gliderY = baselineY - 18 * window.devicePixelRatio;
+
+            drawGlider(ctx, gliderPx, gliderY);
+
+            // Velocity Vector on Glider
+            const showVecV = document.getElementById('chk-vec-v').checked;
+            if (showVecV && Math.abs(curV) > 0.05) {
+                const vLenPx = curV * 12 * window.devicePixelRatio;
+                drawVectorArrow(ctx, gliderPx, gliderY - 24 * window.devicePixelRatio, gliderPx + vLenPx, gliderY - 24 * window.devicePixelRatio, '#10b981', `v = ${curV.toFixed(2)} m/s`);
+            }
+
+            // Acceleration Vector on Glider
+            const showVecA = document.getElementById('chk-vec-a').checked;
+            if (showVecA && Math.abs(curA) > 0.05) {
+                const aLenPx = curA * 18 * window.devicePixelRatio;
+                drawVectorArrow(ctx, gliderPx, gliderY - 38 * window.devicePixelRatio, gliderPx + aLenPx, gliderY - 38 * window.devicePixelRatio, '#f59e0b', `a = ${curA.toFixed(2)} m/s²`);
+            }
+        }
+
+        function drawLandmark(ctx, x, y, label) {
+            ctx.fillStyle = '#64748b';
+            ctx.font = `${9 * window.devicePixelRatio}px 'Vazirmatn', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(label, x, y - 60 * window.devicePixelRatio);
+            
+            ctx.strokeStyle = 'rgba(100, 116, 139, 0.3)';
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(x, y - 55 * window.devicePixelRatio);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawGlider(ctx, x, y) {
+            const s = window.devicePixelRatio;
+            
+            // Glider Body / High-Tech Lab Cart
+            ctx.save();
+            ctx.translate(x, y);
+
+            // Glow shadow
+            ctx.shadowColor = 'rgba(56, 189, 248, 0.4)';
+            ctx.shadowBlur = 12 * s;
+
+            // Chassis
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath();
+            ctx.roundRect(-22 * s, -12 * s, 44 * s, 18 * s, 6 * s);
+            ctx.fill();
+
+            // Cockpit / Indicator
+            ctx.fillStyle = '#e0f2fe';
+            ctx.beginPath();
+            ctx.roundRect(-10 * s, -18 * s, 20 * s, 10 * s, 4 * s);
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+
+            // Wheels
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5 * s;
+
+            ctx.beginPath();
+            ctx.arc(-14 * s, 7 * s, 5 * s, 0, Math.PI * 2);
+            ctx.arc(14 * s, 7 * s, 5 * s, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Center Pin Indicator
+            ctx.fillStyle = '#f43f5e';
+            ctx.beginPath();
+            ctx.arc(0, -2 * s, 2.5 * s, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawVectorArrow(ctx, fromX, fromY, toX, toY, color, text) {
+            const s = window.devicePixelRatio;
+            const headlen = 8 * s;
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2.5 * s;
+
+            // Line
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+
+            // Arrow head
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+
+            // Label
+            ctx.font = `${9 * s}px 'JetBrains Mono', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(text, (fromX + toX) / 2, fromY - 6 * s);
+        }
+
+        // Mouse Dragging on Track
+        trackCanvas.addEventListener('mousedown', (e) => {
+            const rect = trackCanvas.getBoundingClientRect();
+            const mouseX = (e.clientX - rect.left) * window.devicePixelRatio;
+            const w = trackCanvas.width;
+            const clickedM = trackPxToMeters(mouseX, w);
+
+            if (Math.abs(clickedM - curX) < 2.5) {
+                isDraggingGlider = true;
+                isRunning = false;
+                updatePlayBtn();
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDraggingGlider) return;
+            const rect = trackCanvas.getBoundingClientRect();
+            const mouseX = (e.clientX - rect.left) * window.devicePixelRatio;
+            const w = trackCanvas.width;
+            const newM = Math.round(trackPxToMeters(mouseX, w) * 10) / 10;
+            
+            x0 = newM;
+            curX = newM;
+            curT = 0;
+            trajectory = [{ t: 0, x: curX, v: curV, a: curA }];
+            document.getElementById('num-pos').value = newM.toFixed(1);
+            document.getElementById('slider-pos').value = newM;
+            updateHUD();
+            redrawTrack();
+            redrawGraphs();
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingGlider = false;
+        });
+
+        // Touch support
+        trackCanvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                const rect = trackCanvas.getBoundingClientRect();
+                const touchX = (e.touches[0].clientX - rect.left) * window.devicePixelRatio;
+                const w = trackCanvas.width;
+                const clickedM = trackPxToMeters(touchX, w);
+                if (Math.abs(clickedM - curX) < 3.0) {
+                    isDraggingGlider = true;
+                    isRunning = false;
+                    updatePlayBtn();
+                }
+            }
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!isDraggingGlider || e.touches.length !== 1) return;
+            const rect = trackCanvas.getBoundingClientRect();
+            const touchX = (e.touches[0].clientX - rect.left) * window.devicePixelRatio;
+            const w = trackCanvas.width;
+            const newM = Math.round(trackPxToMeters(touchX, w) * 10) / 10;
+            x0 = newM;
+            curX = newM;
+            curT = 0;
+            trajectory = [{ t: 0, x: curX, v: curV, a: curA }];
+            document.getElementById('num-pos').value = newM.toFixed(1);
+            document.getElementById('slider-pos').value = newM;
+            updateHUD();
+            redrawTrack();
+            redrawGraphs();
+        });
+
+        window.addEventListener('touchend', () => { isDraggingGlider = false; });
+
+        // ==========================================
+        // Kinematics Graphs Engine
+        // ==========================================
+        function redrawGraphs() {
+            const w = graphsCanvas.width;
+            const h = graphsCanvas.height;
+            const ctx = graphsCtx;
+            const s = window.devicePixelRatio;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Determine visible graphs based on layout mode and checkboxes
+            const showX = document.getElementById('chk-show-x').checked && (activeGraphMode === 'all' || activeGraphMode === 'x');
+            const showV = document.getElementById('chk-show-v').checked && (activeGraphMode === 'all' || activeGraphMode === 'v');
+            const showA = document.getElementById('chk-show-a').checked && (activeGraphMode === 'all' || activeGraphMode === 'a');
+            const showArea = document.getElementById('chk-show-area').checked;
+
+            const visibleCount = (showX ? 1 : 0) + (showV ? 1 : 0) + (showA ? 1 : 0);
+            if (visibleCount === 0) {
+                ctx.fillStyle = '#64748b';
+                ctx.font = `${13 * s}px 'Vazirmatn', sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText('حداقل یکی از نمودارها را انتخاب کنید.', w / 2, h / 2);
+                return;
+            }
+
+            // Time Axis Bounds [0, maxT]
+            const maxT = Math.max(10, Math.ceil(curT / 5) * 5);
+
+            const paddingLeft = 55 * s;
+            const paddingRight = 20 * s;
+            const graphWidth = w - paddingLeft - paddingRight;
+            const graphHeight = (h - 10 * s * (visibleCount - 1)) / visibleCount;
+
+            let currentTop = 0;
+
+            if (showX) {
+                drawSingleGraph(ctx, paddingLeft, currentTop, graphWidth, graphHeight, 'مکان x(t) [متر]', -10, 10, maxT, 'x', '#38bdf8', false);
+                currentTop += graphHeight + 10 * s;
+            }
+
+            if (showV) {
+                drawSingleGraph(ctx, paddingLeft, currentTop, graphWidth, graphHeight, 'سرعت v(t) [متر بر ثانیه]', -10, 10, maxT, 'v', '#10b981', showArea);
+                currentTop += graphHeight + 10 * s;
+            }
+
+            if (showA) {
+                drawSingleGraph(ctx, paddingLeft, currentTop, graphWidth, graphHeight, 'شتاب a(t) [متر بر مجذور ثانیه]', -5, 5, maxT, 'a', '#f59e0b', showArea);
+                currentTop += graphHeight + 10 * s;
+            }
+        }
+
+        function drawSingleGraph(ctx, x, y, width, height, title, minVal, maxVal, maxT, key, color, fillArea) {
+            const s = window.devicePixelRatio;
+
+            // Background grid box
+            ctx.fillStyle = '#060a17';
+            ctx.fillRect(x, y, width, height);
+
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1 * s;
+            ctx.strokeRect(x, y, width, height);
+
+            // Zero Line (Horizontal Axis)
+            const zeroNorm = (0 - minVal) / (maxVal - minVal);
+            const zeroY = y + height - zeroNorm * height;
+
+            // Grid Lines & Ticks (Time Axis)
+            ctx.font = `${9 * s}px 'JetBrains Mono', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#64748b';
+
+            for (let t = 0; t <= maxT; t += 2) {
+                const tX = x + (t / maxT) * width;
+                ctx.strokeStyle = '#111c38';
+                ctx.beginPath();
+                ctx.moveTo(tX, y);
+                ctx.lineTo(tX, y + height);
+                ctx.stroke();
+
+                // Time labels on bottom-most graph boundary
+                ctx.fillText(`${t}s`, tX, y + height - 3 * s);
+            }
+
+            // Grid Lines & Ticks (Value Axis)
+            const stepY = (maxVal - minVal) / 4;
+            ctx.textAlign = 'right';
+
+            for (let v = minVal; v <= maxVal; v += stepY) {
+                const vNorm = (v - minVal) / (maxVal - minVal);
+                const vY = y + height - vNorm * height;
+
+                ctx.strokeStyle = (Math.abs(v) < 0.01) ? '#38bdf8' : '#111c38';
+                ctx.lineWidth = (Math.abs(v) < 0.01) ? 1.5 * s : 1 * s;
+
+                ctx.beginPath();
+                ctx.moveTo(x, vY);
+                ctx.lineTo(x + width, vY);
+                ctx.stroke();
+
+                ctx.fillStyle = (Math.abs(v) < 0.01) ? '#38bdf8' : '#64748b';
+                ctx.fillText(`${v.toFixed(0)}`, x - 6 * s, vY + 3 * s);
+            }
+
+            // Graph Title in corner
+            ctx.fillStyle = color;
+            ctx.font = `bold ${10 * s}px 'Vazirmatn', sans-serif`;
+            ctx.textAlign = 'left';
+            ctx.fillText(title, x + 8 * s, y + 14 * s);
+
+            if (trajectory.length < 2) return;
+
+            // Area Shading under curve (for v-t showing displacement Δx)
+            if (fillArea && (key === 'v' || key === 'a')) {
+                ctx.save();
+                ctx.beginPath();
+                const startPoint = trajectory[0];
+                const startX = x + (startPoint.t / maxT) * width;
+                ctx.moveTo(startX, zeroY);
+
+                for (let i = 0; i < trajectory.length; i++) {
+                    const pt = trajectory[i];
+                    const ptX = x + (pt.t / maxT) * width;
+                    const valNorm = (pt[key] - minVal) / (maxVal - minVal);
+                    const ptY = y + height - Math.max(0, Math.min(1, valNorm)) * height;
+                    ctx.lineTo(ptX, ptY);
+                }
+
+                const lastPoint = trajectory[trajectory.length - 1];
+                const endX = x + (lastPoint.t / maxT) * width;
+                ctx.lineTo(endX, zeroY);
+                ctx.closePath();
+
+                ctx.fillStyle = key === 'v' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)';
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Draw Dynamic Kinematics Curve
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5 * s;
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+
+            for (let i = 0; i < trajectory.length; i++) {
+                const pt = trajectory[i];
+                const ptX = x + (pt.t / maxT) * width;
+                const valNorm = (pt[key] - minVal) / (maxVal - minVal);
+                const ptY = y + height - Math.max(0, Math.min(1, valNorm)) * height;
+
+                if (i === 0) ctx.moveTo(ptX, ptY);
+                else ctx.lineTo(ptX, ptY);
+            }
+            ctx.stroke();
+
+            // Draw Live Head Marker & Tangent Slope Indicator
+            const latest = trajectory[trajectory.length - 1];
+            const headX = x + (latest.t / maxT) * width;
+            const headNorm = (latest[key] - minVal) / (maxVal - minVal);
+            const headY = y + height - Math.max(0, Math.min(1, headNorm)) * height;
+
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(headX, headY, 4 * s, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2 * s;
+            ctx.stroke();
+
+            // Draw current value pill at head
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.roundRect(headX + 6 * s, headY - 10 * s, 46 * s, 16 * s, 4 * s);
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1 * s;
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.font = `bold ${9 * s}px 'JetBrains Mono', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(`${latest[key].toFixed(1)}`, headX + 29 * s, headY + 2 * s);
+        }
+
+        // ==========================================
+        // Controls, Presets & Event Handlers
+        // ==========================================
+        function togglePlay() {
+            isRunning = !isRunning;
+            updatePlayBtn();
+        }
+
+        function updatePlayBtn() {
+            const btn = document.getElementById('btn-play');
+            const icon = document.getElementById('play-icon');
+            const text = document.getElementById('play-text');
+            if (isRunning) {
+                btn.className = 'phet-btn';
+                icon.textContent = '⏸';
+                text.textContent = 'توقف موقت';
+            } else {
+                btn.className = 'phet-btn primary';
+                icon.textContent = '▶';
+                text.textContent = 'شروع حرکت';
+            }
+        }
+
+        function stepForward(dt = 0.1) {
+            isRunning = false;
+            updatePlayBtn();
+            simStep(dt);
+        }
+
+        function clearData() {
+            trajectory = [{ t: curT, x: curX, v: curV, a: curA }];
+            redrawGraphs();
+        }
+
+        function resetAll() {
+            isRunning = false;
+            updatePlayBtn();
+            x0 = 0.0;
+            v0 = 0.0;
+            aConst = 0.0;
+
+            document.getElementById('num-pos').value = '0.0';
+            document.getElementById('slider-pos').value = 0;
+            document.getElementById('num-vel').value = '0.0';
+            document.getElementById('slider-vel').value = 0;
+            document.getElementById('num-acc').value = '0.0';
+            document.getElementById('slider-acc').value = 0;
+            document.getElementById('sim-preset-select').value = 'custom';
+
+            init();
+        }
+
+        function setSimSpeed(sp) {
+            simSpeed = sp;
+            document.getElementById('speed-slow').style.background = sp === 0.4 ? 'var(--phet-blue)' : '#1e293b';
+            document.getElementById('speed-normal').style.background = sp === 1.0 ? 'var(--phet-blue)' : '#1e293b';
+        }
+
+        function setGraphLayout(mode) {
+            activeGraphMode = mode;
+            ['both', 'xt', 'vt', 'at'].forEach(id => {
+                const btn = document.getElementById(`tab-${id}`);
+                if (btn) btn.classList.remove('active');
+            });
+            const activeMap = { 'all': 'tab-both', 'x': 'tab-xt', 'v': 'tab-vt', 'a': 'tab-at' };
+            const activeBtn = document.getElementById(activeMap[mode]);
+            if (activeBtn) activeBtn.classList.add('active');
+            redrawGraphs();
+        }
+
+        // Direct Numeric Input Handlers
+        function onInputPos(val) {
+            const n = parseFloat(val) || 0;
+            const clamped = Math.max(-10, Math.min(10, n));
+            x0 = clamped;
+            curX = clamped;
+            document.getElementById('slider-pos').value = clamped;
+            clearData();
+            updateHUD();
+            redrawTrack();
+        }
+
+        function onSliderPos(val) {
+            const n = parseFloat(val);
+            x0 = n;
+            curX = n;
+            document.getElementById('num-pos').value = n.toFixed(1);
+            clearData();
+            updateHUD();
+            redrawTrack();
+        }
+
+        function onInputVel(val) {
+            const n = parseFloat(val) || 0;
+            const clamped = Math.max(-10, Math.min(10, n));
+            v0 = clamped;
+            curV = clamped;
+            document.getElementById('slider-vel').value = clamped;
+            clearData();
+            updateHUD();
+            redrawTrack();
+        }
+
+        function onSliderVel(val) {
+            const n = parseFloat(val);
+            v0 = n;
+            curV = n;
+            document.getElementById('num-vel').value = n.toFixed(1);
+            clearData();
+            updateHUD();
+            redrawTrack();
+        }
+
+        function onInputAcc(val) {
+            const n = parseFloat(val) || 0;
+            const clamped = Math.max(-5, Math.min(5, n));
+            aConst = clamped;
+            curA = clamped;
+            document.getElementById('slider-acc').value = clamped;
+            clearData();
+            updateHUD();
+            redrawTrack();
+        }
+
+        function onSliderAcc(val) {
+            const n = parseFloat(val);
+            aConst = n;
+            curA = n;
+            document.getElementById('num-acc').value = n.toFixed(1);
+            clearData();
+            updateHUD();
+            redrawTrack();
+        }
+
+        function applyPreset(type) {
+            isRunning = false;
+            updatePlayBtn();
+
+            if (type === 'uniform') {
+                x0 = -8.0; v0 = 2.0; aConst = 0.0;
+            } else if (type === 'accel_from_rest') {
+                x0 = -9.0; v0 = 0.0; aConst = 1.5;
+            } else if (type === 'decel_to_stop') {
+                x0 = -8.0; v0 = 6.0; aConst = -1.5;
+            } else if (type === 'reverse_direction') {
+                x0 = -6.0; v0 = 5.0; aConst = -1.2;
+            } else if (type === 'negative_accel') {
+                x0 = 8.0; v0 = 0.0; aConst = -2.0;
+            }
+
+            document.getElementById('num-pos').value = x0.toFixed(1);
+            document.getElementById('slider-pos').value = x0;
+            document.getElementById('num-vel').value = v0.toFixed(1);
+            document.getElementById('slider-vel').value = v0;
+            document.getElementById('num-acc').value = aConst.toFixed(1);
+            document.getElementById('slider-acc').value = aConst;
+
+            init();
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-t').textContent = `${curT.toFixed(2)} s`;
+            document.getElementById('hud-x').textContent = `${curX.toFixed(2)} m`;
+            document.getElementById('hud-v').textContent = `${curV.toFixed(2)} m/s`;
+            document.getElementById('hud-a').textContent = `${curA.toFixed(2)} m/s²`;
+            document.getElementById('hud-dx').textContent = `${(curX - x0).toFixed(2)} m`;
+            document.getElementById('hud-d').textContent = `${totalDistance.toFixed(2)} m`;
+
+            const pill = document.getElementById('live-time-pill');
+            if (pill) pill.textContent = `t = ${curT.toFixed(2)} s`;
+        }
+
+        // Start
+        window.addEventListener('load', () => {
+            init();
+        });
+    </script>
+</body>
+</html>
