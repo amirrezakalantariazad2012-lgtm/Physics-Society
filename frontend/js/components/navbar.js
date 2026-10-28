@@ -75,6 +75,16 @@ function renderNavbar() {
 
                 <!-- User Stats & Actions -->
                 <div class="flex items-center gap-1.5 sm:gap-3">
+                    <!-- Android APK Download Link -->
+                    <a href="https://github.com/amirrezakalantariazad2012-lgtm/Physics-Society/releases/latest/download/physics-society.apk" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-900/30 transition-all hover:scale-105" 
+                       title="دانلود مستقیم اپلیکیشن اندروید (APK)">
+                        <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+                        <span>دانلود APK</span>
+                    </a>
+
                     <!-- Theme Toggle -->
                     <button onclick="window.store.toggleTheme()" class="p-1.5 sm:p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors" title="تغییر تم">
                         <i data-lucide="${isDark ? 'sun' : 'moon'}" class="w-4 sm:w-5 h-4 sm:h-5"></i>
@@ -140,6 +150,16 @@ function renderNavbar() {
 
         <!-- Mobile Slide-Down Drawer Menu -->
         <div id="mobile-nav-drawer" class="hidden md:hidden border-t border-slate-800 bg-slate-900/98 px-4 py-5 space-y-4 shadow-2xl">
+            <a href="https://github.com/amirrezakalantariazad2012-lgtm/Physics-Society/releases/latest/download/physics-society.apk" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               class="w-full p-3 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-bold text-xs flex items-center justify-between shadow-lg shadow-emerald-950/40">
+                <span class="flex items-center gap-2">
+                    <i data-lucide="smartphone" class="w-4 h-4"></i>
+                    <span>دانلود اپلیکیشن اندروید (APK)</span>
+                </span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 font-mono">v2.1</span>
+            </a>
             ${user ? `
             <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-800/70 border border-slate-700/60">
                 <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 to-violet-600 text-white font-bold flex items-center justify-center text-sm shadow-md">

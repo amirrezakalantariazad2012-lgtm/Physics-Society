@@ -1,0 +1,94 @@
+name: Build and Release Android APK
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-android-apk:
+    name: 📱 Compile Android Standalone APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Check out repository
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🟢 Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Install Capacitor Android Tooling
+        run: |
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init "Physics Society" "ir.sampad.physicssociety" --web-dir "frontend"
+
+      - name: 📱 Generate Native Android Platform
+        run: |
+          npx cap add android
+          npx cap copy android
+
+      - name: ⚙️ Configure Android Permissions in Manifest
+        run: |
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          if [ -f "$MANIFEST" ]; then
+            sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />' "$MANIFEST"
+          fi
+
+      - name: 🔨 Compile APK with Gradle
+        run: |
+          cd android
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: 🚚 Prepare Release Artifact
+        run: |
+          mkdir -p release-output
+          cp android/app/build/outputs/apk/debug/app-debug.apk release-output/physics-society.apk
+          echo "APK generated successfully at release-output/physics-society.apk"
+
+      - name: 💾 Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: physics-society-apk
+          path: release-output/physics-society.apk
+          retention-days: 30
+
+      - name: 🏷️ Determine Release Tag
+        id: release_tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=v2.1.${{ github.run_number }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🚀 Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: "نسخه اندروید انجمن فیزیک - ${{ steps.release_tag.outputs.tag }}"
+          body: |
+            ### 📱 نسخه رسمی اپلیکیشن انجمن فیزیک شهید بهشتی دو (سمپاد)
+            این نسخه جهت استفاده دانش‌آموزان و دبیران سراسر کشور به صورت خودکار کامپایل و منتشر شده است.
+            
+            #### قابلیت‌های نسخه رسمی:
+            - دسترسی بومی و پرسرعت به ۲۷ آزمایشگاه تعاملی PhET
+            - لیگ‌های علمی و آزمون‌های طبقه‌بندی‌شده کتب علوم و سمپاد پایه‌های هفتم، هشتم و نهم
+            - سیستم سنجش استمرار، امتیاز تجربه (XP) و رتبه‌بندی کشوری
+            - انطباق ۱۰۰٪ با کتاب‌های درسی رسمی آموزش و پرورش ایران
+          files: release-output/physics-society.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

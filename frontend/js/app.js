@@ -240,6 +240,14 @@ async function renderLandingView(container) {
                             <i data-lucide="trophy" class="w-4 h-4 text-amber-700"></i>
                             <span>مسابقه هفتگی</span>
                         </button>
+                        <a href="https://github.com/amirrezakalantariazad2012-lgtm/Physics-Society/releases/latest/download/physics-society.apk" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-950/40 flex items-center gap-2.5 transition-all hover:scale-105"
+                           title="دانلود مستقیم اپلیکیشن اندروید (APK)">
+                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                            <span>دانلود اپلیکیشن اندروید (APK)</span>
+                        </a>
                     </div>
 
                     <!-- Mini Highlights -->

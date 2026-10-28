@@ -2,6 +2,7 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 
@@ -190,6 +191,9 @@ async def check_payload_size(request: Request, call_next):
         except ValueError:
             pass
     return await call_next(request)
+
+# GZip & CORS Middleware
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # CORS Middleware
 app.add_middleware(
