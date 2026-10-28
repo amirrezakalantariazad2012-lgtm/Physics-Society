@@ -115,7 +115,7 @@ class AdminViews {
                             <i data-lucide="terminal" class="w-5 h-5 text-cyan-400"></i>
                             <h3 class="text-sm font-extrabold text-white">مرکز فرماندهی و دسترسی‌های سریع مدیر (Admin Control Deck)</h3>
                         </div>
-                        <span class="text-[11px] px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono">مدیریت انجمن فیزیک</span>
+                        <span class="text-[11px] px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-sans font-medium">مدیریت انجمن فیزیک</span>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
                         <button onclick="window.currentAdminViews.switchTab('curriculum'); setTimeout(() => window.currentAdminViews.openCreateChapterModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-purple-500/40 text-right flex items-center justify-between transition-all group">
@@ -262,10 +262,10 @@ class AdminViews {
                                     ${q.question_type === 'mcq' ? 'تستی' : 'تشریحی'}
                                 </span>
                                 <span class="text-slate-500 font-semibold">${q.chapter_title_fa || 'فصل فیزیک'} (پایه ${q.grade_number || '-'})</span>
-                                <span class="text-[10px] text-slate-400 font-mono">سطح: ${q.difficulty === 'hard' ? 'سخت' : q.difficulty === 'easy' ? 'آسان' : 'متوسط'}</span>
+                                <span class="text-[10px] text-slate-400 font-sans font-medium">سطح: ${q.difficulty === 'hard' ? 'سخت' : q.difficulty === 'easy' ? 'آسان' : 'متوسط'}</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <span class="text-slate-500 font-mono text-[11px] font-bold">${q.points || 1} نمره</span>
+                                <span class="text-slate-500 font-sans text-[11px] font-bold"><span class="font-mono">${q.points || 1}</span> نمره</span>
                                 <button onclick="window.currentAdminViews.deleteQuestion(${q.id}, '${(q.prompt_fa || '').substring(0, 35).replace(/'/g, "\\'")}')" class="text-rose-500 hover:text-rose-700 p-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1" title="حذف دائمی این سؤال">
                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                     <span class="hidden sm:inline">حذف</span>
@@ -273,7 +273,7 @@ class AdminViews {
                             </div>
                         </div>
                         <p class="text-xs font-semibold text-slate-800 dark:text-white leading-relaxed text-justify">${q.prompt_fa || ''}</p>
-                        ${q.source_ref ? `<span class="text-[11px] text-slate-400 block font-mono">مرجع: ${q.source_ref}</span>` : ''}
+                        ${q.source_ref ? `<span class="text-[11px] text-slate-400 block font-sans">مرجع: <span class="font-mono">${q.source_ref}</span></span>` : ''}
                     </div>
                     `).join('') : '<div class="p-8 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/20 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">هیچ سؤالی در بانک اطلاعاتی یافت نشد.</div>'}
                 </div>
@@ -609,13 +609,13 @@ class AdminViews {
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                             <td class="p-3 font-bold text-slate-800 dark:text-white">${c.title_fa}</td>
                             <td class="p-3">
-                                <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold ${c.league_type === 'monthly' ? 'bg-fuchsia-950/60 text-fuchsia-300' : 'bg-cyan-950/60 text-cyan-300'}">
+                                <span class="px-2.5 py-0.5 rounded-full font-sans text-[11px] font-bold ${c.league_type === 'monthly' ? 'bg-fuchsia-950/60 text-fuchsia-300' : 'bg-cyan-950/60 text-cyan-300'}">
                                     ${c.league_type === 'monthly' ? 'جام ماهانه' : (c.league_type === 'speed_cup' ? 'جام سرعت' : 'لیگ هفتگی')}
                                 </span>
                             </td>
                             <td class="p-3 text-slate-500">${c.grade_title_fa}</td>
-                            <td class="p-3 font-mono">${c.duration_minutes || 45} دقیقه</td>
-                            <td class="p-3 font-mono">${c.has_negative_marking ? 'دارد (۳۳٪)' : 'ندارد'}</td>
+                            <td class="p-3 font-sans"><span class="font-mono">${c.duration_minutes || 45}</span> دقیقه</td>
+                            <td class="p-3 font-sans">${c.has_negative_marking ? 'دارد (۳۳٪)' : 'ندارد'}</td>
                             <td class="p-3 font-mono font-bold text-cyan-500">${c.participant_count}</td>
                             <td class="p-3">
                                 <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${c.is_active ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' : (c.is_closed ? 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300')}">
@@ -1564,7 +1564,7 @@ class AdminViews {
                                     </div>
 
                                     <div class="flex items-center gap-2 self-end sm:self-auto flex-wrap">
-                                        <span class="text-xs text-slate-400 font-mono font-semibold">${ch.estimated_minutes} دقیقه</span>
+                                        <span class="text-xs text-slate-400 font-sans font-semibold"><span class="font-mono">${ch.estimated_minutes}</span> دقیقه</span>
                                         <span class="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">${ch.lessons.length} درسنامه</span>
                                         <span class="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">${ch.questions_count} سؤال</span>
                                         
@@ -1590,7 +1590,7 @@ class AdminViews {
                                         <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-purple-400 transition-all flex flex-col justify-between space-y-2 shadow-2xs">
                                             <div class="space-y-1">
                                                 <div class="flex items-center justify-between text-[11px]">
-                                                    <span class="font-mono font-bold text-slate-400">درس ${les.order_index}</span>
+                                                    <span class="font-sans font-bold text-slate-400">درس <span class="font-mono">${les.order_index}</span></span>
                                                     <div class="flex items-center gap-1">
                                                         <span class="font-mono text-amber-500 font-bold">⚡ +${les.xp_reward} XP</span>
                                                         ${les.simulator_type ? `<span class="px-1.5 py-0.5 rounded bg-cyan-100 dark:bg-cyan-950 text-cyan-600 text-[10px] font-bold">🔬 ${les.simulator_type}</span>` : ''}
@@ -1601,7 +1601,7 @@ class AdminViews {
                                             </div>
 
                                             <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60 text-[11px]">
-                                                <span class="text-slate-400 font-mono">⏱️ ${les.estimated_minutes} دقیقه</span>
+                                                <span class="text-slate-400 font-sans">⏱️ <span class="font-mono">${les.estimated_minutes}</span> دقیقه</span>
                                                 <button onclick="window.currentAdminViews.deleteLesson(${les.id}, '${(les.title_fa || les.title || '').replace(/'/g, "\\'")}')" class="text-rose-500 hover:text-rose-700 p-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1" title="حذف درسنامه">
                                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                     <span>حذف</span>
@@ -2180,11 +2180,11 @@ class AdminViews {
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                             <span class="text-[11px] text-slate-400 font-bold block">کل دانش‌آموزان</span>
-                            <span class="text-xl font-black text-slate-800 dark:text-white font-mono">${totalStudents} نفر</span>
+                            <span class="text-xl font-black text-slate-800 dark:text-white font-sans"><span class="font-mono">${totalStudents}</span> نفر</span>
                         </div>
                         <div class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
                             <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold block">دانش‌آموزان فعال</span>
-                            <span class="text-xl font-black text-emerald-600 font-mono">${activeStudents} نفر</span>
+                            <span class="text-xl font-black text-emerald-600 font-sans"><span class="font-mono">${activeStudents}</span> نفر</span>
                         </div>
                         <div class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30">
                             <span class="text-[11px] text-blue-600 dark:text-blue-400 font-bold block">میانگین امتیاز (XP)</span>
@@ -2192,7 +2192,7 @@ class AdminViews {
                         </div>
                         <div class="p-3.5 rounded-2xl bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30">
                             <span class="text-[11px] text-orange-600 dark:text-orange-400 font-bold block">بیشترین استمرار</span>
-                            <span class="text-xl font-black text-orange-500 font-mono">🔥 ${maxStreak} روز</span>
+                            <span class="text-xl font-black text-orange-500 font-sans">🔥 <span class="font-mono">${maxStreak}</span> روز</span>
                         </div>
                     </div>
 

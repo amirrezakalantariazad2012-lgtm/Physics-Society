@@ -330,7 +330,7 @@ class ExamRunner {
                                         ${opt.option_key}
                                     </span>
                                     <span class="text-sm font-semibold flex-1 leading-relaxed">${opt.text_fa}</span>
-                                    <span class="text-[10px] text-slate-400 font-mono hidden sm:inline">[کلید ${oIdx + 1}]</span>
+                                    <span class="text-[10px] text-slate-400 font-sans hidden sm:inline">[کلید <span class="font-mono">${oIdx + 1}</span>]</span>
                                 </label>
                                 `;
                             }).join('')}
@@ -351,7 +351,7 @@ class ExamRunner {
                             <div class="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
                                 <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
                                     <span>درج سریع نمادها و یکاهای فیزیک:</span>
-                                    <span class="text-[10px] text-blue-500 font-mono">روی نماد کلیک کنید</span>
+                                    <span class="text-[10px] text-blue-500 font-sans">روی نماد کلیک کنید</span>
                                 </div>
                                 <div class="flex flex-wrap gap-1.5">
                                     ${[
@@ -417,7 +417,7 @@ class ExamRunner {
                             <span>سؤال قبلی</span>
                         </button>
 
-                        <span class="text-xs text-slate-400 font-mono hidden sm:inline">سؤال ${this.currentIndex + 1} از ${stats.total}</span>
+                        <span class="text-xs text-slate-400 font-sans hidden sm:inline">سؤال <span class="font-mono">${this.currentIndex + 1}</span> از <span class="font-mono">${stats.total}</span></span>
 
                         <button onclick="window.currentExamRunner.nextQuestion()"
                             ${this.currentIndex === this.questions.length - 1 ? 'disabled class="opacity-40 cursor-not-allowed"' : 'class="btn-duo-blue text-white"'}
@@ -865,14 +865,14 @@ class ExamRunner {
                     </div>
                     <div class="w-px h-12 bg-slate-200 dark:bg-slate-700"></div>
                     <div class="text-center">
-                        <span class="text-4xl sm:text-5xl font-black ${res.is_passed ? 'text-emerald-500' : 'text-rose-500'} font-mono">${res.percentage}٪</span>
+                        <span class="text-4xl sm:text-5xl font-black ${res.is_passed ? 'text-emerald-500' : 'text-rose-500'} font-sans"><span class="font-mono">${res.percentage}</span>%</span>
                         <span class="block text-xs font-bold text-slate-500 mt-1">درصد کسب‌شده</span>
                     </div>
                 </div>
 
                 <div class="inline-flex flex-wrap items-center justify-center gap-3 px-5 py-2 rounded-full text-xs font-black ${res.is_passed ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'}">
                     <span>${res.is_passed ? 'تبریک! نمره قبولی را کسب کردید 🎉' : 'نیاز به مرور مباحث و تمرین مجدد 💡'}</span>
-                    <span class="font-mono text-amber-500">• ⚡ +${res.xp_earned || 0} XP دریافت شد</span>
+                    <span class="font-sans text-amber-500">• ⚡ +<span class="font-mono">${res.xp_earned || 0}</span> XP دریافت شد</span>
                 </div>
 
                 ${res.feedback_fa ? `

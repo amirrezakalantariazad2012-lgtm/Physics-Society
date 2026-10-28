@@ -481,8 +481,8 @@ async function renderDashboardView(container) {
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
-                                <h3 class="font-extrabold text-white text-base">معلم همراه هوش مصنوعی نکسورا (Nexora AI)</h3>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/70 text-emerald-400 border border-emerald-500/40 font-mono">آنلاین • آماده پاسخگویی</span>
+                                <h3 class="font-extrabold text-white text-base font-sans">معلم همراه هوش مصنوعی نکسورا (Nexora AI)</h3>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/70 text-emerald-400 border border-emerald-500/40 font-sans font-medium">آنلاین • آماده پاسخگویی</span>
                             </div>
                             <p class="text-xs text-slate-300 mt-0.5">پاسخگویی مفهومی، اثبات فرمول‌ها و رفع اشکال گام‌به‌گام فیزیک ${s.grade_title_fa}</p>
                         </div>
@@ -1620,111 +1620,111 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
     const progressPct = simCatalog.length > 0 ? Math.round((completedCount / simCatalog.length) * 100) : 0;
 
     container.innerHTML = `
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <!-- Hero Header -->
-        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 p-6 sm:p-10 border border-teal-500/30 text-white shadow-2xl space-y-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+        <!-- PhET Official Standard Header -->
+        <div class="relative overflow-hidden rounded-3xl bg-slate-900/95 p-6 sm:p-10 border border-slate-800 text-white shadow-xl space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-900/60 border border-teal-500/40 text-teal-300 text-xs font-bold">
-                    <i data-lucide="flask-conical" class="w-4 h-4 text-teal-400"></i>
-                    <span>آزمایشگاه مجازی و تعاملی فیزیک سمپاد — دوره‌های هفتم، هشتم و نهم</span>
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-950/80 border border-sky-500/30 text-sky-300 text-xs font-bold font-sans">
+                    <i data-lucide="flask-conical" class="w-4 h-4 text-sky-400"></i>
+                    <span>پلتفرم تخصصی آزمایشگاه‌های تعاملی فیزیک — استاندارد آموزشی PhET</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="window.physicsSimulators.openLabToolboxModal('caliper')" 
-                        class="px-3.5 py-2 rounded-2xl bg-cyan-600/90 hover:bg-cyan-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg transition-all hover:scale-105">
+                        class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold font-sans flex items-center gap-2 shadow-sm transition-colors">
                         <i data-lucide="wrench" class="w-4 h-4"></i>
-                        <span>جعبه ابزار آزاد فیزیکدان</span>
+                        <span>جعبه ابزار آزمایشگاهی</span>
                     </button>
                     <button onclick="window.physicsSimulators.openLabToolboxModal('report')" 
-                        class="px-3.5 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-2 transition-all">
-                        <i data-lucide="file-text" class="w-4 h-4 text-emerald-400"></i>
+                        class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold font-sans flex items-center gap-2 transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4 text-sky-400"></i>
                         <span>دفترچه گزارش کار</span>
                     </button>
                 </div>
             </div>
 
-            <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
-                آزمایشگاه تجربی، شبیه‌سازهای باز و کارگاه اندازه‌گیری
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight font-sans">
+                آزمایشگاه تخصصی و شبیه‌سازهای تعاملی فیزیک
             </h1>
 
-            <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
-                فرصتی برای لمس بی‌واسطه قوانین فیزیک بدون خطر و بدون محدودیت ابزار. متغیرها را آزادانه تغییر دهید، فرضیه‌سازی کنید، با کولیس و ترازو اندازه‌گیری نمایید و گزارش کار مستند دریافت کنید.
+            <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed font-sans">
+                محیط استاندارد آموزش تجربی و شبیه‌سازی دقیق فیزیک؛ متغیرها را آزادانه تغییر دهید، فرضیه‌سازی کنید و با ابزارهای علمی داده‌ها را تحلیل و ثبت نمایید.
             </p>
 
-            <!-- Grade & Search Filters Bar -->
-            <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800/80">
-                <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+            <!-- Unified PhET Grade Filter Tabs (Clean, Professional, No Rainbow Emojis) -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800">
+                <div class="flex flex-wrap items-center gap-2 text-xs font-sans">
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'all')"
-                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === 'all' ? 'bg-teal-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                        همه پایه‌ها (${simCatalog.length})
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === 'all' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        همه آزمایش‌ها (${simCatalog.length})
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '7')"
-                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '7' ? 'bg-amber-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                        🟡 پایه هفتم (${simCatalog.filter(s => s.grade === 7 && s.gradeKey !== 'space').length} آزمایش)
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === '7' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        پایه هفتم (${simCatalog.filter(s => s.grade === 7 && s.gradeKey !== 'space').length})
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '8')"
-                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '8' ? 'bg-blue-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                        🔵 پایه هشتم (${simCatalog.filter(s => s.grade === 8 && s.gradeKey !== 'space').length} آزمایش)
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === '8' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        پایه هشتم (${simCatalog.filter(s => s.grade === 8 && s.gradeKey !== 'space').length})
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '9')"
-                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === '9' ? 'bg-purple-500 text-slate-950 shadow-md font-black' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                        🟣 پایه نهم (${simCatalog.filter(s => s.grade === 9 && s.gradeKey !== 'space').length} آزمایش)
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === '9' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        پایه نهم (${simCatalog.filter(s => s.grade === 9 && s.gradeKey !== 'space').length})
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'space')"
-                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === 'space' ? 'bg-cyan-500 text-slate-950 shadow-md font-black ring-2 ring-cyan-400/50' : 'bg-slate-800 text-cyan-400 hover:text-white border border-cyan-800/40'}">
-                        🚀 فضا و نجوم (${simCatalog.filter(s => s.gradeKey === 'space').length} آزمایش)
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === 'space' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        نجوم و فضا (${simCatalog.filter(s => s.gradeKey === 'space').length})
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'featured')"
-                        class="px-3.5 py-1.5 rounded-xl transition-all ${gradeFilter === 'featured' ? 'bg-sky-500 text-slate-950 shadow-md font-black ring-2 ring-sky-400/50' : 'bg-slate-800 text-sky-300 hover:text-white border border-sky-800/40'}">
-                        آزمایشگاه‌های تحلیلی (${simCatalog.filter(s => s.gradeKey === 'featured').length} پلتفرم)
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === 'featured' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        آزمایشگاه‌های تخصصی (${simCatalog.filter(s => s.gradeKey === 'featured').length})
                     </button>
                 </div>
 
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>۳۰ آزمایشگاه تعاملی (۲۷ شبیه‌ساز رسمی PhET + ۳ آزمایشگاه تحلیلی مکمل)</span>
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 font-sans">
+                    <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                    <span>۳۰ آزمایشگاه تعاملی (۲۷ شبیه‌ساز استاندارد PhET + ۳ آزمایشگاه تحلیلی)</span>
                 </div>
             </div>
         </div>
 
-        <!-- Student Lab Progress & Gamification Bar -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-teal-500/30 text-white shadow-xl space-y-3">
+        <!-- Student Lab Progress Strip (PhET Slate & Sky Blue Theme) -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-slate-800 text-white shadow-lg space-y-3 font-sans">
             <div class="flex flex-wrap items-center justify-between gap-3 text-xs">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-400 border border-teal-500/40 flex items-center justify-center font-black">
+                    <div class="w-9 h-9 rounded-xl bg-sky-950 text-sky-400 border border-sky-500/30 flex items-center justify-center font-bold">
                         <i data-lucide="award" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <span class="text-[11px] text-slate-400 block font-bold">کارنامه و پیشرفت آزمایشگاهی شما:</span>
-                        <span class="text-sm sm:text-base font-extrabold text-white flex items-center gap-1.5">
-                            <span class="font-mono text-emerald-400">${totalXp} XP</span>
-                            <span class="text-xs text-slate-300 font-normal">امتیاز کسب‌شده در فعالیت‌های تجربی و گزارش کار</span>
+                        <span class="text-[11px] text-slate-400 block font-medium font-sans">کارنامه فعالیت‌های آزمایشگاهی شما:</span>
+                        <span class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+                            <span class="font-mono text-sky-400">${totalXp} XP</span>
+                            <span class="text-xs text-slate-300 font-normal font-sans">امتیاز کسب‌شده در گزارش کار و فعالیت‌های علمی</span>
                         </span>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4 text-xs font-bold">
+                <div class="flex items-center gap-5 text-xs font-sans">
                     <div class="text-right">
-                        <span class="text-slate-400 text-[10px] block">آزمایش‌های تکمیل‌شده:</span>
-                        <span class="text-emerald-400 font-mono text-sm">${completedCount} / ${simCatalog.length} آزمایش</span>
+                        <span class="text-slate-400 text-[10px] block font-sans">آزمایش‌های تکمیل‌شده:</span>
+                        <span class="text-slate-200 text-sm font-sans font-bold"><span class="font-mono text-sky-400">${completedCount}</span> از <span class="font-mono">${simCatalog.length}</span></span>
                     </div>
                     <div class="text-right">
-                        <span class="text-slate-400 text-[10px] block">درصد تکمیل:</span>
-                        <span class="text-cyan-300 font-mono text-sm">${progressPct}%</span>
+                        <span class="text-slate-400 text-[10px] block font-sans">درصد تکمیل:</span>
+                        <span class="text-sky-300 font-mono text-sm font-bold">${progressPct}%</span>
                     </div>
                 </div>
             </div>
 
             <!-- Progress track -->
             <div class="w-full h-2 rounded-full bg-slate-950 border border-slate-800 overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-teal-500 via-cyan-400 to-emerald-400 rounded-full transition-all duration-500" 
+                <div class="h-full bg-sky-500 rounded-full transition-all duration-500" 
                     style="width: ${Math.min(100, progressPct)}%"></div>
             </div>
         </div>
 
-        <!-- Experiment Selector Grid -->
-        <div class="space-y-3">
-            <div class="flex items-center justify-between text-xs font-bold text-slate-400">
-                <span>انتخاب آزمایش از سرفصل دروس فیزیک (کتاب‌های وزارتی و تکمیلی سمپاد):</span>
+        <!-- Experiment Selector Grid (PhET Official Clean Cards) -->
+        <div class="space-y-3 font-sans">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-400 font-sans">
+                <span>انتخاب آزمایش از سرفصل دروس فیزیک:</span>
                 <span>${simCatalog.filter(s => {
                     if (gradeFilter === 'all') return true;
                     if (gradeFilter === 'space') return s.gradeKey === 'space';
@@ -1742,33 +1742,30 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                 }).map(s => {
                     const isSelected = s.id === activeSim;
                     const isCompleted = labProgress && labProgress.completed_sim_ids && labProgress.completed_sim_ids.includes(s.id);
-                    const gradeColor = s.gradeKey === 'space'
-                        ? 'text-cyan-400 bg-cyan-950/60 border-cyan-800/40'
-                        : (s.gradeKey === 'featured' ? 'text-sky-300 bg-sky-950/60 border-sky-800/40' : (s.grade === 7 ? 'text-amber-400 bg-amber-950/60 border-amber-800/40' : (s.grade === 8 ? 'text-blue-400 bg-blue-950/60 border-blue-800/40' : 'text-purple-400 bg-purple-950/60 border-purple-800/40')));
                     return `
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${s.id}', '${currentMode}', '${gradeFilter}')"
-                        class="p-3 rounded-2xl border text-right transition-all flex flex-col justify-between group ${isSelected 
-                            ? 'bg-teal-500/20 border-teal-500 text-teal-300 font-bold shadow-lg shadow-teal-500/10 ring-2 ring-teal-500/40' 
-                            : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:border-teal-500/50 hover:bg-slate-850'}">
+                        class="p-3 rounded-2xl border text-right transition-all flex flex-col justify-between group font-sans ${isSelected 
+                            ? 'bg-slate-900 border-sky-500 text-white ring-2 ring-sky-500/40 shadow-lg' 
+                            : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-800/80'}">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="w-7 h-7 rounded-xl bg-slate-800 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
+                            <span class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center ${isSelected ? 'text-sky-400' : 'text-slate-400 group-hover:text-sky-400'} transition-colors">
                                 <i data-lucide="${s.icon || 'atom'}" class="w-3.5 h-3.5"></i>
                             </span>
                             <div class="flex items-center gap-1">
                                 ${isCompleted ? `
-                                <span class="text-[9px] px-1 py-0.5 rounded border font-bold text-emerald-300 bg-emerald-950/80 border-emerald-700/60 flex items-center gap-0.5">
+                                <span class="text-[9px] px-1.5 py-0.5 rounded-md font-sans font-medium text-emerald-300 bg-emerald-950/80 border border-emerald-700/60 flex items-center gap-0.5">
                                     <i data-lucide="check" class="w-2.5 h-2.5"></i>
                                     <span>انجام‌شده</span>
                                 </span>
                                 ` : ''}
-                                <span class="text-[9px] px-1.5 py-0.5 rounded border font-mono font-bold ${gradeColor}">
+                                <span class="text-[10px] px-2 py-0.5 rounded-md font-sans font-medium text-slate-300 bg-slate-800/90 border border-slate-700/60">
                                     ${s.gradeTitle}
                                 </span>
                             </div>
                         </div>
                         <div>
-                            <span class="text-xs font-bold block truncate leading-tight">${s.title}</span>
-                            <span class="text-[10px] text-slate-400 block truncate mt-1">${s.topic}</span>
+                            <span class="text-xs font-bold block truncate font-sans leading-tight ${isSelected ? 'text-white' : 'text-slate-200'}">${s.title}</span>
+                            <span class="text-[10px] text-slate-400 block truncate mt-1 font-sans">${s.topic}</span>
                         </div>
                     </button>
                     `;

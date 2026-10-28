@@ -66,6 +66,26 @@ kbd {
     direction: ltr;
 }
 
+/* Guard: Prevent Monospace Fallback From Breaking Persian Cursive Ligatures */
+[dir="rtl"],
+.font-fa,
+.font-sans,
+body, button, input, textarea, select {
+    font-family: var(--font-fa);
+    letter-spacing: normal !important;
+}
+
+/* PhET Official Design Tokens */
+:root {
+    --phet-navy: #001e44;
+    --phet-blue: #0284c7;
+    --phet-blue-hover: #0369a1;
+    --phet-dark-bg: #070b14;
+    --phet-card-bg: rgba(15, 23, 42, 0.95);
+    --phet-border: #1e293b;
+    --phet-border-active: #0284c7;
+}
+
 .katex,
 .katex * {
     font-family: KaTeX_Main, KaTeX_Math, 'JetBrains Mono', sans-serif !important;

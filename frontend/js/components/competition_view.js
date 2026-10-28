@@ -341,7 +341,7 @@ async function openCompetitionModal(compId) {
                             <span class="text-xs font-black px-2.5 py-0.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
                                 سؤال ${idx + 1}
                             </span>
-                            <span class="text-xs text-slate-400 font-mono">${q.points} نمره</span>
+                            <span class="text-xs text-slate-400 font-sans"><span class="font-mono">${q.points}</span> نمره</span>
                         </div>
 
                         <p class="text-sm font-bold text-white leading-relaxed">${q.prompt_fa}</p>
@@ -406,10 +406,10 @@ async function openCompetitionModal(compId) {
                         </div>
                         <div class="flex items-center gap-3">
                             ${b.time_spent_seconds ? `
-                            <span class="text-[11px] text-slate-400 font-mono">${b.time_spent_seconds} ثانیه</span>
+                            <span class="text-[11px] text-slate-400 font-sans"><span class="font-mono">${b.time_spent_seconds}</span> ثانیه</span>
                             ` : ''}
-                            <span class="font-black text-cyan-400 font-mono text-sm">
-                                ${b.score} نمره
+                            <span class="font-black text-cyan-400 font-sans text-sm">
+                                <span class="font-mono">${b.score}</span> نمره
                             </span>
                         </div>
                     </div>
