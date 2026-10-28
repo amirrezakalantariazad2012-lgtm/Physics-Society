@@ -1442,8 +1442,9 @@ class PhysicsSimulators {
         const isDuoPoint = container.id === 'duo-sim-mount-point';
         const frameHeight = isDuoPoint ? 'h-[500px]' : 'h-[640px] sm:h-[720px]';
         const buster = Date.now();
-        const baseSimUrl = sim.localUrl || '';
-        const simIframeSrc = baseSimUrl ? (baseSimUrl.includes('?') ? `${baseSimUrl}&v=${buster}` : `${baseSimUrl}?v=${buster}`) : '';
+        const rawUrl = sim.localUrl || '';
+        const baseSimUrl = rawUrl.split('?')[0];
+        const simIframeSrc = baseSimUrl ? `${baseSimUrl}?phet_theme=white&build=3.2&v=${buster}` : '';
 
         container.innerHTML = `
         <div id="sim-master-card" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl flex flex-col space-y-0 transition-all">
@@ -1718,7 +1719,7 @@ class PhysicsSimulators {
     openInStandaloneTab(url) {
         if (!url) return;
         const cleanUrl = url.split('?')[0];
-        window.open(`${cleanUrl}?v=${Date.now()}`, '_blank');
+        window.open(`${cleanUrl}?phet_theme=white&build=3.2&v=${Date.now()}`, '_blank');
     }
 
     toggleFullscreen(elementId) {
@@ -1753,7 +1754,7 @@ class PhysicsSimulators {
             const baseUrl = raw.split('?')[0];
             iframe.src = 'about:blank';
             setTimeout(() => { 
-                iframe.src = `${baseUrl}?v=${Date.now()}`; 
+                iframe.src = `${baseUrl}?phet_theme=white&build=3.2&v=${Date.now()}`; 
             }, 60);
         }
     }
