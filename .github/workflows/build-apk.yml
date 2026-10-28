@@ -12,6 +12,8 @@ jobs:
   build-android-apk:
     name: 📱 Compile Android Standalone APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: 📥 Check out repository
@@ -32,7 +34,7 @@ jobs:
         run: |
           npm init -y
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "Physics Society" "ir.sampad.physicssociety" --web-dir "frontend"
+          npx cap init "Physics Society" "ir.sampad.physicssociety" --web-dir "frontend" || true
 
       - name: 📱 Generate Native Android Platform
         run: |

@@ -333,14 +333,14 @@ async function renderLandingView(container) {
                         <div class="space-y-2.5">
                             <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 text-center">
                                 <span class="text-[10px] text-slate-400 block mb-1 font-mono">KINEMATICS & DYNAMICS (معادلات حرکت سمپاد)</span>
-                                <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-sky-300 academic-mono">
-                                    $$x(t) = \frac{1}{2}at^2 + v_0t + x_0 \quad \Longleftrightarrow \quad \vec{F} = m\vec{a}$$
+                                <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-sky-300 academic-mono katex-ltr-container" dir="ltr">
+                                    $$x(t) = \\frac{1}{2}at^2 + v_0t + x_0 \\quad \\Longleftrightarrow \\quad \\vec{F} = m\\vec{a}$$
                                 </div>
                             </div>
                             <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 text-center">
                                 <span class="text-[10px] text-slate-400 block mb-1 font-mono">ENERGY & PRESSURE (پایستگی انرژی و فشار)</span>
-                                <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-teal-300 academic-mono">
-                                    $$K = \frac{1}{2}mv^2 + mgh \quad , \quad P = \rho gh + P_0$$
+                                <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-teal-300 academic-mono katex-ltr-container" dir="ltr">
+                                    $$K = \\frac{1}{2}mv^2 + mgh \\quad , \\quad P = \\rho gh + P_0$$
                                 </div>
                             </div>
                         </div>
@@ -517,6 +517,10 @@ async function renderLandingView(container) {
         </div>
     </section>
     `;
+
+    if (window.renderMathInPage) {
+        setTimeout(() => window.renderMathInPage(container), 30);
+    }
 }
 
 
@@ -553,9 +557,9 @@ async function renderDashboardView(container) {
                 gradeBadge: 'پایه هفتم — کاوشگر ماده، اندازه‌گیری و انرژی',
                 badgeIcon: 'flame',
                 accentColor: 'sky',
-                formula: '$$W = F \cdot d \quad , \quad E_k = \frac{1}{2}m v^2 \quad , \quad Q = mc\Delta T$$',
+                formula: '$$W = F \\cdot d \\quad , \\quad E_k = \\frac{1}{2}m v^2 \\quad , \\quad Q = mc\\Delta T$$',
                 labTitle: 'میز کار آزمایشگاه هفتم: اندازه‌گیری، چگالی و تبدیل انرژی (PhET)',
-                labDesc: 'بررسی دقیق یکاهای استاندارد SI، رابطه چگالی $\rho = \frac{m}{V}$، تبدیلات انرژی پتانسیل گرانشی و جنبشی، و سازوکار انتقال گرما (رسانش، همرفت، تابش).',
+                labDesc: 'بررسی دقیق یکاهای استاندارد SI، رابطه چگالی $\\rho = \\frac{m}{V}$، تبدیلات انرژی پتانسیل گرانشی و جنبشی، و سازوکار انتقال گرما (رسانش، همرفت، تابش).',
                 labActionText: 'ورود به آزمایشگاه PhET',
                 simId: 'density'
             },
@@ -565,7 +569,7 @@ async function renderDashboardView(container) {
                 gradeBadge: 'پایه هشتم — پژوهشگر بارهای الکتریکی، مغناطیس و نور',
                 badgeIcon: 'zap',
                 accentColor: 'sky',
-                formula: '$$V = I \cdot R \quad , \quad \theta_i = \theta_r \quad , \quad n = \frac{c}{v}$$',
+                formula: '$$V = I \\cdot R \\quad , \\quad \\theta_i = \\theta_r \\quad , \\quad n = \\frac{c}{v}$$',
                 labTitle: 'میز کار آزمایشگاه هشتم: مدار الکتریکی و شکست نور در عدسی‌ها (PhET)',
                 labDesc: 'کاوش قانون اهم، مقاومت معادل مدارهای متوالی و موازی، اثر متقابل قطب‌های مغناطیسی، تشکیل تصویر در آینه‌های کروی و پدیده شکست نور در منشور.',
                 labActionText: 'ورود به آزمایشگاه PhET',
@@ -577,7 +581,7 @@ async function renderDashboardView(container) {
                 gradeBadge: 'پایه نهم — نخبه مکانیک کلاسیک، دینامیک نیوتون و فشار',
                 badgeIcon: 'orbit',
                 accentColor: 'sky',
-                formula: '$$F_{net} = m \cdot a \quad , \quad P = \rho g h \quad , \quad v = \frac{\Delta x}{\Delta t}$$',
+                formula: '$$F_{net} = m \\cdot a \\quad , \\quad P = \\rho g h \\quad , \\quad v = \\frac{\\Delta x}{\\Delta t}$$',
                 labTitle: 'رصدخانه تخصصی نهم: بردار نیرو، قوانین نیوتون و فشار شاره‌ها (PhET)',
                 labDesc: 'تحلیل برداری سینماتیک حرکت، قوانین اول تا سوم نیوتون و نیروی اصطکاک، فشار در عمق مایعات، قانون پاسکال و مزیت مکانیکی قرقره‌ها و اهرم‌ها.',
                 labActionText: 'ورود به آزمایشگاه PhET',

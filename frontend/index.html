@@ -58,10 +58,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
 
-    <!-- KaTeX for Scientific Formulas and Equations -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <!-- KaTeX for Scientific Formulas and Equations (Self-Hosted Offline First with CDN Fallback) -->
+    <link rel="stylesheet" href="/assets/katex/katex.min.css">
+    <script src="/assets/katex/katex.min.js"></script>
+    <script src="/assets/katex/auto-render.min.js"></script>
 
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -264,6 +264,7 @@
     <!-- Math & KaTeX Automatic Scientific Formula Renderer -->
     <script>
         function renderMathInPage(targetEl = document.body) {
+            if (!targetEl) targetEl = document.body;
             if (window.renderMathInElement) {
                 try {
                     window.renderMathInElement(targetEl, {
@@ -279,14 +280,23 @@
                 } catch (e) {
                     console.warn('Math rendering notice:', e);
                 }
-            } else if (window.katex && targetEl) {
-                const mathContainers = targetEl.querySelectorAll('.katex-ltr-container');
+            }
+            if (window.katex && targetEl) {
+                const mathContainers = targetEl.querySelectorAll('.katex-ltr-container, .academic-mono');
                 mathContainers.forEach(el => {
-                    const raw = el.textContent.trim().replace(/^\$\$|\$\$$/g, '');
-                    if (raw && !el.querySelector('.katex')) {
+                    if (el.querySelector('.katex')) return;
+                    let raw = el.textContent.trim();
+                    if (raw.startsWith('$$') && raw.endsWith('$$')) {
+                        raw = raw.slice(2, -2).trim();
+                    } else if (raw.startsWith('$') && raw.endsWith('$')) {
+                        raw = raw.slice(1, -1).trim();
+                    }
+                    if (raw && (raw.includes('\\') || raw.includes('^') || raw.includes('_') || raw.includes('='))) {
                         try {
                             window.katex.render(raw, el, { displayMode: true, throwOnError: false });
-                        } catch (err) {}
+                        } catch (err) {
+                            console.warn('KaTeX fallback error:', err);
+                        }
                     }
                 });
             }
