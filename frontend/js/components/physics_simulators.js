@@ -1446,25 +1446,25 @@ class PhysicsSimulators {
         const simIframeSrc = baseSimUrl ? (baseSimUrl.includes('?') ? `${baseSimUrl}&v=${buster}` : `${baseSimUrl}?v=${buster}`) : '';
 
         container.innerHTML = `
-        <div id="sim-master-card" class="rounded-3xl bg-slate-900 border border-slate-700/80 overflow-hidden shadow-2xl flex flex-col space-y-0 transition-all">
-            <!-- Sleek Control Toolbar -->
-            <div class="p-3.5 sm:p-4 bg-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+        <div id="sim-master-card" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl flex flex-col space-y-0 transition-all">
+            <!-- Academic Control Toolbar (MIT / CERN Standard) -->
+            <div class="p-3.5 sm:p-4 bg-slate-50/90 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-2.5">
-                    <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shadow-lg shadow-emerald-500/50"></span>
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-md shadow-emerald-500/30"></span>
                     <div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <h3 class="font-extrabold text-sm sm:text-base text-white">${sim.title}</h3>
-                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/60 font-bold">
+                            <h3 class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">${sim.title}</h3>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700/60 font-bold">
                                 بومی و آفلاین
                             </span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-950 text-sky-300 border border-sky-800 font-bold">
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 dark:bg-sky-950 text-blue-700 dark:text-sky-300 border border-blue-200 dark:border-sky-800 font-bold">
                                 ${sim.gradeTitle}
                             </span>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-                            <span class="text-teal-400 font-medium">${sim.ministryBook}</span>
+                        <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            <span class="text-blue-600 dark:text-teal-400 font-medium">${sim.ministryBook}</span>
                             <span>•</span>
-                            <span class="text-amber-400 font-medium">${sim.sampadBook}</span>
+                            <span class="text-amber-600 dark:text-amber-400 font-medium">${sim.sampadBook}</span>
                         </div>
                     </div>
                 </div>
@@ -1473,27 +1473,27 @@ class PhysicsSimulators {
                 <div class="flex items-center flex-wrap gap-1.5 sm:gap-2">
                     <button onclick="window.physicsSimulators.openInStandaloneTab('${sim.localUrl}')" 
                         title="باز کردن در صفحه جداگانه / پنجره تمام‌صفحه مستقل برای نمایش روی تخته هوشمند"
-                        class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 hover:text-white text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all shadow hover:border-teal-500/50">
+                        class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-blue-600 dark:text-teal-300 font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 text-xs transition-all shadow-sm">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                         <span>پنجره مستقل</span>
                     </button>
 
                     <button onclick="window.physicsSimulators.toggleFullscreen('sim-viewport-frame-wrapper')" 
                         title="نمایش تمام‌صفحه"
-                        class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all">
+                        class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all shadow-sm">
                         <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
                         <span>تمام‌صفحه</span>
                     </button>
 
                     <button onclick="window.physicsSimulators.reloadActiveFrame()" 
                         title="راه‌اندازی مجدد شبیه‌ساز"
-                        class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all">
+                        class="p-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-all shadow-sm">
                         <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
                     </button>
 
                     <button onclick="window.physicsSimulators.openLabToolboxModal('caliper')" 
                         title="جعبه ابزار آزمایشگاهی (کولیس، کرونومتر، مولتی‌متر)"
-                        class="px-3 py-1.5 rounded-xl bg-cyan-700/80 hover:bg-cyan-600 text-white text-xs font-bold flex items-center gap-1.5 shadow transition-all">
+                        class="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-cyan-700/80 hover:bg-blue-100 dark:hover:bg-cyan-600 text-blue-700 dark:text-white border border-blue-200 dark:border-transparent text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all">
                         <i data-lucide="wrench" class="w-3.5 h-3.5"></i>
                         <span>جعبه ابزار</span>
                     </button>
@@ -1555,32 +1555,32 @@ class PhysicsSimulators {
             </div>
 
             <!-- Bottom Multi-Tab Educational Panel -->
-            <div class="p-4 sm:p-6 bg-slate-900/95 border-t border-slate-800 space-y-4">
+            <div class="p-4 sm:p-6 bg-slate-50 dark:bg-slate-900/95 border-t border-slate-200 dark:border-slate-800 space-y-4">
                 <!-- Tab Selector -->
-                <div class="flex flex-wrap items-center gap-2 border-b border-slate-800/80 pb-3 text-xs font-bold">
+                <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-slate-800/80 pb-3 text-xs font-bold">
                     <button onclick="window.physicsSimulators.switchInfoTab('steps')" id="sim-tab-btn-steps" 
-                        class="px-3.5 py-1.5 rounded-xl bg-teal-500 text-slate-950 font-black shadow flex items-center gap-1.5 transition-all">
+                        class="px-3.5 py-1.5 rounded-xl bg-blue-600 text-white font-black shadow flex items-center gap-1.5 transition-all">
                         <i data-lucide="list-ordered" class="w-3.5 h-3.5"></i>
                         <span>دستور کار و سناریو</span>
                     </button>
                     <button onclick="window.physicsSimulators.switchInfoTab('formula')" id="sim-tab-btn-formula" 
-                        class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all">
+                        class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all">
                         <i data-lucide="sigma" class="w-3.5 h-3.5"></i>
                         <span>روابط و فرمول‌ها</span>
                     </button>
                     <button onclick="window.physicsSimulators.switchInfoTab('logbook')" id="sim-tab-btn-logbook" 
-                        class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all">
+                        class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all">
                         <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                        <span>دفترچه ثبت مشاهدات ${isLogbookClaimed ? '<span class="text-[10px] text-emerald-400 font-bold">✓ ثبت‌شده</span>' : '<span class="text-[10px] text-teal-300">(+۱۵ XP)</span>'}</span>
+                        <span>دفترچه ثبت مشاهدات ${isLogbookClaimed ? '<span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ ثبت‌شده</span>' : '<span class="text-[10px] text-blue-600 dark:text-teal-300">(+۱۵ XP)</span>'}</span>
                     </button>
                     <button onclick="window.physicsSimulators.switchInfoTab('challenge')" id="sim-tab-btn-challenge" 
-                        class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all">
-                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-amber-400"></i>
-                        <span>چالش مفهومی سمپاد ${isChallengeClaimed ? '<span class="text-[10px] text-emerald-400 font-bold">✓ حل‌شده</span>' : '<span class="text-[10px] text-amber-300">(+۱۰ XP)</span>'}</span>
+                        class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-amber-500"></i>
+                        <span>چالش مفهومی سمپاد ${isChallengeClaimed ? '<span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ حل‌شده</span>' : '<span class="text-[10px] text-amber-600 dark:text-amber-300">(+۱۰ XP)</span>'}</span>
                     </button>
                     <button onclick="window.physicsSimulators.switchInfoTab('misconceptions')" id="sim-tab-btn-misconceptions" 
-                        class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all">
-                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400"></i>
+                        class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all">
+                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-500"></i>
                         <span>تله‌های تستی سمپاد</span>
                     </button>
                 </div>
@@ -1701,10 +1701,10 @@ class PhysicsSimulators {
             const content = document.getElementById(`sim-info-tab-${t}`);
             if (btn && content) {
                 if (t === targetTab) {
-                    btn.className = 'px-3.5 py-1.5 rounded-xl bg-teal-500 text-slate-950 font-black shadow flex items-center gap-1.5 transition-all';
+                    btn.className = 'px-3.5 py-1.5 rounded-xl bg-blue-600 text-white font-black shadow flex items-center gap-1.5 transition-all';
                     content.classList.remove('hidden');
                 } else {
-                    btn.className = 'px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all';
+                    btn.className = 'px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all';
                     content.classList.add('hidden');
                 }
             }

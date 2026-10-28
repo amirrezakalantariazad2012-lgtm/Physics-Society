@@ -8,15 +8,18 @@ class AppStore {
         this.viewParams = {};
         this.grades = [];
         this.selectedGrade = null;
-        this.theme = localStorage.getItem('theme') || 'dark';
+        this.theme = localStorage.getItem('theme') || 'light';
         this.initTheme();
     }
 
     initTheme() {
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
         if (this.theme === 'dark') {
             document.documentElement.classList.add('dark');
+            if (metaTheme) metaTheme.setAttribute('content', '#070A18');
         } else {
             document.documentElement.classList.remove('dark');
+            if (metaTheme) metaTheme.setAttribute('content', '#f8fafc');
         }
     }
 

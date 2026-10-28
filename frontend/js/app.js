@@ -205,6 +205,9 @@ async function renderCurrentView() {
 // ==========================================
 // VIEW: LANDING PAGE
 // ==========================================
+// ==========================================
+// VIEW: ACADEMIC ENTERPRISE LANDING PAGE (MIT Physics & CERN Inspired)
+// ==========================================
 async function renderLandingView(container) {
     let stats = { students_count: 0, questions_count: 360, exams_count: 12, competitions_count: 1 };
     try {
@@ -212,144 +215,300 @@ async function renderLandingView(container) {
     } catch (e) {}
 
     container.innerHTML = `
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden py-16 sm:py-24">
+    <!-- Institutional Accreditation Top Bar -->
+    <div class="border-b border-slate-200 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/60 backdrop-blur py-2.5 px-4 sm:px-8">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">دبیرستان استعدادهای درخشان شهید بهشتی دو • دوره اول</span>
+                <span class="hidden sm:inline text-slate-400 dark:text-slate-600">|</span>
+                <span class="hidden sm:inline text-[11px] text-sky-600 dark:text-sky-400 font-mono tracking-wide">SAMPAD DEPARTMENT OF EXPERIMENTAL PHYSICS</span>
+            </div>
+            <div class="flex items-center gap-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                <span>سامانه مصوب آموزشی سمپاد</span>
+                <span>•</span>
+                <span class="text-emerald-600 dark:text-emerald-400 font-bold">ورژن سراسری ۲.۱</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Academic Hero Section -->
+    <section class="relative overflow-hidden py-12 sm:py-20 academic-hero-glow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-6 text-right">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-950/80 border border-sky-800/80 text-sky-300 text-xs font-bold shadow-sm">
-                        <i data-lucide="atom" class="w-4 h-4 text-sky-400"></i>
-                        <span>انجمن فیزیک شهید بهشتی دو دوره اول</span>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+                
+                <!-- Left/Text Column (RTL) -->
+                <div class="lg:col-span-7 space-y-6 text-right">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-800/80 text-blue-700 dark:text-blue-300 text-xs font-bold shadow-sm">
+                        <i data-lucide="atom" class="w-4 h-4 text-blue-500"></i>
+                        <span>پرتال تخصصی آموزش، آزمایشگاه‌های تعاملی و سنجش فیزیک</span>
                     </div>
 
-                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white leading-tight">
-                        یادگیری عمیق فیزیک، <br/>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-sky-300 to-blue-400">آزمایشگاه تخصصی PhET و هوش مصنوعی</span>
+                    <h1 class="text-3xl sm:text-5xl lg:text-[3.25rem] font-black text-slate-900 dark:text-white leading-[1.25] tracking-tight">
+                        یادگیری مفهومی فیزیک، <br/>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-sky-500 to-teal-500 dark:from-blue-400 dark:via-sky-300 dark:to-teal-300">
+                            آزمایشگاه‌های استاندارد PhET و سنجش تشریحی
+                        </span>
                     </h1>
 
-                    <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
-                        پلتفرم تخصصی آموزش فیزیک پایه‌های هفتم، هشتم و نهم بر پایه کتاب‌های رسمی و کتب تکمیلی استعدادهای درخشان. همراه با شبیه‌سازهای آزمایشگاهی، تصحیح هوشمند، لیگ‌های هفتگی و گیمیفیکیشن.
+                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl font-normal">
+                        سامانه جامع آموزش علوم تجربی و فیزیک دوره‌ اول متوسطه و مدارس استعدادهای درخشان (سمپاد) — پایه‌های هفتم، هشتم و نهم. منطبق با کتاب‌های درسی رسمی وزارت آموزش و پرورش و کتب تکمیلی فیزیک سمپاد، همراه با ۲۷ آزمایشگاه رسمی دانشگاه کلرادو، لیگ‌های علمی هفتگی و آزمون‌ساز هوشمند.
                     </p>
 
-                    <div class="flex flex-wrap items-center gap-4 pt-4">
-                        <button onclick="window.store.setView('curriculum')" class="btn-duo-green text-white font-bold text-sm px-8 py-3.5 rounded-2xl shadow-lg flex items-center gap-2">
-                            <span>شروع یادگیری فیزیک</span>
-                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <!-- Academic Primary Action Buttons -->
+                    <div class="flex flex-wrap items-center gap-3 pt-2">
+                        <button onclick="window.store.setView('curriculum')" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 flex items-center gap-2 transition-all hover:scale-[1.02]">
+                            <i data-lucide="book-open" class="w-4 h-4"></i>
+                            <span>سرفصل‌ها و نقشه یادگیری</span>
                         </button>
-                        <button onclick="window.store.setView('competitions')" class="btn-duo-yellow text-slate-900 font-bold text-sm px-6 py-3.5 rounded-2xl shadow-sm flex items-center gap-2">
-                            <i data-lucide="trophy" class="w-4 h-4 text-amber-700"></i>
-                            <span>مسابقه هفتگی</span>
+                        
+                        <button onclick="window.store.setView('simulators')" class="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-teal-300 font-bold text-xs sm:text-sm border border-slate-300 dark:border-slate-700 flex items-center gap-2 transition-all">
+                            <i data-lucide="flask-conical" class="w-4 h-4 text-teal-500"></i>
+                            <span>آزمایشگاه‌های ۲۷گانه PhET</span>
                         </button>
+
                         <a href="https://github.com/amirrezakalantariazad2012-lgtm/Physics-Society/releases/latest/download/physics-society.apk" 
                            target="_blank" 
                            rel="noopener noreferrer" 
-                           class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-950/40 flex items-center gap-2.5 transition-all hover:scale-105"
+                           class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 flex items-center gap-2 transition-all hover:scale-[1.02]"
                            title="دانلود مستقیم اپلیکیشن اندروید (APK)">
                             <i data-lucide="smartphone" class="w-4 h-4"></i>
                             <span>دانلود اپلیکیشن اندروید (APK)</span>
                         </a>
+
+                        <button onclick="window.store.setView('competitions')" class="px-4 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/50 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold text-xs sm:text-sm border border-amber-300 dark:border-amber-800/80 flex items-center gap-2 transition-all">
+                            <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
+                            <span>لیگ المپیاد</span>
+                        </button>
                     </div>
 
-                    <!-- Mini Highlights -->
-                    <div class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
-                            <span>۵۰۰+ سؤال استاندارد سمپاد</span>
+                    <!-- Academic Telemetry Badges Strip -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs">
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                            <span class="text-lg sm:text-xl font-black text-blue-600 dark:text-blue-400 font-mono block">۲۷</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">آزمایشگاه تعاملی بومی</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="cpu" class="w-4 h-4 text-blue-500"></i>
-                            <span>تصحیح هوشمند AI</span>
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                            <span class="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono block">۵۰۰+</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">مسئله تشریحی و تستی</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="award" class="w-4 h-4 text-amber-500"></i>
-                            <span>مدال‌ها و استمرار</span>
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                            <span class="text-lg sm:text-xl font-black text-teal-600 dark:text-teal-400 font-mono block">۳ پایه</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">هفتم، هشتم، نهم سمپاد</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                            <span class="text-lg sm:text-xl font-black text-amber-600 dark:text-amber-400 font-mono block">۱۰۰٪</span>
+                            <span class="text-[11px] text-slate-500 dark:text-slate-400">انطباق با کتب درسی</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Hero Graphic / Illustration -->
-                <div class="relative">
-                    <div class="aspect-square max-w-md mx-auto rounded-3xl bg-gradient-to-tr from-blue-600/10 via-indigo-600/10 to-emerald-600/10 p-8 border border-slate-200 dark:border-slate-800 relative flex flex-col justify-center items-center text-center space-y-6">
-                        <div class="w-24 h-24 rounded-3xl bg-blue-600 text-white flex items-center justify-center shadow-xl shadow-blue-500/30 animate-pulse">
-                            <i data-lucide="atom" class="w-14 h-14"></i>
+                <!-- Right/Academic Terminal Showcase Column -->
+                <div class="lg:col-span-5">
+                    <div class="academic-panel rounded-2xl p-5 sm:p-6 space-y-4 relative overflow-hidden">
+                        <!-- Terminal Header -->
+                        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
+                                <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
+                                <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
+                                <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400 mr-2">PHYSICS APPARATUS MONITOR</span>
+                            </div>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300 dark:border-emerald-800 font-mono">
+                                LIVE ONLINE
+                            </span>
                         </div>
-                        <div class="space-y-2">
-                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">آزمایشگاه مجازی فیزیک سمپاد</h3>
-                            <p class="text-xs text-slate-500 max-w-xs">نیرو، کار، انرژی، مغناطیس، الکتریسیته، نور، فشار و ماشین‌ها در محیطی مدرن</p>
+
+                        <!-- Scientific Formulas Matrix -->
+                        <div class="space-y-2.5">
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 text-center">
+                                <span class="text-[10px] text-slate-400 block mb-1 font-mono">KINEMATICS & DYNAMICS (معادلات حرکت سمپاد)</span>
+                                <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-sky-300 academic-mono">
+                                    $$x(t) = \frac{1}{2}at^2 + v_0t + x_0 \quad \Longleftrightarrow \quad \vec{F} = m\vec{a}$$
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 text-center">
+                                <span class="text-[10px] text-slate-400 block mb-1 font-mono">ENERGY & PRESSURE (پایستگی انرژی و فشار)</span>
+                                <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-teal-300 academic-mono">
+                                    $$K = \frac{1}{2}mv^2 + mgh \quad , \quad P = \rho gh + P_0$$
+                                </div>
+                            </div>
                         </div>
-                        <!-- Mini Card badges -->
-                        <div class="flex items-center gap-3">
-                            <span class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-sm">پایه هفتم</span>
-                            <span class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-sm">پایه هشتم</span>
-                            <span class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-sm">پایه نهم</span>
+
+                        <!-- Direct Launch Links to Core Labs -->
+                        <div class="pt-2 space-y-2">
+                            <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">دسترسی سریع به آزمایشگاه‌های شاخص:</span>
+                            <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+                                <button onclick="window.store.setView('simulators', { id: 'motion-1d' })" class="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-slate-800/80 dark:hover:bg-slate-750 border border-blue-200 dark:border-slate-700 text-blue-700 dark:text-blue-300 text-right flex items-center justify-between group transition-all">
+                                    <span class="truncate">حرکت خط راست (سینماتیک)</span>
+                                    <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i>
+                                </button>
+                                <button onclick="window.store.setView('simulators', { id: 'energy-skate-park' })" class="p-2.5 rounded-xl bg-teal-50 hover:bg-teal-100 dark:bg-slate-800/80 dark:hover:bg-slate-750 border border-teal-200 dark:border-slate-700 text-teal-700 dark:text-teal-300 text-right flex items-center justify-between group transition-all">
+                                    <span class="truncate">پایستگی انرژی (اسکیت)</span>
+                                    <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i>
+                                </button>
+                                <button onclick="window.store.setView('simulators', { id: 'circuit-dc' })" class="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-slate-800/80 dark:hover:bg-slate-750 border border-amber-200 dark:border-slate-700 text-amber-700 dark:text-amber-300 text-right flex items-center justify-between group transition-all">
+                                    <span class="truncate">مدار الکتریکی DC</span>
+                                    <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i>
+                                </button>
+                                <button onclick="window.store.setView('simulators', { id: 'density' })" class="p-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800/80 dark:hover:bg-slate-750 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 text-right flex items-center justify-between group transition-all">
+                                    <span class="truncate">چگالی و غوطه‌وری</span>
+                                    <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i>
+                                </button>
+                            </div>
                         </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 3 Academic Grade Departments Grid -->
+    <section class="py-14 bg-white dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+            <div class="text-center space-y-2 max-w-2xl mx-auto">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold">
+                    <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-blue-500"></i>
+                    <span>دپارتمان‌های آموزشی دوره اول متوسطه</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">سرفصل‌های تحصیلی و آزمایشگاه‌های تخصصی</h2>
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">کتاب‌های درسی وزارتی علوم تجربی به همراه کتاب‌های تکمیلی سمپاد (سازمان ملی پرورش استعدادهای درخشان)</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Grade 7 Card -->
+                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 1 })" 
+                     class="academic-card p-6 cursor-pointer space-y-5 relative overflow-hidden group">
+                    <div class="flex items-center justify-between">
+                        <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center justify-center font-black text-xl group-hover:scale-105 transition-transform">
+                            ۷
+                        </div>
+                        <span class="text-[10px] px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 font-mono">
+                            GRADE 07
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            پایه هفتم • فیزیک و اندازه‌گیری
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                            فصل ۲: اندازه‌گیری و چگالی • فصل ۳ و ۱۰: جنبش ذرات، دما و گرما • فصل ۸: کار، انرژی و پایستگی مکانیکی
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400">
+                        <span>ورود به سرفصل‌ها و درسنامه‌ها</span>
+                        <i data-lucide="chevron-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Grade 8 Card -->
+                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 2 })" 
+                     class="academic-card p-6 cursor-pointer space-y-5 relative overflow-hidden group">
+                    <div class="flex items-center justify-between">
+                        <div class="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-950/80 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800 flex items-center justify-center font-black text-xl group-hover:scale-105 transition-transform">
+                            ۸
+                        </div>
+                        <span class="text-[10px] px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 font-mono">
+                            GRADE 08
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                            پایه هشتم • الکتریسیته، مغناطیس و نور
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                            فصل ۹: بار الکتریکی، قانون کولن و اهم • فصل ۱۰: مغناطیس و القا • فصل ۱۴ و ۱۵: بازتاب، شکست نور و عدسی‌ها
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-teal-600 dark:text-teal-400">
+                        <span>ورود به سرفصل‌ها و درسنامه‌ها</span>
+                        <i data-lucide="chevron-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+
+                <!-- Grade 9 Card -->
+                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 3 })" 
+                     class="academic-card p-6 cursor-pointer space-y-5 relative overflow-hidden group">
+                    <div class="flex items-center justify-between">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center font-black text-xl group-hover:scale-105 transition-transform">
+                            ۹
+                        </div>
+                        <span class="text-[10px] px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 font-mono">
+                            GRADE 09
+                        </span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                            پایه نهم • سینماتیک، دینامیک، فشار و فضا
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                            فصل ۴: حرکت و نمودارهای x-t, v-t, a-t • فصل ۵: قوانین نیوتون و اصطکاک • فصل ۸: فشار شاره‌ها • فصل ۹: ماشین‌ها • فصل ۱۰: فضا
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                        <span>ورود به سرفصل‌ها و درسنامه‌ها</span>
+                        <i data-lucide="chevron-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 3 Grades Selection Grid -->
-    <section class="py-12 bg-slate-50 dark:bg-slate-900/40 border-y border-slate-200 dark:border-slate-800">
+    <!-- Institutional Quality & Pedagogical Framework -->
+    <section class="py-14">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-            <div class="text-center space-y-2">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white">پایه‌های تحصیلی و سرفصل‌های آموزشی</h2>
-                <p class="text-xs text-slate-500">پایه مورد نظر خود را جهت مشاهده کتاب‌های درسی و دروس تعاملی انتخاب کنید</p>
+            <div class="text-center space-y-2 max-w-xl mx-auto">
+                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 tracking-wide uppercase font-mono">PEDAGOGICAL STANDARDS</span>
+                <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">چهار اصل حاکم بر طراحی علمی پلتفرم</h3>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Grade 7 -->
-                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 1 })" class="physics-card-3d bg-slate-900/95 hover:bg-slate-850 p-6 rounded-3xl border border-slate-800 hover:border-sky-500/60 shadow-xl cursor-pointer space-y-4 relative overflow-hidden transition-all group">
-                    ${window.store.currentUser && window.store.currentUser.grade_id === 1 ? '<span class="absolute top-3 left-3 text-[10px] px-2.5 py-0.5 rounded-full bg-sky-950 text-sky-300 font-bold border border-sky-700/60 shadow-sm">پایه شما</span>' : ''}
-                    <div class="w-12 h-12 rounded-2xl bg-sky-950/80 text-sky-400 border border-sky-800/80 flex items-center justify-center font-black text-xl group-hover:scale-105 group-hover:border-sky-500 transition-all">
-                        ۷
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
+                    <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+                        ۱
                     </div>
-                    <div>
-                        <h3 class="font-bold text-lg text-white">پایه هفتم</h3>
-                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">اندازه‌گیری و ابزارها • انرژی و تبدیل‌های آن • منابع انرژی • گرما و بهینه‌سازی مصرف</p>
-                    </div>
-                    <div class="flex items-center justify-between text-xs font-bold text-sky-400 group-hover:text-sky-300 pt-2 border-t border-slate-800">
-                        <span>۲ کتاب • ۴ فصل جامع فیزیک</span>
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                    </div>
+                    <h4 class="font-bold text-sm text-slate-900 dark:text-white">یادگیری کاوش‌محور (Inquiry)</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        دانش‌آموز ابتدا با متغیرها در شبیه‌ساز آزمایشگاهی کار می‌کند و سپس رابطه تحلیلی و فرمول حاکم را استخراج می‌نماید.
+                    </p>
                 </div>
 
-                <!-- Grade 8 -->
-                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 2 })" class="physics-card-3d bg-slate-900/95 hover:bg-slate-850 p-6 rounded-3xl border border-slate-800 hover:border-sky-500/60 shadow-xl cursor-pointer space-y-4 relative overflow-hidden transition-all group">
-                    ${window.store.currentUser && window.store.currentUser.grade_id === 2 ? '<span class="absolute top-3 left-3 text-[10px] px-2.5 py-0.5 rounded-full bg-sky-950 text-sky-300 font-bold border border-sky-700/60 shadow-sm">پایه شما</span>' : ''}
-                    <div class="w-12 h-12 rounded-2xl bg-sky-950/80 text-sky-400 border border-sky-800/80 flex items-center justify-center font-black text-xl group-hover:scale-105 group-hover:border-sky-500 transition-all">
-                        ۸
+                <div class="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
+                    <div class="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold">
+                        ۲
                     </div>
-                    <div>
-                        <h3 class="font-bold text-lg text-white">پایه هشتم</h3>
-                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">الکتریسیته ساکن و جاری • مغناطیس و قطب‌ها • نور و بازتاب • شکست نور و عدسی‌ها</p>
-                    </div>
-                    <div class="flex items-center justify-between text-xs font-bold text-sky-400 group-hover:text-sky-300 pt-2 border-t border-slate-800">
-                        <span>۲ کتاب • ۴ فصل جامع فیزیک</span>
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                    </div>
+                    <h4 class="font-bold text-sm text-slate-900 dark:text-white">تفکیک نرده‌ای و برداری</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        حل ریشه‌ای بدفهمی‌های رایج دانش‌آموزان در تمایز مسافت با جابه‌جایی، تندی با سرعت و ارتباط جهت شتاب با تندشوندگی.
+                    </p>
                 </div>
 
-                <!-- Grade 9 -->
-                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 3 })" class="physics-card-3d bg-slate-900/95 hover:bg-slate-850 p-6 rounded-3xl border border-slate-800 hover:border-sky-500/60 shadow-xl cursor-pointer space-y-4 relative overflow-hidden transition-all group">
-                    ${window.store.currentUser && window.store.currentUser.grade_id === 3 ? '<span class="absolute top-3 left-3 text-[10px] px-2.5 py-0.5 rounded-full bg-sky-950 text-sky-300 font-bold border border-sky-700/60 shadow-sm">پایه شما</span>' : ''}
-                    <div class="w-12 h-12 rounded-2xl bg-sky-950/80 text-sky-400 border border-sky-800/80 flex items-center justify-center font-black text-xl group-hover:scale-105 group-hover:border-sky-500 transition-all">
-                        ۹
+                <div class="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                        ۳
                     </div>
-                    <div>
-                        <h3 class="font-bold text-lg text-white">پایه نهم</h3>
-                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">حرکت، تندی و شتاب • نیرو و قوانین نیوتون • فشار جامدات و شاره‌ها • ماشین‌ها و اهرم‌ها</p>
+                    <h4 class="font-bold text-sm text-slate-900 dark:text-white">تحلیل هندسی ۳ نمودار</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        درک شهودی مفهوم شیب مماس (مشتق لحظه‌ای) و مساحت زیر منحنی (انتگرال جابه‌جایی و تغییر سرعت) به سبک آزمون‌های سمپاد.
+                    </p>
+                </div>
+
+                <div class="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
+                    <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                        ۴
                     </div>
-                    <div class="flex items-center justify-between text-xs font-bold text-sky-400 group-hover:text-sky-300 pt-2 border-t border-slate-800">
-                        <span>۲ کتاب • ۵ فصل تخصصی فیزیک و فضا</span>
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                    </div>
+                    <h4 class="font-bold text-sm text-slate-900 dark:text-white">سنجه ارزیابی روبیک</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        تصحیح سوالات تشریحی بر اساس ۴ مؤلفه استاندارد: استخراج داده‌های اولیه، فرمول، جایگذاری با یکا و استنتاج نهایی.
+                    </p>
                 </div>
             </div>
         </div>
     </section>
     `;
 }
+
 
 // ==========================================
 // VIEW: STUDENT DASHBOARD (DEDICATED 7, 8, 9)
@@ -1629,105 +1788,105 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
 
     container.innerHTML = `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
-        <!-- PhET Official Standard Header -->
-        <div class="relative overflow-hidden rounded-3xl bg-slate-900/95 p-6 sm:p-10 border border-slate-800 text-white shadow-xl space-y-4">
+        <!-- PhET Official Standard Header (MIT & CERN Academic Portal Standard) -->
+        <div class="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900/95 p-6 sm:p-8 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white shadow-sm space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-950/80 border border-sky-500/30 text-sky-300 text-xs font-bold font-sans">
-                    <i data-lucide="flask-conical" class="w-4 h-4 text-sky-400"></i>
-                    <span>پلتفرم تخصصی آزمایشگاه‌های تعاملی فیزیک — استاندارد آموزشی PhET</span>
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-sky-950/80 border border-blue-200 dark:border-sky-500/30 text-blue-700 dark:text-sky-300 text-xs font-bold font-sans">
+                    <i data-lucide="flask-conical" class="w-4 h-4 text-blue-600 dark:text-sky-400"></i>
+                    <span>پلتفرم تخصصی آزمایشگاه‌های تعاملی فیزیک — استاندارد بین‌المللی PhET</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="window.physicsSimulators.openLabToolboxModal('caliper')" 
-                        class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold font-sans flex items-center gap-2 shadow-sm transition-colors">
+                        class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold font-sans flex items-center gap-2 shadow-sm transition-colors">
                         <i data-lucide="wrench" class="w-4 h-4"></i>
                         <span>جعبه ابزار آزمایشگاهی</span>
                     </button>
                     <button onclick="window.physicsSimulators.openLabToolboxModal('report')" 
-                        class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold font-sans flex items-center gap-2 transition-colors">
-                        <i data-lucide="file-text" class="w-4 h-4 text-sky-400"></i>
+                        class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold font-sans flex items-center gap-2 transition-colors">
+                        <i data-lucide="file-text" class="w-4 h-4 text-blue-600 dark:text-sky-400"></i>
                         <span>دفترچه گزارش کار</span>
                     </button>
                 </div>
             </div>
 
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight font-sans">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight font-sans">
                 آزمایشگاه تخصصی و شبیه‌سازهای تعاملی فیزیک
             </h1>
 
-            <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed font-sans">
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed font-sans">
                 محیط استاندارد آموزش تجربی و شبیه‌سازی دقیق فیزیک؛ متغیرها را آزادانه تغییر دهید، فرضیه‌سازی کنید و با ابزارهای علمی داده‌ها را تحلیل و ثبت نمایید.
             </p>
 
-            <!-- Unified PhET Grade Filter Tabs (Clean, Professional, No Rainbow Emojis) -->
-            <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800">
+            <!-- Unified PhET Grade Filter Tabs (Academic Light/Dark Contrast) -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                 <div class="flex flex-wrap items-center gap-2 text-xs font-sans">
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'all')"
-                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === 'all' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === 'all' ? 'bg-blue-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 font-medium'}">
                         همه آزمایش‌ها (${simCatalog.length})
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '7')"
-                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === '7' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === '7' ? 'bg-blue-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 font-medium'}">
                         پایه هفتم (${simCatalog.filter(s => s.grade === 7 && s.gradeKey !== 'space').length})
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '8')"
-                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === '8' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === '8' ? 'bg-blue-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 font-medium'}">
                         پایه هشتم (${simCatalog.filter(s => s.grade === 8 && s.gradeKey !== 'space').length})
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', '9')"
-                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === '9' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === '9' ? 'bg-blue-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 font-medium'}">
                         پایه نهم (${simCatalog.filter(s => s.grade === 9 && s.gradeKey !== 'space').length})
                     </button>
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'space')"
-                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === 'space' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === 'space' ? 'bg-blue-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 font-medium'}">
                         نجوم و فضا (${simCatalog.filter(s => s.gradeKey === 'space').length})
                     </button>
                 </div>
 
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 font-sans">
-                    <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 font-sans">
+                    <span class="w-2 h-2 rounded-full bg-blue-600 dark:bg-sky-400"></span>
                     <span>${simCatalog.length} آزمایشگاه تعاملی و رسمی PhET دانشگاه کلرادو (۱۰۰٪ استاندارد و آفلاین)</span>
                 </div>
             </div>
         </div>
 
-        <!-- Student Lab Progress Strip (PhET Slate & Sky Blue Theme) -->
-        <div class="p-4 sm:p-5 rounded-2xl bg-slate-900 border border-slate-800 text-white shadow-lg space-y-3 font-sans">
+        <!-- Student Lab Progress Strip (Academic Light/Dark Theme) -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white shadow-sm space-y-3 font-sans">
             <div class="flex flex-wrap items-center justify-between gap-3 text-xs">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-sky-950 text-sky-400 border border-sky-500/30 flex items-center justify-center font-bold">
+                    <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-sky-950 text-blue-600 dark:text-sky-400 border border-blue-200 dark:border-sky-500/30 flex items-center justify-center font-bold">
                         <i data-lucide="award" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <span class="text-[11px] text-slate-400 block font-medium font-sans">کارنامه فعالیت‌های آزمایشگاهی شما:</span>
-                        <span class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
-                            <span class="font-mono text-sky-400">${totalXp} XP</span>
-                            <span class="text-xs text-slate-300 font-normal font-sans">امتیاز کسب‌شده در گزارش کار و فعالیت‌های علمی</span>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400 block font-medium font-sans">کارنامه فعالیت‌های آزمایشگاهی شما:</span>
+                        <span class="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                            <span class="font-mono text-blue-600 dark:text-sky-400">${totalXp} XP</span>
+                            <span class="text-xs text-slate-600 dark:text-slate-300 font-normal font-sans">امتیاز کسب‌شده در گزارش کار و فعالیت‌های علمی</span>
                         </span>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-5 text-xs font-sans">
                     <div class="text-right">
-                        <span class="text-slate-400 text-[10px] block font-sans">آزمایش‌های تکمیل‌شده:</span>
-                        <span class="text-slate-200 text-sm font-sans font-bold"><span class="font-mono text-sky-400">${completedCount}</span> از <span class="font-mono">${simCatalog.length}</span></span>
+                        <span class="text-slate-500 dark:text-slate-400 text-[10px] block font-sans">آزمایش‌های تکمیل‌شده:</span>
+                        <span class="text-slate-800 dark:text-slate-200 text-sm font-sans font-bold"><span class="font-mono text-blue-600 dark:text-sky-400">${completedCount}</span> از <span class="font-mono">${simCatalog.length}</span></span>
                     </div>
                     <div class="text-right">
-                        <span class="text-slate-400 text-[10px] block font-sans">درصد تکمیل:</span>
-                        <span class="text-sky-300 font-mono text-sm font-bold">${progressPct}%</span>
+                        <span class="text-slate-500 dark:text-slate-400 text-[10px] block font-sans">درصد تکمیل:</span>
+                        <span class="text-blue-600 dark:text-sky-300 font-mono text-sm font-bold">${progressPct}%</span>
                     </div>
                 </div>
             </div>
 
             <!-- Progress track -->
-            <div class="w-full h-2 rounded-full bg-slate-950 border border-slate-800 overflow-hidden">
-                <div class="h-full bg-sky-500 rounded-full transition-all duration-500" 
+            <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 overflow-hidden">
+                <div class="h-full bg-blue-600 dark:bg-sky-500 rounded-full transition-all duration-500" 
                     style="width: ${Math.min(100, progressPct)}%"></div>
             </div>
         </div>
 
-        <!-- Experiment Selector Grid (PhET Official Clean Cards) -->
+        <!-- Experiment Selector Grid (Academic Standard Clean Cards) -->
         <div class="space-y-3 font-sans">
-            <div class="flex items-center justify-between text-xs font-bold text-slate-400 font-sans">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-400 font-sans">
                 <span>انتخاب آزمایش از سرفصل دروس فیزیک:</span>
                 <span>${simCatalog.filter(s => {
                     if (gradeFilter === 'all') return true;
@@ -1747,30 +1906,30 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                     return `
                     <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${s.id}', '${currentMode}', '${gradeFilter}')"
                         class="p-3 rounded-2xl border text-right transition-all flex flex-col justify-between group font-sans ${isSelected 
-                            ? 'bg-slate-900 border-sky-500 text-white ring-2 ring-sky-500/40 shadow-lg' 
-                            : 'bg-slate-900/90 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-800/80'}">
+                            ? 'bg-blue-50 dark:bg-slate-900 border-blue-600 dark:border-sky-500 text-blue-900 dark:text-white ring-2 ring-blue-500/30 dark:ring-sky-500/40 shadow-md' 
+                            : 'bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/80 shadow-sm'}">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center ${isSelected ? 'text-sky-400' : 'text-slate-400 group-hover:text-sky-400'} transition-colors">
+                            <span class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center ${isSelected ? 'text-blue-600 dark:text-sky-400' : 'text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-sky-400'} transition-colors">
                                 <i data-lucide="${s.icon || 'atom'}" class="w-3.5 h-3.5"></i>
                             </span>
                             <div class="flex items-center gap-1">
                                 ${isCompleted ? `
-                                <span class="text-[9px] px-1.5 py-0.5 rounded-md font-sans font-medium text-emerald-300 bg-emerald-950/80 border border-emerald-700/60 flex items-center gap-0.5">
+                                <span class="text-[9px] px-1.5 py-0.5 rounded-md font-sans font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-700/60 flex items-center gap-0.5">
                                     <i data-lucide="check" class="w-2.5 h-2.5"></i>
                                     <span>انجام‌شده</span>
                                 </span>
                                 ` : ''}
-                                <span class="text-[10px] px-2 py-0.5 rounded-md font-sans font-semibold text-sky-300 bg-sky-950/90 border border-sky-800/80">
+                                <span class="text-[10px] px-2 py-0.5 rounded-md font-sans font-semibold text-blue-700 dark:text-sky-300 bg-blue-50 dark:bg-sky-950/90 border border-blue-200 dark:border-sky-800/80">
                                     PhET
                                 </span>
-                                <span class="text-[10px] px-2 py-0.5 rounded-md font-sans font-medium text-slate-300 bg-slate-800/90 border border-slate-700/60">
+                                <span class="text-[10px] px-2 py-0.5 rounded-md font-sans font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60">
                                     ${s.gradeTitle}
                                 </span>
                             </div>
                         </div>
                         <div>
-                            <span class="text-xs font-bold block truncate font-sans leading-tight ${isSelected ? 'text-white' : 'text-slate-200'}">${s.title}</span>
-                            <span class="text-[10px] text-slate-400 block truncate mt-1 font-sans">${s.topic}</span>
+                            <span class="text-xs font-bold block truncate font-sans leading-tight ${isSelected ? 'text-blue-900 dark:text-white' : 'text-slate-800 dark:text-slate-200'}">${s.title}</span>
+                            <span class="text-[10px] text-slate-500 dark:text-slate-400 block truncate mt-1 font-sans">${s.topic}</span>
                         </div>
                     </button>
                     `;

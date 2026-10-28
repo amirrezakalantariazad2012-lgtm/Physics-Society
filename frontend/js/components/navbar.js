@@ -41,33 +41,33 @@ function renderNavbar() {
 
                 <!-- Nav Links for Desktop -->
                 <nav class="hidden md:flex items-center gap-1.5 text-xs sm:text-sm font-medium">
-                    <a href="#curriculum" onclick="window.store.setView('curriculum')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('curriculum') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
-                        <i data-lucide="book-open" class="w-4 h-4 ${isTabActive('curriculum') ? 'text-sky-400' : 'text-slate-400'}"></i>
+                    <a href="#curriculum" onclick="window.store.setView('curriculum')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('curriculum') ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800/80 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60'}">
+                        <i data-lucide="book-open" class="w-4 h-4 ${isTabActive('curriculum') ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}"></i>
                         <span>آموزش فیزیک</span>
                     </a>
-                    <a href="#materials" onclick="window.store.setView('materials')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('materials') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
-                        <i data-lucide="file-text" class="w-4 h-4 ${isTabActive('materials') ? 'text-sky-400' : 'text-slate-400'}"></i>
+                    <a href="#materials" onclick="window.store.setView('materials')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('materials') ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800/80 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60'}">
+                        <i data-lucide="file-text" class="w-4 h-4 ${isTabActive('materials') ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}"></i>
                         <span>درسنامه‌ها و جزوات</span>
                     </a>
-                    <a href="#simulators" onclick="window.store.setView('simulators')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('simulators') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
-                        <i data-lucide="flask-conical" class="w-4 h-4 ${isTabActive('simulators') ? 'text-sky-400' : 'text-slate-400'}"></i>
+                    <a href="#simulators" onclick="window.store.setView('simulators')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('simulators') ? 'bg-teal-50 text-teal-700 dark:bg-teal-950/80 dark:text-teal-300 font-bold border border-teal-200 dark:border-teal-800/80 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60'}">
+                        <i data-lucide="flask-conical" class="w-4 h-4 ${isTabActive('simulators') ? 'text-teal-600 dark:text-teal-400' : 'text-slate-400'}"></i>
                         <span>آزمایشگاه PhET</span>
                     </a>
-                    <a href="#competitions" onclick="window.store.setView('competitions')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('competitions') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
-                        <i data-lucide="trophy" class="w-4 h-4 ${isTabActive('competitions') ? 'text-amber-400' : 'text-slate-400'}"></i>
+                    <a href="#competitions" onclick="window.store.setView('competitions')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('competitions') ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 font-bold border border-amber-200 dark:border-amber-800/80 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60'}">
+                        <i data-lucide="trophy" class="w-4 h-4 ${isTabActive('competitions') ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'}"></i>
                         <span>لیگ‌ها و مسابقات</span>
                     </a>
-                    <a href="#leaderboards" onclick="window.store.setView('leaderboards')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('leaderboards') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
-                        <i data-lucide="award" class="w-4 h-4 ${isTabActive('leaderboards') ? 'text-sky-400' : 'text-slate-400'}"></i>
+                    <a href="#leaderboards" onclick="window.store.setView('leaderboards')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('leaderboards') ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300 font-bold border border-indigo-200 dark:border-indigo-800/80 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60'}">
+                        <i data-lucide="award" class="w-4 h-4 ${isTabActive('leaderboards') ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}"></i>
                         <span>جدول امتیازات</span>
                     </a>
-                    <a href="#badges" onclick="window.store.setView('badges')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('badges') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
-                        <i data-lucide="medal" class="w-4 h-4 ${isTabActive('badges') ? 'text-amber-400' : 'text-slate-400'}"></i>
+                    <a href="#badges" onclick="window.store.setView('badges')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('badges') ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 font-bold border border-emerald-200 dark:border-emerald-800/80 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60'}">
+                        <i data-lucide="medal" class="w-4 h-4 ${isTabActive('badges') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}"></i>
                         <span>مدال‌ها</span>
                     </a>
                     ${user && user.role === 'admin' ? `
-                    <a href="#admin" onclick="window.store.setView('admin')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('admin') ? 'bg-rose-950/80 text-rose-300 font-bold border border-rose-800/80 shadow-sm' : 'text-rose-400 hover:text-rose-200 hover:bg-rose-950/40'}">
-                        <i data-lucide="shield-alert" class="w-4 h-4 text-rose-400"></i>
+                    <a href="#admin" onclick="window.store.setView('admin')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('admin') ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 font-bold border border-rose-200 dark:border-rose-800/80 shadow-sm' : 'text-rose-600 hover:text-rose-800 hover:bg-rose-50 dark:text-rose-400 dark:hover:text-rose-200 dark:hover:bg-rose-950/40'}">
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-rose-500"></i>
                         <span>پنل مدیریت</span>
                     </a>
                     ` : ''}
@@ -149,7 +149,7 @@ function renderNavbar() {
         </div>
 
         <!-- Mobile Slide-Down Drawer Menu -->
-        <div id="mobile-nav-drawer" class="hidden md:hidden border-t border-slate-800 bg-slate-900/98 px-4 py-5 space-y-4 shadow-2xl">
+        <div id="mobile-nav-drawer" class="hidden md:hidden border-t border-slate-200 dark:border-slate-800 bg-white/98 dark:bg-slate-900/98 px-4 py-5 space-y-4 shadow-2xl">
             <a href="https://github.com/amirrezakalantariazad2012-lgtm/Physics-Society/releases/latest/download/physics-society.apk" 
                target="_blank" 
                rel="noopener noreferrer"
@@ -220,29 +220,29 @@ function renderNavbar() {
     </header>
 
     <!-- Mobile Persistent Bottom Navigation Dock (App Bar) -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800 backdrop-blur-xl flex items-center justify-around py-1.5 px-1 shadow-2xl">
-        <button onclick="window.store.setView('curriculum')" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${isTabActive('curriculum') ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-slate-200'}">
-            <i data-lucide="book-open" class="w-4 h-4 mb-0.5 ${isTabActive('curriculum') ? 'text-cyan-400' : ''}"></i>
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 border-t border-slate-200 dark:border-slate-800 backdrop-blur-xl flex items-center justify-around py-1.5 px-1 shadow-2xl">
+        <button onclick="window.store.setView('curriculum')" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${isTabActive('curriculum') ? 'text-blue-600 dark:text-cyan-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'}">
+            <i data-lucide="book-open" class="w-4 h-4 mb-0.5 ${isTabActive('curriculum') ? 'text-blue-600 dark:text-cyan-400' : ''}"></i>
             <span class="text-[10px]">فیزیک</span>
         </button>
 
-        <button onclick="window.store.setView('competitions')" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${isTabActive('competitions') ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-slate-200'}">
-            <i data-lucide="trophy" class="w-4 h-4 mb-0.5 ${isTabActive('competitions') ? 'text-amber-400' : ''}"></i>
+        <button onclick="window.store.setView('competitions')" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${isTabActive('competitions') ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'}">
+            <i data-lucide="trophy" class="w-4 h-4 mb-0.5 ${isTabActive('competitions') ? 'text-amber-600 dark:text-amber-400' : ''}"></i>
             <span class="text-[10px]">لیگ‌ها</span>
         </button>
 
-        <button onclick="window.toggleAiTutorModal(true)" class="relative -top-2 flex flex-col items-center justify-center p-2 rounded-2xl bg-gradient-to-tr from-violet-600 to-cyan-500 text-white shadow-lg shadow-violet-500/30 hover:scale-105 transition-all">
+        <button onclick="window.toggleAiTutorModal(true)" class="relative -top-2 flex flex-col items-center justify-center p-2 rounded-2xl bg-gradient-to-tr from-blue-600 to-teal-500 text-white shadow-lg shadow-blue-500/30 hover:scale-105 transition-all">
             <i data-lucide="bot" class="w-5 h-5"></i>
             <span class="text-[9px] font-bold">هوش‌مصنوعی</span>
         </button>
 
-        <button onclick="window.store.setView('leaderboards')" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${isTabActive('leaderboards') ? 'text-indigo-400 font-bold' : 'text-slate-400 hover:text-slate-200'}">
-            <i data-lucide="award" class="w-4 h-4 mb-0.5 ${isTabActive('leaderboards') ? 'text-indigo-400' : ''}"></i>
+        <button onclick="window.store.setView('leaderboards')" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${isTabActive('leaderboards') ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'}">
+            <i data-lucide="award" class="w-4 h-4 mb-0.5 ${isTabActive('leaderboards') ? 'text-indigo-600 dark:text-indigo-400' : ''}"></i>
             <span class="text-[10px]">رتبه‌ها</span>
         </button>
 
-        <button onclick="window.store.currentUser ? window.store.setView('dashboard') : openAuthModal('login')" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${isTabActive('dashboard') ? 'text-emerald-400 font-bold' : 'text-slate-400 hover:text-slate-200'}">
-            <i data-lucide="user" class="w-4 h-4 mb-0.5 ${isTabActive('dashboard') ? 'text-emerald-400' : ''}"></i>
+        <button onclick="window.store.currentUser ? window.store.setView('dashboard') : openAuthModal('login')" class="flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${isTabActive('dashboard') ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'}">
+            <i data-lucide="user" class="w-4 h-4 mb-0.5 ${isTabActive('dashboard') ? 'text-emerald-600 dark:text-emerald-400' : ''}"></i>
             <span class="text-[10px]">پروفایل</span>
         </button>
     </nav>
