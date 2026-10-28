@@ -1,12 +1,13 @@
 """
 Live Physics Laboratory & Synchronized Classroom Broadcasting Router
-Shared SQLite WAL Repository supporting multi-worker Uvicorn processes and Docker containers.
-Enables teachers to conduct live experiments while students watch and interact live with zero lag.
+Enterprise Multi-Worker Real-Time Architecture with SQLite WAL Inter-Process Event Bus.
+Enables teachers across Iran to conduct live interactive experiments while dozens to hundreds
+of students watch and interact in real-time with zero lag, guaranteed across all Uvicorn workers.
 """
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Set, Any
+from typing import Optional, Dict, Set, Any, List
 import asyncio
 import sqlite3
 import json
@@ -19,14 +20,17 @@ logger = logging.getLogger("physics_society.live_lab")
 
 router = APIRouter(prefix="/live-lab", tags=["Live Laboratory Classroom"])
 
-# SQLite DB Path (inside shared uploads directory)
+# SQLite DB Path (inside shared uploads directory across all workers/containers)
 DB_DIR = os.getenv("UPLOAD_DIR", os.path.abspath("data/uploads"))
 os.makedirs(DB_DIR, exist_ok=True)
 DB_PATH = os.path.join(DB_DIR, "live_lab_rooms.db")
 
+CURRENT_PID = os.getpid()
+
 def get_db():
-    conn = sqlite3.connect(DB_PATH, timeout=10.0)
+    conn = sqlite3.connect(DB_PATH, timeout=15.0)
     conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA synchronous=NORMAL;")
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -57,6 +61,29 @@ def init_live_db():
             created_at REAL NOT NULL
         )
         """)
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS live_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            room_code TEXT NOT NULL,
+            sender_pid INTEGER NOT NULL,
+            event_type TEXT NOT NULL,
+            payload_json TEXT NOT NULL,
+            created_at REAL NOT NULL
+        )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_live_events_lookup ON live_events(room_code, id)")
+        
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS active_viewers (
+            session_id TEXT PRIMARY KEY,
+            room_code TEXT NOT NULL,
+            user_name TEXT NOT NULL,
+            role TEXT NOT NULL,
+            worker_pid INTEGER NOT NULL,
+            last_ping REAL NOT NULL
+        )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_viewers_room ON active_viewers(room_code, last_ping)")
         conn.commit()
 
         # Seed permanent demo room if not exists
@@ -69,18 +96,100 @@ def init_live_db():
                 "isRunning": False, "sim_id": "motion-1d"
             })
             default_notes = json.dumps([
-                "به مساحت سطح زیر نمودار سرعت-زمان (Δx) و شیب خط مماس (شتاب لحظه‌ای) دقت کنید."
+                "به مساحت سطح زیر نمودار سرعت-زمان (Δx) و شیب خط مماس (شتاب لحظه‌ای a) در حرکت شتاب‌دار دقت نمایید.",
+                "معادله حرکت با شتاب ثابت: x(t) = 1/2*a*t^2 + v0*t + x0"
             ])
             conn.execute("""
             INSERT INTO rooms (room_code, title, sim_id, grade, teacher_name, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
-            """, (demo_code, "کلاس پژوهشی فیزیک سمپاد: حرکت بر خط راست و نمودارهای لحظه‌ای", "motion-1d", 9, "دپارتمان فیزیک استعدادهای درخشان", default_state, default_notes, time.time(), time.time()))
+            """, (demo_code, "کلاس پژوهشی فیزیک سمپاد: حرکت بر خط راست و تحلیل نمودارهای لحظه‌ای", "motion-1d", 9, "دپارتمان فیزیک استعدادهای درخشان", default_state, default_notes, time.time(), time.time()))
             conn.commit()
 
 init_live_db()
 
-# Local worker socket connections
+# Local worker socket connections map: room_code -> Set[WebSocket]
 local_sockets: Dict[str, Set[WebSocket]] = {}
+last_handled_event_id: int = 0
+
+async def broadcast_to_local_sockets(room_code: str, message: dict, exclude: Optional[WebSocket] = None):
+    sockets = local_sockets.get(room_code, set())
+    if not sockets:
+        return
+    text = json.dumps(message)
+    dead = set()
+    for ws in list(sockets):
+        if ws != exclude:
+            try:
+                await ws.send_text(text)
+            except Exception:
+                dead.add(ws)
+    for ws in dead:
+        sockets.discard(ws)
+
+def publish_event(room_code: str, event_type: str, payload: dict):
+    """Publishes an event to the shared SQLite WAL event bus, accessible by all 4 worker processes"""
+    now = time.time()
+    try:
+        with get_db() as conn:
+            conn.execute(
+                "INSERT INTO live_events (room_code, sender_pid, event_type, payload_json, created_at) VALUES (?, ?, ?, ?, ?)",
+                (room_code, CURRENT_PID, event_type, json.dumps(payload), now)
+            )
+            # Periodic cleanup: retain events from last 120 seconds only
+            if now % 10 < 0.2:
+                conn.execute("DELETE FROM live_events WHERE created_at < ?", (now - 120,))
+                conn.execute("DELETE FROM active_viewers WHERE last_ping < ?", (now - 30,))
+            conn.commit()
+    except Exception as e:
+        logger.error(f"Failed to publish event {event_type} in room {room_code}: {e}")
+
+# Async Background Event Bus Poller (Running in each Uvicorn worker process)
+event_listener_task: Optional[asyncio.Task] = None
+
+async def event_bus_listener():
+    global last_handled_event_id
+    # Initialize pointer to latest event
+    try:
+        with get_db() as conn:
+            cur = conn.execute("SELECT MAX(id) as max_id FROM live_events")
+            row = cur.fetchone()
+            if row and row["max_id"]:
+                last_handled_event_id = int(row["max_id"])
+    except Exception:
+        pass
+
+    while True:
+        try:
+            active_rooms = list(local_sockets.keys())
+            if active_rooms:
+                with get_db() as conn:
+                    cur = conn.execute(
+                        "SELECT id, room_code, sender_pid, event_type, payload_json FROM live_events WHERE id > ? ORDER BY id ASC LIMIT 50",
+                        (last_handled_event_id,)
+                    )
+                    rows = cur.fetchall()
+                    for r in rows:
+                        last_handled_event_id = max(last_handled_event_id, int(r["id"]))
+                        # Only broadcast if originated from another worker OR needs broadcast
+                        if int(r["sender_pid"]) != CURRENT_PID:
+                            room = r["room_code"]
+                            if room in local_sockets and local_sockets[room]:
+                                payload = json.loads(r["payload_json"])
+                                payload["type"] = r["event_type"]
+                                await broadcast_to_local_sockets(room, payload)
+        except Exception as e:
+            logger.debug(f"Event bus loop tick error: {e}")
+        await asyncio.sleep(0.04)  # 40ms polling tick (butter-smooth real-time)
+
+def ensure_event_listener_started():
+    global event_listener_task
+    if event_listener_task is None or event_listener_task.done():
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                event_listener_task = loop.create_task(event_bus_listener())
+        except Exception as e:
+            logger.debug(f"Could not start event bus listener: {e}")
 
 class RoomCreateRequest(BaseModel):
     title: str = Field(..., min_length=3, max_length=150)
@@ -99,48 +208,58 @@ class ChatSendRequest(BaseModel):
 class TeacherNoteRequest(BaseModel):
     note: str
 
-class PollStartRequest(BaseModel):
+class PollCreateRequest(BaseModel):
     question: str
-    options: list[str]
+    options: List[str]
 
 class PollVoteRequest(BaseModel):
     option_index: int
 
 @router.get("/rooms")
-async def list_active_rooms():
-    """Lists all active live physics classroom broadcasts across all workers"""
+async def list_live_rooms():
+    """Returns active live laboratory classrooms with live student counts across all workers"""
+    ensure_event_listener_started()
+    now = time.time()
     with get_db() as conn:
-        cur = conn.execute("SELECT room_code, title, sim_id, grade, teacher_name, created_at, updated_at FROM rooms ORDER BY updated_at DESC")
+        cur = conn.execute("SELECT room_code, title, sim_id, grade, teacher_name, created_at, updated_at FROM rooms ORDER BY updated_at DESC LIMIT 20")
         rows = cur.fetchall()
-        rooms = []
+        result = []
         for r in rows:
-            rooms.append({
+            cur_count = conn.execute("SELECT COUNT(*) as count FROM active_viewers WHERE room_code = ? AND last_ping > ?", (r["room_code"], now - 20))
+            count_row = cur_count.fetchone()
+            viewers_count = max(count_row["count"] if count_row else 0, len(local_sockets.get(r["room_code"], set())))
+            result.append({
                 "room_code": r["room_code"],
                 "title": r["title"],
                 "sim_id": r["sim_id"],
                 "grade": r["grade"],
                 "teacher_name": r["teacher_name"],
-                "viewers_count": len(local_sockets.get(r["room_code"], set())),
+                "viewers_count": viewers_count,
                 "created_at": r["created_at"],
-                "updated_at": r["updated_at"]
+                "is_active": (now - r["updated_at"]) < 3600
             })
-    return {"rooms": rooms}
+    return {"rooms": result}
 
 @router.post("/create")
 async def create_live_room(req: RoomCreateRequest):
-    """Creates a shared live classroom accessible across all worker processes"""
+    """Creates a new synchronized live classroom broadcast"""
+    ensure_event_listener_started()
     code = f"SMP-{uuid.uuid4().hex[:4].upper()}"
+    now = time.time()
     default_state = json.dumps({
         "x0": 0.0, "v0": 0.0, "a": 0.0,
         "curX": 0.0, "curV": 0.0, "curA": 0.0, "curT": 0.0,
         "isRunning": False, "sim_id": req.sim_id
     })
-    now = time.time()
+    default_notes = json.dumps([
+        f"به پخش زنده کلاس «{req.title}» خوش آمدید."
+    ])
+
     with get_db() as conn:
         conn.execute("""
         INSERT INTO rooms (room_code, title, sim_id, grade, teacher_name, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, '[]', NULL, NULL, ?, ?)
-        """, (code, req.title, req.sim_id, req.grade or 9, req.teacher_name or "دبیر فیزیک", default_state, now, now))
+        VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
+        """, (code, req.title, req.sim_id, req.grade, req.teacher_name, default_state, default_notes, now, now))
         conn.commit()
 
     return {
@@ -153,14 +272,16 @@ async def create_live_room(req: RoomCreateRequest):
 
 @router.get("/rooms/{room_code}")
 async def get_room_details(room_code: str):
+    """Fetches room metadata, active state, teacher chalkboard notes, and chat history"""
+    ensure_event_listener_started()
+    now = time.time()
     with get_db() as conn:
-        cur = conn.execute("SELECT * FROM rooms WHERE room_code = ?", (room_code,))
+        cur = conn.execute("SELECT room_code, title, sim_id, grade, teacher_name, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, created_at FROM rooms WHERE room_code = ?", (room_code,))
         row = cur.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="اتاق پخش زنده یافت نشد.")
 
-        # Fetch recent chat messages
-        cur_chat = conn.execute("SELECT sender, role, message, created_at FROM chat_messages WHERE room_code = ? ORDER BY id DESC LIMIT 30", (room_code,))
+        cur_chat = conn.execute("SELECT sender, role, message, created_at FROM chat_messages WHERE room_code = ? ORDER BY id DESC LIMIT 50", (room_code,))
         chat_rows = cur_chat.fetchall()
         chat_history = [{
             "sender": c["sender"],
@@ -169,8 +290,9 @@ async def get_room_details(room_code: str):
             "time": time.strftime("%H:%M", time.localtime(c["created_at"]))
         } for c in reversed(chat_rows)]
 
-        current_state = json.loads(row["current_state_json"])
-        teacher_notes = json.loads(row["teacher_notes_json"])
+        cur_count = conn.execute("SELECT COUNT(*) as count FROM active_viewers WHERE room_code = ? AND last_ping > ?", (room_code, now - 20))
+        count_row = cur_count.fetchone()
+        viewers_count = max(count_row["count"] if count_row else 0, len(local_sockets.get(room_code, set())), 1)
 
         return {
             "room_code": row["room_code"],
@@ -178,25 +300,25 @@ async def get_room_details(room_code: str):
             "sim_id": row["sim_id"],
             "grade": row["grade"],
             "teacher_name": row["teacher_name"],
-            "viewers_count": len(local_sockets.get(room_code, set())),
+            "viewers_count": viewers_count,
             "created_at": row["created_at"],
-            "updated_at": row["updated_at"],
-            "current_state": current_state,
-            "teacher_notes": teacher_notes,
-            "chat_history": chat_history,
-            "has_active_poll": row["active_poll_json"] is not None
+            "current_state": json.loads(row["current_state_json"]),
+            "teacher_notes": json.loads(row["teacher_notes_json"]),
+            "active_poll": json.loads(row["active_poll_json"]) if row["active_poll_json"] else None,
+            "poll_votes": json.loads(row["poll_votes_json"]) if row["poll_votes_json"] else None,
+            "chat_history": chat_history
         }
 
 @router.get("/rooms/{room_code}/sync")
 async def sync_room_state(room_code: str, since: float = Query(0.0)):
     """Fast polling sync endpoint guaranteeing lockstep across multi-worker Uvicorn instances"""
+    ensure_event_listener_started()
     with get_db() as conn:
         cur = conn.execute("SELECT current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, updated_at FROM rooms WHERE room_code = ?", (room_code,))
         row = cur.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Room not found")
 
-        # Fetch chat messages since last check
         cur_chat = conn.execute("SELECT sender, role, message, created_at FROM chat_messages WHERE room_code = ? AND created_at > ? ORDER BY id ASC", (room_code, since))
         chat_rows = cur_chat.fetchall()
         new_messages = [{
@@ -227,16 +349,12 @@ async def post_room_state(room_code: str, req: StateUpdateRequest):
         
         st = json.loads(row["current_state_json"])
         st.update(req.payload)
-
         conn.execute("UPDATE rooms SET current_state_json = ?, updated_at = ? WHERE room_code = ?", (json.dumps(st), now, room_code))
         conn.commit()
 
-    # Broadcast to local worker sockets
-    await broadcast_to_local_sockets(room_code, {
-        "type": "state_sync",
-        "payload": req.payload,
-        "updated_at": now
-    })
+    payload = {"payload": req.payload, "updated_at": now}
+    publish_event(room_code, "state_sync", payload)
+    await broadcast_to_local_sockets(room_code, {"type": "state_sync", **payload})
     return {"success": True}
 
 @router.post("/rooms/{room_code}/chat")
@@ -249,19 +367,23 @@ async def post_room_chat(room_code: str, req: ChatSendRequest):
         conn.commit()
 
     msg_data = {
-        "type": "chat_message",
         "sender": req.sender,
         "role": req.role,
         "message": req.message,
         "time": time.strftime("%H:%M")
     }
-    await broadcast_to_local_sockets(room_code, msg_data)
+    publish_event(room_code, "chat_message", msg_data)
+    await broadcast_to_local_sockets(room_code, {"type": "chat_message", **msg_data})
     return {"success": True, "message": msg_data}
 
 @router.post("/rooms/{room_code}/note")
 async def post_teacher_note(room_code: str, req: TeacherNoteRequest):
-    """Allows teacher to add chalkboard notes"""
+    """Adds a formula or lesson note to the teacher's live chalkboard"""
     now = time.time()
+    note_text = req.note.strip()
+    if not note_text:
+        raise HTTPException(status_code=400, detail="Note cannot be empty")
+
     with get_db() as conn:
         cur = conn.execute("SELECT teacher_notes_json FROM rooms WHERE room_code = ?", (room_code,))
         row = cur.fetchone()
@@ -269,30 +391,64 @@ async def post_teacher_note(room_code: str, req: TeacherNoteRequest):
             raise HTTPException(status_code=404, detail="Room not found")
         
         notes = json.loads(row["teacher_notes_json"])
-        notes.append(req.note)
-
+        notes.insert(0, note_text)
+        if len(notes) > 20:
+            notes = notes[:20]
         conn.execute("UPDATE rooms SET teacher_notes_json = ?, updated_at = ? WHERE room_code = ?", (json.dumps(notes), now, room_code))
         conn.commit()
 
-    await broadcast_to_local_sockets(room_code, {
-        "type": "teacher_note_added",
-        "note": req.note,
-        "notes": notes
-    })
+    payload = {"note": note_text, "notes": notes, "timestamp": now}
+    publish_event(room_code, "teacher_note_added", payload)
+    await broadcast_to_local_sockets(room_code, {"type": "teacher_note_added", **payload})
     return {"success": True, "notes": notes}
 
-async def broadcast_to_local_sockets(room_code: str, data: dict, exclude: Optional[WebSocket] = None):
-    sockets = local_sockets.get(room_code, set())
-    dead = set()
-    for ws in sockets:
-        if ws == exclude:
-            continue
-        try:
-            await ws.send_json(data)
-        except Exception:
-            dead.add(ws)
-    for d in dead:
-        sockets.discard(d)
+@router.post("/rooms/{room_code}/poll")
+async def create_classroom_poll(room_code: str, req: PollCreateRequest):
+    """Starts a live interactive multiple-choice question for all students"""
+    now = time.time()
+    q = req.question.strip()
+    opts = [o.strip() for o in req.options if o.strip()]
+    if not q or len(opts) < 2:
+        raise HTTPException(status_code=400, detail="Question and at least 2 options required")
+
+    poll_data = {"question": q, "options": opts}
+    votes_data = {str(i): 0 for i in range(len(opts))}
+
+    with get_db() as conn:
+        conn.execute("UPDATE rooms SET active_poll_json = ?, poll_votes_json = ?, updated_at = ? WHERE room_code = ?",
+                     (json.dumps(poll_data), json.dumps(votes_data), now, room_code))
+        conn.commit()
+
+    payload = {"question": q, "options": opts, "votes": votes_data, "total": 0}
+    publish_event(room_code, "poll_started", payload)
+    await broadcast_to_local_sockets(room_code, {"type": "poll_started", **payload})
+    return {"success": True, "poll": poll_data}
+
+@router.post("/rooms/{room_code}/vote")
+async def submit_poll_vote(room_code: str, req: PollVoteRequest):
+    """Submits student vote on active classroom poll"""
+    now = time.time()
+    with get_db() as conn:
+        cur = conn.execute("SELECT active_poll_json, poll_votes_json FROM rooms WHERE room_code = ?", (room_code,))
+        row = cur.fetchone()
+        if not row or not row["active_poll_json"]:
+            raise HTTPException(status_code=400, detail="No active poll in this classroom")
+        
+        votes = json.loads(row["poll_votes_json"]) if row["poll_votes_json"] else {}
+        idx_str = str(req.option_index)
+        if idx_str in votes:
+            votes[idx_str] += 1
+        else:
+            votes[idx_str] = 1
+
+        total = sum(votes.values())
+        conn.execute("UPDATE rooms SET poll_votes_json = ?, updated_at = ? WHERE room_code = ?", (json.dumps(votes), now, room_code))
+        conn.commit()
+
+    payload = {"votes": votes, "total": total}
+    publish_event(room_code, "poll_update", payload)
+    await broadcast_to_local_sockets(room_code, {"type": "poll_update", **payload})
+    return {"success": True, "votes": votes, "total": total}
 
 @router.websocket("/ws/{room_code}")
 async def live_lab_websocket(
@@ -301,104 +457,207 @@ async def live_lab_websocket(
     role: str = Query("student"),
     name: str = Query("دانش‌آموز")
 ):
-    """Websocket real-time push with shared SQLite persistence"""
-    # Verify room exists in database
-    with get_db() as conn:
-        cur = conn.execute("SELECT * FROM rooms WHERE room_code = ?", (room_code,))
-        row = cur.fetchone()
-        if not row:
-            await websocket.close(code=4004, reason="Room not found")
-            return
-
-        current_state = json.loads(row["current_state_json"])
-        teacher_notes = json.loads(row["teacher_notes_json"])
-        room_title = row["title"]
-        sim_id = row["sim_id"]
-        teacher_name = row["teacher_name"]
-
+    """Bidirectional real-time WebSocket connection synchronized across all 4 Uvicorn worker processes"""
+    ensure_event_listener_started()
     await websocket.accept()
+
+    session_id = uuid.uuid4().hex[:12]
+    now = time.time()
 
     if room_code not in local_sockets:
         local_sockets[room_code] = set()
     local_sockets[room_code].add(websocket)
 
-    # Send initial welcome state
-    await websocket.send_json({
-        "type": "welcome",
-        "room_code": room_code,
-        "title": room_title,
-        "sim_id": sim_id,
-        "teacher_name": teacher_name,
-        "state": current_state,
-        "teacher_notes": teacher_notes,
-        "viewers_count": len(local_sockets[room_code]),
-        "role": role
-    })
+    # Register active viewer in shared DB
+    try:
+        with get_db() as conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO active_viewers (session_id, room_code, user_name, role, worker_pid, last_ping) VALUES (?, ?, ?, ?, ?, ?)",
+                (session_id, room_code, name, role, CURRENT_PID, now)
+            )
+            conn.commit()
+    except Exception as e:
+        logger.debug(f"Viewer registration error: {e}")
 
-    # Broadcast user joined
-    await broadcast_to_local_sockets(room_code, {
-        "type": "user_joined",
-        "name": name,
-        "role": role,
-        "viewers_count": len(local_sockets[room_code])
-    }, exclude=websocket)
+    # Compute total viewers across all workers
+    total_viewers = 1
+    try:
+        with get_db() as conn:
+            c = conn.execute("SELECT COUNT(*) as cnt FROM active_viewers WHERE room_code = ? AND last_ping > ?", (room_code, now - 20))
+            cnt_row = c.fetchone()
+            if cnt_row:
+                total_viewers = max(cnt_row["cnt"], len(local_sockets[room_code]))
+    except Exception:
+        total_viewers = len(local_sockets[room_code])
+
+    # Send initial room state to newly joined user
+    with get_db() as conn:
+        cur = conn.execute("SELECT current_state_json, teacher_notes_json, active_poll_json, poll_votes_json FROM rooms WHERE room_code = ?", (room_code,))
+        row = cur.fetchone()
+        if row:
+            await websocket.send_text(json.dumps({
+                "type": "welcome",
+                "room_code": room_code,
+                "role": role,
+                "viewers_count": total_viewers,
+                "state": json.loads(row["current_state_json"]),
+                "notes": json.loads(row["teacher_notes_json"]),
+                "active_poll": json.loads(row["active_poll_json"]) if row["active_poll_json"] else None,
+                "poll_votes": json.loads(row["poll_votes_json"]) if row["poll_votes_json"] else None
+            }))
+
+    # Announce user joined across workers
+    join_payload = {"name": name, "role": role, "viewers_count": total_viewers}
+    publish_event(room_code, "user_joined", join_payload)
+    await broadcast_to_local_sockets(room_code, {"type": "user_joined", **join_payload}, exclude=websocket)
 
     try:
         while True:
             data = await websocket.receive_json()
             msg_type = data.get("type")
 
-            # Real-time state update from teacher
+            # 1. State Update (Teacher moving sliders or running simulation)
             if msg_type == "state_update":
                 payload = data.get("payload", {})
-                now = time.time()
+                now_t = time.time()
+                # Persist in DB
                 with get_db() as conn:
                     cur = conn.execute("SELECT current_state_json FROM rooms WHERE room_code = ?", (room_code,))
                     r = cur.fetchone()
                     if r:
                         st = json.loads(r["current_state_json"])
                         st.update(payload)
-                        conn.execute("UPDATE rooms SET current_state_json = ?, updated_at = ? WHERE room_code = ?", (json.dumps(st), now, room_code))
+                        conn.execute("UPDATE rooms SET current_state_json = ?, updated_at = ? WHERE room_code = ?", (json.dumps(st), now_t, room_code))
                         conn.commit()
 
-                await broadcast_to_local_sockets(room_code, {
-                    "type": "state_sync",
-                    "payload": payload,
-                    "timestamp": now
-                }, exclude=websocket)
+                event_data = {"payload": payload, "timestamp": now_t}
+                publish_event(room_code, "state_sync", event_data)
+                await broadcast_to_local_sockets(room_code, {"type": "state_sync", **event_data}, exclude=websocket)
 
+            # 2. Laser Pointer Move (Teacher pointing on simulation screen)
             elif msg_type == "laser_pointer":
-                await broadcast_to_local_sockets(room_code, {
-                    "type": "laser_pointer",
+                laser_data = {
                     "x": data.get("x", 0.5),
-                    "y": data.get("y", 0.5)
-                }, exclude=websocket)
+                    "y": data.get("y", 0.5),
+                    "active": data.get("active", True)
+                }
+                publish_event(room_code, "laser_pointer", laser_data)
+                await broadcast_to_local_sockets(room_code, {"type": "laser_pointer", **laser_data}, exclude=websocket)
 
+            # 3. Teacher Chalkboard Note
+            elif msg_type == "teacher_note":
+                note = data.get("note", "").strip()
+                if note:
+                    now_t = time.time()
+                    with get_db() as conn:
+                        cur = conn.execute("SELECT teacher_notes_json FROM rooms WHERE room_code = ?", (room_code,))
+                        r = cur.fetchone()
+                        if r:
+                            notes = json.loads(r["teacher_notes_json"])
+                            notes.insert(0, note)
+                            if len(notes) > 25:
+                                notes = notes[:25]
+                            conn.execute("UPDATE rooms SET teacher_notes_json = ?, updated_at = ? WHERE room_code = ?", (json.dumps(notes), now_t, room_code))
+                            conn.commit()
+                            note_data = {"note": note, "notes": notes, "timestamp": now_t}
+                            publish_event(room_code, "teacher_note_added", note_data)
+                            await broadcast_to_local_sockets(room_code, {"type": "teacher_note_added", **note_data})
+
+            # 4. Clear Notes
+            elif msg_type == "clear_notes":
+                now_t = time.time()
+                with get_db() as conn:
+                    conn.execute("UPDATE rooms SET teacher_notes_json = '[]', updated_at = ? WHERE room_code = ?", (now_t, room_code))
+                    conn.commit()
+                publish_event(room_code, "notes_cleared", {})
+                await broadcast_to_local_sockets(room_code, {"type": "notes_cleared"})
+
+            # 5. Quick Classroom Poll Launch
+            elif msg_type == "start_poll":
+                poll_q = data.get("question", "").strip()
+                poll_opts = [o.strip() for o in data.get("options", []) if o.strip()]
+                if poll_q and len(poll_opts) >= 2:
+                    now_t = time.time()
+                    p_data = {"question": poll_q, "options": poll_opts}
+                    v_data = {str(i): 0 for i in range(len(poll_opts))}
+                    with get_db() as conn:
+                        conn.execute("UPDATE rooms SET active_poll_json = ?, poll_votes_json = ?, updated_at = ? WHERE room_code = ?",
+                                     (json.dumps(p_data), json.dumps(v_data), now_t, room_code))
+                        conn.commit()
+                    poll_event = {"question": poll_q, "options": poll_opts, "votes": v_data, "total": 0}
+                    publish_event(room_code, "poll_started", poll_event)
+                    await broadcast_to_local_sockets(room_code, {"type": "poll_started", **poll_event})
+
+            # 6. Poll Vote
+            elif msg_type == "poll_vote":
+                v_idx = str(data.get("option_index", 0))
+                now_t = time.time()
+                with get_db() as conn:
+                    cur = conn.execute("SELECT poll_votes_json FROM rooms WHERE room_code = ?", (room_code,))
+                    r = cur.fetchone()
+                    if r and r["poll_votes_json"]:
+                        votes = json.loads(r["poll_votes_json"])
+                        votes[v_idx] = votes.get(v_idx, 0) + 1
+                        total = sum(votes.values())
+                        conn.execute("UPDATE rooms SET poll_votes_json = ?, updated_at = ? WHERE room_code = ?", (json.dumps(votes), now_t, room_code))
+                        conn.commit()
+                        vote_event = {"votes": votes, "total": total}
+                        publish_event(room_code, "poll_update", vote_event)
+                        await broadcast_to_local_sockets(room_code, {"type": "poll_update", **vote_event})
+
+            # 7. Student Raise Hand
+            elif msg_type == "raise_hand":
+                hand_data = {"sender": name, "timestamp": time.time()}
+                publish_event(room_code, "student_raised_hand", hand_data)
+                await broadcast_to_local_sockets(room_code, {"type": "student_raised_hand", **hand_data})
+
+            # 8. Classroom Chat Message
             elif msg_type == "chat_message":
                 text = data.get("message", "").strip()
                 if text:
-                    now = time.time()
+                    now_t = time.time()
                     with get_db() as conn:
                         conn.execute("INSERT INTO chat_messages (room_code, sender, role, message, created_at) VALUES (?, ?, ?, ?, ?)",
-                                     (room_code, name, role, text, now))
+                                     (room_code, name, role, text, now_t))
                         conn.commit()
-
-                    await broadcast_to_local_sockets(room_code, {
-                        "type": "chat_message",
+                    chat_data = {
                         "sender": name,
                         "role": role,
                         "message": text,
                         "time": time.strftime("%H:%M")
-                    })
+                    }
+                    publish_event(room_code, "chat_message", chat_data)
+                    await broadcast_to_local_sockets(room_code, {"type": "chat_message", **chat_data})
+
+            # 9. Ping Heartbeat & Viewer Update
+            elif msg_type == "ping":
+                now_t = time.time()
+                with get_db() as conn:
+                    conn.execute("UPDATE active_viewers SET last_ping = ? WHERE session_id = ?", (now_t, session_id))
+                    conn.commit()
+                    c = conn.execute("SELECT COUNT(*) as cnt FROM active_viewers WHERE room_code = ? AND last_ping > ?", (room_code, now_t - 20))
+                    row_c = c.fetchone()
+                    total_viewers = max(row_c["cnt"] if row_c else 1, len(local_sockets.get(room_code, set())))
+                await websocket.send_text(json.dumps({"type": "pong", "viewers_count": total_viewers}))
 
     except WebSocketDisconnect:
         local_sockets.get(room_code, set()).discard(websocket)
-        await broadcast_to_local_sockets(room_code, {
-            "type": "user_left",
-            "name": name,
-            "role": role,
-            "viewers_count": len(local_sockets.get(room_code, set()))
-        })
+        try:
+            with get_db() as conn:
+                conn.execute("DELETE FROM active_viewers WHERE session_id = ?", (session_id,))
+                conn.commit()
+        except Exception:
+            pass
+        leave_payload = {"name": name, "role": role, "viewers_count": max(1, len(local_sockets.get(room_code, set())))}
+        publish_event(room_code, "user_left", leave_payload)
+        await broadcast_to_local_sockets(room_code, {"type": "user_left", **leave_payload})
+
     except Exception as e:
         logger.error(f"WebSocket error in {room_code}: {e}")
         local_sockets.get(room_code, set()).discard(websocket)
+        try:
+            with get_db() as conn:
+                conn.execute("DELETE FROM active_viewers WHERE session_id = ?", (session_id,))
+                conn.commit()
+        except Exception:
+            pass

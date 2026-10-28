@@ -568,6 +568,7 @@
     <header>
         <div class="sim-title">
             <span class="phet-badge">PhET</span>
+            <span id="live-mode-badge" style="display: none;"></span>
             <h1>حرکت بر روی خط راست: نمودار مکان، سرعت و شتاب (آزمایشگاه رسمی PhET)</h1>
         </div>
 
@@ -593,6 +594,7 @@
                     </div>
 
                     <div class="track-tools">
+                        <button id="btn-laser-tool" class="track-tool-btn" style="display: none; background: #fee2e2; border-color: #fca5a5; color: #b91c1c;" onclick="toggleLaserPointer()" title="فعال/غیرفعال کردن نشانگر لیزری روی صفحه دانش‌آموزان"><span>🔦 لیزر تدریس</span></button>
                         <button id="btn-camera-follow" class="track-tool-btn active" onclick="toggleCameraFollow()" title="دوربین به صورت زنده و نرم موقعیت متحرک را در مرکز دید نگه می‌دارد">
                             <span>🎥 دنبال‌کننده خودکار</span>
                         </button>
@@ -1855,7 +1857,110 @@
 
         
         // --- REAL-TIME CLASSROOM SYNCHRONIZATION HOOKS (TEACHER & STUDENT) ---
-        function broadcastLiveState() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const isLiveMode = urlParams.get('live') === '1';
+        const liveRole = urlParams.get('role') || 'student'; // 'teacher' or 'student'
+        let isLaserActive = false;
+        let lastBroadcastTime = 0;
+
+        function setupLiveClassroomMode() {
+            if (!isLiveMode) return;
+
+            const badge = document.getElementById('live-mode-badge');
+            if (badge) {
+                badge.style.display = 'inline-flex';
+                if (liveRole === 'teacher') {
+                    badge.style.background = '#e11d48';
+                    badge.style.color = '#ffffff';
+                    badge.style.padding = '2px 8px';
+                    badge.style.borderRadius = '6px';
+                    badge.style.fontSize = '11px';
+                    badge.style.fontWeight = '800';
+                    badge.innerHTML = '🔴 پخش زنده دبیر';
+
+                    const laserBtn = document.getElementById('btn-laser-tool');
+                    if (laserBtn) laserBtn.style.display = 'inline-flex';
+                } else {
+                    badge.style.background = '#059669';
+                    badge.style.color = '#ffffff';
+                    badge.style.padding = '2px 8px';
+                    badge.style.borderRadius = '6px';
+                    badge.style.fontSize = '11px';
+                    badge.style.fontWeight = '800';
+                    badge.innerHTML = '🔴 همگام با دبیر';
+
+                    // Lock student controls
+                    const sidebar = document.querySelector('.controls-panel');
+                    if (sidebar && !document.getElementById('student-live-banner')) {
+                        const banner = document.createElement('div');
+                        banner.id = 'student-live-banner';
+                        banner.style.cssText = 'background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 7px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; text-align: center; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 6px;';
+                        banner.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#3b82f6;animation:pulse 1.5s infinite;"></span><span>کنترل شبیه‌ساز در دست دبیر است</span>';
+                        sidebar.prepend(banner);
+                    }
+
+                    ['num-pos', 'num-vel', 'num-acc', 'slider-pos', 'slider-vel', 'slider-acc'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) { el.disabled = true; el.style.opacity = '0.7'; el.style.cursor = 'not-allowed'; }
+                    });
+                    document.querySelectorAll('.step-btn').forEach(btn => {
+                        btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed';
+                    });
+                    const presetSel = document.getElementById('sel-presets');
+                    if (presetSel) { presetSel.disabled = true; presetSel.style.opacity = '0.7'; }
+                    const playBtn = document.getElementById('play-btn');
+                    if (playBtn) { playBtn.style.pointerEvents = 'none'; playBtn.style.opacity = '0.6'; }
+                    const stepBtn = document.getElementById('step-btn');
+                    if (stepBtn) { stepBtn.style.pointerEvents = 'none'; stepBtn.style.opacity = '0.4'; }
+                    const resetBtn = document.getElementById('reset-btn');
+                    if (resetBtn) { resetBtn.style.pointerEvents = 'none'; resetBtn.style.opacity = '0.4'; }
+                }
+            }
+        }
+
+        function toggleLaserPointer() {
+            isLaserActive = !isLaserActive;
+            const btn = document.getElementById('btn-laser-tool');
+            if (btn) {
+                if (isLaserActive) {
+                    btn.classList.add('active');
+                    btn.style.background = '#ef4444';
+                    btn.style.color = '#ffffff';
+                    btn.style.borderColor = '#dc2626';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.background = '#fee2e2';
+                    btn.style.color = '#b91c1c';
+                    btn.style.borderColor = '#fca5a5';
+                }
+            }
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'TEACHER_LASER_MOVE',
+                    payload: { active: isLaserActive }
+                }, '*');
+            }
+        }
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isLaserActive || !isLiveMode || liveRole !== 'teacher') return;
+            const normX = e.clientX / window.innerWidth;
+            const normY = e.clientY / window.innerHeight;
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'TEACHER_LASER_MOVE',
+                    payload: { x: normX, y: normY, active: true }
+                }, '*');
+            }
+        });
+
+        function broadcastLiveState(force = false) {
+            if (!isLiveMode || liveRole !== 'teacher') return;
+            const now = Date.now();
+            if (!force && isRunning && (now - lastBroadcastTime < 65)) {
+                return; // Throttle live running physics loop to ~15 fps
+            }
+            lastBroadcastTime = now;
             if (window.parent && window.parent !== window) {
                 window.parent.postMessage({
                     type: 'TEACHER_SIM_STATE_UPDATE',
@@ -1867,7 +1972,8 @@
                         curV: curV,
                         curA: curA,
                         curT: curT,
-                        isRunning: isRunning
+                        isRunning: isRunning,
+                        trajectoryRecent: trajectory.slice(-4)
                     }
                 }, '*');
             }
@@ -1903,10 +2009,28 @@
                 if (typeof p.curV === 'number') curV = p.curV;
                 if (typeof p.curA === 'number') curA = p.curA;
                 if (typeof p.curT === 'number') curT = p.curT;
-                if (typeof p.isRunning === 'boolean' && p.isRunning !== isRunning) {
-                    togglePlay();
+                if (typeof p.isRunning === 'boolean') {
+                    isRunning = p.isRunning;
+                    updatePlayBtn();
                 }
-                if (p.reset) resetAll();
+                if (p.reset) {
+                    x0 = 0.0; v0 = 0.0; aConst = 0.0;
+                    curX = 0.0; curV = 0.0; curA = 0.0; curT = 0.0;
+                    totalDistance = 0.0;
+                    trajectory = [{ t: 0, x: 0, v: 0, a: 0 }];
+                    isRunning = false;
+                    updatePlayBtn();
+                }
+                if (Array.isArray(p.trajectoryRecent) && p.trajectoryRecent.length > 0) {
+                    p.trajectoryRecent.forEach(function(pt) {
+                        if (trajectory.length === 0 || trajectory[trajectory.length - 1].t < pt.t) {
+                            trajectory.push(pt);
+                        }
+                    });
+                } else if (trajectory.length === 0 || trajectory[trajectory.length - 1].t < curT) {
+                    trajectory.push({ t: curT, x: curX, v: curV, a: curA });
+                }
+                if (autoFollow) cameraX = curX;
                 updateHUD();
                 redrawTrack();
                 redrawGraphs();
@@ -1914,7 +2038,10 @@
         });
 
         // Start initialization on DOM load
-        window.addEventListener('DOMContentLoaded', init);
+        window.addEventListener('DOMContentLoaded', () => {
+            init();
+            setupLiveClassroomMode();
+        });
     </script>
 </body>
 </html>
