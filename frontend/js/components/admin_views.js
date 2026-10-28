@@ -20,7 +20,7 @@ class AdminViews {
         container.innerHTML = `
         <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
             <!-- Admin Top Bar -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
                 <div>
                     <div class="flex items-center gap-2 text-rose-600 font-bold text-xs mb-1">
                         <i data-lucide="shield-check" class="w-4 h-4"></i>
@@ -30,35 +30,35 @@ class AdminViews {
                 </div>
 
                 <!-- Admin Tabs Navigation (Responsive Horizontal Scroll on Mobile) -->
-                <div class="flex items-center sm:flex-wrap gap-1.5 p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-xs font-bold overflow-x-auto no-scrollbar w-full sm:w-auto">
-                    <button onclick="window.currentAdminViews.switchTab('overview')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'overview' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                <div class="flex items-center sm:flex-wrap gap-1.5 p-1.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 text-xs font-bold overflow-x-auto no-scrollbar w-full sm:w-auto">
+                    <button onclick="window.currentAdminViews.switchTab('overview')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'overview' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         داشبورد
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('curriculum')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'curriculum' ? 'bg-white dark:bg-slate-900 text-purple-600 shadow-sm font-black' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('curriculum')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'curriculum' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         سرفصل‌ها و درسنامه‌ساز
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('materials')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'materials' ? 'bg-white dark:bg-slate-900 text-emerald-500 shadow-sm font-black' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('materials')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'materials' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         درسنامه‌ها و جزوات متفرقه
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('competitions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'competitions' ? 'bg-white dark:bg-slate-900 text-cyan-400 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('competitions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'competitions' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         مدیریت لیگ‌ها و مسابقات
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('questions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'questions' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('questions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'questions' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         بانک سؤالات
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('reviews')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'reviews' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('reviews')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'reviews' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         مرکز بازبینی و تصحیح
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('validation')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'validation' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('validation')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'validation' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         اعتبارسنجی سؤالات
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('ai')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'ai' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('ai')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'ai' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         تنظیمات هوش مصنوعی
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('textbooks')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'textbooks' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('textbooks')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'textbooks' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         کتاب‌ها و استخراج PDF
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('students')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'students' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+                    <button onclick="window.currentAdminViews.switchTab('students')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'students' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         دانش‌آموزان
                     </button>
                 </div>
@@ -90,19 +90,19 @@ class AdminViews {
             <div class="space-y-6">
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
                         <span class="text-xs text-slate-400 font-bold block mb-1">دانش‌آموزان ثبت‌نامی</span>
                         <span class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">${data.total_students}</span>
                     </div>
-                    <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
                         <span class="text-xs text-slate-400 font-bold block mb-1">کل پرسش‌های فعال</span>
                         <span class="text-3xl font-extrabold text-blue-600 font-mono">${data.total_questions}</span>
                     </div>
-                    <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
                         <span class="text-xs text-slate-400 font-bold block mb-1">آزمون‌های برگزار شده</span>
                         <span class="text-3xl font-extrabold text-indigo-600 font-mono">${data.total_attempts}</span>
                     </div>
-                    <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
                         <span class="text-xs text-slate-400 font-bold block mb-1">پاسخ‌های در صف بازبینی دبیر</span>
                         <span class="text-3xl font-extrabold text-amber-600 font-mono">${data.pending_written_reviews}</span>
                     </div>
@@ -115,7 +115,7 @@ class AdminViews {
                             <i data-lucide="terminal" class="w-5 h-5 text-cyan-400"></i>
                             <h3 class="text-sm font-extrabold text-white">مرکز فرماندهی و دسترسی‌های سریع مدیر (Admin Control Deck)</h3>
                         </div>
-                        <span class="text-[11px] px-2.5 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-sans font-medium">مدیریت انجمن فیزیک</span>
+                        <span class="text-[11px] px-2.5 py-1 rounded-full bg-sky-950/80 border border-sky-800/80 text-sky-300 font-sans font-medium">مدیریت انجمن فیزیک</span>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
                         <button onclick="window.currentAdminViews.switchTab('curriculum'); setTimeout(() => window.currentAdminViews.openCreateChapterModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-purple-500/40 text-right flex items-center justify-between transition-all group">

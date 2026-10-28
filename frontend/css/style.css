@@ -102,64 +102,95 @@ body, button, input, textarea, select {
     background-attachment: fixed;
 }
 
-/* 3D Duolingo-style action buttons */
-.btn-duo-green {
-    background-color: var(--duo-green);
-    border-bottom: 4px solid var(--duo-green-border);
-    transition: all 0.1s ease;
+/* PhET Professional Action Buttons (Replacing Cartoon 3D Buttons with Sleek PhET Standard) */
+.btn-duo-blue, .btn-phet-primary {
+    background-color: #0284c7;
+    color: #ffffff;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.btn-duo-green:active {
-    transform: translateY(2px);
-    border-bottom-width: 2px;
+.btn-duo-blue:hover, .btn-phet-primary:hover {
+    background-color: #0369a1;
+    border-color: rgba(56, 189, 248, 0.7);
+    box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35);
+    transform: translateY(-1px);
+}
+.btn-duo-blue:active, .btn-phet-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2);
 }
 
-.btn-duo-blue {
-    background-color: var(--duo-blue);
-    border-bottom: 4px solid #1899d6;
-    transition: all 0.1s ease;
+.btn-duo-green {
+    background-color: #059669;
+    color: #ffffff;
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.btn-duo-blue:active {
-    transform: translateY(2px);
-    border-bottom-width: 2px;
+.btn-duo-green:hover {
+    background-color: #047857;
+    border-color: rgba(52, 211, 153, 0.7);
+    box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
+    transform: translateY(-1px);
+}
+.btn-duo-green:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2);
 }
 
 .btn-duo-yellow {
-    background-color: var(--duo-yellow);
-    border-bottom: 4px solid #e5b400;
-    transition: all 0.1s ease;
+    background-color: #d97706;
+    color: #ffffff;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.25);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-duo-yellow:hover {
+    background-color: #b45309;
+    border-color: rgba(251, 191, 36, 0.7);
+    box-shadow: 0 6px 20px rgba(217, 119, 6, 0.35);
+    transform: translateY(-1px);
 }
 .btn-duo-yellow:active {
-    transform: translateY(2px);
-    border-bottom-width: 2px;
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.2);
 }
 
 .btn-duo-purple {
-    background-color: var(--duo-purple);
-    border-bottom: 4px solid var(--duo-purple-border);
-    transition: all 0.1s ease;
+    background-color: #475569;
+    color: #f8fafc;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    box-shadow: 0 4px 14px rgba(71, 85, 105, 0.2);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-duo-purple:hover {
+    background-color: #334155;
+    border-color: rgba(148, 163, 184, 0.6);
+    box-shadow: 0 6px 20px rgba(71, 85, 105, 0.3);
+    transform: translateY(-1px);
 }
 .btn-duo-purple:active {
-    transform: translateY(2px);
-    border-bottom-width: 2px;
+    transform: translateY(0);
 }
 
-/* 3D Physics Cards */
+/* Professional PhET Scientific Cards */
 .physics-card-3d {
     position: relative;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.06);
+    border: 1px solid #1e293b;
+    box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.3);
 }
 .dark .physics-card-3d {
-    background: linear-gradient(145deg, rgba(15, 23, 42, 0.8), rgba(11, 17, 33, 0.95));
+    background: rgba(15, 23, 42, 0.95);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(59, 130, 246, 0.15);
+    border: 1px solid #1e293b;
     box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
 }
 .dark .physics-card-3d:hover {
-    transform: translateY(-4px);
-    border-color: rgba(59, 130, 246, 0.45);
-    box-shadow: 0 16px 32px -8px rgba(37, 99, 235, 0.25), 0 0 15px rgba(59, 130, 246, 0.15);
+    transform: translateY(-3px);
+    border-color: #0284c7;
+    box-shadow: 0 12px 28px -4px rgba(2, 132, 199, 0.2);
 }
 
 /* Physics Laboratory Sliders */
@@ -259,18 +290,15 @@ input[type=range].physics-slider::-webkit-slider-thumb:hover {
 .strength-medium .seg-1, .strength-medium .seg-2 { background: #f59e0b; }
 .strength-strong .seg-1, .strength-strong .seg-2, .strength-strong .seg-3 { background: #10b981; }
 
-/* Grade Theme Accents */
-.grade-theme-7 {
-    border-color: rgba(245, 158, 11, 0.35);
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%);
+/* Unified Scientific Grade Cards */
+.grade-theme-7, .grade-theme-8, .grade-theme-9 {
+    border-color: #1e293b;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(12px);
 }
-.grade-theme-8 {
-    border-color: rgba(59, 130, 246, 0.35);
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%);
-}
-.grade-theme-9 {
-    border-color: rgba(168, 85, 247, 0.35);
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%);
+.grade-theme-7:hover, .grade-theme-8:hover, .grade-theme-9:hover {
+    border-color: #0284c7;
+    box-shadow: 0 12px 28px -4px rgba(2, 132, 199, 0.2);
 }
 
 /* Shake Animation for Auth Errors */
@@ -283,24 +311,16 @@ input[type=range].physics-slider::-webkit-slider-thumb:hover {
     animation: shake-x 0.4s ease-in-out;
 }
 
-/* Cyberpunk Neon Glow & AI Tutor Floating Widget */
-.cyber-glow-cyan {
-    box-shadow: 0 0 25px -5px rgba(34, 211, 238, 0.45), 0 0 10px -2px rgba(6, 182, 212, 0.3);
-}
-
-.cyber-glow-blue {
-    box-shadow: 0 0 25px -5px rgba(56, 189, 248, 0.4), 0 0 10px -2px rgba(34, 211, 238, 0.3);
-}
-
-.cyber-glow-violet {
-    box-shadow: 0 0 25px -5px rgba(139, 92, 246, 0.45), 0 0 10px -2px rgba(167, 139, 250, 0.3);
+/* PhET Scientific Ambient Glow & Glass Containers */
+.cyber-glow-cyan, .cyber-glow-blue, .cyber-glow-violet {
+    box-shadow: 0 4px 20px rgba(2, 132, 199, 0.15);
 }
 
 .cyber-card-glass {
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(15, 23, 42, 0.95);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(139, 92, 246, 0.25);
+    border: 1px solid #1e293b;
 }
 
 @keyframes pulse-ring {

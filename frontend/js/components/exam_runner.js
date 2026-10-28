@@ -254,7 +254,7 @@ class ExamRunner {
 
                     <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
                         <!-- Quick Formula Sheet Button -->
-                        <button onclick="window.currentExamRunner.openFormulaModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-violet-50 hover:bg-violet-100 dark:bg-violet-950/40 dark:hover:bg-violet-900/40 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800 text-xs font-bold transition-all" title="فرمول‌نامه سریع فیزیک">
+                        <button onclick="window.currentExamRunner.openFormulaModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-950/80 hover:bg-sky-900/80 text-sky-300 border border-sky-800/80 text-xs font-bold transition-all" title="فرمول‌نامه سریع فیزیک">
                             <i data-lucide="file-text" class="w-4 h-4"></i>
                             <span class="hidden sm:inline">فرمول‌نامه سریع</span>
                         </button>
@@ -292,7 +292,7 @@ class ExamRunner {
                         <!-- Top Metadata & Flag Toggle -->
                         <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span class="px-3 py-1 rounded-full text-xs font-black ${q.question_type === 'mcq' ? 'bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400' : 'bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400'}">
+                                <span class="px-3 py-1 rounded-full text-xs font-black ${q.question_type === 'mcq' ? 'bg-sky-950/80 text-sky-300 border border-sky-800/80' : 'bg-slate-800 text-slate-300 border border-slate-700'}">
                                     ${q.question_type === 'mcq' ? 'چهارگزینه‌ای استاندارد' : 'تشریحی / مسأله فیزیک'} (${q.points} نمره)
                                 </span>
                                 <span class="text-xs px-2.5 py-0.5 rounded-lg font-bold ${q.difficulty === 'hard' ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40' : q.difficulty === 'easy' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40' : 'bg-amber-50 text-amber-600 dark:bg-amber-950/40'}">
@@ -455,7 +455,7 @@ class ExamRunner {
                                 }
 
                                 if (isCurrent) {
-                                    stateClass += ' ring-4 ring-cyan-400 scale-105 z-10';
+                                    stateClass += ' ring-4 ring-sky-500 scale-105 z-10';
                                 }
 
                                 return `
@@ -602,7 +602,7 @@ class ExamRunner {
                 <!-- Modal Header -->
                 <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/60">
                     <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-950/80 text-violet-600 flex items-center justify-center font-bold">
+                        <div class="w-9 h-9 rounded-xl bg-sky-950/80 text-sky-400 border border-sky-800/80 flex items-center justify-center font-bold">
                             <i data-lucide="file-text" class="w-5 h-5"></i>
                         </div>
                         <div>
@@ -618,8 +618,8 @@ class ExamRunner {
                 <!-- Modal Body with Formulas -->
                 <div class="p-6 overflow-y-auto space-y-6 text-sm">
                     <!-- Section 1: چگالی و ماده -->
-                    <div class="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/60 space-y-2">
-                        <h4 class="font-black text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                    <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+                        <h4 class="font-black text-sky-300 flex items-center gap-2">
                             <span>⚖️ چگالی، جرم و حجم (پایه هفتم)</span>
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
@@ -631,8 +631,8 @@ class ExamRunner {
                     </div>
 
                     <!-- Section 2: حرکت و نیرو -->
-                    <div class="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/60 space-y-2">
-                        <h4 class="font-black text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                    <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+                        <h4 class="font-black text-sky-300 flex items-center gap-2">
                             <span>🚀 حرکت، سرعت، شتاب و قوانین نیوتون (پایه نهم)</span>
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
@@ -644,8 +644,8 @@ class ExamRunner {
                     </div>
 
                     <!-- Section 3: فشار و شاره‌ها -->
-                    <div class="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/60 space-y-2">
-                        <h4 class="font-black text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                    <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+                        <h4 class="font-black text-sky-300 flex items-center gap-2">
                             <span>💧 فشار در جامدات و مایعات (پایه نهم)</span>
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
@@ -657,8 +657,8 @@ class ExamRunner {
                     </div>
 
                     <!-- Section 4: الکتریسیته و مغناطیس -->
-                    <div class="p-4 rounded-2xl bg-cyan-50/50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-900/60 space-y-2">
-                        <h4 class="font-black text-cyan-700 dark:text-cyan-300 flex items-center gap-2">
+                    <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+                        <h4 class="font-black text-sky-300 flex items-center gap-2">
                             <span>⚡ الکتریسیته و مدارهای الکتریکی (پایه هشتم)</span>
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
@@ -670,8 +670,8 @@ class ExamRunner {
                     </div>
 
                     <!-- Section 5: کار و انرژی و گرما -->
-                    <div class="p-4 rounded-2xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-900/60 space-y-2">
-                        <h4 class="font-black text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                    <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+                        <h4 class="font-black text-sky-300 flex items-center gap-2">
                             <span>🔥 کار، انرژی، توان و گرما (پایه‌های هفتم و هشتم)</span>
                         </h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
@@ -726,7 +726,7 @@ class ExamRunner {
                 <div class="grid grid-cols-3 gap-2 text-center">
                     <div class="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
                         <span class="block text-xl font-black text-emerald-600 font-mono">${stats.answered}</span>
-                        <span class="text-[11px] font-bold text-emerald-700 dark:text-emerald-300">پاسخ‌داده</span>
+                        <span class="text-[11px] font-bold text-sky-300">پاسخ‌داده</span>
                     </div>
                     <div class="p-3 rounded-2xl ${stats.unanswered > 0 ? 'bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600' : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400'}">
                         <span class="block text-xl font-black font-mono">${stats.unanswered}</span>
@@ -744,7 +744,7 @@ class ExamRunner {
                     <span>هشدار: شما ${stats.unanswered} سؤال پاسخ‌نداده دارید!</span>
                 </div>
                 ` : `
-                <div class="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2">
+                <div class="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800 text-sky-300 text-xs font-semibold flex items-center gap-2">
                     <i data-lucide="check-circle-2" class="w-4 h-4 shrink-0 text-emerald-500"></i>
                     <span>عالی! به تمامی سؤالات پاسخ داده‌اید.</span>
                 </div>
@@ -870,7 +870,7 @@ class ExamRunner {
                     </div>
                 </div>
 
-                <div class="inline-flex flex-wrap items-center justify-center gap-3 px-5 py-2 rounded-full text-xs font-black ${res.is_passed ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'}">
+                <div class="inline-flex flex-wrap items-center justify-center gap-3 px-5 py-2 rounded-full text-xs font-black ${res.is_passed ? 'bg-emerald-50 dark:bg-emerald-950/40 text-sky-300 border border-emerald-200 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'}">
                     <span>${res.is_passed ? 'تبریک! نمره قبولی را کسب کردید 🎉' : 'نیاز به مرور مباحث و تمرین مجدد 💡'}</span>
                     <span class="font-sans text-amber-500">• ⚡ +<span class="font-mono">${res.xp_earned || 0}</span> XP دریافت شد</span>
                 </div>

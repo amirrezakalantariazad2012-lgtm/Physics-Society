@@ -40,34 +40,34 @@ function renderNavbar() {
                 </div>
 
                 <!-- Nav Links for Desktop -->
-                <nav class="hidden md:flex items-center gap-6 text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300">
-                    <a href="#curriculum" onclick="window.store.setView('curriculum')" class="transition-colors flex items-center gap-1.5 ${isTabActive('curriculum') ? 'text-cyan-400 font-bold' : 'hover:text-cyan-400'}">
-                        <i data-lucide="book-open" class="w-4 h-4 text-cyan-400"></i>
+                <nav class="hidden md:flex items-center gap-1.5 text-xs sm:text-sm font-medium">
+                    <a href="#curriculum" onclick="window.store.setView('curriculum')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('curriculum') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
+                        <i data-lucide="book-open" class="w-4 h-4 ${isTabActive('curriculum') ? 'text-sky-400' : 'text-slate-400'}"></i>
                         <span>آموزش فیزیک</span>
                     </a>
-                    <a href="#materials" onclick="window.store.setView('materials')" class="transition-colors flex items-center gap-1.5 ${isTabActive('materials') ? 'text-emerald-400 font-bold' : 'hover:text-emerald-400'}">
-                        <i data-lucide="file-text" class="w-4 h-4 text-emerald-400"></i>
+                    <a href="#materials" onclick="window.store.setView('materials')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('materials') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
+                        <i data-lucide="file-text" class="w-4 h-4 ${isTabActive('materials') ? 'text-sky-400' : 'text-slate-400'}"></i>
                         <span>درسنامه‌ها و جزوات</span>
                     </a>
-                    <a href="#simulators" onclick="window.store.setView('simulators')" class="transition-colors flex items-center gap-1.5 ${isTabActive('simulators') ? 'text-teal-400 font-bold' : 'hover:text-teal-400'}">
-                        <i data-lucide="flask-conical" class="w-4 h-4 text-teal-400"></i>
-                        <span>آزمایشگاه فیزیک</span>
+                    <a href="#simulators" onclick="window.store.setView('simulators')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('simulators') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
+                        <i data-lucide="flask-conical" class="w-4 h-4 ${isTabActive('simulators') ? 'text-sky-400' : 'text-slate-400'}"></i>
+                        <span>آزمایشگاه PhET</span>
                     </a>
-                    <a href="#competitions" onclick="window.store.setView('competitions')" class="transition-colors flex items-center gap-1.5 ${isTabActive('competitions') ? 'text-amber-400 font-bold' : 'hover:text-amber-400'}">
-                        <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
+                    <a href="#competitions" onclick="window.store.setView('competitions')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('competitions') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
+                        <i data-lucide="trophy" class="w-4 h-4 ${isTabActive('competitions') ? 'text-amber-400' : 'text-slate-400'}"></i>
                         <span>لیگ‌ها و مسابقات</span>
                     </a>
-                    <a href="#leaderboards" onclick="window.store.setView('leaderboards')" class="transition-colors flex items-center gap-1.5 ${isTabActive('leaderboards') ? 'text-indigo-400 font-bold' : 'hover:text-indigo-400'}">
-                        <i data-lucide="award" class="w-4 h-4 text-indigo-400"></i>
+                    <a href="#leaderboards" onclick="window.store.setView('leaderboards')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('leaderboards') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
+                        <i data-lucide="award" class="w-4 h-4 ${isTabActive('leaderboards') ? 'text-sky-400' : 'text-slate-400'}"></i>
                         <span>جدول امتیازات</span>
                     </a>
-                    <a href="#badges" onclick="window.store.setView('badges')" class="transition-colors flex items-center gap-1.5 ${isTabActive('badges') ? 'text-emerald-400 font-bold' : 'hover:text-emerald-400'}">
-                        <i data-lucide="medal" class="w-4 h-4 text-emerald-400"></i>
+                    <a href="#badges" onclick="window.store.setView('badges')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('badges') ? 'bg-sky-950/80 text-sky-300 font-bold border border-sky-800/80 shadow-sm' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'}">
+                        <i data-lucide="medal" class="w-4 h-4 ${isTabActive('badges') ? 'text-amber-400' : 'text-slate-400'}"></i>
                         <span>مدال‌ها</span>
                     </a>
                     ${user && user.role === 'admin' ? `
-                    <a href="#admin" onclick="window.store.setView('admin')" class="text-rose-500 font-bold hover:underline flex items-center gap-1.5">
-                        <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                    <a href="#admin" onclick="window.store.setView('admin')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('admin') ? 'bg-rose-950/80 text-rose-300 font-bold border border-rose-800/80 shadow-sm' : 'text-rose-400 hover:text-rose-200 hover:bg-rose-950/40'}">
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-rose-400"></i>
                         <span>پنل مدیریت</span>
                     </a>
                     ` : ''}

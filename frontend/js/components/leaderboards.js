@@ -29,14 +29,14 @@ async function renderLeaderboardsView(containerId) {
             ${list.length >= 3 ? `
             <div class="grid grid-cols-3 gap-3 items-end pt-8 pb-4 text-center">
                 <!-- 2nd Place -->
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 h-[170px] flex flex-col justify-end">
+                <div class="bg-slate-900/95 rounded-3xl p-4 border border-slate-800 shadow-xl space-y-2 h-[170px] flex flex-col justify-end">
                     <span class="w-7 h-7 mx-auto rounded-full bg-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center">۲</span>
                     <span class="font-bold text-xs text-slate-800 dark:text-white block truncate">${list[1].display_name}</span>
                     <span class="text-[11px] text-slate-400 block">${list[1].grade_title_fa}</span>
-                    <span class="text-xs font-bold text-blue-500 font-sans">${list[1].total_xp} XP</span>
+                    <span class="text-xs font-bold text-sky-400 font-sans font-bold">${list[1].total_xp} XP</span>
                 </div>
                 <!-- 1st Place -->
-                <div class="bg-gradient-to-t from-amber-500/10 to-transparent dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 border-2 border-amber-400 shadow-md space-y-2 h-[200px] flex flex-col justify-end relative">
+                <div class="bg-gradient-to-t from-amber-500/10 to-transparent dark:from-slate-900/90 dark:to-slate-950 rounded-3xl p-4 border border-amber-500/50 shadow-xl space-y-2 h-[200px] flex flex-col justify-end relative">
                     <i data-lucide="crown" class="w-6 h-6 text-amber-500 absolute -top-3 left-1/2 -translate-x-1/2"></i>
                     <span class="w-8 h-8 mx-auto rounded-full bg-amber-400 text-slate-900 font-black text-sm flex items-center justify-center shadow">۱</span>
                     <span class="font-extrabold text-sm text-slate-900 dark:text-white block truncate">${list[0].display_name}</span>
@@ -44,11 +44,11 @@ async function renderLeaderboardsView(containerId) {
                     <span class="text-sm font-black text-amber-500 font-sans">${list[0].total_xp} XP</span>
                 </div>
                 <!-- 3rd Place -->
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 h-[150px] flex flex-col justify-end">
+                <div class="bg-slate-900/95 rounded-3xl p-4 border border-slate-800 shadow-xl space-y-2 h-[150px] flex flex-col justify-end">
                     <span class="w-7 h-7 mx-auto rounded-full bg-amber-700 text-white font-bold text-xs flex items-center justify-center">۳</span>
                     <span class="font-bold text-xs text-slate-800 dark:text-white block truncate">${list[2].display_name}</span>
                     <span class="text-[11px] text-slate-400 block">${list[2].grade_title_fa}</span>
-                    <span class="text-xs font-bold text-blue-500 font-sans">${list[2].total_xp} XP</span>
+                    <span class="text-xs font-bold text-sky-400 font-sans font-bold">${list[2].total_xp} XP</span>
                 </div>
             </div>
             ` : ''}
@@ -71,7 +71,7 @@ async function renderLeaderboardsView(containerId) {
                             <i data-lucide="flame" class="w-3.5 h-3.5 fill-orange-500"></i>
                             ${s.streak}
                         </span>
-                        <span class="text-sm font-black text-blue-500 dark:text-blue-400 font-sans">
+                        <span class="text-sm font-black text-sky-400 font-sans font-bold">
                             ${s.total_xp} XP
                         </span>
                     </div>
@@ -112,9 +112,9 @@ async function renderBadgesView(containerId) {
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 ${badges.map(b => `
-                <div class="p-6 rounded-3xl border transition-all ${b.is_unlocked ? 'bg-white dark:bg-slate-900 border-emerald-300 dark:border-emerald-800 shadow-sm' : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 opacity-60'}">
+                <div class="p-6 rounded-3xl border transition-all ${b.is_unlocked ? 'bg-slate-900/95 border-emerald-700/60 shadow-xl' : 'bg-slate-900/40 border-slate-800 opacity-60'}">
                     <div class="flex items-center gap-4 mb-3">
-                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${b.is_unlocked ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-slate-200 text-slate-400 dark:bg-slate-800'}">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${b.is_unlocked ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-700/60' : 'bg-slate-800 text-slate-500 border border-slate-700'}">
                             <i data-lucide="${b.icon || 'star'}" class="w-6 h-6"></i>
                         </div>
                         <div>

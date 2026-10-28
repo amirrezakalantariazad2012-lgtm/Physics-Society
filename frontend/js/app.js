@@ -217,14 +217,14 @@ async function renderLandingView(container) {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-6 text-right">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 text-xs font-bold cyber-glow-cyan">
-                        <i data-lucide="atom" class="w-4 h-4 text-cyan-400"></i>
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-950/80 border border-sky-800/80 text-sky-300 text-xs font-bold shadow-sm">
+                        <i data-lucide="atom" class="w-4 h-4 text-sky-400"></i>
                         <span>انجمن فیزیک شهید بهشتی دو دوره اول</span>
                     </div>
 
                     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white leading-tight">
                         یادگیری عمیق فیزیک، <br/>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500">لیگ‌های کوانتومی و هوش مصنوعی</span>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-sky-300 to-blue-400">آزمایشگاه تخصصی PhET و هوش مصنوعی</span>
                     </h1>
 
                     <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
@@ -291,48 +291,48 @@ async function renderLandingView(container) {
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Grade 7 -->
-                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 1 })" class="physics-card-3d bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer space-y-4 relative overflow-hidden">
-                    ${window.store.currentUser && window.store.currentUser.grade_id === 1 ? '<span class="absolute top-3 left-3 text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-bold border border-blue-400/30">پایه شما</span>' : ''}
-                    <div class="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-500 flex items-center justify-center font-black text-xl">
+                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 1 })" class="physics-card-3d bg-slate-900/95 hover:bg-slate-850 p-6 rounded-3xl border border-slate-800 hover:border-sky-500/60 shadow-xl cursor-pointer space-y-4 relative overflow-hidden transition-all group">
+                    ${window.store.currentUser && window.store.currentUser.grade_id === 1 ? '<span class="absolute top-3 left-3 text-[10px] px-2.5 py-0.5 rounded-full bg-sky-950 text-sky-300 font-bold border border-sky-700/60 shadow-sm">پایه شما</span>' : ''}
+                    <div class="w-12 h-12 rounded-2xl bg-sky-950/80 text-sky-400 border border-sky-800/80 flex items-center justify-center font-black text-xl group-hover:scale-105 group-hover:border-sky-500 transition-all">
                         ۷
                     </div>
                     <div>
-                        <h3 class="font-bold text-lg text-slate-800 dark:text-white">پایه هفتم</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">اندازه‌گیری و ابزارها • انرژی و تبدیل‌های آن • منابع انرژی • گرما و بهینه‌سازی مصرف</p>
+                        <h3 class="font-bold text-lg text-white">پایه هفتم</h3>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">اندازه‌گیری و ابزارها • انرژی و تبدیل‌های آن • منابع انرژی • گرما و بهینه‌سازی مصرف</p>
                     </div>
-                    <div class="flex items-center justify-between text-xs font-bold text-blue-500 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center justify-between text-xs font-bold text-sky-400 group-hover:text-sky-300 pt-2 border-t border-slate-800">
                         <span>۲ کتاب • ۴ فصل جامع فیزیک</span>
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </div>
                 </div>
 
                 <!-- Grade 8 -->
-                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 2 })" class="physics-card-3d bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer space-y-4 relative overflow-hidden">
-                    ${window.store.currentUser && window.store.currentUser.grade_id === 2 ? '<span class="absolute top-3 left-3 text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-bold border border-indigo-400/30">پایه شما</span>' : ''}
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-400 flex items-center justify-center font-black text-xl">
+                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 2 })" class="physics-card-3d bg-slate-900/95 hover:bg-slate-850 p-6 rounded-3xl border border-slate-800 hover:border-sky-500/60 shadow-xl cursor-pointer space-y-4 relative overflow-hidden transition-all group">
+                    ${window.store.currentUser && window.store.currentUser.grade_id === 2 ? '<span class="absolute top-3 left-3 text-[10px] px-2.5 py-0.5 rounded-full bg-sky-950 text-sky-300 font-bold border border-sky-700/60 shadow-sm">پایه شما</span>' : ''}
+                    <div class="w-12 h-12 rounded-2xl bg-sky-950/80 text-sky-400 border border-sky-800/80 flex items-center justify-center font-black text-xl group-hover:scale-105 group-hover:border-sky-500 transition-all">
                         ۸
                     </div>
                     <div>
-                        <h3 class="font-bold text-lg text-slate-800 dark:text-white">پایه هشتم</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">الکتریسیته ساکن و جاری • مغناطیس و قطب‌ها • نور و بازتاب • شکست نور و عدسی‌ها</p>
+                        <h3 class="font-bold text-lg text-white">پایه هشتم</h3>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">الکتریسیته ساکن و جاری • مغناطیس و قطب‌ها • نور و بازتاب • شکست نور و عدسی‌ها</p>
                     </div>
-                    <div class="flex items-center justify-between text-xs font-bold text-indigo-400 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center justify-between text-xs font-bold text-sky-400 group-hover:text-sky-300 pt-2 border-t border-slate-800">
                         <span>۲ کتاب • ۴ فصل جامع فیزیک</span>
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </div>
                 </div>
 
                 <!-- Grade 9 -->
-                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 3 })" class="physics-card-3d bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer space-y-4 relative overflow-hidden">
-                    ${window.store.currentUser && window.store.currentUser.grade_id === 3 ? '<span class="absolute top-3 left-3 text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 font-bold border border-purple-400/30">پایه شما</span>' : ''}
-                    <div class="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-900/40 text-purple-400 flex items-center justify-center font-black text-xl">
+                <div onclick="window.store.currentUser && window.store.currentUser.role === 'student' ? window.store.setView('curriculum', { id: window.store.currentUser.grade_id }) : window.store.setView('curriculum', { id: 3 })" class="physics-card-3d bg-slate-900/95 hover:bg-slate-850 p-6 rounded-3xl border border-slate-800 hover:border-sky-500/60 shadow-xl cursor-pointer space-y-4 relative overflow-hidden transition-all group">
+                    ${window.store.currentUser && window.store.currentUser.grade_id === 3 ? '<span class="absolute top-3 left-3 text-[10px] px-2.5 py-0.5 rounded-full bg-sky-950 text-sky-300 font-bold border border-sky-700/60 shadow-sm">پایه شما</span>' : ''}
+                    <div class="w-12 h-12 rounded-2xl bg-sky-950/80 text-sky-400 border border-sky-800/80 flex items-center justify-center font-black text-xl group-hover:scale-105 group-hover:border-sky-500 transition-all">
                         ۹
                     </div>
                     <div>
-                        <h3 class="font-bold text-lg text-slate-800 dark:text-white">پایه نهم</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">حرکت، تندی و شتاب • نیرو و قوانین نیوتون • فشار جامدات و شاره‌ها • ماشین‌ها و اهرم‌ها</p>
+                        <h3 class="font-bold text-lg text-white">پایه نهم</h3>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">حرکت، تندی و شتاب • نیرو و قوانین نیوتون • فشار جامدات و شاره‌ها • ماشین‌ها و اهرم‌ها</p>
                     </div>
-                    <div class="flex items-center justify-between text-xs font-bold text-purple-400 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center justify-between text-xs font-bold text-sky-400 group-hover:text-sky-300 pt-2 border-t border-slate-800">
                         <span>۲ کتاب • ۵ فصل تخصصی فیزیک و فضا</span>
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </div>
@@ -372,38 +372,38 @@ async function renderDashboardView(container) {
         const gradeConfigs = {
             7: {
                 themeClass: 'grade-theme-7',
-                heroGradient: 'from-amber-600 via-orange-700 to-slate-900 border-amber-500/30',
+                heroGradient: 'from-slate-900 via-slate-900/95 to-slate-950 border-slate-800',
                 gradeBadge: 'پایه هفتم — کاوشگر ماده، اندازه‌گیری و انرژی',
                 badgeIcon: 'flame',
-                accentColor: 'amber',
-                formula: '$$W = F \\cdot d \\quad , \\quad E_k = \\frac{1}{2}m v^2 \\quad , \\quad Q = mc\\Delta T$$',
-                labTitle: 'میز کار آزمایشگاه هفتم: اندازه‌گیری، چگالی و تبدیل انرژی',
-                labDesc: 'بررسی دقیق یکاهای استاندارد SI، رابطه چگالی $\\rho = \\frac{m}{V}$، تبدیلات انرژی پتانسیل گرانشی و جنبشی، و سازوکار انتقال گرما (رسانش، همرفت، تابش).',
-                labActionText: 'ورود به شبیه‌ساز پایستگی انرژی و چگالی',
+                accentColor: 'sky',
+                formula: '$$W = F \cdot d \quad , \quad E_k = \frac{1}{2}m v^2 \quad , \quad Q = mc\Delta T$$',
+                labTitle: 'میز کار آزمایشگاه هفتم: اندازه‌گیری، چگالی و تبدیل انرژی (PhET)',
+                labDesc: 'بررسی دقیق یکاهای استاندارد SI، رابطه چگالی $\rho = \frac{m}{V}$، تبدیلات انرژی پتانسیل گرانشی و جنبشی، و سازوکار انتقال گرما (رسانش، همرفت، تابش).',
+                labActionText: 'ورود به آزمایشگاه PhET',
                 simId: 'density'
             },
             8: {
                 themeClass: 'grade-theme-8',
-                heroGradient: 'from-blue-600 via-cyan-700 to-slate-900 border-cyan-500/30',
+                heroGradient: 'from-slate-900 via-slate-900/95 to-slate-950 border-slate-800',
                 gradeBadge: 'پایه هشتم — پژوهشگر بارهای الکتریکی، مغناطیس و نور',
                 badgeIcon: 'zap',
-                accentColor: 'cyan',
-                formula: '$$V = I \\cdot R \\quad , \\quad \\theta_i = \\theta_r \\quad , \\quad n = \\frac{c}{v}$$',
-                labTitle: 'میز کار آزمایشگاه هشتم: مدار الکتریکی و شکست نور در عدسی‌ها',
+                accentColor: 'sky',
+                formula: '$$V = I \cdot R \quad , \quad \theta_i = \theta_r \quad , \quad n = \frac{c}{v}$$',
+                labTitle: 'میز کار آزمایشگاه هشتم: مدار الکتریکی و شکست نور در عدسی‌ها (PhET)',
                 labDesc: 'کاوش قانون اهم، مقاومت معادل مدارهای متوالی و موازی، اثر متقابل قطب‌های مغناطیسی، تشکیل تصویر در آینه‌های کروی و پدیده شکست نور در منشور.',
-                labActionText: 'ورود به شبیه‌ساز مدار و اپتیک',
+                labActionText: 'ورود به آزمایشگاه PhET',
                 simId: 'circuit-dc'
             },
             9: {
                 themeClass: 'grade-theme-9',
-                heroGradient: 'from-purple-700 via-indigo-800 to-slate-900 border-purple-500/30',
+                heroGradient: 'from-slate-900 via-slate-900/95 to-slate-950 border-slate-800',
                 gradeBadge: 'پایه نهم — نخبه مکانیک کلاسیک، دینامیک نیوتون و فشار',
                 badgeIcon: 'orbit',
-                accentColor: 'purple',
-                formula: '$$F_{net} = m \\cdot a \\quad , \\quad P = \\rho g h \\quad , \\quad v = \\frac{\\Delta x}{\\Delta t}$$',
-                labTitle: 'رصدخانه تخصصی نهم: بردار نیرو، قوانین نیوتون و فشار شاره‌ها',
+                accentColor: 'sky',
+                formula: '$$F_{net} = m \cdot a \quad , \quad P = \rho g h \quad , \quad v = \frac{\Delta x}{\Delta t}$$',
+                labTitle: 'رصدخانه تخصصی نهم: بردار نیرو، قوانین نیوتون و فشار شاره‌ها (PhET)',
                 labDesc: 'تحلیل برداری سینماتیک حرکت، قوانین اول تا سوم نیوتون و نیروی اصطکاک، فشار در عمق مایعات، قانون پاسکال و مزیت مکانیکی قرقره‌ها و اهرم‌ها.',
-                labActionText: 'ورود به شبیه‌ساز حرکت و نیرو',
+                labActionText: 'ورود به آزمایشگاه PhET',
                 simId: 'forces-motion'
             }
         };
@@ -416,7 +416,7 @@ async function renderDashboardView(container) {
             <div class="bg-gradient-to-r ${cfg.heroGradient} rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-6 border">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold mb-2">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-950/80 backdrop-blur-md border border-sky-800/80 text-sky-300 text-xs font-bold mb-2 shadow-sm">
                             <i data-lucide="${cfg.badgeIcon}" class="w-3.5 h-3.5 text-amber-300"></i>
                             <span>${cfg.gradeBadge}</span>
                         </div>
@@ -473,10 +473,10 @@ async function renderDashboardView(container) {
             </div>
 
             <!-- Nexora AI Physics Assistant Interactive Banner -->
-            <div class="p-6 rounded-3xl bg-gradient-to-r from-violet-950/70 via-indigo-950/70 to-slate-900 border border-violet-500/40 cyber-glow-violet space-y-4">
+            <div class="p-6 rounded-3xl bg-slate-900/95 border border-slate-800 shadow-xl space-y-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div class="flex items-center gap-3.5">
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-cyan-500 text-white flex items-center justify-center shadow-lg shadow-violet-500/25 animate-pulse">
+                        <div class="w-12 h-12 rounded-2xl bg-sky-950/80 text-sky-400 border border-sky-800/80 flex items-center justify-center shadow-md">
                             <i data-lucide="sparkles" class="w-6 h-6"></i>
                         </div>
                         <div>
@@ -677,14 +677,14 @@ async function renderCurriculumView(container, gradeId = null) {
                         const isPhys = isPhysicsCh(ch.chapter_number);
                         return `
                         <div onclick="window.store.setView('chapter', { id: ${ch.id} })" 
-                            class="physics-card-3d bg-white dark:bg-slate-900/90 p-6 rounded-3xl border border-cyan-500/40 dark:border-cyan-500/30 hover:border-cyan-400 cyber-glow-cyan shadow-sm cursor-pointer space-y-3.5 transition-all">
+                            class="physics-card-3d bg-white dark:bg-slate-900/90 p-6 rounded-3xl border border-slate-800 hover:border-sky-500/60 shadow-xl shadow-sm cursor-pointer space-y-3.5 transition-all">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs font-black px-3 py-1 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-400/20 font-mono">
+                                    <span class="text-xs font-black px-3 py-1 rounded-xl bg-sky-950/80 text-sky-300 border border-sky-800/80 font-bold">
                                         فصل ${ch.chapter_number}
                                     </span>
-                                    <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-lg bg-cyan-950/70 text-cyan-300 border border-cyan-500/40 flex items-center gap-1">
-                                        <i data-lucide="zap" class="w-3 h-3 text-cyan-400 fill-cyan-400"></i>
+                                    <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700/60 flex items-center gap-1">
+                                        <i data-lucide="zap" class="w-3 h-3 text-sky-400 fill-sky-400"></i>
                                         فصل تخصصی فیزیک
                                     </span>
                                 </div>
@@ -763,7 +763,7 @@ async function renderCurriculumView(container, gradeId = null) {
             `}
 
             <!-- Supplementary Study Materials Banner -->
-            <div class="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-emerald-950/80 via-slate-900 to-indigo-950/80 border border-emerald-500/40 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+            <div class="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
                         <i data-lucide="book-marked" class="w-5 h-5"></i>
@@ -1821,7 +1821,7 @@ async function renderStudyMaterialsView(container, activeGradeId = null) {
             container.innerHTML = `
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                 <!-- Hero Header -->
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-950 via-slate-900 to-indigo-950 p-6 sm:p-10 border border-emerald-500/30 cyber-glow-cyan text-white space-y-4">
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 p-6 sm:p-10 border border-slate-800 shadow-xl text-white space-y-4">
                     <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
                         <i data-lucide="book-marked" class="w-4 h-4 text-emerald-400"></i>
                         <span>بانک تخصصی درسنامه‌ها و جزوات متفرقه فیزیک</span>
@@ -1852,16 +1852,16 @@ async function renderStudyMaterialsView(container, activeGradeId = null) {
                     <!-- Grade Switcher -->
                     <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold">
                         <span class="text-slate-400 text-xs shrink-0 pl-1">پایه:</span>
-                        <button id="mat-grade-all" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === null ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-500'}">
+                        <button id="mat-grade-all" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === null ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
                             همه پایه‌ها
                         </button>
-                        <button id="mat-grade-7" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 1 ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-500'}">
+                        <button id="mat-grade-7" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 1 ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
                             پایه هفتم
                         </button>
-                        <button id="mat-grade-8" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 2 ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-500'}">
+                        <button id="mat-grade-8" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 2 ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
                             پایه هشتم
                         </button>
-                        <button id="mat-grade-9" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 3 ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-500'}">
+                        <button id="mat-grade-9" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 3 ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
                             پایه نهم
                         </button>
                     </div>
@@ -1869,16 +1869,16 @@ async function renderStudyMaterialsView(container, activeGradeId = null) {
                     <!-- Category Switcher -->
                     <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold">
                         <span class="text-slate-400 text-xs shrink-0 pl-1">موضوع:</span>
-                        <button id="mat-cat-all" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === null ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                        <button id="mat-cat-all" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === null ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
                             همه
                         </button>
-                        <button id="mat-cat-pamphlet" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'pamphlet' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                        <button id="mat-cat-pamphlet" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'pamphlet' ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
                             جزوات
                         </button>
-                        <button id="mat-cat-summary" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'summary' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                        <button id="mat-cat-summary" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'summary' ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
                             فرمول‌نامه
                         </button>
-                        <button id="mat-cat-exam_sample" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'exam_sample' ? 'bg-amber-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                        <button id="mat-cat-exam_sample" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'exam_sample' ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
                             نمونه سؤال
                         </button>
                     </div>
