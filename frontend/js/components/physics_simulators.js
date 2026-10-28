@@ -276,6 +276,9 @@ const SIMULATOR_CATALOG = [
     {
         id: 'forces-motion',
         title: 'نیرو، شتاب و قوانین نیوتون (دینامیک نیوتونی)',
+        platformName: 'PhET',
+        platformBadge: 'PhET',
+        pairedSimId: 'free-body-diagrams',
         grade: 9,
         gradeKey: 'grade_9',
         gradeTitle: 'پایه نهم',
@@ -304,6 +307,41 @@ const SIMULATOR_CATALOG = [
         localFile: 'forces-motion.html',
         localUrl: '/simulators/phet/forces-motion.html',
         phetSlug: 'forces-and-motion-basics'
+    },
+    {
+        id: 'free-body-diagrams',
+        title: 'دیاگرام جسم آزاد (FBD) و سطح شیب‌دار',
+        platformName: 'oPhysics',
+        platformBadge: 'oPhysics',
+        pairedSimId: 'forces-motion',
+        grade: 9,
+        gradeKey: 'grade_9',
+        gradeTitle: 'پایه نهم',
+        gradeLabel: 'پایه نهم',
+        category: 'نیرو و قوانین نیوتون (تحلیلی)',
+        topic: 'فصل ۵ علوم نهم: نیرو و قوانین نیوتون',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۵ (نیرو، قانون دوم نیوتون و اصطکاک)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — تجزیه برداری نیروها، نیروی عمودی سطح و دیاگرام جسم آزاد روی سطح شیب‌دار',
+        icon: 'compass',
+        desc: 'کارگاه تعاملی oPhysics برای رسم زنده دیاگرام جسم آزاد (Free Body Diagram) روی سطح افقی و شیب‌دار: تجزیه بردار وزن به مؤلفه‌های سینوسی و کسینوسی، نیروی عمودی سطح (N)، اصطکاک و قانون دوم نیوتون.',
+        description: 'کارگاه تعاملی oPhysics برای رسم زنده دیاگرام جسم آزاد (Free Body Diagram) روی سطح افقی و شیب‌دار: تجزیه بردار وزن به مؤلفه‌های سینوسی و کسینوسی، نیروی عمودی سطح (N)، اصطکاک و قانون دوم نیوتون.',
+        formula: '\\sum \\vec{F} = m\\vec{a} \\quad , \\quad N = mg \\cos\\theta \\quad , \\quad f_s \\le \\mu_s N \\quad , \\quad f_k = \\mu_k N',
+        badge: 'آزمایشگاه تحلیلی oPhysics — قوانین نیوتون',
+        goals: [
+            'رسم و درک برداری ۴ نیروی اصلی وارد بر جسم: وزن (W)، عمودی سطح (N)، اصطکاک (f) و نیروی اعمالی (F)',
+            'تجزیه بردار وزن روی سطح شیب‌دار با زاویه دلخواه (θ)',
+            'محاسبه شتاب حرکت جسم با استفاده از معادله حرکت قانون دوم نیوتون'
+        ],
+        experimentSteps: [
+            'زاویه سطح شیب‌دار (θ) را از ۰ تا ۶۰ درجه تغییر دهید و تغییر طول بردار N و مؤلفه mg sinθ را رصد کنید.',
+            'ضرایب اصطکاک ایستایی (μs) و جنبشی (μk) را تنظیم نمایید.',
+            'نیروی اعمالی (F) را اضافه کرده و آستانه حرکت جسم را بررسی کنید.',
+            'دکمه «شبیه‌سازی حرکت» را بزنید تا لغزش جسم طبق قانون نیوتون را تماشا کنید.'
+        ],
+        misconceptions: 'اشتباه رایج: نیروی عمودی تکیه‌گاه (N) همیشه برابر با وزن جسم (mg) است! خیر؛ روی سطح شیب‌دار N = mg cosθ است و هر چه شیب بیشتر شود، نیروی عمودی سطح کمتر می‌شود.',
+        localFile: 'free-body-diagrams.html',
+        localUrl: '/simulators/ophysics/free-body-diagrams.html',
+        externalUrl: 'https://www.ophysics.com/f1.html'
     },
     {
         id: 'hookes-law',
@@ -404,6 +442,9 @@ const SIMULATOR_CATALOG = [
     {
         id: 'balancing-act',
         title: 'اهرم‌ها، گشتاور نیرو و تعادل دورانی (ماشین‌های ساده)',
+        platformName: 'PhET',
+        platformBadge: 'PhET',
+        pairedSimId: 'simple-machines',
         grade: 9,
         gradeKey: 'grade_9',
         gradeTitle: 'پایه نهم',
@@ -432,6 +473,41 @@ const SIMULATOR_CATALOG = [
         localFile: 'balancing-act.html',
         localUrl: '/simulators/phet/balancing-act.html',
         phetSlug: 'balancing-act'
+    },
+    {
+        id: 'simple-machines',
+        title: 'ماشین‌های ساده، اهرم‌ها و سیستم قرقره‌ها',
+        platformName: 'oPhysics',
+        platformBadge: 'oPhysics',
+        pairedSimId: 'balancing-act',
+        grade: 9,
+        gradeKey: 'grade_9',
+        gradeTitle: 'پایه نهم',
+        gradeLabel: 'پایه نهم',
+        category: 'ماشین‌ها و مزیت مکانیکی (تحلیلی)',
+        topic: 'فصل ۹ علوم نهم: ماشین‌ها',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۹ (ماشین‌ها، اهرم‌ها و قرقره‌ها)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — گشتاور نیرو، مزیت مکانیکی کامل و سیستم قرقره‌های مرکب',
+        icon: 'settings',
+        desc: 'شبیه‌ساز تحلیلی oPhysics برای اهرم‌های نوع اول، دوم و سوم بر اساس تعادل گشتاورها، به همراه شبیه‌ساز سیستم قرقره‌های ثابت، متحرک و مرکب (Block and Tackle) با مزیت‌های مکانیکی متنوع.',
+        description: 'شبیه‌ساز تحلیلی oPhysics برای اهرم‌های نوع اول، دوم و سوم بر اساس تعادل گشتاورها، به همراه شبیه‌ساز سیستم قرقره‌های ثابت، متحرک و مرکب (Block and Tackle) با مزیت‌های مکانیکی متنوع.',
+        formula: 'R \\cdot d_R = E \\cdot d_E \\quad , \\quad A = \\frac{R}{E} = \\frac{d_E}{d_R} \\quad , \\quad A_{\\text{pulley}} = n \\text{ (طناب‌های حامی)}',
+        badge: 'آزمایشگاه تحلیلی oPhysics — ماشین‌ها',
+        goals: [
+            'بررسی قانون تعادل گشتاور نیروها در اهرم‌های نوع اول، دوم و سوم',
+            'آشنایی با نحوه عملکرد قرقره ثابت (تغییر جهت نیرو) و قرقره متحرک (نصف کردن نیروی لازم)',
+            'محاسبه تجربی مزیت مکانیکی در سیستم قرقره‌های مرکب ۴ طنابه'
+        ],
+        experimentSteps: [
+            'بین دو حالت «اهرم‌ها» و «قرقره‌ها» سوییچ کنید.',
+            'در حالت اهرم، نوع اهرم (اول، دوم یا سوم) را انتخاب کرده و با تغییر بازوی محرک (dE)، مزیت مکانیکی را تحلیل کنید.',
+            'در حالت قرقره، با کشیدن طناب مشاهده کنید چگونه وزن بار بین طناب‌های حامی تقسیم می‌شود.',
+            'قانون پایستگی کار را بررسی کنید: نیروی محرک کمتر با مسافت کشش بیشتر جبران می‌شود.'
+        ],
+        misconceptions: 'اشتباه رایج: ماشین‌ها کار را کاهش می‌دهند یا انرژی خلق می‌کنند! خیر؛ طبق پایستگی انرژی، کار ورودی با کار خروجی (در غیاب اصطکاک) برابر است و ماشین‌ها فقط با تغییر نیرو یا جهت، کار را آسان می‌کنند.',
+        localFile: 'simple-machines.html',
+        localUrl: '/simulators/ophysics/simple-machines.html',
+        externalUrl: 'https://www.ophysics.com/r6.html'
     },
     {
         id: 'wave-on-a-string',
@@ -815,6 +891,9 @@ const SIMULATOR_CATALOG = [
     {
         id: 'calculus-grapher',
         title: 'تحلیل نمودارهای حرکت، شیب و جابه‌جایی (سینماتیک)',
+        platformName: 'PhET',
+        platformBadge: 'PhET',
+        pairedSimId: 'kinematics-1d',
         grade: 9,
         gradeKey: 'grade_9',
         gradeTitle: 'پایه نهم',
@@ -843,6 +922,41 @@ const SIMULATOR_CATALOG = [
         localFile: 'calculus-grapher.html',
         localUrl: '/simulators/phet/calculus-grapher.html',
         phetSlug: 'calculus-grapher'
+    },
+    {
+        id: 'kinematics-1d',
+        title: 'سینماتیک، حرکت ۱ بعدی و نمودارهای مکان و سرعت',
+        platformName: 'oPhysics',
+        platformBadge: 'oPhysics',
+        pairedSimId: 'calculus-grapher',
+        grade: 9,
+        gradeKey: 'grade_9',
+        gradeTitle: 'پایه نهم',
+        gradeLabel: 'پایه نهم',
+        category: 'سینماتیک و نمودارهای حرکت (تحلیلی)',
+        topic: 'فصل ۴ علوم نهم: حرکت چیست؟',
+        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۴ (تندی متوسط، سرعت و شتاب)',
+        sampadBook: 'کتاب تکمیلی سمپاد نهم — تحلیل تخصصی نمودارهای x-t و v-t و درک فرمولی حرکت',
+        icon: 'trending-up',
+        desc: 'شبیه‌ساز تحلیلی oPhysics برای رسم زنده نمودارهای حرکت یک‌بعدی: رسم همزمان نمودار مکان-زمان x(t) و سرعت-زمان v(t)، استخراج سرعت از شیب مماس و استخراج جابه‌جایی از مساحت زیر منحنی.',
+        description: 'شبیه‌ساز تحلیلی oPhysics برای رسم زنده نمودارهای حرکت یک‌بعدی: رسم همزمان نمودار مکان-زمان x(t) و سرعت-زمان v(t)، استخراج سرعت از شیب مماس و استخراج جابه‌جایی از مساحت زیر منحنی.',
+        formula: 'v = \\frac{\\Delta x}{\\Delta t} = \\text{شیب } x-t \\quad , \\quad a = \\frac{\\Delta v}{\\Delta t} \\quad , \\quad \\Delta x = \\text{مساحت زیر } v-t',
+        badge: 'آزمایشگاه تحلیلی oPhysics — سینماتیک',
+        goals: [
+            'تحلیل رفتار متحرک با شتاب ثابت مثبت و منفی و بررسی شرط تندشونده یا کندشونده بودن',
+            'استخراج شهودی جابه‌جایی با محاسبه مساحت زیر نمودار سرعت-زمان (v-t)',
+            'اتصال مفاهیم متنی مسائل فیزیک به مشخصه‌های نموداری'
+        ],
+        experimentSteps: [
+            'مکان اولیه (x₀) و سرعت اولیه (v₀) و شتاب (a) را با لغزنده‌ها تعیین کنید.',
+            'دکمه «اجرا» را فشار دهید و حرکت همزمان خودرو و رسم نمودارهای x-t و v-t را مشاهده کنید.',
+            'به مساحت رنگی زیر نمودار v-t توجه کنید و با جابه‌جایی کل مقایسه نمایید.',
+            'در چالش تستی مفهومی شرکت کرده و درک خود را از علامت سرعت و شتاب بسنجید.'
+        ],
+        misconceptions: 'اشتباه رایج: شتاب منفی همیشه به معنای کم شدن تندی (کندشونده) است! خیر؛ اگر سرعت نیز منفی باشد (v < 0 و a < 0)، تندی متحرک افزایش یافته و حرکت «تندشونده در جهت منفی» است.',
+        localFile: 'kinematics-grapher.html',
+        localUrl: '/simulators/ophysics/kinematics-grapher.html',
+        externalUrl: 'https://www.ophysics.com/k4.html'
     },
     {
         id: 'vector-addition',
@@ -877,112 +991,7 @@ const SIMULATOR_CATALOG = [
         phetSlug: 'vector-addition'
     },
 
-    // =========================================================================
-    // FEATURED EXTERNAL & INTEGRATED PLATFORMS (پلتفرم‌های منتخب و کاربردی فیزیک)
-    // =========================================================================
-    {
-        id: 'physics-classroom',
-        title: 'سینماتیک، حرکت ۱ بعدی و تحلیل نمودارها',
-        platformName: 'The Physics Classroom',
-        grade: 9,
-        gradeKey: 'featured',
-        gradeTitle: 'آزمایشگاه تخصصی',
-        gradeLabel: 'پایه نهم',
-        category: 'سینماتیک و نمودارها',
-        topic: 'فصل ۴ علوم نهم: حرکت چیست؟',
-        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۴ (تندی متوسط، سرعت و شتاب)',
-        sampadBook: 'کتاب تکمیلی سمپاد نهم — تحلیل تخصصی نمودارهای x-t و v-t و درک مفهومی مسائل',
-        icon: 'trending-up',
-        desc: 'شبیه‌ساز تخصصی تحلیل نمودارهای حرکت یک‌بعدی، ارتباط عمیق بین فرمول ریاضی و مفهوم فیزیکی، استخراج سرعت از شیب مماس x-t و استخراج جابه‌جایی از مساحت زیر منحنی v-t.',
-        description: 'شبیه‌ساز تخصصی تحلیل نمودارهای حرکت یک‌بعدی، ارتباط عمیق بین فرمول ریاضی و مفهوم فیزیکی، استخراج سرعت از شیب مماس x-t و استخراج جابه‌جایی از مساحت زیر منحنی v-t.',
-        formula: 'v = \\frac{\\Delta x}{\\Delta t} = \\text{شیب } x-t \\quad , \\quad a = \\frac{\\Delta v}{\\Delta t} \\quad , \\quad \\Delta x = \\text{مساحت زیر } v-t',
-        badge: 'استاندارد تحلیلی PhET — سینماتیک',
-        languageFa: 'بومی و فارسی‌سازی‌شده کامل',
-        externalUrl: 'https://www.physicsclassroom.com/Physics-Interactives/1-D-Kinematics',
-        goals: [
-            'تحلیل رفتار متحرک با شتاب ثابت مثبت و منفی و بررسی شرط تندشونده یا کندشونده بودن',
-            'استخراج شهودی جابه‌جایی با محاسبه مساحت زیر نمودار سرعت-زمان (v-t)',
-            'اتصال مفاهیم متنی مسائل فیزیک به مشخصه‌های نموداری'
-        ],
-        experimentSteps: [
-            'مکان اولیه (x₀) و سرعت اولیه (v₀) و شتاب (a) را با لغزنده‌ها تعیین کنید.',
-            'دکمه «اجرا» را فشار دهید و حرکت همزمان خودرو و رسم نمودارهای x-t و v-t را مشاهده کنید.',
-            'به مساحت رنگی زیر نمودار v-t توجه کنید و با جابه‌جایی کل مقایسه نمایید.',
-            'در چالش تستی مفهومی شرکت کرده و درک خود را از علامت سرعت و شتاب بسنجید.'
-        ],
-        misconceptions: 'اشتباه رایج: شتاب منفی همیشه به معنای کم شدن تندی (کندشونده) است! خیر؛ اگر سرعت نیز منفی باشد (v < 0 و a < 0)، تندی متحرک افزایش یافته و حرکت «تندشونده در جهت منفی» است.',
-        localFile: 'kinematics-grapher.html',
-        localUrl: '/simulators/physics-classroom/kinematics-grapher.html'
-    },
-    {
-        id: 'walter-fendt',
-        title: 'ماشین‌های ساده، اهرم‌ها و سیستم قرقره‌ها',
-        platformName: 'Walter Fendt',
-        grade: 9,
-        gradeKey: 'featured',
-        gradeTitle: 'آزمایشگاه تخصصی',
-        gradeLabel: 'پایه نهم',
-        category: 'ماشین‌ها و مزیت مکانیکی',
-        topic: 'فصل ۹ علوم نهم: ماشین‌ها',
-        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۹ (ماشین‌ها، اهرم‌ها و قرقره‌ها)',
-        sampadBook: 'کتاب تکمیلی سمپاد نهم — گشتاور نیرو، مزیت مکانیکی کامل و سیستم قرقره‌های مرکب',
-        icon: 'settings',
-        desc: 'شبیه‌سازی کامل و دقیق اهرم‌های نوع اول، دوم و سوم بر اساس تعادل گشتاورها، به همراه شبیه‌ساز سیستم قرقره‌های ثابت، متحرک و مرکب (Block and Tackle) با مزیت‌های مکانیکی متنوع.',
-        description: 'شبیه‌سازی کامل و دقیق اهرم‌های نوع اول، دوم و سوم بر اساس تعادل گشتاورها، به همراه شبیه‌ساز سیستم قرقره‌های ثابت، متحرک و مرکب (Block and Tackle) با مزیت‌های مکانیکی متنوع.',
-        formula: 'R \\cdot d_R = E \\cdot d_E \\quad , \\quad A = \\frac{R}{E} = \\frac{d_E}{d_R} \\quad , \\quad A_{\\text{pulley}} = n \\text{ (طناب‌های حامی)}',
-        badge: 'استاندارد تحلیلی PhET — ماشین‌ها',
-        languageFa: 'بومی و فارسی‌سازی‌شده کامل',
-        externalUrl: 'https://www.walter-fendt.de/html5/phen/lever_en.htm',
-        goals: [
-            'بررسی قانون تعادل گشتاور نیروها در اهرم‌های نوع اول، دوم و سوم',
-            'آشنایی با نحوه عملکرد قرقره ثابت (تغییر جهت نیرو) و قرقره متحرک (نصف کردن نیروی لازم)',
-            'محاسبه تجربی مزیت مکانیکی در سیستم قرقره‌های مرکب ۴ طنابه'
-        ],
-        experimentSteps: [
-            'بین دو حالت «اهرم‌ها» و «قرقره‌ها» سوییچ کنید.',
-            'در حالت اهرم، نوع اهرم (اول، دوم یا سوم) را انتخاب کرده و با تغییر بازوی محرک (dE)، مزیت مکانیکی را تحلیل کنید.',
-            'در حالت قرقره، با کشیدن طناب مشاهده کنید چگونه وزن بار بین طناب‌های حامی تقسیم می‌شود.',
-            'قانون پایستگی کار را بررسی کنید: نیروی محرک کمتر با مسافت کشش بیشتر جبران می‌شود.'
-        ],
-        misconceptions: 'اشتباه رایج: ماشین‌ها کار را کاهش می‌دهند یا انرژی خلق می‌کنند! خیر؛ طبق پایستگی انرژی، کار ورودی با کار خروجی (در غیاب اصطکاک) برابر است و ماشین‌ها فقط با تغییر نیرو یا جهت، کار را آسان می‌کنند.',
-        localFile: 'simple-machines.html',
-        localUrl: '/simulators/walter-fendt/simple-machines.html'
-    },
-    {
-        id: 'ophysics',
-        title: 'دیاگرام جسم آزاد (FBD) و سطح شیب‌دار',
-        platformName: 'oPhysics',
-        grade: 9,
-        gradeKey: 'featured',
-        gradeTitle: 'آزمایشگاه تخصصی',
-        gradeLabel: 'پایه نهم',
-        category: 'نیرو و سینماتیک',
-        topic: 'فصل ۵ علوم نهم: نیرو و قوانین نیوتون',
-        ministryBook: 'کتاب وزارتی علوم نهم — فصل ۵ (نیرو، قانون دوم نیوتون و اصطکاک)',
-        sampadBook: 'کتاب تکمیلی سمپاد نهم — تجزیه برداری نیروها، نیروی عمودی سطح و دیاگرام جسم آزاد روی سطح شیب‌دار',
-        icon: 'compass',
-        desc: 'کارگاه تعاملی رسم زنده دیاگرام جسم آزاد (Free Body Diagram) روی سطح افقی و شیب‌دار، تجزیه بردار وزن به مؤلفه‌های سینوسی و کسینوسی، نیروی عمودی سطح (N)، اصطکاک و قانون دوم نیوتون.',
-        description: 'کارگاه تعاملی رسم زنده دیاگرام جسم آزاد (Free Body Diagram) روی سطح افقی و شیب‌دار، تجزیه بردار وزن به مؤلفه‌های سینوسی و کسینوسی، نیروی عمودی سطح (N)، اصطکاک و قانون دوم نیوتون.',
-        formula: '\\sum \\vec{F} = m\\vec{a} \\quad , \\quad N = mg \\cos\\theta \\quad , \\quad f_s \\le \\mu_s N \\quad , \\quad f_k = \\mu_k N',
-        badge: 'استاندارد تحلیلی PhET — قوانین نیوتون',
-        languageFa: 'بومی و فارسی‌سازی‌شده کامل',
-        externalUrl: 'https://www.ophysics.com/f1.html',
-        goals: [
-            'رسم و درک برداری ۴ نیروی اصلی وارد بر جسم: وزن (W)، عمودی سطح (N)، اصطکاک (f) و نیروی اعمالی (F)',
-            'تجزیه بردار وزن روی سطح شیب‌دار با زاویه دلخواه (θ)',
-            'محاسبه شتاب حرکت جسم با استفاده از معادله حرکت قانون دوم نیوتون'
-        ],
-        experimentSteps: [
-            'زاویه سطح شیب‌دار (θ) را از ۰ تا ۶۰ درجه تغییر دهید و تغییر طول بردار N و مؤلفه mg sinθ را رصد کنید.',
-            'ضرایب اصطکاک ایستایی (μs) و جنبشی (μk) را تنظیم نمایید.',
-            'نیروی اعمالی (F) را اضافه کرده و آستانه حرکت جسم را بررسی کنید.',
-            'دکمه «شبیه‌سازی حرکت» را بزنید تا لغزش جسم طبق قانون نیوتون را تماشا کنید.'
-        ],
-        misconceptions: 'اشتباه رایج: نیروی عمودی تکیه‌گاه (N) همیشه برابر با وزن جسم (mg) است! خیر؛ روی سطح شیب‌دار N = mg cosθ است و هر چه شیب بیشتر شود، نیروی عمودی سطح کمتر می‌شود.',
-        localFile: 'free-body-diagrams.html',
-        localUrl: '/simulators/ophysics/free-body-diagrams.html'
-    }
-];
+    ];
 
 class PhysicsSimulators {
     constructor() {
@@ -1003,22 +1012,24 @@ class PhysicsSimulators {
         const aliasMap = {
             'calorimetry': 'energy-forms',
             'energy': 'energy-skate',
-            'levers': 'walter-fendt',
-            'lever': 'walter-fendt',
-            'pulley': 'walter-fendt',
-            'pulleys': 'walter-fendt',
-            'simple-machines': 'walter-fendt',
-            'walter-fendt': 'walter-fendt',
-            'walterfendt': 'walter-fendt',
-            'fendt': 'walter-fendt',
-            'fbd': 'ophysics',
-            'free-body-diagram': 'ophysics',
-            'freebody': 'ophysics',
-            'ophysics': 'ophysics',
-            'physics-classroom': 'physics-classroom',
-            'physicsclassroom': 'physics-classroom',
-            'the-physics-classroom': 'physics-classroom',
-            'kinematics-grapher': 'physics-classroom',
+            'levers': 'simple-machines',
+            'lever': 'simple-machines',
+            'pulley': 'simple-machines',
+            'pulleys': 'simple-machines',
+            'simple-machines': 'simple-machines',
+            'walter-fendt': 'simple-machines',
+            'walterfendt': 'simple-machines',
+            'fendt': 'simple-machines',
+            'fbd': 'free-body-diagrams',
+            'free-body-diagram': 'free-body-diagrams',
+            'free-body-diagrams': 'free-body-diagrams',
+            'freebody': 'free-body-diagrams',
+            'ophysics': 'free-body-diagrams',
+            'physics-classroom': 'kinematics-1d',
+            'physicsclassroom': 'kinematics-1d',
+            'the-physics-classroom': 'kinematics-1d',
+            'kinematics-grapher': 'kinematics-1d',
+            'kinematics-1d': 'kinematics-1d',
             'circuit': 'circuit-dc',
             'electrostatics': 'balloons-static',
             'optics': 'bending-light',
@@ -1315,6 +1326,17 @@ class PhysicsSimulators {
                 correct: 2,
                 explanation: 'پاسخ صحیح گزینه ۳ است. بسامد نور ویژگی ذاتی چشمه تولیدکننده است و با تغییر محیط مادی هرگز تغییر نمی‌کند.'
             },
+            'kinematics-1d': {
+                q: 'در نمودار مکان-زمان (x-t) متحرکی که روی خط راست حرکت می‌کند، شیب خط مماس بر نمودار در هر لحظه نشان‌دهنده کدام کمیت فیزیکی است؟',
+                options: [
+                    'مسافت پیموده‌شده',
+                    'سرعت لحظه‌ای متحرک',
+                    'شتاب متوسط',
+                    'نیروی اصطکاک وارد بر جسم'
+                ],
+                correct: 1,
+                explanation: 'پاسخ صحیح گزینه ۲ است. شیب نمودار x-t برابر با مشتق زمانی مکان (dx/dt) یعنی سرعت لحظه‌ای است.'
+            },
             'kinematics-grapher': {
                 q: 'در نمودار مکان-زمان (x-t) متحرکی که روی خط راست حرکت می‌کند، شیب خط مماس بر نمودار در هر لحظه نشان‌دهنده کدام کمیت فیزیکی است؟',
                 options: [
@@ -1424,6 +1446,9 @@ class PhysicsSimulators {
         const simId = this.resolveSimId(type);
         this.activeSimId = simId;
         const sim = this.catalog.find(s => s.id === simId) || this.catalog[0];
+        const pairedSim = sim.pairedSimId ? this.catalog.find(s => s.id === sim.pairedSimId) : null;
+        const phetSim = sim.platformName === 'PhET' ? sim : pairedSim;
+        const ophysicsSim = sim.platformName === 'oPhysics' ? sim : pairedSim;
 
         // Fetch fresh lab progress if user is logged in
         if (window.api && window.api.token && !this.userLabProgress) {
@@ -1483,6 +1508,14 @@ class PhysicsSimulators {
 
                 <!-- Action Buttons: Fullscreen, Standalone External Tab, Reload, Claim XP, Tools -->
                 <div class="flex items-center flex-wrap gap-1.5 sm:gap-2">
+                    ${sim.externalUrl ? `
+                    <a href="${sim.externalUrl}" target="_blank" rel="noopener noreferrer"
+                        title="مشاهده نسخه اصلی در وب‌سایت oPhysics.com"
+                        class="px-3 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900/80 text-cyan-300 hover:text-white text-xs font-bold border border-cyan-700/60 flex items-center gap-1.5 transition-all shadow hover:border-cyan-500">
+                        <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                        <span>وب‌سایت oPhysics</span>
+                    </a>
+                    ` : ''}
                     <button onclick="window.physicsSimulators.openInStandaloneTab('${sim.localUrl}')" 
                         title="باز کردن در صفحه جداگانه / پنجره تمام‌صفحه مستقل برای نمایش روی تخته هوشمند"
                         class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 hover:text-white text-xs font-bold border border-slate-700 flex items-center gap-1.5 transition-all shadow hover:border-teal-500/50">
@@ -1526,6 +1559,28 @@ class PhysicsSimulators {
                     `}
                 </div>
             </div>
+
+            ${pairedSim ? `
+            <!-- Dual-Lab Quick Switcher Bar (PhET + oPhysics) -->
+            <div class="px-4 py-2.5 bg-slate-950/95 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+                    <span class="text-slate-300 font-bold font-sans">آزمایشگاه‌های دوگانه این مبحث (${sim.topic}):</span>
+                </div>
+                <div class="flex items-center gap-1.5 p-1 bg-slate-900/90 rounded-xl border border-slate-800">
+                    <button onclick="window.renderSimulatorsCatalogView ? window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${phetSim.id}', '${mode}') : window.physicsSimulators.mount('${phetSim.id}', '${container.id}', '${mode}')"
+                        class="px-3.5 py-1.5 rounded-lg text-xs font-sans transition-all flex items-center gap-1.5 ${sim.id === phetSim.id ? 'bg-sky-600 text-white font-bold shadow-md' : 'text-slate-400 hover:text-white font-medium hover:bg-slate-800'}">
+                        <i data-lucide="flask-conical" class="w-3.5 h-3.5"></i>
+                        <span>آزمایشگاه ۱ (PhET): تجربی و اکتشافی</span>
+                    </button>
+                    <button onclick="window.renderSimulatorsCatalogView ? window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${ophysicsSim.id}', '${mode}') : window.physicsSimulators.mount('${ophysicsSim.id}', '${container.id}', '${mode}')"
+                        class="px-3.5 py-1.5 rounded-lg text-xs font-sans transition-all flex items-center gap-1.5 ${sim.id === ophysicsSim.id ? 'bg-cyan-600 text-white font-bold shadow-md' : 'text-slate-400 hover:text-white font-medium hover:bg-slate-800'}">
+                        <i data-lucide="binary" class="w-3.5 h-3.5"></i>
+                        <span>آزمایشگاه ۲ (oPhysics): تحلیلی و فرمول‌محور</span>
+                    </button>
+                </div>
+            </div>
+            ` : ''}
 
             <!-- Standalone IFrame Viewport (100% Offline, Same-Origin) -->
             <div id="sim-viewport-frame-wrapper" class="relative w-full ${frameHeight} bg-slate-950 flex flex-col justify-center items-center overflow-hidden">

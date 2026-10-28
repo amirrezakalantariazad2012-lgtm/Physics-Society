@@ -1673,15 +1673,15 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                         class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === 'space' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
                         نجوم و فضا (${simCatalog.filter(s => s.gradeKey === 'space').length})
                     </button>
-                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'featured')"
-                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === 'featured' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
-                        آزمایشگاه‌های تخصصی (${simCatalog.filter(s => s.gradeKey === 'featured').length})
+                    <button onclick="window.renderSimulatorsCatalogView(document.getElementById('app-main-content'), '${activeSim}', '${currentMode}', 'paired')"
+                        class="px-4 py-2 rounded-xl transition-colors font-sans ${gradeFilter === 'paired' ? 'bg-sky-600 text-white font-bold shadow-sm' : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 font-medium'}">
+                        آزمایشگاه‌های دوگانه (PhET + oPhysics) (${simCatalog.filter(s => s.pairedSimId).length})
                     </button>
                 </div>
 
                 <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 font-sans">
                     <span class="w-2 h-2 rounded-full bg-sky-400"></span>
-                    <span>۳۰ آزمایشگاه تعاملی (۲۷ شبیه‌ساز استاندارد PhET + ۳ آزمایشگاه تحلیلی)</span>
+                    <span>۳۰ آزمایشگاه تعاملی (۲۷ شبیه‌ساز استاندارد PhET + ۳ آزمایشگاه تحلیلی oPhysics)</span>
                 </div>
             </div>
         </div>
@@ -1728,7 +1728,7 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                 <span>${simCatalog.filter(s => {
                     if (gradeFilter === 'all') return true;
                     if (gradeFilter === 'space') return s.gradeKey === 'space';
-                    if (gradeFilter === 'featured') return s.gradeKey === 'featured';
+                    if (gradeFilter === 'paired') return !!s.pairedSimId;
                     return s.grade.toString() === gradeFilter && s.gradeKey !== 'space';
                 }).length} آزمایش در دسترس</span>
             </div>
@@ -1737,7 +1737,7 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                 ${simCatalog.filter(s => {
                     if (gradeFilter === 'all') return true;
                     if (gradeFilter === 'space') return s.gradeKey === 'space';
-                    if (gradeFilter === 'featured') return s.gradeKey === 'featured';
+                    if (gradeFilter === 'paired') return !!s.pairedSimId;
                     return s.grade.toString() === gradeFilter && s.gradeKey !== 'space';
                 }).map(s => {
                     const isSelected = s.id === activeSim;
@@ -1758,6 +1758,15 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                                     <span>انجام‌شده</span>
                                 </span>
                                 ` : ''}
+                                ${s.platformName === 'oPhysics' ? `
+                                <span class="text-[10px] px-1.5 py-0.5 rounded-md font-sans font-semibold text-cyan-300 bg-cyan-950/90 border border-cyan-800/80">
+                                    oPhysics
+                                </span>
+                                ` : `
+                                <span class="text-[10px] px-1.5 py-0.5 rounded-md font-sans font-semibold text-sky-300 bg-sky-950/90 border border-sky-800/80">
+                                    PhET
+                                </span>
+                                `}
                                 <span class="text-[10px] px-2 py-0.5 rounded-md font-sans font-medium text-slate-300 bg-slate-800/90 border border-slate-700/60">
                                     ${s.gradeTitle}
                                 </span>
