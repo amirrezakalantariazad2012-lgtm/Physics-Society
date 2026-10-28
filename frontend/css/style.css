@@ -1,8 +1,10 @@
-/* Vazirmatn Persian Typography and Custom Styles */
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap');
+/* Vazirmatn (Persian), Inter (English), JetBrains Mono (Scientific/Math/Monospace) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@100..900&display=swap');
 
 :root {
-    --font-fa: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+    --font-fa: 'Vazirmatn', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-en: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, 'Courier New', monospace;
     --primary: #2563eb;
     --primary-hover: #1d4ed8;
     --success: #16a34a;
@@ -20,8 +22,6 @@
 * {
     font-variant-ligatures: normal;
     text-rendering: optimizeLegibility;
-    -webkit-font-feature-settings: "ss01" on;
-    font-feature-settings: "ss01" on;
 }
 
 body {
@@ -30,6 +30,39 @@ body {
     text-align: right;
     -webkit-font-smoothing: antialiased;
     letter-spacing: 0;
+}
+
+/* Persian numerals only where explicitly specified */
+.fa-num {
+    font-feature-settings: "ss01" on;
+    -webkit-font-feature-settings: "ss01" on;
+}
+
+/* Ensure English, physics symbols, KaTeX math, and metrics render cleanly in Latin fonts without corruption */
+[dir="ltr"],
+.font-en,
+.en-text,
+.font-mono,
+.katex,
+.katex *,
+code,
+pre,
+kbd,
+input,
+textarea,
+select {
+    font-feature-settings: normal !important;
+    -webkit-font-feature-settings: normal !important;
+}
+
+.font-mono {
+    font-family: var(--font-mono) !important;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+.font-en {
+    font-family: var(--font-en) !important;
 }
 
 /* Dark Laboratory Blueprint Background */
@@ -41,11 +74,6 @@ body {
         linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
     background-size: 100% 100%, 36px 36px, 36px 36px;
     background-attachment: fixed;
-}
-
-/* Persian numerals helper */
-.fa-num {
-    font-feature-settings: "ss01";
 }
 
 /* 3D Duolingo-style action buttons */

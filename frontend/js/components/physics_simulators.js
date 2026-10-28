@@ -1630,10 +1630,10 @@ class PhysicsSimulators {
 
             <!-- Fine Step Buttons -->
             <div class="flex items-center justify-center gap-2 pt-1">
-                <button id="calip-sub-1" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">- 1 mm</button>
-                <button id="calip-sub-01" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">- 0.1 mm</button>
-                <button id="calip-add-01" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">+ 0.1 mm</button>
-                <button id="calip-add-1" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">+ 1 mm</button>
+                <button id="calip-sub-1" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono text-xs" dir="ltr">- 1 mm</button>
+                <button id="calip-sub-01" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono text-xs" dir="ltr">- 0.1 mm</button>
+                <button id="calip-add-01" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono text-xs" dir="ltr">+ 0.1 mm</button>
+                <button id="calip-add-1" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono text-xs" dir="ltr">+ 1 mm</button>
             </div>
 
             <!-- Caliper Visualizer -->
@@ -1890,8 +1890,13 @@ class PhysicsSimulators {
         <head>
             <meta charset="UTF-8">
             <title>${title}</title>
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Vazirmatn:wght@400;600;700;800&display=swap" rel="stylesheet">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
             <style>
-                body { font-family: Tahoma, 'Vazirmatn', sans-serif; direction: rtl; padding: 30px; color: #0f172a; line-height: 1.6; }
+                body { font-family: 'Vazirmatn', 'Inter', system-ui, -apple-system, sans-serif; direction: rtl; padding: 30px; color: #0f172a; line-height: 1.6; }
+                .font-mono, td:nth-child(2) { font-family: 'JetBrains Mono', 'Vazirmatn', monospace; direction: ltr; }
                 .header { text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 15px; margin-bottom: 20px; }
                 .meta { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px; font-weight: bold; }
                 table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }

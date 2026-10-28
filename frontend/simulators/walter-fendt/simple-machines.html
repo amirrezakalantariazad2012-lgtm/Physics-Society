@@ -5,14 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Walter Fendt | ماشین‌های ساده، اهرم‌ها و قرقره‌ها</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Typography: Vazirmatn (Persian), Inter (English), JetBrains Mono (Math/Metrics) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
     <style>
-        @font-face {
-            font-family: 'Vazirmatn';
-            src: local('Vazirmatn'), local('Tahoma');
+        :root {
+            --font-fa: 'Vazirmatn', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --font-en: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
         }
         body {
-            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            font-family: var(--font-fa);
             user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .font-en, [dir="ltr"] {
+            font-family: var(--font-en);
+        }
+        .font-mono, [id^="lbl-"], [id^="metric-"] {
+            font-family: var(--font-mono) !important;
+            direction: ltr;
+            unicode-bidi: isolate;
         }
     </style>
 </head>
@@ -420,7 +436,7 @@
             ctx.fillStyle = '#06b6d4';
             ctx.fillRect(rx - rSize / 2, centerY - rSize, rSize, rSize);
             ctx.fillStyle = '#020617';
-            ctx.font = `bold ${10 * dpr}px sans-serif`;
+            ctx.font = `bold ${11 * dpr}px 'Inter', sans-serif`;
             ctx.textAlign = 'center';
             ctx.fillText('R', rx, centerY - rSize / 2 + 4 * dpr);
 
@@ -446,7 +462,7 @@
             ctx.closePath();
             ctx.fill();
 
-            ctx.font = `bold ${11 * dpr}px sans-serif`;
+            ctx.font = `bold ${11 * dpr}px 'Vazirmatn', 'Inter', sans-serif`;
             ctx.fillText(`نیروی محرک E = ${E.toFixed(1)} N`, ex, arrowEndY + (16 * dpr * arrowDir));
             ctx.fillText(`بار مقاوم R = ${R} N`, rx, centerY - rSize - 8 * dpr);
         }
@@ -569,7 +585,7 @@
             ctx.strokeRect(x - size / 2, y, size, size);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = `bold ${9 * dpr}px sans-serif`;
+            ctx.font = `bold ${10 * dpr}px 'Inter', 'JetBrains Mono', sans-serif`;
             ctx.textAlign = 'center';
             ctx.fillText(label, x, y + size / 2 + 3 * dpr);
         }
@@ -594,7 +610,7 @@
             ctx.closePath();
             ctx.fill();
 
-            ctx.font = `bold ${9 * dpr}px sans-serif`;
+            ctx.font = `bold ${10 * dpr}px 'Vazirmatn', 'Inter', sans-serif`;
             ctx.fillText('نیروی دست (E)', x, y + 36 * dpr);
         }
 
@@ -618,7 +634,7 @@
             ctx.closePath();
             ctx.fill();
 
-            ctx.font = `bold ${9 * dpr}px sans-serif`;
+            ctx.font = `bold ${10 * dpr}px 'Vazirmatn', 'Inter', sans-serif`;
             ctx.fillText('نیروی دست (E)', x, y - 30 * dpr);
         }
 

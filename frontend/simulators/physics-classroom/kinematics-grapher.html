@@ -5,14 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Physics Classroom | تحلیل نمودار و اتصال مفهوم به مسئله</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Typography: Vazirmatn (Persian), Inter (English), JetBrains Mono (Math/Metrics) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
     <style>
-        @font-face {
-            font-family: 'Vazirmatn';
-            src: local('Vazirmatn'), local('Tahoma');
+        :root {
+            --font-fa: 'Vazirmatn', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --font-en: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
         }
         body {
-            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            font-family: var(--font-fa);
             user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .font-en, [dir="ltr"] {
+            font-family: var(--font-en);
+        }
+        .font-mono, #motion-readout, .metric-val {
+            font-family: var(--font-mono) !important;
+            direction: ltr;
+            unicode-bidi: isolate;
         }
     </style>
 </head>
@@ -316,7 +332,7 @@
 
             // Axis labels
             ctx.fillStyle = '#64748b';
-            ctx.font = `${10 * dpr}px monospace`;
+            ctx.font = `bold ${11 * dpr}px 'Vazirmatn', 'JetBrains Mono', 'Inter', monospace`;
             ctx.fillText(title, 40 * dpr, 16 * dpr);
             ctx.fillText('t (s)', w - 30 * dpr, zeroY + 14 * dpr);
             ctx.fillText('0', 25 * dpr, zeroY + 4 * dpr);

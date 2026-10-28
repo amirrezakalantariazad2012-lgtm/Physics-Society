@@ -5,14 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>oPhysics | رسم دیاگرام‌های نیرو (FBD) و سینماتیک</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Typography: Vazirmatn (Persian), Inter (English), JetBrains Mono (Math/Metrics) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
     <style>
-        @font-face {
-            font-family: 'Vazirmatn';
-            src: local('Vazirmatn'), local('Tahoma');
+        :root {
+            --font-fa: 'Vazirmatn', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --font-en: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
         }
         body {
-            font-family: 'Vazirmatn', Tahoma, sans-serif;
+            font-family: var(--font-fa);
             user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .font-en, [dir="ltr"] {
+            font-family: var(--font-en);
+        }
+        .font-mono, #motion-readout, .metric-val {
+            font-family: var(--font-mono) !important;
+            direction: ltr;
+            unicode-bidi: isolate;
         }
     </style>
 </head>
@@ -364,7 +380,7 @@
                 ctx.arc(rampBaseX, rampBaseY, 35 * dpr, 0, -rad, true);
                 ctx.stroke();
                 ctx.fillStyle = '#c084fc';
-                ctx.font = `bold ${10 * dpr}px sans-serif`;
+                ctx.font = `bold ${11 * dpr}px 'JetBrains Mono', 'Inter', 'Vazirmatn', sans-serif`;
                 ctx.fillText(`θ = ${thetaDeg}°`, rampBaseX + 42 * dpr, rampBaseY - 8 * dpr);
             }
 
@@ -399,7 +415,7 @@
 
             // Mass label
             ctx.fillStyle = '#0f172a';
-            ctx.font = `bold ${9 * dpr}px sans-serif`;
+            ctx.font = `bold ${10 * dpr}px 'JetBrains Mono', 'Inter', 'Vazirmatn', sans-serif`;
             ctx.textAlign = 'center';
             ctx.fillText(`${mass} kg`, cmX, cmY + 3 * dpr);
 
@@ -461,7 +477,7 @@
             ctx.closePath();
             ctx.fill();
 
-            ctx.font = `bold ${9 * dpr}px sans-serif`;
+            ctx.font = `bold ${10 * dpr}px 'Vazirmatn', 'Inter', 'JetBrains Mono', sans-serif`;
             if (labelPos === 'top') {
                 ctx.fillText(label, x2, y2 - 6 * dpr);
             } else {
@@ -481,7 +497,7 @@
             ctx.stroke();
             ctx.restore();
 
-            ctx.font = `${9 * dpr}px sans-serif`;
+            ctx.font = `${10 * dpr}px 'Vazirmatn', 'Inter', 'JetBrains Mono', sans-serif`;
             ctx.fillStyle = color;
             ctx.fillText(label, x1 + dx + 6 * dpr, y1 + dy + 12 * dpr);
         }
