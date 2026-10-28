@@ -134,6 +134,7 @@ async def add_security_headers(request: Request, call_next):
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
+        response.headers["Clear-Site-Data"] = '"cache"'
     elif path.startswith("/static/assets"):
         response.headers["Cache-Control"] = "public, max-age=3600"
 
@@ -218,6 +219,20 @@ app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend"))
 if os.path.exists(frontend_dir):
     app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
+
+    @app.get("/simulators/phet/motion-1d.html", include_in_schema=False)
+    async def serve_motion_1d_redirect():
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(
+            url="/simulators/phet/kinematics-1d.html",
+            status_code=302,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+                "Pragma": "no-cache",
+                "Expires": "0",
+                "Clear-Site-Data": '"cache"'
+            }
+        )
 
     simulators_dir = os.path.join(frontend_dir, "simulators")
     if os.path.exists(simulators_dir):

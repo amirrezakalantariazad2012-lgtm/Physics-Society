@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>حرکت بر روی خط راست: نمودار مکان، سرعت و شتاب (PhET Standard)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --phet-bg: #f8fafc;
+            --phet-panel: #ffffff;
+            --phet-border: #cbd5e1;
+            --phet-border-light: #e2e8f0;
+            --phet-text: #0f172a;
+            --phet-text-muted: #64748b;
+            --phet-blue: #0284c7;
+            --phet-sky: #0ea5e9;
+            --phet-green: #16a34a;
+            --phet-amber: #ea580c;
+            --phet-orange: #f97316;
+            --phet-red: #dc2626;
+            --phet-yellow: #fde047;
+            --phet-bottom-bar: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--phet-bg);
+            color: var(--phet-text);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mono-num {
+            font-family: 'JetBrains Mono', 'Vazirmatn', monospace;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        /* Top Header (Clean PhET Light Style) */
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--phet-border-light);
+            padding: 6px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 48px;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .sim-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .phet-badge {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 2px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .sim-title h1 {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--phet-text);
+            letter-spacing: -0.2px;
+        }
+
+        .tab-btn-group {
+            display: flex;
+            gap: 4px;
+            background: #f1f5f9;
+            padding: 3px;
+            border-radius: 8px;
+            border: 1px solid var(--phet-border-light);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--phet-text-muted);
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: var(--phet-blue);
+            font-weight: 800;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Workspace Layout */
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 10px;
+            padding: 10px;
+            overflow: hidden;
+            height: calc(100vh - 48px - 40px);
+        }
+
+        @media (max-width: 900px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr auto;
+                overflow-y: auto;
+            }
+        }
+
+        /* Stage Container */
+        .stage-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        /* 1. Open World Physical Track Box */
+        .track-box {
+            background: #ffffff;
+            border: 1px solid var(--phet-border);
+            border-radius: 14px;
+            position: relative;
+            flex-shrink: 0;
+            height: 210px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .track-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--phet-border-light);
+            font-size: 11px;
+            z-index: 5;
+        }
+
+        .track-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--phet-blue);
+        }
+
+        .track-tools {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .track-tool-btn {
+            background: #f8fafc;
+            border: 1px solid var(--phet-border);
+            color: var(--phet-text);
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .track-tool-btn:hover {
+            background: #e2e8f0;
+            color: var(--phet-blue);
+            border-color: var(--phet-blue);
+        }
+
+        .track-tool-btn.active {
+            background: #e0f2fe;
+            color: var(--phet-blue);
+            border-color: var(--phet-blue);
+        }
+
+        .track-canvas-wrapper {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #e0f2fe;
+        }
+
+        .track-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: grab;
+        }
+
+        .track-canvas:active {
+            cursor: grabbing;
+        }
+
+        /* 2. Kinematics Graphs Container (Clean White PhET Style) */
+        .graphs-wrapper {
+            flex: 1;
+            background: #ffffff;
+            border: 1px solid var(--phet-border);
+            border-radius: 14px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .graphs-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--phet-border-light);
+        }
+
+        .graphs-header-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--phet-blue);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .graph-selectors {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .graph-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .graph-checkbox input {
+            accent-color: var(--phet-blue);
+            cursor: pointer;
+        }
+
+        .graphs-canvas-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+        }
+
+        #graphs-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #ffffff;
+        }
+
+        /* 3. Control Panel Sidebar (Clean White Cards) */
+        .controls-sidebar {
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .control-card {
+            background: #ffffff;
+            border: 1px solid var(--phet-border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        .control-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .control-label {
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-input-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .step-btn {
+            background: #f1f5f9;
+            border: 1px solid var(--phet-border);
+            color: var(--phet-text);
+            width: 22px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s;
+        }
+
+        .step-btn:hover {
+            background: #e2e8f0;
+            border-color: var(--phet-blue);
+        }
+
+        .num-input {
+            width: 76px;
+            background: #ffffff;
+            border: 1.5px solid var(--phet-border);
+            color: var(--phet-text);
+            padding: 4px 6px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 800;
+            text-align: center;
+            direction: ltr;
+            outline: none;
+            transition: all 0.15s;
+        }
+
+        .num-input:focus {
+            border-color: var(--phet-blue);
+            box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+        }
+
+        .slider-range {
+            flex: 1;
+            accent-color: var(--phet-blue);
+            cursor: pointer;
+            height: 6px;
+        }
+
+        /* Live HUD Stats */
+        .hud-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            background: #f8fafc;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--phet-border-light);
+        }
+
+        .hud-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hud-item-label {
+            font-size: 10px;
+            color: var(--phet-text-muted);
+            font-weight: 600;
+        }
+
+        .hud-item-val {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--phet-text);
+        }
+
+        /* Presets Select */
+        .preset-select {
+            background: #ffffff;
+            border: 1.5px solid var(--phet-border);
+            color: var(--phet-text);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: inherit;
+            width: 100%;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .preset-select:focus {
+            border-color: var(--phet-blue);
+        }
+
+        /* Vectors Toggle Strip */
+        .vectors-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            font-size: 11px;
+            padding: 6px 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid var(--phet-border-light);
+        }
+
+        /* 4. Authentic PhET Bottom Toolbar */
+        .phet-bottom-bar {
+            height: 40px;
+            background: #0f172a;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .phet-bottom-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .phet-logo-text {
+            font-weight: 900;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            color: #38bdf8;
+        }
+
+        .phet-bottom-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .phet-round-play-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f97316;
+            border: none;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(249, 115, 22, 0.4);
+            transition: all 0.15s;
+        }
+
+        .phet-round-play-btn:hover {
+            transform: scale(1.08);
+            background: #ea580c;
+        }
+
+        .phet-round-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #334155;
+            border: none;
+            color: #ffffff;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .phet-round-btn:hover {
+            background: #475569;
+        }
+
+        .phet-reset-btn {
+            background: #eab308;
+            color: #0f172a;
+            font-weight: 900;
+        }
+
+        .phet-reset-btn:hover {
+            background: #facc15;
+        }
+
+        .phet-speed-switch {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            color: #cbd5e1;
+            margin-right: 8px;
+        }
+
+        .phet-bottom-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .phet-icon-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.15s;
+        }
+
+        .phet-icon-btn:hover {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Header -->
+    <header>
+        <div class="sim-title">
+            <span class="phet-badge">PhET</span>
+            <h1>حرکت بر روی خط راست: نمودار مکان، سرعت و شتاب (آزمایشگاه رسمی PhET)</h1>
+        </div>
+
+        <div class="tab-btn-group">
+            <button class="tab-btn active" id="tab-both" onclick="setGraphLayout('all')">۳ نمودار همزمان</button>
+            <button class="tab-btn" id="tab-xt" onclick="setGraphLayout('x')">مکان (x-t)</button>
+            <button class="tab-btn" id="tab-vt" onclick="setGraphLayout('v')">سرعت (v-t)</button>
+            <button class="tab-btn" id="tab-at" onclick="setGraphLayout('a')">شتاب (a-t)</button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+        
+        <!-- Left: Physical Stage & Graphs -->
+        <div class="stage-container">
+            <!-- 1. Physical Stage Canvas (Open World Horizon & Infinite Tape) -->
+            <div class="track-box">
+                <div class="track-header-bar">
+                    <div class="track-info">
+                        <span>🏃 جهان باز و مسیر پیوسته حرکت (نامحدود)</span>
+                        <span id="camera-pos-pill" class="mono-num" style="font-size: 10px; color: var(--phet-blue); background: #e0f2fe; padding: 2px 6px; border-radius: 4px; border: 1px solid #bae6fd;">دوربین: 0.0 m</span>
+                    </div>
+
+                    <div class="track-tools">
+                        <button id="btn-camera-follow" class="track-tool-btn active" onclick="toggleCameraFollow()" title="دوربین به صورت زنده و نرم موقعیت متحرک را در مرکز دید نگه می‌دارد">
+                            <span>🎥 دنبال‌کننده خودکار</span>
+                        </button>
+                        <button class="track-tool-btn" onclick="zoomTrack(1.3)" title="بزرگ‌نمایی محور (زوم این)">
+                            <span>🔍+ زوم</span>
+                        </button>
+                        <button class="track-tool-btn" onclick="zoomTrack(0.7)" title="کوچک‌نمایی محور (زوم اوت)">
+                            <span>🔍- مقیاس باز</span>
+                        </button>
+                        <button class="track-tool-btn" onclick="resetCamera()" title="بازگشت به مبدأ مختصات (0m)">
+                            <span>🎯 مرکز (0m)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="track-canvas-wrapper">
+                    <canvas id="track-canvas" class="track-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- 2. Kinematics Graphs (Pure White PhET Standard) -->
+            <div class="graphs-wrapper">
+                <div class="graphs-header">
+                    <div class="graphs-header-title">
+                        <span>📈 نمودارهای پیوسته با مقیاس خودکار (Auto-Scale)</span>
+                        <span id="live-time-pill" class="mono-num" style="font-size: 11px; color: var(--phet-blue); background: #f0f9ff; padding: 2px 8px; border-radius: 6px; border: 1px solid #bae6fd;">t = 0.00 s</span>
+                    </div>
+
+                    <div class="graph-selectors">
+                        <label class="graph-checkbox" style="color: var(--phet-blue);">
+                            <input type="checkbox" id="chk-show-x" checked onchange="redrawGraphs()">
+                            <span>مکان x(t)</span>
+                        </label>
+                        <label class="graph-checkbox" style="color: var(--phet-green);">
+                            <input type="checkbox" id="chk-show-v" checked onchange="redrawGraphs()">
+                            <span>سرعت v(t)</span>
+                        </label>
+                        <label class="graph-checkbox" style="color: var(--phet-amber);">
+                            <input type="checkbox" id="chk-show-a" checked onchange="redrawGraphs()">
+                            <span>شتاب a(t)</span>
+                        </label>
+                        <label class="graph-checkbox" style="color: var(--phet-text-muted);">
+                            <input type="checkbox" id="chk-show-area" checked onchange="redrawGraphs()">
+                            <span>مساحت زیر منحنی (Δx)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="graphs-canvas-container">
+                    <canvas id="graphs-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Scientific Control Dock (Crisp White PhET Panels) -->
+        <div class="controls-sidebar">
+            
+            <!-- Preset Scenarios -->
+            <div class="control-card">
+                <div class="control-card-header">
+                    <span class="control-label" style="color: var(--phet-blue);">
+                        <span>📚 مسائل استاندارد فیزیک نهم و سمپاد:</span>
+                    </span>
+                </div>
+                <select id="sim-preset-select" class="preset-select" onchange="applyPreset(this.value)">
+                    <option value="custom">-- انتخاب سناریو یا تنظیم عددی دلخواه --</option>
+                    <option value="uniform">۱. حرکت با سرعت ثابت (v = 4.0 m/s , a = 0)</option>
+                    <option value="accel_from_rest">۲. شتاب ثابت تندشونده از سکون (v₀ = 0 , a = +2.0 m/s²)</option>
+                    <option value="decel_to_stop">۳. حرکت کندشونده تا توقف کامل (v₀ = 10.0 m/s , a = -2.0 m/s²)</option>
+                    <option value="reverse_direction">۴. تغییر جهت و بازگشت (x₀ = -15 m , v₀ = +8 m/s , a = -1.5 m/s²)</option>
+                    <option value="long_run">۵. حرکت شتابدار پیوسته در مسافت طولانی (v₀ = +2 m/s , a = +1.0 m/s²)</option>
+                </select>
+            </div>
+
+            <!-- Position Control (x) -->
+            <div class="control-card" style="border-right: 4px solid var(--phet-blue);">
+                <div class="control-card-header">
+                    <span class="control-label" style="color: var(--phet-blue);">
+                        <span>📍 مکان اولیه (x₀):</span>
+                    </span>
+                    <div class="control-input-group">
+                        <button class="step-btn" onclick="stepNum('num-pos', -1)" title="کاهش ۱ متر">-</button>
+                        <input type="number" id="num-pos" class="num-input" step="0.5" value="0.0" oninput="onInputPos(this.value)">
+                        <button class="step-btn" onclick="stepNum('num-pos', 1)" title="افزایش ۱ متر">+</button>
+                        <span style="font-size: 11px; color: var(--phet-text-muted); font-weight: 600;">m</span>
+                    </div>
+                </div>
+                <input type="range" id="slider-pos" class="slider-range" min="-50" max="50" step="0.5" value="0" oninput="onSliderPos(this.value)">
+            </div>
+
+            <!-- Velocity Control (v) -->
+            <div class="control-card" style="border-right: 4px solid var(--phet-green);">
+                <div class="control-card-header">
+                    <span class="control-label" style="color: var(--phet-green);">
+                        <span>⚡ سرعت اولیه (v₀):</span>
+                    </span>
+                    <div class="control-input-group">
+                        <button class="step-btn" onclick="stepNum('num-vel', -1)" title="کاهش ۱ m/s">-</button>
+                        <input type="number" id="num-vel" class="num-input" step="0.5" value="0.0" oninput="onInputVel(this.value)">
+                        <button class="step-btn" onclick="stepNum('num-vel', 1)" title="افزایش ۱ m/s">+</button>
+                        <span style="font-size: 11px; color: var(--phet-text-muted); font-weight: 600;">m/s</span>
+                    </div>
+                </div>
+                <input type="range" id="slider-vel" class="slider-range" min="-25" max="25" step="0.5" value="0" oninput="onSliderVel(this.value)">
+            </div>
+
+            <!-- Acceleration Control (a) -->
+            <div class="control-card" style="border-right: 4px solid var(--phet-amber);">
+                <div class="control-card-header">
+                    <span class="control-label" style="color: var(--phet-amber);">
+                        <span>🚀 شتاب ثابت (a):</span>
+                    </span>
+                    <div class="control-input-group">
+                        <button class="step-btn" onclick="stepNum('num-acc', -0.5)" title="کاهش ۰.۵ m/s²">-</button>
+                        <input type="number" id="num-acc" class="num-input" step="0.2" value="0.0" oninput="onInputAcc(this.value)">
+                        <button class="step-btn" onclick="stepNum('num-acc', 0.5)" title="افزایش ۰.۵ m/s²">+</button>
+                        <span style="font-size: 11px; color: var(--phet-text-muted); font-weight: 600;">m/s²</span>
+                    </div>
+                </div>
+                <input type="range" id="slider-acc" class="slider-range" min="-10" max="10" step="0.2" value="0" oninput="onSliderAcc(this.value)">
+            </div>
+
+            <!-- Vector Display Toggles -->
+            <div class="vectors-strip">
+                <span style="font-weight: 700; color: var(--phet-text-muted);">نمایش بردارها:</span>
+                <label style="display: flex; align-items: center; gap: 3px; cursor: pointer; color: var(--phet-green); font-weight: 600;">
+                    <input type="checkbox" id="chk-vec-v" checked onchange="redrawTrack()">
+                    <span>سرعت (v)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 3px; cursor: pointer; color: var(--phet-amber); font-weight: 600;">
+                    <input type="checkbox" id="chk-vec-a" checked onchange="redrawTrack()">
+                    <span>شتاب (a)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 3px; cursor: pointer; color: var(--phet-blue); font-weight: 600;">
+                    <input type="checkbox" id="chk-vec-x" onchange="redrawTrack()">
+                    <span>مکان (x)</span>
+                </label>
+            </div>
+
+            <!-- Live Digital HUD (Readouts) -->
+            <div class="hud-grid">
+                <div class="hud-item">
+                    <span class="hud-item-label">زمان سپری‌شده (t):</span>
+                    <span id="hud-t" class="hud-item-val mono-num">0.00 s</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-item-label">مکان لحظه‌ای (x):</span>
+                    <span id="hud-x" class="hud-item-val mono-num" style="color: var(--phet-blue);">0.00 m</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-item-label">سرعت لحظه‌ای (v):</span>
+                    <span id="hud-v" class="hud-item-val mono-num" style="color: var(--phet-green);">0.00 m/s</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-item-label">شتاب لحظه‌ای (a):</span>
+                    <span id="hud-a" class="hud-item-val mono-num" style="color: var(--phet-amber);">0.00 m/s²</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-item-label">جابه‌جایی کل (Δx):</span>
+                    <span id="hud-dx" class="hud-item-val mono-num">0.00 m</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-item-label">مسافت پیموده‌شده (d):</span>
+                    <span id="hud-d" class="hud-item-val mono-num">0.00 m</span>
+                </div>
+            </div>
+
+            <!-- Textbook Formulas Reference -->
+            <div style="background: #f8fafc; border: 1px solid var(--phet-border-light); padding: 8px 10px; border-radius: 10px; font-size: 10px; color: var(--phet-text-muted); line-height: 1.6;">
+                <span style="color: var(--phet-text); font-weight: 700; display: block; margin-bottom: 2px;">📐 معادلات حرکت با شتاب ثابت:</span>
+                <div class="mono-num" style="display: block; color: var(--phet-blue);">x(t) = 1/2·a·t² + v₀·t + x₀</div>
+                <div class="mono-num" style="display: block; color: var(--phet-green);">v(t) = a·t + v₀</div>
+                <div class="mono-num" style="display: block; color: var(--phet-amber);">v² - v₀² = 2·a·Δx &nbsp;|&nbsp; Δx = ∫ v dt</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Authentic PhET Bottom Navigation & Playback Toolbar -->
+    <div class="phet-bottom-bar">
+        <div class="phet-bottom-left">
+            <span class="phet-logo-text">PhET</span>
+            <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">The Moving Man (HTML5)</span>
+        </div>
+
+        <div class="phet-bottom-center">
+            <div class="phet-speed-switch">
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 3px;">
+                    <input type="radio" name="speed" value="slow" onchange="setSimSpeed(0.4)">
+                    <span>آهسته (0.4×)</span>
+                </label>
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 3px;">
+                    <input type="radio" name="speed" value="normal" checked onchange="setSimSpeed(1.0)">
+                    <span>عادی (1.0×)</span>
+                </label>
+            </div>
+
+            <button id="btn-play" class="phet-round-play-btn" onclick="togglePlay()" title="شروع / توقف حرکت">
+                <span id="play-icon">▶</span>
+            </button>
+
+            <button class="phet-round-btn" onclick="stepForward(0.1)" title="گام زمانی رو به جلو (+0.1 ثانیه)">
+                ⏭
+            </button>
+
+            <button class="phet-round-btn" onclick="clearData()" title="پاک کردن تاریخچه نمودار">
+                🧹
+            </button>
+
+            <button class="phet-round-btn phet-reset-btn" onclick="resetAll()" title="بازنشانی کامل شبیه‌ساز (Reset All)">
+                🔄
+            </button>
+        </div>
+
+        <div class="phet-bottom-right">
+            <button class="phet-icon-btn" onclick="toggleFullscreen()" title="تمام‌صفحه">
+                ⛶
+            </button>
+        </div>
+    </div>
+
+    <!-- Kinematics Engine Script -->
+    <script>
+        // Physics State Variables
+        let x0 = 0.0;
+        let v0 = 0.0;
+        let aConst = 0.0;
+
+        let curX = 0.0;
+        let curV = 0.0;
+        let curA = 0.0;
+        let curT = 0.0;
+
+        let totalDistance = 0.0;
+        let lastX = 0.0;
+
+        let isRunning = false;
+        let simSpeed = 1.0;
+        let lastTimestamp = null;
+
+        // Data recording for graphs: Array of { t, x, v, a }
+        let trajectory = [];
+
+        // UI & Layout Modes
+        let activeGraphMode = 'all'; // 'all', 'x', 'v', 'a'
+        let isDraggingGlider = false;
+        let isPanningTrack = false;
+        let panStartX = 0;
+        let panStartCameraX = 0;
+
+        // Dynamic Open World Camera
+        let cameraX = 0.0; // Current center of viewport in meters
+        let viewSpanMeters = 24.0; // Total horizontal span visible (default 24 meters)
+        let autoFollow = true; // Auto follow runner
+
+        // Canvases
+        const trackCanvas = document.getElementById('track-canvas');
+        const trackCtx = trackCanvas.getContext('2d');
+
+        const graphsCanvas = document.getElementById('graphs-canvas');
+        const graphsCtx = graphsCanvas.getContext('2d');
+
+        // Resize Handlers
+        function resizeCanvases() {
+            const trackRect = trackCanvas.parentElement.getBoundingClientRect();
+            trackCanvas.width = Math.max(100, trackRect.width) * window.devicePixelRatio;
+            trackCanvas.height = Math.max(80, trackRect.height) * window.devicePixelRatio;
+
+            const graphRect = graphsCanvas.parentElement.getBoundingClientRect();
+            graphsCanvas.width = Math.max(100, graphRect.width) * window.devicePixelRatio;
+            graphsCanvas.height = Math.max(100, graphRect.height) * window.devicePixelRatio;
+
+            redrawTrack();
+            redrawGraphs();
+        }
+
+        window.addEventListener('resize', resizeCanvases);
+
+        // Initialization
+        function init() {
+            curX = x0;
+            curV = v0;
+            curA = aConst;
+            curT = 0.0;
+            totalDistance = 0.0;
+            lastX = curX;
+            cameraX = curX;
+            trajectory = [{ t: 0, x: curX, v: curV, a: curA }];
+            updateHUD();
+            resizeCanvases();
+        }
+
+        // ==========================================
+        // Physics Simulation Loop (Infinite & Exact Analytical)
+        // ==========================================
+        function simStep(dt) {
+            if (!isRunning) return;
+
+            const nextT = curT + dt;
+            
+            // Analytical kinematics for 100% precision without numerical drift
+            const nextV = v0 + aConst * nextT;
+            const nextX = x0 + v0 * nextT + 0.5 * aConst * nextT * nextT;
+
+            totalDistance += Math.abs(nextX - curX);
+            curX = nextX;
+            curV = nextV;
+            curA = aConst;
+            curT = nextT;
+
+            // Smooth camera tracking if autoFollow enabled
+            if (autoFollow) {
+                cameraX += (curX - cameraX) * 0.15;
+            }
+
+            trajectory.push({ t: curT, x: curX, v: curV, a: curA });
+
+            // Keep trajectory memory healthy (up to 5000 points)
+            if (trajectory.length > 5000) {
+                trajectory.splice(1, 100);
+            }
+
+            updateHUD();
+            redrawTrack();
+            redrawGraphs();
+        }
+
+        function animationLoop(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const deltaMs = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+
+            if (isRunning) {
+                const dt = Math.min(deltaMs / 1000, 0.05) * simSpeed;
+                simStep(dt);
+            }
+
+            requestAnimationFrame(animationLoop);
+        }
+
+        requestAnimationFrame(animationLoop);
+
+        // ==========================================
+        // Coordinate Transforms (Seamless & Margin-Free)
+        // ==========================================
+        function metersToCanvasPx(m, width) {
+            const leftM = cameraX - viewSpanMeters / 2;
+            const scale = width / viewSpanMeters;
+            return (m - leftM) * scale;
+        }
+
+        function canvasPxToMeters(px, width) {
+            const leftM = cameraX - viewSpanMeters / 2;
+            const scale = width / viewSpanMeters;
+            return leftM + px / scale;
+        }
+
+        // ==========================================
+        // Track Drawing (Authentic PhET Daylight Open World)
+        // ==========================================
+        function redrawTrack() {
+            const w = trackCanvas.width;
+            const h = trackCanvas.height;
+            const ctx = trackCtx;
+            const s = window.devicePixelRatio;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const baselineY = h - 38 * s;
+            const leftM = cameraX - viewSpanMeters / 2;
+            const rightM = cameraX + viewSpanMeters / 2;
+
+            // 1. PhET Clear Daytime Sky Gradient
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, baselineY);
+            skyGrad.addColorStop(0, '#c7e6fc');
+            skyGrad.addColorStop(0.5, '#dff1fd');
+            skyGrad.addColorStop(1, '#f1f8fe');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, w, baselineY);
+
+            // 2. Sunny Clouds floating in the open sky
+            drawCloud(ctx, (w * 0.2 - cameraX * 8 * s) % (w + 200 * s) - 100 * s, 35 * s, 45 * s);
+            drawCloud(ctx, (w * 0.7 - cameraX * 5 * s) % (w + 200 * s) - 100 * s, 25 * s, 35 * s);
+
+            // 3. Distant Rolling Green Hills (Landscape Depth)
+            ctx.fillStyle = '#a7f3d0';
+            ctx.beginPath();
+            ctx.moveTo(0, baselineY);
+            for (let px = 0; px <= w; px += 30 * s) {
+                const m = canvasPxToMeters(px, w);
+                const hillY = baselineY - (Math.sin(m * 0.05) * 14 + Math.cos(m * 0.02) * 10 + 22) * s;
+                ctx.lineTo(px, hillY);
+            }
+            ctx.lineTo(w, baselineY);
+            ctx.closePath();
+            ctx.fill();
+
+            // Near hills (rich green)
+            ctx.fillStyle = '#6ee7b7';
+            ctx.beginPath();
+            ctx.moveTo(0, baselineY);
+            for (let px = 0; px <= w; px += 25 * s) {
+                const m = canvasPxToMeters(px, w);
+                const hillY = baselineY - (Math.sin(m * 0.09 + 1) * 8 + Math.cos(m * 0.04) * 6 + 10) * s;
+                ctx.lineTo(px, hillY);
+            }
+            ctx.lineTo(w, baselineY);
+            ctx.closePath();
+            ctx.fill();
+
+            // 4. Lush Green Grass Lawn & Running Track
+            ctx.fillStyle = '#16a34a';
+            ctx.fillRect(0, baselineY, w, h - baselineY);
+
+            // Running Road strip
+            const roadH = 14 * s;
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(0, baselineY, w, roadH);
+
+            // Road center dashed line
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5 * s;
+            ctx.setLineDash([8 * s, 8 * s]);
+            ctx.beginPath();
+            ctx.moveTo(0, baselineY + roadH / 2);
+            ctx.lineTo(w, baselineY + roadH / 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 5. Authentic PhET Golden Calibrated Measuring Tape (Full Width)
+            const rulerH = 24 * s;
+            const rulerY = baselineY + roadH;
+            const rulerGrad = ctx.createLinearGradient(0, rulerY, 0, rulerY + rulerH);
+            rulerGrad.addColorStop(0, '#fef9c3');
+            rulerGrad.addColorStop(1, '#fde047');
+            ctx.fillStyle = rulerGrad;
+            ctx.fillRect(0, rulerY, w, rulerH);
+
+            ctx.strokeStyle = '#ca8a04';
+            ctx.lineWidth = 1 * s;
+            ctx.strokeRect(0, rulerY, w, rulerH);
+
+            // 6. Calibrated Ruler Ticks & Numerical Marks
+            let majorStep = 5;
+            let minorStep = 1;
+            if (viewSpanMeters <= 16) {
+                majorStep = 2;
+                minorStep = 0.5;
+            } else if (viewSpanMeters > 50) {
+                majorStep = 10;
+                minorStep = 2;
+            }
+
+            const startM = Math.floor(leftM / minorStep) * minorStep;
+            const endM = Math.ceil(rightM / minorStep) * minorStep;
+
+            ctx.font = `bold ${9 * s}px 'JetBrains Mono', sans-serif`;
+            ctx.textAlign = 'center';
+
+            for (let m = startM; m <= endM; m += minorStep) {
+                const px = metersToCanvasPx(m, w);
+                if (px < -50 || px > w + 50) continue;
+
+                const isZero = (Math.abs(m) < 0.001);
+                const isMajor = Math.abs(Math.round(m) - m) < 0.001 && (Math.round(m) % majorStep === 0);
+
+                if (isZero) {
+                    // Zero Origin Marker: Red line & bold 0m
+                    ctx.strokeStyle = '#dc2626';
+                    ctx.lineWidth = 3 * s;
+                    ctx.beginPath();
+                    ctx.moveTo(px, rulerY);
+                    ctx.lineTo(px, rulerY + rulerH);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#dc2626';
+                    ctx.fillText('0 m', px, rulerY + rulerH - 6 * s);
+                } else if (isMajor) {
+                    // Major Tick with Meter Label
+                    ctx.strokeStyle = '#0f172a';
+                    ctx.lineWidth = 1.5 * s;
+                    ctx.beginPath();
+                    ctx.moveTo(px, rulerY);
+                    ctx.lineTo(px, rulerY + 12 * s);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillText(`${Math.round(m)}m`, px, rulerY + rulerH - 5 * s);
+                } else {
+                    // Minor Tick
+                    ctx.strokeStyle = '#713f12';
+                    ctx.lineWidth = 0.75 * s;
+                    ctx.beginPath();
+                    ctx.moveTo(px, rulerY);
+                    ctx.lineTo(px, rulerY + 6 * s);
+                    ctx.stroke();
+                }
+            }
+
+            // 7. Open World Landmarks along the road
+            const landmarks = [
+                { m: -100, label: '🏔️ قله غربی (-100m)' },
+                { m: -50,  label: '🏭 کارخانه (-50m)' },
+                { m: -25,  label: '⛽ پمپ بنزین (-25m)' },
+                { m: -10,  label: '🏠 خانه (-10m)' },
+                { m: 0,    label: '🌳 مبدأ درخت (0m)' },
+                { m: 10,   label: '🏫 مدرسه (+10m)' },
+                { m: 25,   label: '🌉 پل رودخانه (+25m)' },
+                { m: 50,   label: '🏟️ استادیوم (+50m)' },
+                { m: 100,  label: '🚀 پایگاه پرتاب (+100m)' }
+            ];
+
+            landmarks.forEach(lm => {
+                if (lm.m >= leftM - 15 && lm.m <= rightM + 15) {
+                    const lmPx = metersToCanvasPx(lm.m, w);
+                    drawLandmark(ctx, lmPx, baselineY, lm.label, lm.m === 0);
+                }
+            });
+
+            // 8. Position Vector (Blue Arrow from 0m to curX)
+            const showVecX = document.getElementById('chk-vec-x').checked;
+            if (showVecX && Math.abs(curX) > 0.05) {
+                const originPx = metersToCanvasPx(0, w);
+                const targetPx = metersToCanvasPx(curX, w);
+                drawVectorArrow(ctx, originPx, baselineY - 48 * s, targetPx, baselineY - 48 * s, '#0284c7', `x = ${curX.toFixed(2)} m`);
+            }
+
+            // 9. Draw Moving Glider / Character at curX
+            const gliderPx = metersToCanvasPx(curX, w);
+            const gliderY = baselineY - 14 * s;
+            drawGlider(ctx, gliderPx, gliderY);
+
+            // 10. Velocity Vector on Glider
+            const showVecV = document.getElementById('chk-vec-v').checked;
+            if (showVecV && Math.abs(curV) > 0.05) {
+                const scaleM = (w / viewSpanMeters);
+                const vLenPx = Math.max(-130 * s, Math.min(130 * s, curV * 0.45 * scaleM));
+                drawVectorArrow(ctx, gliderPx, gliderY - 26 * s, gliderPx + vLenPx, gliderY - 26 * s, '#16a34a', `v = ${curV.toFixed(2)} m/s`);
+            }
+
+            // 11. Acceleration Vector on Glider
+            const showVecA = document.getElementById('chk-vec-a').checked;
+            if (showVecA && Math.abs(curA) > 0.05) {
+                const scaleM = (w / viewSpanMeters);
+                const aLenPx = Math.max(-130 * s, Math.min(130 * s, curA * 0.65 * scaleM));
+                drawVectorArrow(ctx, gliderPx, gliderY - 40 * s, gliderPx + aLenPx, gliderY - 40 * s, '#ea580c', `a = ${curA.toFixed(2)} m/s²`);
+            }
+
+            // Update Camera badge
+            const camPill = document.getElementById('camera-pos-pill');
+            if (camPill) camPill.textContent = `دوربین: ${cameraX.toFixed(1)} m`;
+        }
+
+        function drawCloud(ctx, x, y, size) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.35, y - size * 0.15, size * 0.45, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.7, y, size * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawLandmark(ctx, x, y, label, isOrigin) {
+            const s = window.devicePixelRatio;
+            ctx.fillStyle = isOrigin ? '#0284c7' : '#334155';
+            ctx.font = `${isOrigin ? 'bold ' : ''}${10 * s}px 'Vazirmatn', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(label, x, y - 62 * s);
+            
+            ctx.strokeStyle = isOrigin ? 'rgba(2, 132, 199, 0.8)' : 'rgba(100, 116, 139, 0.4)';
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(x, y - 56 * s);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawGlider(ctx, x, y) {
+            const s = window.devicePixelRatio;
+            ctx.save();
+            ctx.translate(x, y);
+
+            // Clean drop shadow
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+            ctx.shadowBlur = 8 * s;
+            ctx.shadowOffsetY = 4 * s;
+
+            // Chassis (PhET Blue Body)
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath();
+            ctx.roundRect(-24 * s, -14 * s, 48 * s, 22 * s, 6 * s);
+            ctx.fill();
+
+            // Cockpit Dome (Clean Sky White)
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.roundRect(-12 * s, -22 * s, 24 * s, 12 * s, 4 * s);
+            ctx.fill();
+            ctx.strokeStyle = '#bae6fd';
+            ctx.lineWidth = 1.5 * s;
+            ctx.stroke();
+
+            ctx.shadowColor = 'transparent';
+
+            // Wheels (Dark Wheels with Chrome Rims)
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(-15 * s, 8 * s, 6 * s, 0, Math.PI * 2);
+            ctx.arc(15 * s, 8 * s, 6 * s, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.arc(-15 * s, 8 * s, 2.5 * s, 0, Math.PI * 2);
+            ctx.arc(15 * s, 8 * s, 2.5 * s, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Center Pin Indicator (Red reference dot)
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.arc(0, -3 * s, 3.5 * s, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1 * s;
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawVectorArrow(ctx, fromX, fromY, toX, toY, color, text) {
+            const s = window.devicePixelRatio;
+            const headlen = 8 * s;
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2.5 * s;
+
+            // Line
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+
+            // Arrow head
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+
+            // Label Box
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1 * s;
+            const textWidth = ctx.measureText(text).width + 8 * s;
+            const midX = (fromX + toX) / 2;
+            const midY = fromY - 9 * s;
+
+            ctx.beginPath();
+            ctx.roundRect(midX - textWidth / 2, midY - 6 * s, textWidth, 13 * s, 3 * s);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.font = `bold ${9 * s}px 'JetBrains Mono', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(text, midX, midY + 4 * s);
+        }
+
+        // ==========================================
+        // User Interactions: Drag Runner & Pan Camera
+        // ==========================================
+        trackCanvas.addEventListener('mousedown', (e) => {
+            const rect = trackCanvas.getBoundingClientRect();
+            const mouseX = (e.clientX - rect.left) * window.devicePixelRatio;
+            const w = trackCanvas.width;
+            const clickedM = canvasPxToMeters(mouseX, w);
+
+            // Check if clicking near the glider
+            if (Math.abs(clickedM - curX) < (viewSpanMeters * 0.08)) {
+                isDraggingGlider = true;
+                isRunning = false;
+                updatePlayBtn();
+            } else {
+                // Otherwise start panning camera
+                isPanningTrack = true;
+                panStartX = e.clientX;
+                panStartCameraX = cameraX;
+                autoFollow = false;
+                updateFollowBtn();
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            const rect = trackCanvas.getBoundingClientRect();
+            const w = trackCanvas.width;
+
+            if (isDraggingGlider) {
+                const mouseX = (e.clientX - rect.left) * window.devicePixelRatio;
+                const newM = Math.round(canvasPxToMeters(mouseX, w) * 10) / 10;
+                x0 = newM;
+                curX = newM;
+                curT = 0;
+                trajectory = [{ t: 0, x: curX, v: curV, a: curA }];
+                document.getElementById('num-pos').value = newM.toFixed(1);
+                document.getElementById('slider-pos').value = Math.max(-50, Math.min(50, newM));
+                updateHUD();
+                redrawTrack();
+                redrawGraphs();
+            } else if (isPanningTrack) {
+                const deltaPx = e.clientX - panStartX;
+                const scaleM = viewSpanMeters / rect.width;
+                cameraX = panStartCameraX - deltaPx * scaleM;
+                redrawTrack();
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingGlider = false;
+            isPanningTrack = false;
+        });
+
+        // Touch support for mobile / tablets
+        trackCanvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                const rect = trackCanvas.getBoundingClientRect();
+                const touchX = (e.touches[0].clientX - rect.left) * window.devicePixelRatio;
+                const w = trackCanvas.width;
+                const clickedM = canvasPxToMeters(touchX, w);
+
+                if (Math.abs(clickedM - curX) < (viewSpanMeters * 0.1)) {
+                    isDraggingGlider = true;
+                    isRunning = false;
+                    updatePlayBtn();
+                } else {
+                    isPanningTrack = true;
+                    panStartX = e.touches[0].clientX;
+                    panStartCameraX = cameraX;
+                    autoFollow = false;
+                    updateFollowBtn();
+                }
+            }
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length !== 1) return;
+            const rect = trackCanvas.getBoundingClientRect();
+            const w = trackCanvas.width;
+
+            if (isDraggingGlider) {
+                const touchX = (e.touches[0].clientX - rect.left) * window.devicePixelRatio;
+                const newM = Math.round(canvasPxToMeters(touchX, w) * 10) / 10;
+                x0 = newM;
+                curX = newM;
+                curT = 0;
+                trajectory = [{ t: 0, x: curX, v: curV, a: curA }];
+                document.getElementById('num-pos').value = newM.toFixed(1);
+                document.getElementById('slider-pos').value = Math.max(-50, Math.min(50, newM));
+                updateHUD();
+                redrawTrack();
+                redrawGraphs();
+            } else if (isPanningTrack) {
+                const deltaPx = e.touches[0].clientX - panStartX;
+                const scaleM = viewSpanMeters / rect.width;
+                cameraX = panStartCameraX - deltaPx * scaleM;
+                redrawTrack();
+            }
+        });
+
+        window.addEventListener('touchend', () => {
+            isDraggingGlider = false;
+            isPanningTrack = false;
+        });
+
+        // ==========================================
+        // Camera & Zoom Functions
+        // ==========================================
+        function toggleCameraFollow() {
+            autoFollow = !autoFollow;
+            updateFollowBtn();
+            if (autoFollow) {
+                cameraX = curX;
+                redrawTrack();
+            }
+        }
+
+        function updateFollowBtn() {
+            const btn = document.getElementById('btn-camera-follow');
+            if (!btn) return;
+            if (autoFollow) {
+                btn.className = 'track-tool-btn active';
+                btn.innerHTML = '<span>🎥 دنبال‌کننده فعال</span>';
+            } else {
+                btn.className = 'track-tool-btn';
+                btn.innerHTML = '<span>🎥 دنبال‌کننده خاموش</span>';
+            }
+        }
+
+        function zoomTrack(factor) {
+            viewSpanMeters = Math.max(8, Math.min(200, viewSpanMeters / factor));
+            redrawTrack();
+        }
+
+        function resetCamera() {
+            cameraX = 0.0;
+            viewSpanMeters = 24.0;
+            autoFollow = false;
+            updateFollowBtn();
+            redrawTrack();
+        }
+
+        // ==========================================
+        // Kinematics Graphs Engine (Pure White PhET Standard)
+        // ==========================================
+        function getNiceMaxScale(rawMax, defaultMin) {
+            let m = Math.max(defaultMin, rawMax * 1.15);
+            if (m <= 10) return 10;
+            if (m <= 20) return 20;
+            if (m <= 50) return 50;
+            if (m <= 100) return 100;
+            if (m <= 250) return 250;
+            if (m <= 500) return 500;
+            return Math.ceil(m / 200) * 200;
+        }
+
+        function redrawGraphs() {
+            const w = graphsCanvas.width;
+            const h = graphsCanvas.height;
+            const ctx = graphsCtx;
+            const s = window.devicePixelRatio;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Determine visible graphs based on layout mode and checkboxes
+            const showX = document.getElementById('chk-show-x').checked && (activeGraphMode === 'all' || activeGraphMode === 'x');
+            const showV = document.getElementById('chk-show-v').checked && (activeGraphMode === 'all' || activeGraphMode === 'v');
+            const showA = document.getElementById('chk-show-a').checked && (activeGraphMode === 'all' || activeGraphMode === 'a');
+            const showArea = document.getElementById('chk-show-area').checked;
+
+            const visibleCount = (showX ? 1 : 0) + (showV ? 1 : 0) + (showA ? 1 : 0);
+            if (visibleCount === 0) {
+                ctx.fillStyle = '#64748b';
+                ctx.font = `${13 * s}px 'Vazirmatn', sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText('حداقل یکی از نمودارها را انتخاب فرمایید.', w / 2, h / 2);
+                return;
+            }
+
+            // Dynamic Time Axis Scale [0, maxT] (Expands seamlessly as time progresses)
+            const maxT = Math.max(10, Math.ceil((curT * 1.15) / 5) * 5);
+
+            // Dynamic Value Ranges for x, v, a
+            let maxX = 10;
+            let maxV = 10;
+            let maxA = 5;
+
+            for (let i = 0; i < trajectory.length; i++) {
+                const pt = trajectory[i];
+                if (Math.abs(pt.x) > maxX) maxX = Math.abs(pt.x);
+                if (Math.abs(pt.v) > maxV) maxV = Math.abs(pt.v);
+                if (Math.abs(pt.a) > maxA) maxA = Math.abs(pt.a);
+            }
+
+            const scaleX = getNiceMaxScale(maxX, 10);
+            const scaleV = getNiceMaxScale(maxV, 10);
+            const scaleA = getNiceMaxScale(maxA, 5);
+
+            const paddingLeft = 58 * s;
+            const paddingRight = 18 * s;
+            const graphWidth = w - paddingLeft - paddingRight;
+            const graphHeight = (h - 10 * s * (visibleCount - 1)) / visibleCount;
+
+            let currentTop = 0;
+
+            if (showX) {
+                drawSingleGraph(ctx, paddingLeft, currentTop, graphWidth, graphHeight, 'مکان x(t) [متر]', -scaleX, scaleX, maxT, 'x', '#0284c7', false);
+                currentTop += graphHeight + 10 * s;
+            }
+
+            if (showV) {
+                drawSingleGraph(ctx, paddingLeft, currentTop, graphWidth, graphHeight, 'سرعت v(t) [متر بر ثانیه]', -scaleV, scaleV, maxT, 'v', '#16a34a', showArea);
+                currentTop += graphHeight + 10 * s;
+            }
+
+            if (showA) {
+                drawSingleGraph(ctx, paddingLeft, currentTop, graphWidth, graphHeight, 'شتاب a(t) [متر بر مجذور ثانیه]', -scaleA, scaleA, maxT, 'a', '#ea580c', showArea);
+                currentTop += graphHeight + 10 * s;
+            }
+        }
+
+        function drawSingleGraph(ctx, x, y, width, height, title, minVal, maxVal, maxT, key, color, fillArea) {
+            const s = window.devicePixelRatio;
+
+            // Pure White PhET Graph Background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(x, y, width, height);
+
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1 * s;
+            ctx.strokeRect(x, y, width, height);
+
+            // Zero Horizontal Line
+            const zeroNorm = (0 - minVal) / (maxVal - minVal);
+            const zeroY = y + height - zeroNorm * height;
+
+            // Grid Lines & Ticks (Time Axis)
+            ctx.font = `${9 * s}px 'JetBrains Mono', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#64748b';
+
+            let tStep = 2;
+            if (maxT > 30) tStep = 5;
+            if (maxT > 80) tStep = 10;
+
+            for (let t = 0; t <= maxT; t += tStep) {
+                const tX = x + (t / maxT) * width;
+                ctx.strokeStyle = '#f1f5f9';
+                ctx.lineWidth = 1 * s;
+                ctx.beginPath();
+                ctx.moveTo(tX, y);
+                ctx.lineTo(tX, y + height);
+                ctx.stroke();
+
+                // Time labels on bottom of graph
+                ctx.fillText(`${t}s`, tX, y + height - 3 * s);
+            }
+
+            // Grid Lines & Ticks (Value Axis)
+            const stepY = (maxVal - minVal) / 4;
+            ctx.textAlign = 'right';
+
+            for (let v = minVal; v <= maxVal; v += stepY) {
+                const vNorm = (v - minVal) / (maxVal - minVal);
+                const vY = y + height - vNorm * height;
+
+                ctx.strokeStyle = (Math.abs(v) < 0.01) ? '#475569' : '#f1f5f9';
+                ctx.lineWidth = (Math.abs(v) < 0.01) ? 1.5 * s : 1 * s;
+
+                ctx.beginPath();
+                ctx.moveTo(x, vY);
+                ctx.lineTo(x + width, vY);
+                ctx.stroke();
+
+                ctx.fillStyle = (Math.abs(v) < 0.01) ? '#0f172a' : '#94a3b8';
+                ctx.fillText(`${Math.round(v)}`, x - 6 * s, vY + 3 * s);
+            }
+
+            // Zero Axis Line (Sharp Dark)
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1.5 * s;
+            ctx.beginPath();
+            ctx.moveTo(x, zeroY);
+            ctx.lineTo(x + width, zeroY);
+            ctx.stroke();
+
+            // Graph Title Pill in Corner
+            ctx.fillStyle = '#f8fafc';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1 * s;
+            ctx.beginPath();
+            ctx.roundRect(x + 6 * s, y + 5 * s, 180 * s, 18 * s, 4 * s);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.font = `bold ${10 * s}px 'Vazirmatn', sans-serif`;
+            ctx.textAlign = 'right';
+            ctx.fillText(title, x + 180 * s, y + 17 * s);
+
+            if (trajectory.length < 2) return;
+
+            // Area Shading under curve (for v-t showing displacement Δx)
+            if (fillArea && (key === 'v' || key === 'a')) {
+                ctx.save();
+                ctx.beginPath();
+                const startPoint = trajectory[0];
+                const startX = x + (startPoint.t / maxT) * width;
+                ctx.moveTo(startX, zeroY);
+
+                for (let i = 0; i < trajectory.length; i++) {
+                    const pt = trajectory[i];
+                    const ptX = x + (pt.t / maxT) * width;
+                    const valNorm = (pt[key] - minVal) / (maxVal - minVal);
+                    const ptY = y + height - Math.max(0, Math.min(1, valNorm)) * height;
+                    ctx.lineTo(ptX, ptY);
+                }
+
+                const lastPoint = trajectory[trajectory.length - 1];
+                const endX = x + (lastPoint.t / maxT) * width;
+                ctx.lineTo(endX, zeroY);
+                ctx.closePath();
+
+                ctx.fillStyle = key === 'v' ? 'rgba(22, 163, 74, 0.2)' : 'rgba(234, 88, 12, 0.2)';
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Draw Dynamic Kinematics Curve
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5 * s;
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+
+            for (let i = 0; i < trajectory.length; i++) {
+                const pt = trajectory[i];
+                const ptX = x + (pt.t / maxT) * width;
+                const valNorm = (pt[key] - minVal) / (maxVal - minVal);
+                const ptY = y + height - Math.max(0, Math.min(1, valNorm)) * height;
+
+                if (i === 0) ctx.moveTo(ptX, ptY);
+                else ctx.lineTo(ptX, ptY);
+            }
+            ctx.stroke();
+
+            // Draw Live Head Marker & Indicator Pill
+            const latest = trajectory[trajectory.length - 1];
+            const headX = x + (latest.t / maxT) * width;
+            const headNorm = (latest[key] - minVal) / (maxVal - minVal);
+            const headY = y + height - Math.max(0, Math.min(1, headNorm)) * height;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(headX, headY, 4.5 * s, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5 * s;
+            ctx.stroke();
+
+            // Live Numerical Value Badge
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.roundRect(headX + 6 * s, headY - 10 * s, 50 * s, 18 * s, 4 * s);
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1 * s;
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.font = `bold ${9 * s}px 'JetBrains Mono', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(`${latest[key].toFixed(1)}`, headX + 31 * s, headY + 3 * s);
+        }
+
+        // ==========================================
+        // Controls, Presets & Event Handlers
+        // ==========================================
+        function togglePlay() {
+            isRunning = !isRunning;
+            updatePlayBtn();
+        }
+
+        function updatePlayBtn() {
+            const icon = document.getElementById('play-icon');
+            if (isRunning) {
+                icon.textContent = '⏸';
+            } else {
+                icon.textContent = '▶';
+            }
+        }
+
+        function stepForward(dt = 0.1) {
+            isRunning = false;
+            updatePlayBtn();
+            simStep(dt);
+        }
+
+        function clearData() {
+            trajectory = [{ t: curT, x: curX, v: curV, a: curA }];
+            redrawGraphs();
+        }
+
+        function resetAll() {
+            isRunning = false;
+            updatePlayBtn();
+            x0 = 0.0;
+            v0 = 0.0;
+            aConst = 0.0;
+            cameraX = 0.0;
+            viewSpanMeters = 24.0;
+            autoFollow = true;
+            updateFollowBtn();
+
+            document.getElementById('num-pos').value = '0.0';
+            document.getElementById('slider-pos').value = 0;
+            document.getElementById('num-vel').value = '0.0';
+            document.getElementById('slider-vel').value = 0;
+            document.getElementById('num-acc').value = '0.0';
+            document.getElementById('slider-acc').value = 0;
+            document.getElementById('sim-preset-select').value = 'custom';
+
+            init();
+        }
+
+        function setSimSpeed(sp) {
+            simSpeed = sp;
+        }
+
+        function setGraphLayout(layout) {
+            activeGraphMode = layout;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if (layout === 'all') document.getElementById('tab-both').classList.add('active');
+            if (layout === 'x') document.getElementById('tab-xt').classList.add('active');
+            if (layout === 'v') document.getElementById('tab-vt').classList.add('active');
+            if (layout === 'a') document.getElementById('tab-at').classList.add('active');
+            redrawGraphs();
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        // Live HUD updates
+        function updateHUD() {
+            document.getElementById('hud-t').textContent = `${curT.toFixed(2)} s`;
+            document.getElementById('hud-x').textContent = `${curX.toFixed(2)} m`;
+            document.getElementById('hud-v').textContent = `${curV.toFixed(2)} m/s`;
+            document.getElementById('hud-a').textContent = `${curA.toFixed(2)} m/s²`;
+            
+            const dx = curX - x0;
+            document.getElementById('hud-dx').textContent = `${dx.toFixed(2)} m`;
+            document.getElementById('hud-d').textContent = `${totalDistance.toFixed(2)} m`;
+            document.getElementById('live-time-pill').textContent = `t = ${curT.toFixed(2)} s`;
+        }
+
+        // Step Arrow Buttons (< and >)
+        function stepNum(id, delta) {
+            const el = document.getElementById(id);
+            const val = parseFloat(el.value) || 0;
+            const newVal = Math.round((val + delta) * 10) / 10;
+            el.value = newVal.toFixed(1);
+            if (id === 'num-pos') onInputPos(newVal);
+            if (id === 'num-vel') onInputVel(newVal);
+            if (id === 'num-acc') onInputAcc(newVal);
+        }
+
+        // Inputs for Position, Velocity, Acceleration
+        function onInputPos(val) {
+            const num = parseFloat(val);
+            if (!isNaN(num)) {
+                x0 = num;
+                curX = num;
+                curT = 0;
+                trajectory = [{ t: 0, x: curX, v: curV, a: curA }];
+                document.getElementById('slider-pos').value = Math.max(-50, Math.min(50, num));
+                if (autoFollow) cameraX = curX;
+                updateHUD();
+                redrawTrack();
+                redrawGraphs();
+            }
+        }
+
+        function onSliderPos(val) {
+            const num = parseFloat(val);
+            document.getElementById('num-pos').value = num.toFixed(1);
+            onInputPos(num);
+        }
+
+        function onInputVel(val) {
+            const num = parseFloat(val);
+            if (!isNaN(num)) {
+                v0 = num;
+                curV = num;
+                curT = 0;
+                trajectory = [{ t: 0, x: curX, v: curV, a: curA }];
+                document.getElementById('slider-vel').value = Math.max(-25, Math.min(25, num));
+                updateHUD();
+                redrawTrack();
+                redrawGraphs();
+            }
+        }
+
+        function onSliderVel(val) {
+            const num = parseFloat(val);
+            document.getElementById('num-vel').value = num.toFixed(1);
+            onInputVel(num);
+        }
+
+        function onInputAcc(val) {
+            const num = parseFloat(val);
+            if (!isNaN(num)) {
+                aConst = num;
+                curA = num;
+                curT = 0;
+                trajectory = [{ t: 0, x: curX, v: curV, a: curA }];
+                document.getElementById('slider-acc').value = Math.max(-10, Math.min(10, num));
+                updateHUD();
+                redrawTrack();
+                redrawGraphs();
+            }
+        }
+
+        function onSliderAcc(val) {
+            const num = parseFloat(val);
+            document.getElementById('num-acc').value = num.toFixed(1);
+            onInputAcc(num);
+        }
+
+        function applyPreset(preset) {
+            resetAll();
+            if (preset === 'uniform') {
+                // Uniform motion: v = 4.0 m/s, a = 0
+                x0 = -10.0;
+                v0 = 4.0;
+                aConst = 0.0;
+            } else if (preset === 'accel_from_rest') {
+                // Accelerating from rest: v0 = 0, a = 2.0 m/s^2
+                x0 = -15.0;
+                v0 = 0.0;
+                aConst = 2.0;
+            } else if (preset === 'decel_to_stop') {
+                // Braking to stop: v0 = 10.0 m/s, a = -2.0 m/s^2
+                x0 = -20.0;
+                v0 = 10.0;
+                aConst = -2.0;
+            } else if (preset === 'reverse_direction') {
+                // Turn around: x0 = -15, v0 = +8, a = -1.5
+                x0 = -15.0;
+                v0 = 8.0;
+                aConst = -1.5;
+            } else if (preset === 'long_run') {
+                // Long run: v0 = +2.0, a = +1.0
+                x0 = 0.0;
+                v0 = 2.0;
+                aConst = 1.0;
+            }
+
+            document.getElementById('num-pos').value = x0.toFixed(1);
+            document.getElementById('slider-pos').value = Math.max(-50, Math.min(50, x0));
+            document.getElementById('num-vel').value = v0.toFixed(1);
+            document.getElementById('slider-vel').value = Math.max(-25, Math.min(25, v0));
+            document.getElementById('num-acc').value = aConst.toFixed(1);
+            document.getElementById('slider-acc').value = Math.max(-10, Math.min(10, aConst));
+
+            curX = x0;
+            curV = v0;
+            curA = aConst;
+            cameraX = x0;
+            autoFollow = true;
+            updateFollowBtn();
+            trajectory = [{ t: 0, x: curX, v: curV, a: curA }];
+            updateHUD();
+            redrawTrack();
+            redrawGraphs();
+        }
+
+        // Start initialization on DOM load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
