@@ -416,10 +416,11 @@ function getLabInfo(simId) {
     return found || ALL_LABORATORIES[13]; // default motion-1d
 }
 
+const LIVE_LAB_ASSET_VER = '2.1';
+
 function getLabUrl(simId, role = 'student') {
     const info = getLabInfo(simId);
-    const buster = Date.now();
-    return `/simulators/phet/${info.file}?v=${buster}&live=1&role=${role}`;
+    return `/simulators/phet/${info.file}?v=${LIVE_LAB_ASSET_VER}&role=${role}`;
 }
 
 
@@ -995,13 +996,13 @@ class LiveLabComponent {
                         <!-- Student Meet Stage -->
                         <div id="student-stream-viewport" class="relative w-full h-full flex items-center justify-center bg-slate-950">
                             
-                            <!-- Live WebRTC Video Element (High-Resolution Google Meet Feed) -->
+                            <!-- Live WebRTC Video Element (Google Meet Feed) -->
                             <video id="live-meet-video" autoplay playsinline muted 
                                 class="${this.isStreaming && this.activeViewMode === 'stream' ? 'block' : 'hidden'} w-full h-full object-contain bg-slate-950"></video>
                             
-                            <!-- Live High-Speed Canvas Mirror (Direct real-time simulation broadcast) -->
+                            <!-- Live Canvas Mirror (Direct real-time simulation broadcast) -->
                             <canvas id="live-auto-mirror-canvas" 
-                                class="w-full h-full object-contain bg-white rounded-2xl shadow-inner"></canvas>
+                                class="${this.isStreaming && this.activeViewMode === 'stream' ? 'block' : 'hidden'} w-full h-full object-contain bg-slate-900 rounded-2xl shadow-inner"></canvas>
                             
                             <!-- Live Fallback Canvas (Instant frame snapshot receiver) -->
                             <canvas id="live-fallback-canvas" 
@@ -1277,9 +1278,9 @@ class LiveLabComponent {
             const stream = await navigator.mediaDevices.getDisplayMedia({
                 video: {
                     displaySurface: "browser",
-                    frameRate: { ideal: 30, max: 60 },
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 },
+                    frameRate: { ideal: 30, max: 30 },
+                    width: { ideal: 1280, max: 1280 },
+                    height: { ideal: 720, max: 720 },
                     cursor: "always"
                 },
                 audio: false
@@ -1515,24 +1516,25 @@ class LiveLabComponent {
 
     showVideoScreen(hasStream) {
         const video = document.getElementById('live-meet-video');
+        const canvas = document.getElementById('live-auto-mirror-canvas');
         const lounge = document.getElementById('stream-waiting-lounge');
         const badge = document.getElementById('student-stream-badge');
         const badgeText = document.getElementById('student-stream-badge-text');
 
-        if (lounge) {
-            if (hasStream && this.activeViewMode === 'stream') {
-                lounge.classList.add('hidden');
-            } else if (!hasStream && this.activeViewMode === 'stream') {
-                lounge.classList.remove('hidden');
+        if (this.activeViewMode === 'stream') {
+            if (hasStream) {
+                if (lounge) lounge.classList.add('hidden');
+                if (video && video.srcObject) {
+                    video.classList.remove('hidden');
+                    if (canvas) canvas.classList.add('hidden');
+                } else if (canvas) {
+                    canvas.classList.remove('hidden');
+                    if (video) video.classList.add('hidden');
+                }
+            } else {
+                if (lounge) lounge.classList.remove('hidden');
                 if (video) video.classList.add('hidden');
-                const canvas = document.getElementById('live-auto-mirror-canvas') || document.getElementById('live-fallback-canvas');
                 if (canvas) canvas.classList.add('hidden');
-            }
-        }
-
-        if (video) {
-            if (hasStream && video.srcObject && this.activeViewMode === 'stream') {
-                video.classList.remove('hidden');
             }
         }
 
@@ -1547,7 +1549,7 @@ class LiveLabComponent {
         }
     }
 
-    // Ultra-reliable Canvas Snapshot Fallback (Adaptive for 150+ concurrent viewers)
+    // Ultra-reliable Canvas Snapshot Fallback (Medium Quality 480p, Ultra-Fast Delivery)
     startFallbackFrameCapture() {
         if (this.fallbackTimer) clearInterval(this.fallbackTimer);
         const hiddenVideo = document.createElement('video');
@@ -1556,8 +1558,8 @@ class LiveLabComponent {
         hiddenVideo.play().catch(() => {});
 
         const canvas = document.createElement('canvas');
-        canvas.width = 960;
-        canvas.height = 540;
+        canvas.width = 854;
+        canvas.height = 480;
         const ctx = canvas.getContext('2d');
 
         this.fallbackTimer = setInterval(() => {
@@ -1567,8 +1569,8 @@ class LiveLabComponent {
             }
             try {
                 if (hiddenVideo.readyState >= 2) {
-                    ctx.drawImage(hiddenVideo, 0, 0, 960, 540);
-                    const frame = canvas.toDataURL('image/jpeg', 0.50);
+                    ctx.drawImage(hiddenVideo, 0, 0, 854, 480);
+                    const frame = canvas.toDataURL('image/jpeg', 0.45);
                     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
                         this.socket.send(JSON.stringify({
                             type: "stream_frame",
@@ -1577,7 +1579,7 @@ class LiveLabComponent {
                     }
                 }
             } catch (e) {}
-        }, 260); // ~3.8 FPS (optimized lightweight bandwidth for 150+ concurrent viewers)
+        }, 250); // 4.0 FPS (Instant lightweight delivery under all network conditions)
     }
 
     renderFallbackFrame(frameData) {

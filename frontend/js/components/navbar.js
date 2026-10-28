@@ -19,9 +19,10 @@ function toggleMobileDrawer(forceState) {
 }
 
 function renderNavbar() {
-    const user = window.store.currentUser;
-    const isDark = window.store.theme === 'dark';
-    const currentView = window.store.currentView?.name || 'dashboard';
+    const user = window.store ? window.store.currentUser : null;
+    const isDark = window.store ? window.store.theme === 'dark' : false;
+    const rawView = window.store ? window.store.currentView : 'dashboard';
+    const currentView = typeof rawView === 'string' ? rawView : (rawView?.name || 'dashboard');
 
     const isTabActive = (tabName) => currentView === tabName;
 
