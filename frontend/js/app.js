@@ -220,18 +220,18 @@ async function renderLandingView(container) {
 
     container.innerHTML = `
     <!-- Institutional Accreditation Top Bar -->
-    <div class="border-b border-slate-200 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/60 backdrop-blur py-2.5 px-4 sm:px-8">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div class="flex items-center gap-2.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="font-bold text-slate-800 dark:text-slate-200">دبیرستان استعدادهای درخشان شهید بهشتی دو • دوره اول</span>
-                <span class="hidden sm:inline text-slate-400 dark:text-slate-600">|</span>
-                <span class="hidden sm:inline text-[11px] text-sky-600 dark:text-sky-400 font-mono tracking-wide">SAMPAD DEPARTMENT OF EXPERIMENTAL PHYSICS</span>
+    <div class="w-full border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur py-2 px-3 sm:px-6 lg:px-8 overflow-hidden">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-2 max-w-full truncate">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                <span class="font-bold text-slate-800 dark:text-slate-200 truncate text-[11px] sm:text-xs">دبیرستان استعدادهای درخشان شهید بهشتی دو • دوره اول</span>
+                <span class="hidden lg:inline text-slate-300 dark:text-slate-700">|</span>
+                <span class="hidden lg:inline text-[10px] text-sky-600 dark:text-sky-400 font-mono tracking-wider shrink-0">SAMPAD DEPARTMENT OF EXPERIMENTAL PHYSICS</span>
             </div>
-            <div class="flex items-center gap-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
-                <span>سامانه مصوب آموزشی سمپاد</span>
-                <span>•</span>
-                <span class="text-emerald-600 dark:text-emerald-400 font-bold">ورژن سراسری ۲.۱</span>
+            <div class="flex items-center gap-2 font-mono text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
+                <span class="hidden sm:inline">سامانه مصوب آموزشی سمپاد</span>
+                <span class="hidden sm:inline">•</span>
+                <span class="text-emerald-700 dark:text-emerald-300 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">ورژن سراسری ۲.۲</span>
             </div>
         </div>
     </div>

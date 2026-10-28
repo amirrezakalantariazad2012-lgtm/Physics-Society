@@ -37,11 +37,17 @@ body, button, input, textarea, select {
     font-family: var(--font-fa);
 }
 
+html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
 body {
     direction: rtl;
     text-align: right;
     -webkit-font-smoothing: antialiased;
     letter-spacing: 0;
+    width: 100%;
 }
 
 /* Persian numerals only where explicitly specified */
