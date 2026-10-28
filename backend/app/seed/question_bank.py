@@ -8,21 +8,26 @@ from app.seed.chapters_g8 import get_grade_8_chapters, get_grade_8_core_physics
 from app.seed.chapters_g9 import get_grade_9_chapters, get_grade_9_core_physics
 from app.schemas.ai import ChapterContentValidationReport
 
+def get_all_physics_chapters() -> List[Dict[str, Any]]:
+    from app.seed.chapters_g9_part1 import get_grade_9_part1_chapters
+    g9_ch10 = [c for c in get_grade_9_part1_chapters() if c["ch_num"] == 10]
+    return get_grade_7_core_physics() + get_grade_8_core_physics() + get_grade_9_core_physics() + g9_ch10
+
 def get_all_12_physics_chapters() -> List[Dict[str, Any]]:
-    return get_grade_7_core_physics() + get_grade_8_core_physics() + get_grade_9_core_physics()
+    return get_all_physics_chapters()
 
 def get_all_45_curriculum_chapters() -> List[Dict[str, Any]]:
-    return get_grade_7_chapters() + get_grade_8_chapters() + get_grade_9_chapters()
+    return get_all_physics_chapters()
 
 def seed_complete_curriculum_and_questions(db: Session) -> Dict[str, int]:
     """
-    Seeds all 45 science chapters across Grades 7, 8, 9 (15 chapters per grade) with:
+    Seeds pure physics chapters across Grades 7, 8, 9 with:
     - Interactive Duolingo-style lessons and multi-type exercises
     - At least 20 distinct MCQs and at least 10 distinct Written questions for core physics chapters
-    - Granular textbook-aligned lessons and questions for all chapters
+    - Granular textbook-aligned lessons and questions
     - Default examinations for each chapter
     """
-    all_ch_data = get_all_45_curriculum_chapters()
+    all_ch_data = get_all_physics_chapters()
     stats = {"chapters": 0, "lessons": 0, "exercises": 0, "mcqs": 0, "written": 0, "exams": 0}
 
     for ch_spec in all_ch_data:

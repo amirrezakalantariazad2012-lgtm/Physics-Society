@@ -25,19 +25,24 @@ def test_chapter_question_minimums_enforced(db_session):
         assert r.is_fully_compliant is True
         assert len(r.missing_categories) == 0
 
-def test_all_45_chapters_question_minimums_enforced(db_session):
+def test_only_physics_chapters_exist_and_enforced(db_session):
     """
-    MASTER REQUIREMENT:
-    Validates that ALL 45 chapters across Grades 7, 8, and 9 strictly satisfy:
-    - >= 20 valid MCQs per chapter
-    - >= 10 valid Written questions per chapter
+    PURGE VERIFICATION:
+    Validates that only pure physics chapters exist across Grades 7, 8, and 9,
+    and all 32 non-physics chapters have been cleanly removed.
     """
     reports = validate_all_chapters_content(db_session, physics_core_only=False)
-    assert len(reports) == 45, "Must contain all 45 chapters across Grades 7, 8, 9"
+    assert len(reports) == 13, "Must contain exactly the 13 pure physics and space chapters"
+    physics_map = {
+        7: {2, 8, 9, 10},
+        8: {9, 10, 14, 15},
+        9: {4, 5, 8, 9, 10}
+    }
     for r in reports:
-        assert r.actual_valid_mcq_count >= 20, f"Chapter {r.chapter_title_fa} failed MCQ requirement"
-        assert r.actual_valid_written_count >= 10, f"Chapter {r.chapter_title_fa} failed Written requirement"
-        assert r.is_fully_compliant is True
+        assert r.grade_number in physics_map
+        assert r.chapter_number in physics_map[r.grade_number], (
+            f"Non-physics chapter found: Grade {r.grade_number} Ch {r.chapter_number}"
+        )
 
 def test_admin_validation_report_endpoint(client):
     # Login as admin

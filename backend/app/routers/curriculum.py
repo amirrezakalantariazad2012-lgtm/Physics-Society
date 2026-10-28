@@ -23,6 +23,13 @@ from app.config import settings
 
 router = APIRouter(prefix="/curriculum", tags=["Curriculum"])
 
+# Pure Iranian junior high physics chapters whitelist
+PHYSICS_CHAPTERS_BY_GRADE = {
+    1: {2, 8, 9, 10},        # Grade 7: اندازه گیری، انرژی، منابع انرژی، گرما
+    2: {9, 10, 14, 15},      # Grade 8: الکتریسیته، مغناطیس، نور، شکست نور
+    3: {4, 5, 8, 9, 10}      # Grade 9: حرکت، نیرو، فشار، ماشین‌ها، نگاهی به فضا
+}
+
 @router.get("/grades", response_model=List[GradeResponse])
 def get_grades(db: Session = Depends(get_db)):
     """Lists all supported grades (7, 8, 9)"""
@@ -89,10 +96,14 @@ def get_chapters_by_book(
                 detail="دسترسی غیرمجاز: این کتاب متعلق به پایه تحصیلی شما نیست."
             )
 
-    chapters = db.query(Chapter).filter(
+    allowed_nums = PHYSICS_CHAPTERS_BY_GRADE.get(book.grade_id)
+    ch_query = db.query(Chapter).filter(
         Chapter.book_id == book_id,
         Chapter.is_published == True
-    ).order_by(Chapter.order_index).all()
+    )
+    if allowed_nums:
+        ch_query = ch_query.filter(Chapter.chapter_number.in_(allowed_nums))
+    chapters = ch_query.order_by(Chapter.order_index).all()
 
     completed_chapter_ids = set()
     if current_user:
@@ -146,6 +157,10 @@ def get_chapter_detail(
     ch = db.query(Chapter).filter(Chapter.id == chapter_id).first()
     if not ch:
         raise HTTPException(status_code=404, detail="فصل مورد نظر یافت نشد.")
+
+    if ch.book and ch.book.grade_id in PHYSICS_CHAPTERS_BY_GRADE:
+        if ch.chapter_number not in PHYSICS_CHAPTERS_BY_GRADE[ch.book.grade_id]:
+            raise HTTPException(status_code=404, detail="این سرفصل جزو مباحث فیزیک سامانه نمی‌باشد.")
 
     if current_user and current_user.role == "student" and current_user.profile and current_user.profile.grade_id:
         if ch.book and current_user.profile.grade_id != ch.book.grade_id:

@@ -15,19 +15,31 @@ from app.models.exam import (
     ExaminationAttempt, StudentAnswer, GradingReview
 )
 from app.models.competition import Competition, CompetitionSubmission
+from app.models.gamification import XPTransaction, StudentBadge, LearningStreak
 from app.models.system import AIProviderConfig, AIUsageRecord, AuditLog, ApplicationSetting
 from app.schemas.ai import (
     ChapterContentValidationReport, AIProviderConfigUpdate, AIConnectionTestResult
 )
 from app.schemas.curriculum import ChapterCreateRequest, LessonCreateRequest
 from app.schemas.exam import AdminGradeOverrideRequest, QuestionCreateRequest, QuestionReviewRequest
-from app.services.auth import get_current_admin
+from app.schemas.user import (
+    AdminStudentCreateRequest, AdminStudentUpdateRequest,
+    AdminPasswordResetRequest, AdminXPAdjustRequest
+)
+from app.services.auth import get_current_admin, hash_password
 from app.services.ai_service import AIService, validate_base_url_ssrf
 from app.services.pdf_ingestion import process_textbook_file
 from app.services.exam_service import override_student_answer_grade
 from app.services.audit_service import log_audit_event
 from app.seed.question_bank import validate_all_chapters_content
 from app.config import settings
+
+# Pure Iranian junior high physics chapters whitelist
+PHYSICS_CHAPTERS_BY_GRADE = {
+    1: {2, 8, 9, 10},        # Grade 7: اندازه گیری، انرژی، منابع انرژی، گرما
+    2: {9, 10, 14, 15},      # Grade 8: الکتریسیته، مغناطیس، نور، شکست نور
+    3: {4, 5, 8, 9, 10}      # Grade 9: حرکت، نیرو، فشار، ماشین‌ها، نگاهی به فضا
+}
 
 router = APIRouter(prefix="/admin", tags=["Administration"], dependencies=[Depends(get_current_admin)])
 
@@ -461,37 +473,411 @@ def test_ai_connection(db: Session = Depends(get_db)):
     ai_svc = AIService(db=db)
     return ai_svc.test_connection()
 
+# ========================================================
+# COMPREHENSIVE STUDENT MANAGEMENT SUITE (PENTAGON-GRADE)
+# ========================================================
+
 @router.get("/students")
 def list_students(
     grade_id: Optional[int] = None,
     search: Optional[str] = None,
+    is_active: Optional[bool] = None,
     db: Session = Depends(get_db)
 ):
-    """Lists students with progress, XP, and status"""
+    """Lists students with progress, XP, streak, attempts count, and filter options"""
     query = db.query(User).filter(User.role == "student")
-    if search:
-        query = query.filter((User.username.ilike(f"%{search}%")) | (User.full_name.ilike(f"%{search}%")))
+    if is_active is not None:
+        query = query.filter(User.is_active == is_active)
 
-    users = query.all()
+    if search:
+        s_term = f"%{search.strip()}%"
+        query = query.outerjoin(StudentProfile, User.id == StudentProfile.user_id).filter(
+            (User.username.ilike(s_term)) |
+            (User.full_name.ilike(s_term)) |
+            (User.email.ilike(s_term)) |
+            (StudentProfile.student_number.ilike(s_term))
+        )
+
+    users = query.order_by(User.id.desc()).all()
     results = []
     for u in users:
         prof = u.profile
         if grade_id and (not prof or prof.grade_id != grade_id):
             continue
 
+        attempts_cnt = db.query(ExaminationAttempt).filter(ExaminationAttempt.user_id == u.id).count()
+        passed_cnt = db.query(ExaminationAttempt).filter(
+            ExaminationAttempt.user_id == u.id,
+            ExaminationAttempt.is_passed == True
+        ).count()
+
         results.append({
             "id": u.id,
             "username": u.username,
             "full_name": u.full_name,
             "display_name": u.display_name,
+            "email": u.email,
             "is_active": u.is_active,
             "created_at": u.created_at,
+            "grade_id": prof.grade_id if prof else None,
             "grade_title_fa": prof.grade.title_fa if (prof and prof.grade) else "نامشخص",
+            "student_number": prof.student_number if prof else None,
             "total_xp": prof.total_xp if prof else 0,
             "level": prof.current_level if prof else 1,
-            "streak": prof.current_streak if prof else 0
+            "streak": prof.current_streak if prof else 0,
+            "max_streak": prof.max_streak if prof else 0,
+            "attempts_count": attempts_cnt,
+            "passed_count": passed_cnt
         })
     return results
+
+
+@router.post("/students/create")
+def create_student(
+    data: AdminStudentCreateRequest,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Admin-initiated direct student registration with grade, credentials, and initial XP"""
+    username = data.username.strip().lower()
+    if len(username) < 3:
+        raise HTTPException(status_code=400, detail="نام کاربری باید حداقل ۳ کاراکتر باشد.")
+
+    existing_user = db.query(User).filter(User.username == username).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="این نام کاربری قبلاً در سامانه ثبت شده است.")
+
+    if data.email and data.email.strip():
+        email = data.email.strip().lower()
+        if db.query(User).filter(User.email == email).first():
+            raise HTTPException(status_code=400, detail="این ایمیل قبلاً در سامانه ثبت شده است.")
+    else:
+        email = None
+
+    grade = db.query(Grade).filter(Grade.id == data.grade_id).first()
+    if not grade:
+        raise HTTPException(status_code=400, detail="پایه تحصیلی معتبر نیست.")
+
+    hashed_pw = hash_password(data.password.strip())
+    initial_xp = max(0, data.initial_xp or 0)
+    level = max(1, 1 + (initial_xp // 100))
+
+    new_user = User(
+        username=username,
+        email=email,
+        hashed_password=hashed_pw,
+        role="student",
+        full_name=data.full_name.strip(),
+        display_name=data.full_name.strip(),
+        is_active=True,
+        must_change_password=False
+    )
+    db.add(new_user)
+    db.flush()
+
+    profile = StudentProfile(
+        user_id=new_user.id,
+        grade_id=grade.id,
+        student_number=data.student_number.strip() if data.student_number else None,
+        total_xp=initial_xp,
+        current_level=level,
+        current_streak=0,
+        max_streak=0
+    )
+    db.add(profile)
+
+    if initial_xp > 0:
+        tx = XPTransaction(
+            user_id=new_user.id,
+            amount=initial_xp,
+            activity_type="admin_initial",
+            reference_id=f"initial_{new_user.id}",
+            description_fa="امتیاز اولیه ثبت‌نام توسط مدیر سامانه"
+        )
+        db.add(tx)
+
+    db.commit()
+    db.refresh(new_user)
+
+    log_audit_event(
+        db, action="create_student", target_entity="users",
+        target_id=str(new_user.id), user_id=current_admin.id,
+        details={"username": new_user.username, "full_name": new_user.full_name, "grade_id": grade.id}
+    )
+
+    return {
+        "success": True,
+        "student_id": new_user.id,
+        "message_fa": f"دانش‌آموز «{new_user.full_name}» با موفقیت در سامانه ثبت گردید."
+    }
+
+
+@router.get("/students/{user_id}/details")
+def get_student_details(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    """Retrieves 360-degree student dossier: profile, exam history, badges, and XP logs"""
+    user = db.query(User).filter(User.id == user_id, User.role == "student").first()
+    if not user:
+        raise HTTPException(status_code=404, detail="دانش‌آموز یافت نشد.")
+
+    prof = user.profile
+    # Exam attempts
+    attempts = db.query(ExaminationAttempt).filter(
+        ExaminationAttempt.user_id == user.id
+    ).order_by(desc(ExaminationAttempt.started_at)).all()
+
+    attempts_data = []
+    for a in attempts:
+        ex = a.examination
+        attempts_data.append({
+            "id": a.id,
+            "exam_id": a.exam_id,
+            "exam_title": ex.title_fa if ex else "آزمون نامشخص",
+            "chapter_title": ex.chapter.title_fa if (ex and ex.chapter) else None,
+            "started_at": a.started_at,
+            "submitted_at": a.submitted_at,
+            "score": a.final_score,
+            "total_points": a.total_possible_points,
+            "percentage": a.percentage,
+            "is_passed": a.is_passed,
+            "status": a.status
+        })
+
+    # Badges
+    badges = db.query(StudentBadge).filter(StudentBadge.user_id == user.id).all()
+    badges_data = [
+        {
+            "id": b.id,
+            "badge_id": b.badge_id,
+            "title_fa": b.badge.title_fa if b.badge else "",
+            "icon": b.badge.icon if b.badge else "award",
+            "awarded_at": b.awarded_at
+        }
+        for b in badges
+    ]
+
+    # XP transactions
+    xp_txs = db.query(XPTransaction).filter(
+        XPTransaction.user_id == user.id
+    ).order_by(desc(XPTransaction.created_at)).limit(20).all()
+
+    xp_data = [
+        {
+            "id": t.id,
+            "amount": t.amount,
+            "activity_type": t.activity_type,
+            "description_fa": t.description_fa,
+            "created_at": t.created_at
+        }
+        for t in xp_txs
+    ]
+
+    return {
+        "id": user.id,
+        "username": user.username,
+        "full_name": user.full_name,
+        "display_name": user.display_name,
+        "email": user.email,
+        "is_active": user.is_active,
+        "created_at": user.created_at,
+        "profile": {
+            "grade_id": prof.grade_id if prof else None,
+            "grade_title_fa": prof.grade.title_fa if (prof and prof.grade) else "نامشخص",
+            "student_number": prof.student_number if prof else None,
+            "total_xp": prof.total_xp if prof else 0,
+            "current_level": prof.current_level if prof else 1,
+            "current_streak": prof.current_streak if prof else 0,
+            "max_streak": prof.max_streak if prof else 0,
+            "bio": prof.bio if prof else None,
+            "avatar_url": prof.avatar_url if prof else None
+        },
+        "exam_attempts": attempts_data,
+        "badges": badges_data,
+        "xp_history": xp_data
+    }
+
+
+@router.put("/students/{user_id}")
+def update_student(
+    user_id: int,
+    data: AdminStudentUpdateRequest,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Admin full update of student profile, grade scoping, XP, level, streak, and status"""
+    user = db.query(User).filter(User.id == user_id, User.role == "student").first()
+    if not user:
+        raise HTTPException(status_code=404, detail="دانش‌آموز یافت نشد.")
+
+    prof = user.profile
+    if not prof:
+        prof = StudentProfile(user_id=user.id, grade_id=1, total_xp=0, current_level=1)
+        db.add(prof)
+
+    if data.username and data.username.strip().lower() != user.username:
+        new_u = data.username.strip().lower()
+        if db.query(User).filter(User.username == new_u, User.id != user.id).first():
+            raise HTTPException(status_code=400, detail="این نام کاربری در سامانه توسط کاربر دیگری رزرو شده است.")
+        user.username = new_u
+
+    if data.email is not None:
+        if data.email.strip():
+            new_em = data.email.strip().lower()
+            if db.query(User).filter(User.email == new_em, User.id != user.id).first():
+                raise HTTPException(status_code=400, detail="این ایمیل توسط کاربر دیگری ثبت شده است.")
+            user.email = new_em
+        else:
+            user.email = None
+
+    if data.full_name and data.full_name.strip():
+        user.full_name = data.full_name.strip()
+        user.display_name = data.full_name.strip()
+
+    if data.is_active is not None:
+        user.is_active = data.is_active
+
+    if data.grade_id is not None:
+        grade = db.query(Grade).filter(Grade.id == data.grade_id).first()
+        if not grade:
+            raise HTTPException(status_code=400, detail="پایه تحصیلی معتبر نیست.")
+        prof.grade_id = grade.id
+
+    if data.student_number is not None:
+        prof.student_number = data.student_number.strip() if data.student_number else None
+
+    if data.total_xp is not None:
+        prof.total_xp = max(0, data.total_xp)
+
+    if data.current_level is not None:
+        prof.current_level = max(1, data.current_level)
+
+    if data.current_streak is not None:
+        prof.current_streak = max(0, data.current_streak)
+        prof.max_streak = max(prof.max_streak, prof.current_streak)
+
+    db.commit()
+
+    log_audit_event(
+        db, action="update_student", target_entity="users",
+        target_id=str(user.id), user_id=current_admin.id,
+        details={"username": user.username, "full_name": user.full_name}
+    )
+
+    return {
+        "success": True,
+        "message_fa": f"مشخصات دانش‌آموز «{user.full_name}» با موفقیت به‌روزرسانی شد."
+    }
+
+
+@router.post("/students/{user_id}/reset-password")
+def reset_student_password(
+    user_id: int,
+    data: AdminPasswordResetRequest,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Direct administrator override/reset of student password without requiring old password"""
+    user = db.query(User).filter(User.id == user_id, User.role == "student").first()
+    if not user:
+        raise HTTPException(status_code=404, detail="دانش‌آموز یافت نشد.")
+
+    if len(data.new_password.strip()) < 4:
+        raise HTTPException(status_code=400, detail="رمز عبور باید حداقل ۴ کاراکتر باشد.")
+
+    user.hashed_password = hash_password(data.new_password.strip())
+    user.must_change_password = False
+    db.commit()
+
+    log_audit_event(
+        db, action="reset_student_password", target_entity="users",
+        target_id=str(user.id), user_id=current_admin.id,
+        details={"username": user.username}
+    )
+
+    return {
+        "success": True,
+        "message_fa": f"رمز عبور حساب کاربری «{user.username}» با موفقیت تغییر یافت."
+    }
+
+
+@router.post("/students/{user_id}/adjust-xp")
+def adjust_student_xp(
+    user_id: int,
+    data: AdminXPAdjustRequest,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Awards or deducts student XP with level recalculation and audit logging"""
+    user = db.query(User).filter(User.id == user_id, User.role == "student").first()
+    if not user:
+        raise HTTPException(status_code=404, detail="دانش‌آموز یافت نشد.")
+
+    prof = user.profile
+    if not prof:
+        prof = StudentProfile(user_id=user.id, grade_id=1, total_xp=0, current_level=1)
+        db.add(prof)
+
+    old_xp = prof.total_xp
+    new_xp = max(0, old_xp + data.amount)
+    prof.total_xp = new_xp
+    prof.current_level = max(1, 1 + (new_xp // 100))
+
+    tx = XPTransaction(
+        user_id=user.id,
+        amount=data.amount,
+        activity_type="admin_adjustment",
+        reference_id=f"admin_{user_id}_{uuid.uuid4().hex[:6]}",
+        description_fa=data.reason.strip() if data.reason else "تنظیم دستی امتیاز توسط مدیر سامانه"
+    )
+    db.add(tx)
+    db.commit()
+
+    log_audit_event(
+        db, action="adjust_student_xp", target_entity="users",
+        target_id=str(user.id), user_id=current_admin.id,
+        details={"old_xp": old_xp, "new_xp": new_xp, "amount": data.amount, "reason": data.reason}
+    )
+
+    return {
+        "success": True,
+        "total_xp": prof.total_xp,
+        "current_level": prof.current_level,
+        "message_fa": f"امتیاز با موفقیت اعمال شد. امتیاز جدید: {prof.total_xp} (سطح {prof.current_level})"
+    }
+
+
+@router.delete("/students/{user_id}/attempts/{attempt_id}")
+def reset_student_exam_attempt(
+    user_id: int,
+    attempt_id: int,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Resets/deletes a student examination attempt, enabling retake of the exam"""
+    attempt = db.query(ExaminationAttempt).filter(
+        ExaminationAttempt.id == attempt_id,
+        ExaminationAttempt.user_id == user_id
+    ).first()
+    if not attempt:
+        raise HTTPException(status_code=404, detail="تلاش آزمون مورد نظر یافت نشد.")
+
+    exam_title = attempt.examination.title_fa if attempt.examination else str(attempt.exam_id)
+    db.delete(attempt)
+    db.commit()
+
+    log_audit_event(
+        db, action="reset_student_exam_attempt", target_entity="examination_attempts",
+        target_id=str(attempt_id), user_id=current_admin.id,
+        details={"user_id": user_id, "exam_title": exam_title}
+    )
+
+    return {
+        "success": True,
+        "message_fa": f"تلاش مربوط به آزمون «{exam_title}» با موفقیت حذف گردید و امکان آزمون مجدد برای دانش‌آموز فعال شد."
+    }
+
 
 @router.post("/students/{user_id}/toggle-status")
 def toggle_student_status(
@@ -516,6 +902,38 @@ def toggle_student_status(
         "success": True,
         "is_active": user.is_active,
         "message_fa": f"وضعیت کاربر به {'فعال' if user.is_active else 'غیرفعال'} تغییر یافت."
+    }
+
+
+@router.delete("/students/{user_id}")
+def delete_student(
+    user_id: int,
+    current_admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """Permanently deletes student account and all related cascade records"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="کاربر یافت نشد.")
+
+    if user.role != "student":
+        raise HTTPException(status_code=400, detail="صرفاً حذف حساب‌های کاربری دانش‌آموزان از این پنل مجاز است.")
+
+    full_name = user.full_name
+    username = user.username
+
+    db.delete(user)
+    db.commit()
+
+    log_audit_event(
+        db, action="delete_student", target_entity="users",
+        target_id=str(user_id), user_id=current_admin.id,
+        details={"username": username, "full_name": full_name}
+    )
+
+    return {
+        "success": True,
+        "message_fa": f"حساب کاربری دانش‌آموز «{full_name}» ({username}) با موفقیت حذف گردید."
     }
 
 @router.post("/textbooks/upload")
@@ -631,6 +1049,8 @@ def get_curriculum_tree(db: Session = Depends(get_db)):
                 "chapters": []
             }
             for ch in b.chapters:
+                if b.grade_id in PHYSICS_CHAPTERS_BY_GRADE and ch.chapter_number not in PHYSICS_CHAPTERS_BY_GRADE[b.grade_id]:
+                    continue
                 ch_data = {
                     "id": ch.id,
                     "chapter_number": ch.chapter_number,

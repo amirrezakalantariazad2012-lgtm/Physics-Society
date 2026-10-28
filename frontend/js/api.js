@@ -310,8 +310,35 @@ function formatApiErrorMessage(data, defaultMsg = 'خطایی در ارتباط 
         const qs = new URLSearchParams(params).toString();
         return this.request(`/admin/students?${qs}`);
     }
+    createStudent(payload) {
+        return this.request('/admin/students/create', { method: 'POST', body: payload });
+    }
+    getStudentDetails(userId) {
+        return this.request(`/admin/students/${userId}/details`);
+    }
+    updateStudent(userId, payload) {
+        return this.request(`/admin/students/${userId}`, { method: 'PUT', body: payload });
+    }
+    resetStudentPassword(userId, newPassword) {
+        return this.request(`/admin/students/${userId}/reset-password`, {
+            method: 'POST',
+            body: { new_password: newPassword }
+        });
+    }
+    adjustStudentXP(userId, amount, reason) {
+        return this.request(`/admin/students/${userId}/adjust-xp`, {
+            method: 'POST',
+            body: { amount, reason }
+        });
+    }
+    resetStudentExamAttempt(userId, attemptId) {
+        return this.request(`/admin/students/${userId}/attempts/${attemptId}`, { method: 'DELETE' });
+    }
     toggleStudentStatus(userId) {
         return this.request(`/admin/students/${userId}/toggle-status`, { method: 'POST' });
+    }
+    deleteStudent(userId) {
+        return this.request(`/admin/students/${userId}`, { method: 'DELETE' });
     }
     uploadTextbook(formData) {
         return this.request('/admin/textbooks/upload', {

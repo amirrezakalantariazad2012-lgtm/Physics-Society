@@ -8,6 +8,9 @@ class AdminViews {
         this.curriculumGradeFilter = null;
         this.materialsGradeFilter = null;
         this.materialsCategoryFilter = null;
+        this.studentGradeFilter = null;
+        this.studentStatusFilter = null;
+        this.studentSearchQuery = '';
     }
 
     async render() {
@@ -442,53 +445,7 @@ class AdminViews {
         } else if (this.activeTab === 'materials') {
             await this.renderMaterialsManagement(target);
         } else if (this.activeTab === 'students') {
-            const rawStudents = await window.api.getStudents();
-            const students = Array.isArray(rawStudents) ? rawStudents : (rawStudents && Array.isArray(rawStudents.students) ? rawStudents.students : []);
-            target.innerHTML = `
-            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-                <h3 class="font-bold text-base text-slate-800 dark:text-white">مدیریت حساب‌های کاربری دانش‌آموزان</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right text-xs">
-                        <thead>
-                            <tr class="border-b border-slate-200 dark:border-slate-700 text-slate-400">
-                                <th class="p-3">نام و نام خانوادگی</th>
-                                <th class="p-3">نام کاربری</th>
-                                <th class="p-3">پایه تحصیلی</th>
-                                <th class="p-3">امتیاز (XP)</th>
-                                <th class="p-3">استمرار (روز)</th>
-                                <th class="p-3">وضعیت</th>
-                                <th class="p-3 text-center">عملیات</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            ${students.length === 0 ? `
-                            <tr>
-                                <td colspan="7" class="p-6 text-center text-slate-400">دانش‌آموزی ثبت نشده است.</td>
-                            </tr>
-                            ` : students.map(s => `
-                            <tr>
-                                <td class="p-3 font-bold text-slate-800 dark:text-white">${s.full_name || s.username}</td>
-                                <td class="p-3 font-mono text-slate-500">${s.username}</td>
-                                <td class="p-3">${s.grade_title_fa}</td>
-                                <td class="p-3 font-mono font-bold text-blue-600">${s.total_xp}</td>
-                                <td class="p-3 font-mono text-orange-500">${s.streak}</td>
-                                <td class="p-3">
-                                    <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${s.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-                                        ${s.is_active ? 'فعال' : 'مسدود'}
-                                    </span>
-                                </td>
-                                <td class="p-3 text-center">
-                                    <button onclick="window.currentAdminViews.toggleStudent(${s.id})" class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-rose-600">
-                                        ${s.is_active ? 'غیرفعال‌سازی' : 'فعال‌سازی'}
-                                    </button>
-                                </td>
-                            </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            `;
+            await this.renderStudentsManagement(target);
         }
 
         if (window.lucide) window.lucide.createIcons();
@@ -2173,14 +2130,742 @@ class AdminViews {
         }
     }
 
-    async deleteQuestion(id, prompt) {
-        if (!confirm(`آیا از حذف دائمی این سؤال اطمینان دارید؟\n"${prompt}..."`)) return;
+    // ========================================================
+    // COMPREHENSIVE STUDENT MANAGEMENT SUITE (PENTAGON-GRADE)
+    // ========================================================
+
+    async renderStudentsManagement(target) {
+        target.innerHTML = `<div class="text-center py-12"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div><p class="text-xs text-slate-500 mt-2 font-bold">در حال بارگذاری لیست کامل دانش‌آموزان...</p></div>`;
+
         try {
-            await window.api.deleteQuestion(id);
-            alert('سؤال با موفقیت از بانک سؤالات حذف شد.');
+            const params = {};
+            if (this.studentGradeFilter) params.grade_id = this.studentGradeFilter;
+            if (this.studentStatusFilter !== null && this.studentStatusFilter !== undefined) params.is_active = this.studentStatusFilter;
+            if (this.studentSearchQuery) params.search = this.studentSearchQuery;
+
+            const rawStudents = await window.api.getStudents(params).catch(() => []);
+            const students = Array.isArray(rawStudents) ? rawStudents : (rawStudents && Array.isArray(rawStudents.students) ? rawStudents.students : []);
+
+            const totalStudents = students.length;
+            const activeStudents = students.filter(s => s.is_active).length;
+            const totalXp = students.reduce((sum, s) => sum + (s.total_xp || 0), 0);
+            const avgXp = totalStudents > 0 ? Math.round(totalXp / totalStudents) : 0;
+            const maxStreak = students.reduce((max, s) => Math.max(max, s.streak || 0), 0);
+
+            target.innerHTML = `
+            <div class="space-y-6">
+                <!-- Header Card & Quick Actions -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+                        <div>
+                            <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-xs mb-1">
+                                <i data-lucide="shield" class="w-4 h-4"></i>
+                                <span>سامانه جامع نظارت و کنترل دانش‌آموزان (Full Student Control Suite)</span>
+                            </div>
+                            <h2 class="text-xl font-black text-slate-900 dark:text-white">مدیریت حساب‌ها، مشخصات، رمز عبور، امتیازها و آزمون‌ها</h2>
+                            <p class="text-xs text-slate-500 mt-1">کنترل کامل دانش‌آموز: ویرایش مشخصات، تغییر پایه، بازنشانی مستقیم کلمه عبور، اهدای امتیاز/تجربه، مشاهده کارنامه و ریست کردن تلاش آزمون</p>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button onclick="window.currentAdminViews.openCreateStudentModal()" class="btn-duo-green text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 hover:scale-105 transition-all">
+                                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                                <span>➕ ثبت‌نام دانش‌آموز جدید</span>
+                            </button>
+                            <button onclick="window.currentAdminViews.loadTabContent()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300" title="به‌روزرسانی جدول">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Mini KPI Stats -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                            <span class="text-[11px] text-slate-400 font-bold block">کل دانش‌آموزان</span>
+                            <span class="text-xl font-black text-slate-800 dark:text-white font-mono">${totalStudents} نفر</span>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
+                            <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold block">دانش‌آموزان فعال</span>
+                            <span class="text-xl font-black text-emerald-600 font-mono">${activeStudents} نفر</span>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30">
+                            <span class="text-[11px] text-blue-600 dark:text-blue-400 font-bold block">میانگین امتیاز (XP)</span>
+                            <span class="text-xl font-black text-blue-600 font-mono">${avgXp}</span>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30">
+                            <span class="text-[11px] text-orange-600 dark:text-orange-400 font-bold block">بیشترین استمرار</span>
+                            <span class="text-xl font-black text-orange-500 font-mono">🔥 ${maxStreak} روز</span>
+                        </div>
+                    </div>
+
+                    <!-- Filters & Search Toolbar -->
+                    <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-2">
+                        <!-- Search Box -->
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="w-4 h-4 absolute right-3.5 top-3 text-slate-400"></i>
+                            <input type="text" id="student-search-input" value="${this.studentSearchQuery || ''}"
+                                onkeydown="if(event.key==='Enter') window.currentAdminViews.searchStudents(this.value)"
+                                placeholder="جستجو بر اساس نام، نام خانوادگی، نام کاربری یا کد دانش‌آموزی... (کلید Enter)"
+                                class="w-full pr-10 pl-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold" />
+                        </div>
+
+                        <!-- Grade Filter Pills -->
+                        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold">
+                            <button onclick="window.currentAdminViews.filterStudentsByGrade(null)" class="px-3 py-1.5 rounded-xl transition-all ${this.studentGradeFilter === null ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                                همه پایه‌ها
+                            </button>
+                            <button onclick="window.currentAdminViews.filterStudentsByGrade(1)" class="px-3 py-1.5 rounded-xl transition-all ${this.studentGradeFilter === 1 ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                                پایه هفتم
+                            </button>
+                            <button onclick="window.currentAdminViews.filterStudentsByGrade(2)" class="px-3 py-1.5 rounded-xl transition-all ${this.studentGradeFilter === 2 ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                                پایه هشتم
+                            </button>
+                            <button onclick="window.currentAdminViews.filterStudentsByGrade(3)" class="px-3 py-1.5 rounded-xl transition-all ${this.studentGradeFilter === 3 ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                                پایه نهم
+                            </button>
+                        </div>
+
+                        <!-- Status Filter Pills -->
+                        <div class="flex items-center gap-1.5 text-xs font-bold">
+                            <button onclick="window.currentAdminViews.filterStudentsByStatus(null)" class="px-3 py-1.5 rounded-xl transition-all ${this.studentStatusFilter === null ? 'bg-slate-700 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}">
+                                همه
+                            </button>
+                            <button onclick="window.currentAdminViews.filterStudentsByStatus(true)" class="px-3 py-1.5 rounded-xl transition-all ${this.studentStatusFilter === true ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}">
+                                فعال
+                            </button>
+                            <button onclick="window.currentAdminViews.filterStudentsByStatus(false)" class="px-3 py-1.5 rounded-xl transition-all ${this.studentStatusFilter === false ? 'bg-rose-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}">
+                                مسدود
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students Table -->
+                <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right text-xs">
+                            <thead>
+                                <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50/75 dark:bg-slate-800/50 text-slate-400 font-extrabold">
+                                    <th class="p-3.5">دانش‌آموز</th>
+                                    <th class="p-3.5">پایه تحصیلی</th>
+                                    <th class="p-3.5">تجربه (XP) و سطح</th>
+                                    <th class="p-3.5">استمرار</th>
+                                    <th class="p-3.5">آزمون‌ها</th>
+                                    <th class="p-3.5">وضعیت</th>
+                                    <th class="p-3.5 text-center">جعبه ابزار کنترل کامل</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                ${students.length === 0 ? `
+                                <tr>
+                                    <td colspan="7" class="p-12 text-center text-slate-400">
+                                        <i data-lucide="user-x" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+                                        <p class="font-bold">دانش‌آموزی با این مشخصات یافت نشد.</p>
+                                    </td>
+                                </tr>
+                                ` : students.map(s => `
+                                <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                                    <td class="p-3.5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-sm">
+                                                ${(s.full_name || s.username).charAt(0)}
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                                    <span>${s.full_name || s.username}</span>
+                                                    ${s.student_number ? `<span class="text-[10px] bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500 font-mono">کد: ${s.student_number}</span>` : ''}
+                                                </div>
+                                                <div class="text-[11px] font-mono text-slate-400 flex items-center gap-2 mt-0.5">
+                                                    <span>@${s.username}</span>
+                                                    ${s.email ? `<span class="text-slate-400 text-[10px]">(${s.email})</span>` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-3.5">
+                                        <span class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-900/40">
+                                            ${s.grade_title_fa || 'نامشخص'}
+                                        </span>
+                                    </td>
+                                    <td class="p-3.5">
+                                        <div class="space-y-0.5">
+                                            <div class="font-mono font-extrabold text-blue-600 dark:text-blue-400">${(s.total_xp || 0).toLocaleString('fa-IR')} XP</div>
+                                            <div class="text-[10px] text-slate-400 font-bold">سطح ${s.level}</div>
+                                        </div>
+                                    </td>
+                                    <td class="p-3.5">
+                                        <span class="font-mono font-bold text-orange-500 flex items-center gap-1">
+                                            🔥 ${s.streak} روز
+                                        </span>
+                                    </td>
+                                    <td class="p-3.5">
+                                        <div class="font-mono text-[11px] text-slate-600 dark:text-slate-300">
+                                            <span class="font-bold text-emerald-600">${s.passed_count || 0}</span> / ${s.attempts_count || 0} تلاش
+                                        </div>
+                                    </td>
+                                    <td class="p-3.5">
+                                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${s.is_active ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400'}">
+                                            ${s.is_active ? 'فعال' : 'مسدود'}
+                                        </span>
+                                    </td>
+                                    <td class="p-3.5 text-center">
+                                        <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                                            <button onclick="window.currentAdminViews.openEditStudentModal(${s.id})" title="ویرایش کامل مشخصات و پایه"
+                                                class="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800 transition-all">
+                                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="window.currentAdminViews.openResetPasswordModal(${s.id}, '${s.username}')" title="بازنشانی مستقیم کلمه عبور"
+                                                class="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-slate-800 transition-all">
+                                                <i data-lucide="key" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="window.currentAdminViews.openAdjustXpModal(${s.id}, '${s.username}', ${s.total_xp})" title="اهدای امتیاز یا کسر XP"
+                                                class="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-slate-800 transition-all">
+                                                <i data-lucide="award" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="window.currentAdminViews.openStudentExamHistoryModal(${s.id}, '${(s.full_name || s.username).replace(/'/g, "\\'")}')" title="سوابق آزمون و ریست تلاش"
+                                                class="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-all">
+                                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="window.currentAdminViews.toggleStudent(${s.id})" title="${s.is_active ? 'مسدودسازی' : 'فعال‌سازی'}"
+                                                class="p-1.5 rounded-lg ${s.is_active ? 'text-slate-400 hover:text-rose-600 hover:bg-rose-50' : 'text-emerald-600 hover:bg-emerald-50'} transition-all">
+                                                <i data-lucide="${s.is_active ? 'user-x' : 'user-check'}" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="window.currentAdminViews.deleteStudentConfirm(${s.id}, '${s.username}', '${(s.full_name || s.username).replace(/'/g, "\\'")}')" title="حذف دائم حساب"
+                                                class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-slate-800 transition-all">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            `;
+        } catch (err) {
+            target.innerHTML = `<div class="p-6 rounded-2xl bg-rose-50 text-rose-700 text-xs font-bold">خطا در بارگذاری دانش‌آموزان: ${err.message}</div>`;
+        }
+
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    searchStudents(query) {
+        this.studentSearchQuery = query.trim();
+        this.loadTabContent();
+    }
+
+    filterStudentsByGrade(gradeId) {
+        this.studentGradeFilter = gradeId;
+        this.loadTabContent();
+    }
+
+    filterStudentsByStatus(status) {
+        this.studentStatusFilter = status;
+        this.loadTabContent();
+    }
+
+    openCreateStudentModal() {
+        const modal = document.createElement('div');
+        modal.id = 'admin-create-student-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto';
+        modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5 my-8 text-right">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-black text-sm">
+                    <i data-lucide="user-plus" class="w-5 h-5"></i>
+                    <span>ثبت‌نام مستقیم دانش‌آموز جدید</span>
+                </div>
+                <button type="button" onclick="document.getElementById('admin-create-student-modal').remove()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+            </div>
+
+            <form onsubmit="window.currentAdminViews.submitCreateStudent(event)" class="space-y-4 text-xs font-semibold">
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">نام و نام خانوادگی دانش‌آموز: <span class="text-rose-500">*</span></label>
+                    <input type="text" id="student-create-name" required placeholder="مثال: آرتین رضوانی"
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">نام کاربری یکتا: <span class="text-rose-500">*</span></label>
+                        <input type="text" id="student-create-username" required placeholder="مثال: artin_rezvani"
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">کلمه عبور ورود: <span class="text-rose-500">*</span></label>
+                        <input type="password" id="student-create-pass" required placeholder="حداقل ۴ کاراکتر" minlength="4"
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">پایه تحصیلی: <span class="text-rose-500">*</span></label>
+                        <select id="student-create-grade" required class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white">
+                            <option value="1">پایه هفتم (علوم تجربی - بخش فیزیک)</option>
+                            <option value="2">پایه هشتم (علوم تجربی - بخش فیزیک)</option>
+                            <option value="3" selected>پایه نهم (علوم تجربی - بخش فیزیک)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">کد دانش‌آموزی (اختیاری):</label>
+                        <input type="text" id="student-create-num" placeholder="مثال: 14030912"
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">ایمیل (اختیاری):</label>
+                        <input type="email" id="student-create-email" placeholder="student@example.com"
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono text-left" dir="ltr" />
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">امتیاز تجربه اولیه (XP):</label>
+                        <input type="number" id="student-create-xp" min="0" value="50"
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onclick="document.getElementById('admin-create-student-modal').remove()" class="px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        انصراف
+                    </button>
+                    <button type="submit" class="btn-duo-green text-white font-black px-6 py-2.5 rounded-xl shadow-md">
+                        ثبت و ایجاد حساب دانش‌آموز
+                    </button>
+                </div>
+            </form>
+        </div>
+        `;
+        document.body.appendChild(modal);
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    async submitCreateStudent(e) {
+        e.preventDefault();
+        const payload = {
+            full_name: document.getElementById('student-create-name').value.trim(),
+            username: document.getElementById('student-create-username').value.trim().toLowerCase(),
+            password: document.getElementById('student-create-pass').value.trim(),
+            grade_id: parseInt(document.getElementById('student-create-grade').value),
+            student_number: document.getElementById('student-create-num')?.value.trim() || null,
+            email: document.getElementById('student-create-email')?.value.trim() || null,
+            initial_xp: parseInt(document.getElementById('student-create-xp')?.value || '0')
+        };
+
+        try {
+            const res = await window.api.createStudent(payload);
+            alert(res.message_fa || 'دانش‌آموز با موفقیت ایجاد شد.');
+            const m = document.getElementById('admin-create-student-modal');
+            if (m) m.remove();
             this.loadTabContent();
         } catch (err) {
-            alert('خطا در حذف سؤال: ' + err.message);
+            alert('خطا در ثبت دانش‌آموز: ' + err.message);
+        }
+    }
+
+    async openEditStudentModal(userId) {
+        try {
+            const data = await window.api.getStudentDetails(userId);
+            const prof = data.profile || {};
+
+            const modal = document.createElement('div');
+            modal.id = 'admin-edit-student-modal';
+            modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto';
+            modal.innerHTML = `
+            <div class="bg-white dark:bg-slate-900 max-w-lg w-full rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5 my-8 text-right">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-black text-sm">
+                        <i data-lucide="edit-3" class="w-5 h-5"></i>
+                        <span>ویرایش مشخصات کامل دانش‌آموز (@${data.username})</span>
+                    </div>
+                    <button type="button" onclick="document.getElementById('admin-edit-student-modal').remove()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+                </div>
+
+                <form onsubmit="window.currentAdminViews.submitUpdateStudent(event, ${data.id})" class="space-y-4 text-xs font-semibold">
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 mb-1">نام و نام خانوادگی:</label>
+                        <input type="text" id="student-edit-name" required value="${data.full_name || ''}"
+                            class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white" />
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-slate-700 dark:text-slate-300 mb-1">نام کاربری:</label>
+                            <input type="text" id="student-edit-username" required value="${data.username || ''}"
+                                class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 dark:text-slate-300 mb-1">پایه تحصیلی:</label>
+                            <select id="student-edit-grade" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white">
+                                <option value="1" ${prof.grade_id === 1 ? 'selected' : ''}>پایه هفتم</option>
+                                <option value="2" ${prof.grade_id === 2 ? 'selected' : ''}>پایه هشتم</option>
+                                <option value="3" ${prof.grade_id === 3 ? 'selected' : ''}>پایه نهم</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-slate-700 dark:text-slate-300 mb-1">ایمیل:</label>
+                            <input type="email" id="student-edit-email" value="${data.email || ''}" placeholder="ایمیل دانش‌آموز"
+                                class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono text-left" dir="ltr" />
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 dark:text-slate-300 mb-1">کد دانش‌آموزی:</label>
+                            <input type="text" id="student-edit-num" value="${prof.student_number || ''}" placeholder="کد دانش‌آموزی"
+                                class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 p-3 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <div>
+                            <label class="block text-slate-500 mb-1">مجموع امتیاز (XP):</label>
+                            <input type="number" id="student-edit-xp" min="0" value="${prof.total_xp || 0}"
+                                class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                        </div>
+                        <div>
+                            <label class="block text-slate-500 mb-1">سطح (Level):</label>
+                            <input type="number" id="student-edit-level" min="1" value="${prof.current_level || 1}"
+                                class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                        </div>
+                        <div>
+                            <label class="block text-slate-500 mb-1">استمرار (Streak):</label>
+                            <input type="number" id="student-edit-streak" min="0" value="${prof.current_streak || 0}"
+                                class="w-full p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-1">
+                        <input type="checkbox" id="student-edit-active" ${data.is_active ? 'checked' : ''} class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />
+                        <label for="student-edit-active" class="text-xs text-slate-700 dark:text-slate-300 font-bold">حساب کاربری فعال است (در صورت برداشتن تیک، دانش‌آموز مسدود می‌شود)</label>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <button type="button" onclick="document.getElementById('admin-edit-student-modal').remove()" class="px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            انصراف
+                        </button>
+                        <button type="submit" class="btn-duo-blue text-white font-black px-6 py-2.5 rounded-xl shadow-md">
+                            ذخیره تغییرات مشخصات
+                        </button>
+                    </div>
+                </form>
+            </div>
+            `;
+            document.body.appendChild(modal);
+            if (window.lucide) window.lucide.createIcons();
+        } catch (err) {
+            alert('خطا در دریافت اطلاعات دانش‌آموز: ' + err.message);
+        }
+    }
+
+    async submitUpdateStudent(e, userId) {
+        e.preventDefault();
+        const payload = {
+            full_name: document.getElementById('student-edit-name').value.trim(),
+            username: document.getElementById('student-edit-username').value.trim().toLowerCase(),
+            email: document.getElementById('student-edit-email')?.value.trim() || null,
+            grade_id: parseInt(document.getElementById('student-edit-grade').value),
+            student_number: document.getElementById('student-edit-num')?.value.trim() || null,
+            total_xp: parseInt(document.getElementById('student-edit-xp')?.value || '0'),
+            current_level: parseInt(document.getElementById('student-edit-level')?.value || '1'),
+            current_streak: parseInt(document.getElementById('student-edit-streak')?.value || '0'),
+            is_active: document.getElementById('student-edit-active').checked
+        };
+
+        try {
+            const res = await window.api.updateStudent(userId, payload);
+            alert(res.message_fa || 'مشخصات دانش‌آموز به‌روزرسانی شد.');
+            const m = document.getElementById('admin-edit-student-modal');
+            if (m) m.remove();
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در ذخیره تغییرات: ' + err.message);
+        }
+    }
+
+    openResetPasswordModal(userId, username) {
+        const modal = document.createElement('div');
+        modal.id = 'admin-reset-pw-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm';
+        modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 max-w-md w-full rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5 text-right">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-black text-sm">
+                    <i data-lucide="key" class="w-5 h-5"></i>
+                    <span>بازنشانی مستقیم رمز عبور</span>
+                </div>
+                <button type="button" onclick="document.getElementById('admin-reset-pw-modal').remove()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+            </div>
+
+            <div class="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-2xl border border-amber-200/50 text-xs text-amber-800 dark:text-amber-300">
+                در حال تنظیم کلمه عبور جدید برای کاربر <strong class="font-mono">@${username}</strong> هستید. نیاز به رمز قبلی نیست و تغییر بلافاصله اعمال می‌شود.
+            </div>
+
+            <form onsubmit="window.currentAdminViews.submitResetPassword(event, ${userId})" class="space-y-4 text-xs font-semibold">
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">کلمه عبور جدید (حداقل ۴ کاراکتر):</label>
+                    <input type="password" id="student-new-pw" required minlength="4" placeholder="رمز عبور جدید..."
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                </div>
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">تکرار کلمه عبور جدید:</label>
+                    <input type="password" id="student-new-pw-confirm" required minlength="4" placeholder="تکرار رمز عبور جدید..."
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onclick="document.getElementById('admin-reset-pw-modal').remove()" class="px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        انصراف
+                    </button>
+                    <button type="submit" class="btn-duo-yellow text-slate-900 font-black px-6 py-2.5 rounded-xl shadow-md">
+                        ثبت رمز عبور جدید
+                    </button>
+                </div>
+            </form>
+        </div>
+        `;
+        document.body.appendChild(modal);
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    async submitResetPassword(e, userId) {
+        e.preventDefault();
+        const p1 = document.getElementById('student-new-pw').value.trim();
+        const p2 = document.getElementById('student-new-pw-confirm').value.trim();
+        if (p1 !== p2) {
+            alert('کلمه عبور و تکرار آن یکسان نیستند.');
+            return;
+        }
+
+        try {
+            const res = await window.api.resetStudentPassword(userId, p1);
+            alert(res.message_fa || 'رمز عبور با موفقیت تغییر یافت.');
+            const m = document.getElementById('admin-reset-pw-modal');
+            if (m) m.remove();
+        } catch (err) {
+            alert('خطا در تغییر رمز عبور: ' + err.message);
+        }
+    }
+
+    openAdjustXpModal(userId, username, currentXp) {
+        const modal = document.createElement('div');
+        modal.id = 'admin-adjust-xp-modal';
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm';
+        modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 max-w-md w-full rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5 text-right">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div class="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-black text-sm">
+                    <i data-lucide="award" class="w-5 h-5"></i>
+                    <span>اهدای امتیاز / کسر تجربه (@${username})</span>
+                </div>
+                <button type="button" onclick="document.getElementById('admin-adjust-xp-modal').remove()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+            </div>
+
+            <div class="p-3 bg-purple-50 dark:bg-purple-950/30 rounded-2xl border border-purple-200/50 text-xs text-purple-800 dark:text-purple-300">
+                امتیاز فعلی دانش‌آموز: <strong class="font-mono text-sm">${(currentXp || 0).toLocaleString('fa-IR')} XP</strong>
+            </div>
+
+            <form onsubmit="window.currentAdminViews.submitAdjustXp(event, ${userId})" class="space-y-4 text-xs font-semibold">
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">مقدار تغییر امتیاز (مثبت برای پاداش، منفی برای کسر):</label>
+                    <input type="number" id="student-adjust-amount" required value="50" step="5"
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
+                </div>
+
+                <!-- Quick Action Chips -->
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <button type="button" onclick="document.getElementById('student-adjust-amount').value = 50; document.getElementById('student-adjust-reason').value = 'پاداش فعالیت کلاسی و پاسخ به پرسش دبیر'" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] hover:bg-purple-100 hover:text-purple-700">
+                        +۵۰ کلاسی
+                    </button>
+                    <button type="button" onclick="document.getElementById('student-adjust-amount').value = 100; document.getElementById('student-adjust-reason').value = 'حل تمرین تشریحی پیشرفته و آزمایش مجازی فیزیک'" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] hover:bg-purple-100 hover:text-purple-700">
+                        +۱۰۰ حل تمرین
+                    </button>
+                    <button type="button" onclick="document.getElementById('student-adjust-amount').value = 250; document.getElementById('student-adjust-reason').value = 'رتبه برتر در مسابقه لیگ فیزیک کوانتومی'" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] hover:bg-purple-100 hover:text-purple-700">
+                        +۲۵۰ رتبه لیگ
+                    </button>
+                    <button type="button" onclick="document.getElementById('student-adjust-amount').value = -50; document.getElementById('student-adjust-reason').value = 'کسر امتیاز به دلیل عدم انجام تکلیف در مهلت مقرر'" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-600 text-[11px] hover:bg-rose-100">
+                        -۵۰ جریمه
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-slate-700 dark:text-slate-300 mb-1">دلیل تغییر امتیاز (جهت ثبت در سوابق و کارنامه):</label>
+                    <textarea id="student-adjust-reason" rows="2" required placeholder="توضیح دلیل اهدای امتیاز..."
+                        class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white">پاداش فعالیت کلاسی و حل تمرین فیزیک</textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onclick="document.getElementById('admin-adjust-xp-modal').remove()" class="px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        انصراف
+                    </button>
+                    <button type="submit" class="btn-duo-purple text-white font-black px-6 py-2.5 rounded-xl shadow-md">
+                        ثبت و اعمال تغییر امتیاز
+                    </button>
+                </div>
+            </form>
+        </div>
+        `;
+        document.body.appendChild(modal);
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    async submitAdjustXp(e, userId) {
+        e.preventDefault();
+        const amount = parseInt(document.getElementById('student-adjust-amount').value);
+        const reason = document.getElementById('student-adjust-reason').value.trim();
+
+        try {
+            const res = await window.api.adjustStudentXP(userId, amount, reason);
+            alert(res.message_fa || 'امتیاز با موفقیت اعمال گردید.');
+            const m = document.getElementById('admin-adjust-xp-modal');
+            if (m) m.remove();
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در اعمال امتیاز: ' + err.message);
+        }
+    }
+
+    async openStudentExamHistoryModal(userId, studentName) {
+        try {
+            const data = await window.api.getStudentDetails(userId);
+            const attempts = data.exam_attempts || [];
+            const badges = data.badges || [];
+            const xpLogs = data.xp_history || [];
+
+            const modal = document.createElement('div');
+            modal.id = 'admin-student-history-modal';
+            modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto';
+            modal.innerHTML = `
+            <div class="bg-white dark:bg-slate-900 max-w-3xl w-full rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-6 my-8 text-right max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div>
+                        <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-black text-sm">
+                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                            <span>کارنامه، سوابق آزمون‌ها و ریست تلاش — ${studentName}</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">مشاهده ریز نمرات، درصد قبولی و امکان بازگشایی آزمون برای دانش‌آموز در صورت بروز مشکل</p>
+                    </div>
+                    <button type="button" onclick="document.getElementById('admin-student-history-modal').remove()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+                </div>
+
+                <!-- Exam Attempts Section -->
+                <div class="space-y-3">
+                    <h4 class="font-extrabold text-sm text-slate-800 dark:text-white flex items-center gap-2">
+                        <i data-lucide="award" class="w-4 h-4 text-blue-500"></i>
+                        <span>سوابق آزمون‌های ثبت‌شده (${attempts.length} آزمون)</span>
+                    </h4>
+
+                    ${attempts.length === 0 ? `
+                    <div class="p-8 text-center text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <p class="text-xs font-bold">هنوز آزمونی توسط این دانش‌آموز ثبت نشده است.</p>
+                    </div>
+                    ` : `
+                    <div class="space-y-2.5">
+                        ${attempts.map(a => `
+                        <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="space-y-1">
+                                <div class="font-bold text-xs text-slate-800 dark:text-white flex items-center gap-2">
+                                    <span>${a.exam_title}</span>
+                                    ${a.chapter_title ? `<span class="text-[10px] bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-normal">فصل: ${a.chapter_title}</span>` : ''}
+                                </div>
+                                <div class="text-[11px] text-slate-400 flex items-center gap-3">
+                                    <span>تاریخ: ${a.started_at ? new Date(a.started_at).toLocaleDateString('fa-IR') : 'نامشخص'}</span>
+                                    <span>وضعیت: <strong>${a.status === 'graded' ? 'تصحیح شده' : a.status}</strong></span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-4 self-end sm:self-auto">
+                                <div class="text-left font-mono">
+                                    <div class="text-sm font-extrabold ${a.is_passed ? 'text-emerald-600' : 'text-rose-600'}">
+                                        ${a.score} / ${a.total_points} نمره (${Math.round(a.percentage || 0)}%)
+                                    </div>
+                                    <div class="text-[10px] font-bold ${a.is_passed ? 'text-emerald-500' : 'text-rose-500'}">
+                                        ${a.is_passed ? '✓ قبول شده' : '✕ نیاز به تلاش مجدد'}
+                                    </div>
+                                </div>
+
+                                <button onclick="window.currentAdminViews.resetStudentAttempt(${userId}, ${a.id}, '${studentName.replace(/'/g, "\\'")}')"
+                                    class="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 hover:bg-amber-100 border border-amber-200 dark:border-amber-800/50 text-[11px] font-bold flex items-center gap-1 transition-all" title="حذف این تلاش تا دانش‌آموز بتواند دوباره آزمون دهد">
+                                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                    <span>مجاز کردن آزمون مجدد</span>
+                                </button>
+                            </div>
+                        </div>
+                        `).join('')}
+                    </div>
+                    `}
+                </div>
+
+                <!-- Badges Earned Section -->
+                ${badges.length > 0 ? `
+                <div class="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <h4 class="font-extrabold text-xs text-slate-700 dark:text-slate-300">مدال‌ها و نشان‌های افتخار (${badges.length})</h4>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        ${badges.map(b => `
+                        <div class="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/30 flex items-center gap-1.5 text-xs">
+                            <span>🏅</span>
+                            <span class="font-bold text-purple-800 dark:text-purple-300">${b.title_fa || 'مدال فیزیک'}</span>
+                        </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Recent XP Logs -->
+                ${xpLogs.length > 0 ? `
+                <div class="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <h4 class="font-extrabold text-xs text-slate-700 dark:text-slate-300">آخرین تراکنش‌های امتیاز و تجربه</h4>
+                    <div class="max-h-40 overflow-y-auto space-y-1.5 text-[11px]">
+                        ${xpLogs.map(x => `
+                        <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 flex items-center justify-between">
+                            <span class="text-slate-600 dark:text-slate-300">${x.description_fa}</span>
+                            <span class="font-mono font-bold ${x.amount >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${x.amount >= 0 ? '+' : ''}${x.amount} XP</span>
+                        </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="flex justify-end pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <button type="button" onclick="document.getElementById('admin-student-history-modal').remove()" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-200">
+                        بستن
+                    </button>
+                </div>
+            </div>
+            `;
+            document.body.appendChild(modal);
+            if (window.lucide) window.lucide.createIcons();
+        } catch (err) {
+            alert('خطا در دریافت سوابق دانش‌آموز: ' + err.message);
+        }
+    }
+
+    async resetStudentAttempt(userId, attemptId, studentName) {
+        if (!confirm(`آیا از حذف این تلاش آزمون و بازگشایی آزمون مجدد برای «${studentName}» اطمینان دارید؟`)) return;
+
+        try {
+            const res = await window.api.resetStudentExamAttempt(userId, attemptId);
+            alert(res.message_fa || 'تلاش آزمون با موفقیت حذف گردید.');
+            const m = document.getElementById('admin-student-history-modal');
+            if (m) m.remove();
+            this.openStudentExamHistoryModal(userId, studentName);
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در ریست آزمون: ' + err.message);
+        }
+    }
+
+    async deleteStudentConfirm(userId, username, fullName) {
+        if (!confirm(`⚠️ هشدار امنیتی:\n\nآیا از حذف دائمی حساب کاربری دانش‌آموز «${fullName}» (@${username}) اطمینان دارید؟\nتمام امتیازها، سوابق شرکت در آزمون‌ها، تمرین‌ها و پاسخ‌ها برای همیشه پاک خواهند شد.`)) return;
+
+        try {
+            const res = await window.api.deleteStudent(userId);
+            alert(res.message_fa || 'حساب کاربری دانش‌آموز حذف شد.');
+            this.loadTabContent();
+        } catch (err) {
+            alert('خطا در حذف حساب کاربری: ' + err.message);
         }
     }
 }

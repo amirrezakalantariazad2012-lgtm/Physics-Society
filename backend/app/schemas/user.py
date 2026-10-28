@@ -48,3 +48,31 @@ class StudentProfileUpdate(BaseModel):
     bio: Optional[str] = None
     avatar_url: Optional[str] = None
     grade_id: Optional[int] = None
+
+class AdminStudentCreateRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+    full_name: str = Field(..., min_length=2, max_length=100)
+    password: str = Field(..., min_length=4, max_length=100)
+    grade_id: int
+    email: Optional[str] = None
+    student_number: Optional[str] = None
+    initial_xp: Optional[int] = 0
+
+class AdminStudentUpdateRequest(BaseModel):
+    username: Optional[str] = Field(None, min_length=3, max_length=50)
+    full_name: Optional[str] = Field(None, min_length=2, max_length=100)
+    email: Optional[str] = None
+    grade_id: Optional[int] = None
+    student_number: Optional[str] = None
+    total_xp: Optional[int] = None
+    current_level: Optional[int] = None
+    current_streak: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class AdminPasswordResetRequest(BaseModel):
+    new_password: str = Field(..., min_length=4, max_length=128)
+
+class AdminXPAdjustRequest(BaseModel):
+    amount: int
+    reason: Optional[str] = "تنظیم دستی توسط مدیر سامانه"
+
