@@ -89,8 +89,8 @@ echo "=== Compiling with AAPT & Platform: $ANDROID_JAR ==="
 $AAPT package -f -m -J "$BUILD_DIR/gen" -M "$BUILD_DIR/AndroidManifest.xml" -S "$BUILD_DIR/res" -I "$ANDROID_JAR"
 
 echo "=== Compiling Java source files ==="
-$JAVAC -source 8 -target 8 -bootclasspath "$ANDROID_JAR" -d "$BUILD_DIR/classes" \\
-    "$BUILD_DIR/gen/ir/sampad/physicssociety/R.java" \\
+$JAVAC -source 8 -target 8 -bootclasspath "$ANDROID_JAR" -d "$BUILD_DIR/classes" \
+    "$BUILD_DIR/gen/ir/sampad/physicssociety/R.java" \
     "$BUILD_DIR/ir/sampad/physicssociety/MainActivity.java"
 
 echo "=== Translating bytecode to Dalvik DEX ==="
@@ -112,11 +112,11 @@ if [ ! -f "$KEYSTORE" ]; then
     $KEYTOOL -genkeypair -v -keystore "$KEYSTORE" -storepass sampad1403 -alias sampad_key -keypass sampad1403 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=SampadPhysics, OU=PhysicsSociety, O=Sampad, L=Tehran, ST=Tehran, C=IR"
 fi
 
-echo "=== Signing APK with apksigner (v1, v2, v3 schemes) ==="
-$APKSIGNER sign --ks "$KEYSTORE" --ks-pass pass:sampad1403 --key-pass pass:sampad1403 --out physics-society-signed.apk --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true aligned.apk
+echo "=== Signing APK with apksigner (v1, v2, v3 schemes with min-sdk 21) ==="
+$APKSIGNER sign --ks "$KEYSTORE" --ks-pass pass:sampad1403 --key-pass pass:sampad1403 --min-sdk-version 21 --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --out physics-society-signed.apk aligned.apk
 
-echo "=== Verifying APK Signature ==="
-$APKSIGNER verify --verbose physics-society-signed.apk
+echo "=== Verifying APK Signature Across All Schemes ==="
+$APKSIGNER verify --verbose --min-sdk-version 21 physics-society-signed.apk
 
 echo "=== AAPT Badging Summary ==="
 $AAPT dump badging physics-society-signed.apk

@@ -99,6 +99,14 @@ def init_live_db():
         )
         """)
         conn.execute("CREATE INDEX IF NOT EXISTS idx_viewers_room ON active_viewers(room_code, last_ping)")
+        
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS live_frames (
+            room_code TEXT PRIMARY KEY,
+            frame_data TEXT NOT NULL,
+            updated_at REAL NOT NULL
+        )
+        """)
         conn.commit()
 
         # Seed permanent demo room if not exists
@@ -203,19 +211,26 @@ async def event_bus_listener():
                         # Only broadcast if originated from another worker OR needs broadcast
                         if int(r["sender_pid"]) != CURRENT_PID:
                             room = r["room_code"]
-                            payload = json.loads(r["payload_json"])
-                            target = payload.get("target_session_id")
-                            if target:
-                                ws = session_sockets.get(target)
-                                if ws:
-                                    try:
-                                        await ws.send_text(json.dumps(payload))
-                                    except Exception:
-                                        session_sockets.pop(target, None)
-                            else:
+                            if r["event_type"] == "stream_frame":
                                 if room in local_sockets and local_sockets[room]:
-                                    payload["type"] = r["event_type"]
-                                    await broadcast_to_local_sockets(room, payload)
+                                    cur_f = conn.execute("SELECT frame_data FROM live_frames WHERE room_code = ?", (room,))
+                                    row_f = cur_f.fetchone()
+                                    if row_f and row_f["frame_data"]:
+                                        await broadcast_to_local_sockets(room, {"type": "stream_frame", "frame": row_f["frame_data"]})
+                            else:
+                                payload = json.loads(r["payload_json"])
+                                target = payload.get("target_session_id")
+                                if target:
+                                    ws = session_sockets.get(target)
+                                    if ws:
+                                        try:
+                                            await ws.send_text(json.dumps(payload))
+                                        except Exception:
+                                            session_sockets.pop(target, None)
+                                else:
+                                    if room in local_sockets and local_sockets[room]:
+                                        payload["type"] = r["event_type"]
+                                        await broadcast_to_local_sockets(room, payload)
         except Exception as e:
             logger.debug(f"Event bus loop tick error: {e}")
         await asyncio.sleep(0.04)  # 40ms polling tick (butter-smooth real-time)
@@ -582,6 +597,11 @@ async def live_lab_websocket(
     with get_db() as conn:
         cur = conn.execute("SELECT sim_id, COALESCE(sim_title, '') as sim_title, COALESCE(is_locked, 1) as is_locked, COALESCE(is_streaming, 0) as is_streaming, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json FROM rooms WHERE room_code = ?", (room_code,))
         row = cur.fetchone()
+
+        cur_f = conn.execute("SELECT frame_data FROM live_frames WHERE room_code = ? AND updated_at > ?", (room_code, now - 120))
+        row_f = cur_f.fetchone()
+        init_frame = row_f["frame_data"] if row_f else None
+
         if row:
             await websocket.send_text(json.dumps({
                 "type": "welcome",
@@ -592,6 +612,7 @@ async def live_lab_websocket(
                 "sim_title": row["sim_title"],
                 "is_locked": bool(row["is_locked"]),
                 "is_streaming": bool(row["is_streaming"]),
+                "initial_frame": init_frame,
                 "viewers_count": total_viewers,
                 "state": json.loads(row["current_state_json"]),
                 "notes": json.loads(row["teacher_notes_json"]),
@@ -831,13 +852,30 @@ async def live_lab_websocket(
                     }
                     await send_to_session(target, ice_payload, room_code)
 
-            # 18. Fast Canvas Frame Fallback (Zero-configuration instant screen mirror)
+            # 18. Fast Canvas Frame Fallback (Zero-configuration instant screen mirror across all workers)
             elif msg_type == "stream_frame":
-                frame_data = {
-                    "frame": data.get("frame"),
+                frame_val = data.get("frame")
+                if frame_val:
+                    now_f = time.time()
+                    with get_db() as conn:
+                        conn.execute("INSERT OR REPLACE INTO live_frames (room_code, frame_data, updated_at) VALUES (?, ?, ?)",
+                                     (room_code, frame_val, now_f))
+                        conn.commit()
+                    publish_event(room_code, "stream_frame", {"timestamp": now_f})
+                    await broadcast_to_local_sockets(room_code, {"type": "stream_frame", "frame": frame_val}, exclude=websocket)
+
+            # 19. Real-Time Interactive Simulator Action Mirroring (Ultra-fast, zero-lag pointer & actions)
+            elif msg_type in ["sim_interaction", "teacher_interaction", "sim_pointer"]:
+                action_data = {
+                    "action": data.get("action", "move"),
+                    "x": data.get("x", 0.5),
+                    "y": data.get("y", 0.5),
+                    "buttons": data.get("buttons", 0),
+                    "sim_id": data.get("sim_id", ""),
                     "timestamp": time.time()
                 }
-                await broadcast_to_local_sockets(room_code, {"type": "stream_frame", **frame_data}, exclude=websocket)
+                publish_event(room_code, "sim_interaction", action_data)
+                await broadcast_to_local_sockets(room_code, {"type": "sim_interaction", **action_data}, exclude=websocket)
 
     except WebSocketDisconnect:
         local_sockets.get(room_code, set()).discard(websocket)

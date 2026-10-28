@@ -983,6 +983,10 @@ class LiveLabComponent {
                             <video id="live-meet-video" autoplay playsinline 
                                 class="${this.isStreaming && this.activeViewMode === 'stream' ? 'block' : 'hidden'} w-full h-full object-contain bg-slate-950"></video>
                             
+                            <!-- Live High-Speed Canvas Mirror (Direct real-time simulation broadcast) -->
+                            <canvas id="live-auto-mirror-canvas" 
+                                class="w-full h-full object-contain bg-white rounded-2xl shadow-inner"></canvas>
+                            
                             <!-- Live Fallback Canvas (Instant frame snapshot receiver) -->
                             <canvas id="live-fallback-canvas" 
                                 class="hidden w-full h-full object-contain bg-slate-950"></canvas>
@@ -1237,6 +1241,10 @@ class LiveLabComponent {
         this.setupLaserCaptureSurface();
         this.setupIframeMessageBridge();
         this.startSyncPoller(roomCode);
+
+        if (this.userRole === 'teacher' && this.simIframe) {
+            this.hookTeacherSimulator(this.simIframe);
+        }
 
         if (details.active_poll) {
             this.renderPollUI(details.active_poll, details.poll_votes || {});
@@ -1611,22 +1619,48 @@ class LiveLabComponent {
     }
 
     renderFallbackFrame(frameData) {
-        const video = document.getElementById('live-meet-video');
-        const fallbackCanvas = document.getElementById('live-fallback-canvas');
-        // Only render fallback canvas if video is not actively streaming
-        if (video && (!video.srcObject || video.paused) && fallbackCanvas && this.activeViewMode === 'stream') {
-            const lounge = document.getElementById('stream-waiting-lounge');
-            if (lounge) lounge.classList.add('hidden');
-            fallbackCanvas.classList.remove('hidden');
+        const lounge = document.getElementById('stream-waiting-lounge');
+        if (lounge) lounge.classList.add('hidden');
 
-            const img = new Image();
-            img.onload = () => {
-                fallbackCanvas.width = img.width;
-                fallbackCanvas.height = img.height;
-                const ctx = fallbackCanvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
+        // Render to live-auto-mirror-canvas or fallbackCanvas
+        let canvas = document.getElementById('live-auto-mirror-canvas') || document.getElementById('live-fallback-canvas');
+        if (!canvas) {
+            const viewport = document.getElementById('student-stream-viewport');
+            if (viewport) {
+                canvas = document.createElement('canvas');
+                canvas.id = 'live-auto-mirror-canvas';
+                canvas.className = "w-full h-full object-contain bg-white rounded-2xl shadow-inner";
+                const laser = document.getElementById('live-laser-canvas');
+                if (laser && laser.parentNode) {
+                    laser.parentNode.insertBefore(canvas, laser);
+                } else {
+                    viewport.appendChild(canvas);
+                }
+            }
+        }
+
+        if (canvas && this.activeViewMode === 'stream') {
+            canvas.classList.remove('hidden');
+            if (!this._mirrorImg) {
+                this._mirrorImg = new Image();
+            }
+            this._mirrorImg.onload = () => {
+                if (canvas.width !== this._mirrorImg.width || canvas.height !== this._mirrorImg.height) {
+                    canvas.width = this._mirrorImg.width;
+                    canvas.height = this._mirrorImg.height;
+                }
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(this._mirrorImg, 0, 0);
             };
-            img.src = frameData;
+            this._mirrorImg.src = frameData;
+
+            // Update student status badge
+            const badge = document.getElementById('student-stream-badge');
+            const badgeText = document.getElementById('student-stream-badge-text');
+            if (badge && badgeText) {
+                badge.className = "px-3 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 font-bold text-xs flex items-center gap-1.5";
+                badgeText.textContent = "🔴 پخش زنده لحظه‌ای آزمایشگاه دبیر (فعال)";
+            }
         }
     }
 
@@ -1822,6 +1856,9 @@ class LiveLabComponent {
         const iframe = document.getElementById('live-sim-iframe');
         if (iframe) {
             iframe.src = getLabUrl(newSimId, this.userRole);
+            if (this.userRole === 'teacher') {
+                setTimeout(() => this.hookTeacherSimulator(iframe), 400);
+            }
         }
 
         // Update header & educational cards
@@ -2159,6 +2196,9 @@ class LiveLabComponent {
         if (type === 'welcome') {
             this.sessionId = data.session_id;
             this.isStreaming = Boolean(data.is_streaming);
+            if (data.initial_frame && this.userRole === 'student') {
+                this.renderFallbackFrame(data.initial_frame);
+            }
 
             if (data.sim_id && data.sim_id !== this.currentSimId) {
                 this.switchSimulatorLocally(data.sim_id, data.sim_title);
@@ -2217,6 +2257,10 @@ class LiveLabComponent {
 
         else if (type === 'stream_frame' && this.userRole === 'student') {
             this.renderFallbackFrame(data.frame);
+        }
+
+        else if (type === 'sim_interaction' && this.userRole === 'student') {
+            this.handleSimInteraction(data);
         }
 
         else if (type === 'simulator_changed') {

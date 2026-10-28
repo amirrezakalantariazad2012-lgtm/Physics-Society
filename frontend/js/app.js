@@ -332,16 +332,12 @@ async function renderLandingView(container) {
                         <!-- Scientific Formulas Matrix -->
                         <div class="space-y-2.5">
                             <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 text-center">
-                                <span class="text-[10px] text-slate-400 block mb-1 font-mono">KINEMATICS & DYNAMICS (معادلات حرکت سمپاد)</span>
-                                <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-sky-300 academic-mono katex-ltr-container" dir="ltr">
-                                    $$x(t) = \\frac{1}{2}at^2 + v_0t + x_0 \\quad \\Longleftrightarrow \\quad \\vec{F} = m\\vec{a}$$
-                                </div>
+                                <span class="text-[10px] text-slate-500 block mb-1 font-mono">KINEMATICS & DYNAMICS (معادلات حرکت سمپاد)</span>
+                                <div id="hero-formula-kinematics" class="text-sm sm:text-base font-bold text-sky-700 dark:text-sky-300 min-h-[32px] flex items-center justify-center academic-mono katex-ltr-container" dir="ltr"></div>
                             </div>
                             <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 text-center">
-                                <span class="text-[10px] text-slate-400 block mb-1 font-mono">ENERGY & PRESSURE (پایستگی انرژی و فشار)</span>
-                                <div class="text-sm sm:text-base font-bold text-slate-900 dark:text-teal-300 academic-mono katex-ltr-container" dir="ltr">
-                                    $$K = \\frac{1}{2}mv^2 + mgh \\quad , \\quad P = \\rho gh + P_0$$
-                                </div>
+                                <span class="text-[10px] text-slate-500 block mb-1 font-mono">ENERGY & PRESSURE (پایستگی انرژی و فشار)</span>
+                                <div id="hero-formula-energy" class="text-sm sm:text-base font-bold text-teal-700 dark:text-teal-300 min-h-[32px] flex items-center justify-center academic-mono katex-ltr-container" dir="ltr"></div>
                             </div>
                         </div>
 
@@ -517,6 +513,22 @@ async function renderLandingView(container) {
         </div>
     </section>
     `;
+
+    // Render Hero Mathematical Matrix with Zero-Escape String.raw KaTeX
+    if (window.katex) {
+        try {
+            const kEl = container.querySelector('#hero-formula-kinematics');
+            if (kEl) {
+                window.katex.render(String.raw`x(t) = \frac{1}{2}at^2 + v_0t + x_0 \quad \Longleftrightarrow \quad \vec{F} = m\vec{a}`, kEl, { displayMode: true, throwOnError: false });
+            }
+            const eEl = container.querySelector('#hero-formula-energy');
+            if (eEl) {
+                window.katex.render(String.raw`K = \frac{1}{2}mv^2 + mgh \quad , \quad P = \rho gh + P_0`, eEl, { displayMode: true, throwOnError: false });
+            }
+        } catch (err) {
+            console.warn('Hero KaTeX render notice:', err);
+        }
+    }
 
     if (window.renderMathInPage) {
         setTimeout(() => window.renderMathInPage(container), 30);
