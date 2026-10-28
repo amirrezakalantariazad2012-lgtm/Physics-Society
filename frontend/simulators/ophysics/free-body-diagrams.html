@@ -11,16 +11,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
     <style>
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: local('Vazirmatn'), local('Vazir'), local('B Vazir');
+            font-weight: 100 900;
+            font-style: normal;
+            font-display: swap;
+        }
         :root {
-            --font-fa: 'Vazirmatn', 'Inter', system-ui, -apple-system, sans-serif;
+            --font-fa: 'Vazirmatn', 'Vazir', system-ui, -apple-system, sans-serif;
             --font-en: 'Inter', system-ui, -apple-system, sans-serif;
             --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
         }
         * {
             box-sizing: border-box;
         }
-        body {
+        body, button, input, select, textarea {
             font-family: var(--font-fa);
+        }
+        body {
             user-select: none;
             -webkit-font-smoothing: antialiased;
             background-color: #070b14;
@@ -605,7 +614,7 @@
             ctx.fill();
 
             // Vector Label
-            ctx.font = `bold ${10 * dpr}px 'JetBrains Mono', 'Vazirmatn', sans-serif`;
+            ctx.font = `bold ${10 * dpr}px 'Vazirmatn', 'Vazir', 'JetBrains Mono', sans-serif`;
             if (labelPos === 'top') {
                 ctx.textAlign = 'center';
                 ctx.fillText(label, x2, y2 - 6 * dpr);
@@ -627,7 +636,7 @@
             ctx.stroke();
             ctx.restore();
 
-            ctx.font = `${10 * dpr}px 'JetBrains Mono', 'Vazirmatn', sans-serif`;
+            ctx.font = `${10 * dpr}px 'Vazirmatn', 'Vazir', 'JetBrains Mono', sans-serif`;
             ctx.fillStyle = color;
             ctx.fillText(label, x1 + dx + 6 * dpr, y1 + dy + 12 * dpr);
         }

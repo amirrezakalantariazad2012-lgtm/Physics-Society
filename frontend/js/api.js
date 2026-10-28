@@ -245,12 +245,16 @@ function formatApiErrorMessage(data, defaultMsg = 'خطایی در ارتباط 
     getXpHistory() {
         return this.request('/gamification/xp-history');
     }
-    recordLabActivity(simType, labTitleFa, xpAmount = 15) {
+    getLabProgress() {
+        return this.request('/gamification/lab-progress');
+    }
+    recordLabActivity(simType, labTitleFa, actionType = 'experiment_run', xpAmount = 20) {
         return this.request('/gamification/lab-activity', {
             method: 'POST',
             body: {
                 sim_type: simType,
                 lab_title_fa: labTitleFa,
+                action_type: actionType,
                 xp_amount: xpAmount
             }
         });

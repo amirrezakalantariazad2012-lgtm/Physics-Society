@@ -10,7 +10,7 @@ from app.models.exam import ExaminationAttempt
 from app.models.competition import Competition
 from app.schemas.gamification import (
     BadgeResponse, LeaderboardResponse, LeaderboardUser, XPTransactionResponse,
-    LabActivityRequest, LabActivityResponse
+    LabActivityRequest, LabActivityResponse, LabProgressResponse
 )
 from app.services.auth import get_current_user, get_optional_current_user
 from app.services.gamification_service import get_leaderboard_data, award_xp, record_daily_streak
@@ -172,29 +172,98 @@ def get_xp_history(
 
     return txs
  
+@router.get("/lab-progress", response_model=LabProgressResponse)
+def get_lab_progress(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Returns detailed summary of student's completed lab activities, XP, and daily claimed actions"""
+    from datetime import datetime
+    today_str = datetime.utcnow().strftime('%Y%m%d')
+    txs = db.query(XPTransaction).filter(
+        XPTransaction.user_id == current_user.id,
+        XPTransaction.activity_type == "lab_experiment"
+    ).all()
+
+    total_lab_xp = sum(t.amount for t in txs)
+    completed_sims = set()
+    today_claimed_actions = set()
+
+    for t in txs:
+        if t.reference_id and t.reference_id.startswith("lab_"):
+            parts = t.reference_id.split("_")
+            # format: lab_{sim_type}_{action_type}_{user_id}_{date_key}
+            if len(parts) >= 5:
+                sim_id = parts[1]
+                action_type = parts[2]
+                date_k = parts[4]
+                completed_sims.add(sim_id)
+                if date_k == today_str:
+                    today_claimed_actions.add(f"{sim_id}_{action_type}")
+            elif len(parts) >= 4:
+                sim_id = parts[1]
+                completed_sims.add(sim_id)
+
+    profile = current_user.profile
+    return LabProgressResponse(
+        total_lab_xp=total_lab_xp,
+        completed_labs_count=len(completed_sims),
+        completed_sim_ids=sorted(list(completed_sims)),
+        today_claimed_actions=sorted(list(today_claimed_actions)),
+        profile_total_xp=profile.total_xp if profile else 0,
+        current_level=profile.current_level if profile else 1
+    )
+
 @router.post("/lab-activity", response_model=LabActivityResponse)
 def record_lab_activity(
     data: LabActivityRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Awards XP for interactive physics laboratory experiments"""
+    """Awards XP for interactive physics laboratory experiments with precise multi-action tracking"""
     from datetime import datetime
-    amount = min(50, max(5, data.xp_amount or 15))
-    date_key = datetime.utcnow().strftime('%Y%m%d_%H')
+    action_type = data.action_type or "experiment_run"
+
+    # Action-specific base XP scaling
+    action_xp_map = {
+        "experiment_run": 20,
+        "logbook_note": 15,
+        "concept_challenge": 10,
+        "lab_report": 15
+    }
+    action_desc_map = {
+        "experiment_run": "اجرای شبیه‌ساز و بررسی آزمایش",
+        "logbook_note": "ثبت مشاهدات و تحلیل علمی در دفترچه",
+        "concept_challenge": "پاسخ صحیح به چالش مفهومی",
+        "lab_report": "تولید و ثبت گزارش کار آزمایشگاهی"
+    }
+
+    base_xp = action_xp_map.get(action_type, 20)
+    amount = min(50, max(5, data.xp_amount if data.xp_amount is not None else base_xp))
+    action_title = action_desc_map.get(action_type, "فعالیت آزمایشگاهی")
+
+    # Daily unique idempotency key per action per simulation
+    date_key = datetime.utcnow().strftime('%Y%m%d')
+    ref_id = f"lab_{data.sim_type}_{action_type}_{current_user.id}_{date_key}"
+
     tx = award_xp(
         db, current_user.id,
         amount=amount,
         activity_type="lab_experiment",
-        description_fa=f"آزمایشگاه مجازی: {data.lab_title_fa}",
-        reference_id=f"lab_{data.sim_type}_{current_user.id}_{date_key}"
+        description_fa=f"آزمایشگاه مجازی ({action_title}): {data.lab_title_fa}",
+        reference_id=ref_id
     )
-    record_daily_streak(db, current_user.id)
+
+    if tx:
+        record_daily_streak(db, current_user.id)
+
     profile = current_user.profile
     return LabActivityResponse(
         success=True,
         xp_awarded=amount if tx else 0,
+        already_claimed=False if tx else True,
         total_xp=profile.total_xp if profile else 0,
         current_level=profile.current_level if profile else 1,
-        message_fa="دستاوردهای آزمایشگاهی شما با موفقیت ثبت شد!"
+        action_type=action_type,
+        message_fa=f"امتیاز علمی {amount}+ XP با موفقیت ثبت شد!" if tx else "این بخش از آزمایشگاه امروز قبلاً برای شما ثبت شده است."
     )

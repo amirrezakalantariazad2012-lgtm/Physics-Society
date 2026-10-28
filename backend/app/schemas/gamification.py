@@ -41,11 +41,22 @@ class LeaderboardResponse(BaseModel):
 class LabActivityRequest(BaseModel):
     sim_type: str
     lab_title_fa: str
-    xp_amount: Optional[int] = 15
+    action_type: Optional[str] = "experiment_run"  # 'experiment_run', 'logbook_note', 'concept_challenge', 'lab_report'
+    xp_amount: Optional[int] = 20
 
 class LabActivityResponse(BaseModel):
     success: bool
     xp_awarded: int
+    already_claimed: Optional[bool] = False
     total_xp: int
     current_level: int
+    action_type: Optional[str] = "experiment_run"
     message_fa: str
+
+class LabProgressResponse(BaseModel):
+    total_lab_xp: int
+    completed_labs_count: int
+    completed_sim_ids: List[str]
+    today_claimed_actions: List[str]
+    profile_total_xp: int
+    current_level: int

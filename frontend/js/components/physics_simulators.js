@@ -1214,13 +1214,231 @@ class PhysicsSimulators {
         return null;
     }
 
-    mount(type, containerId, mode = 'native') {
+    getChallengeForSim(sim) {
+        const challenges = {
+            'density': {
+                q: 'یک مکعب چوبی به جرم ۵۰۰ گرم و یک قطعه فولادی به جرم ۱۰۰ گرم در دست داریم. هر دو را در ظرف آب رها می‌کنیم. کدام گزینه در مورد غوطه‌وری و چگالی صحیح است؟',
+                options: [
+                    'چون جرم مکعب چوبی ۵ برابر آهن است، پس چوب ته‌نشین شده و آهن روی آب می‌ماند.',
+                    'شناوری یا ته‌نشینی تابع چگالی است نه جرم کل؛ آهن (چگالی بیشتر از آب) ته‌نشین شده و چوب شناور می‌ماند.',
+                    'هر دو جسم چون جرم بالای ۵۰ گرم دارند حتماً در آب فرو می‌روند.',
+                    'نیروی ارشمیدس فقط به جرم جسم واردشونده بستگی دارد نه حجم جابه‌جاشده مایع.'
+                ],
+                correct: 1,
+                explanation: 'پاسخ صحیح گزینه ۲ است. شرط شناوری، کمتر بودن چگالی میانگین جسم از چگالی شاره است (ρ_object < ρ_fluid).'
+            },
+            'energy-skate': {
+                q: 'اسکیت‌باز از ارتفاع ۴ متری یک پیست بدون اصطکاک رها می‌شود. در پایین‌ترین نقطه پیست، انرژی مکانیکی کل چه تغییری کرده است؟',
+                options: [
+                    'انرژی مکانیکی کل صفر شده است.',
+                    'تمام انرژی پتانسیل گرانشی به انرژی جنبشی تبدیل شده و انرژی کل مکانیکی بدون تغییر و پایسته مانده است.',
+                    'انرژی مکانیکی دو برابر شده است زیرا سرعت دو برابر شده است.',
+                    'به دلیل شتاب گرانش زمین، نیمی از انرژی کل نابود شده است.'
+                ],
+                correct: 1,
+                explanation: 'پاسخ صحیح گزینه ۲ است. در غیاب نیروهای اتلافی (اصطکاک و مقاومت هوا)، کار نیروهای ناپایستار صفر بوده و انرژی مکانیکی کل پایسته می‌ماند.'
+            },
+            'masses-and-springs': {
+                q: 'اگر سختی فنری k باشد و وزنه‌ای به جرم m را به آن متصل کنیم، دوره تناوب نوسان T است. با چهار برابر کردن جرم وزنه، دوره تناوب نوسان چه تغییری می‌کند؟',
+                options: [
+                    'نصف می‌شود.',
+                    'بدون تغییر می‌ماند چون به دامنه بستگی دارد.',
+                    '۲ برابر می‌شود (متناسب با جذر جرم).',
+                    '۴ برابر می‌شود.'
+                ],
+                correct: 2,
+                explanation: 'پاسخ صحیح گزینه ۳ است. رابطه دوره تناوب نوسان فنر T = 2π√(m/k) است؛ با ۴ برابر شدن جرم m، مقدار T دقیقاً ۲ برابر می‌شود.'
+            },
+            'pendulum': {
+                q: 'در یک آونگ ساده با طول ریسمان L، اگر جرم گلوله آونگ را ۳ برابر کنیم، دوره تناوب نوسان در زوایای کوچک چه تغییری می‌کند؟',
+                options: [
+                    'تغییری نمی‌کند زیرا دوره تناوب آونگ ساده مستقل از جرم گلوله است.',
+                    '√۳ برابر می‌شود.',
+                    '۳ برابر می‌شود.',
+                    'یک سوم می‌شود.'
+                ],
+                correct: 0,
+                explanation: 'پاسخ صحیح گزینه ۱ است. دوره آونگ ساده T = 2π√(L/g) تنها به طول ریسمان و شتاب گرانش وابسته است و ربطی به جرم گلوله ندارد.'
+            },
+            'circuit-construction-kit-dc': {
+                q: 'دو لامپ یکسان را به صورت متوالی به یک باتری وصل کرده‌ایم. اگر مدار را تغییر داده و لامپ‌ها را به صورت موازی به همان باتری وصل کنیم، روشنایی هر لامپ چگونه خواهد شد؟',
+                options: [
+                    'روشنایی لامپ‌ها کاهش می‌یابد چون جریان تقسیم می‌شود.',
+                    'روشنایی هر لامپ افزایش می‌یابد زیرا ولتاژ دوسر هر لامپ برابر با ولتاژ کامل باتری می‌شود.',
+                    'روشنایی هیچ تغییری نمی‌کند.',
+                    'یکی از لامپ‌ها می‌سوزد و دیگری خاموش می‌شود.'
+                ],
+                correct: 1,
+                explanation: 'پاسخ صحیح گزینه ۲ است. در حالت موازی اختلاف پتانسیل دو سر هر لامپ برابر با V کامل باتری است، پس توان مصرفی هر لامپ بیشینه می‌شود.'
+            },
+            'forces-and-motion-basics': {
+                q: 'طبق قانون دوم نیوتون، اگر نیروی خالص وارد بر یک جسم ثابت بماند اما جرم جسم نصف شود، شتاب حرکت آن چه تغییری خواهد کرد؟',
+                options: [
+                    'شتاب نصف می‌شود.',
+                    'شتاب ۲ برابر می‌شود.',
+                    'شتاب ۴ برابر می‌شود.',
+                    'شتاب تغییر نمی‌کند چون نیرو ثابت است.'
+                ],
+                correct: 1,
+                explanation: 'پاسخ صحیح گزینه ۲ است. طبق a = F_net / m، شتاب با جرم رابطه معکوس دارد؛ پس با نصف شدن جرم، شتاب ۲ برابر می‌شود.'
+            },
+            'hookes-law': {
+                q: 'فنر الاستیکی طبق قانون هوک با نیروی ۱۰ نیوتون به اندازه ۲ سانتی‌متر کشیده می‌شود. برای کشیدن فنر به اندازه ۶ سانتی‌متر چه نیرویی لازم است؟',
+                options: [
+                    '۲۰ نیوتون',
+                    '۳۰ نیوتون',
+                    '۶۰ نیوتون',
+                    '۱۵ نیوتون'
+                ],
+                correct: 1,
+                explanation: 'پاسخ صحیح گزینه ۲ است. طبق قانون هوک F = k·Δx، سختی فنر k = 10 / 0.02 = 500 N/m است. برای ۶ سانتی‌متر نیرو برابر با 500 * 0.06 = 30 N است.'
+            },
+            'gravity-and-orbits': {
+                q: 'اگر فاصله ماه تا زمین دو برابر شود، نیروی گرانش متقابل بین زمین و ماه چه تغییری می‌کند؟',
+                options: [
+                    'نصف می‌شود.',
+                    'یک چهارم (۱/۴) برابر می‌شود.',
+                    'دو برابر می‌شود.',
+                    'تغییری نمی‌کند چون جرم‌ها ثابت هستند.'
+                ],
+                correct: 1,
+                explanation: 'پاسخ صحیح گزینه ۲ است. طبق قانون گرانش عمومی نیوتون F = G·(m1·m2)/r²، نیرو با مجذور فاصله رابطه معکوس دارد.'
+            },
+            'bending-light': {
+                q: 'پرتو نوری از هوا (ضریب شکست n=۱) وارد آب (ضریب شکست n=۱.۳۳) می‌شود. کدام کمیت نور حین شکست در مرز دو محیط تغییر نمی‌کند؟',
+                options: [
+                    'سرعت نور (v)',
+                    'طول موج نور (λ)',
+                    'بسامد (فرکانس) نور (f)',
+                    'راستای حرکت پرتو'
+                ],
+                correct: 2,
+                explanation: 'پاسخ صحیح گزینه ۳ است. بسامد نور ویژگی ذاتی چشمه تولیدکننده است و با تغییر محیط مادی هرگز تغییر نمی‌کند.'
+            },
+            'kinematics-grapher': {
+                q: 'در نمودار مکان-زمان (x-t) متحرکی که روی خط راست حرکت می‌کند، شیب خط مماس بر نمودار در هر لحظه نشان‌دهنده کدام کمیت فیزیکی است؟',
+                options: [
+                    'مسافت پیموده‌شده',
+                    'سرعت لحظه‌ای متحرک',
+                    'شتاب متوسط',
+                    'نیروی اصطکاک وارد بر جسم'
+                ],
+                correct: 1,
+                explanation: 'پاسخ صحیح گزینه ۲ است. شیب نمودار x-t برابر با مشتق زمانی مکان (dx/dt) یعنی سرعت لحظه‌ای است.'
+            },
+            'simple-machines': {
+                q: 'در یک اهرم نوع اول، طول بازوی محرک (فاصله نیرو تا تکیه‌گاه) سه برابر طول بازوی مقاوم است. مزیت مکانیکی ایده‌آل این اهرم چقدر است؟',
+                options: [
+                    '۱/۳',
+                    '۱',
+                    '۳ (نیرو را ۳ برابر افزایش می‌دهد)',
+                    '۹'
+                ],
+                correct: 2,
+                explanation: 'پاسخ صحیح گزینه ۳ است. مزیت مکانیکی ایده‌آل اهرم A = L_E / L_R = 3 است، یعنی برای بلند کردن بار ۳۰۰ نیوتونی تنها ۱۰۰ نیوتون نیرو لازم است.'
+            },
+            'free-body-diagrams': {
+                q: 'جعبه‌ای به جرم m روی سطح شیب‌دار با زاویه θ نسبت به افق در حالت سکون قرار دارد. اندازه نیروی اصطکاک ایستایی (fs) برابر با کدام است؟',
+                options: [
+                    'mg cos(θ)',
+                    'mg sin(θ)',
+                    'μs · mg',
+                    'صفر'
+                ],
+                correct: 1,
+                explanation: 'پاسخ صحیح گزینه ۲ است. از آنجا که جسم در حال تعادل است، در راستای موازی با سطح شیب‌دار fs = mg sin(θ) است.'
+            }
+        };
+
+        if (challenges[sim.id]) return challenges[sim.id];
+        return {
+            q: `با توجه به اهداف آزمایش «${sim.title}»، انجام اندازه‌گیری‌های چندباره و مقایسه داده‌ها چه ضرورتی در روش علمی دارد؟`,
+            options: [
+                'تکرار آزمایش خطاهای تصادفی اندازه‌گیری را کاهش داده و تطابق مشاهدات با روابط تئوری کتب درسی را تایید می‌کند.',
+                'تکرار آزمایش همیشه نتایج تئوری را باطل می‌کند.',
+                'فرمول‌های فیزیک نیاز به بررسی تجربی ندارند و بدون آزمایش معتبرند.',
+                'دقت اندازه‌گیری ابزارها هیچ ربطی به نتایج گزارش کار ندارد.'
+            ],
+            correct: 0,
+            explanation: 'تکرار آزمایش و اندازه‌گیری دقیق با ابزارهای استاندارد، اساس روش علمی در فیزیک برای اعتبارسنجی فرضیه‌ها و قوانین است.'
+        };
+    }
+
+    async submitSelectedChallenge(simId) {
+        const sim = this.catalog.find(s => s.id === simId);
+        if (!sim) return;
+        const challenge = this.getChallengeForSim(sim);
+        const radios = document.getElementsByName(`lab-challenge-${simId}`);
+        let selectedIdx = -1;
+        for (const r of radios) {
+            if (r.checked) {
+                selectedIdx = parseInt(r.value, 10);
+                break;
+            }
+        }
+        if (selectedIdx === -1) {
+            alert('لطفاً یکی از گزینه‌ها را به عنوان پاسخ انتخاب فرمایید.');
+            return;
+        }
+
+        const feedbackEl = document.getElementById(`challenge-feedback-${simId}`);
+        const submitBtn = document.getElementById(`claim-lab-action-concept_challenge-${simId}`);
+
+        if (selectedIdx === challenge.correct) {
+            if (feedbackEl) {
+                feedbackEl.className = 'p-3.5 rounded-2xl bg-emerald-950/80 border border-emerald-500/70 text-emerald-200 text-xs leading-relaxed space-y-1 block mt-2';
+                feedbackEl.innerHTML = `
+                    <div class="flex items-center gap-2 font-black text-emerald-300">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        <span>آفرین! پاسخ شما کاملاً درست است (+۱۰ XP)</span>
+                    </div>
+                    <p class="text-[11px]">${challenge.explanation}</p>
+                `;
+            }
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.className = 'px-3.5 py-1.5 rounded-xl bg-emerald-950/80 border border-emerald-600/70 text-emerald-300 text-xs font-bold flex items-center gap-1.5 cursor-default';
+                submitBtn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i><span>امتیاز چالش ثبت شد (+۱۰ XP)</span>`;
+            }
+            if (window.lucide) window.lucide.createIcons();
+            await window.claimLabAction(simId, sim.title, 'concept_challenge', 10);
+        } else {
+            if (feedbackEl) {
+                feedbackEl.className = 'p-3.5 rounded-2xl bg-rose-950/80 border border-rose-500/70 text-rose-200 text-xs leading-relaxed space-y-1 block mt-2';
+                feedbackEl.innerHTML = `
+                    <div class="flex items-center gap-2 font-black text-rose-300">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                        <span>پاسخ صحیح نبود!</span>
+                    </div>
+                    <p class="text-[11px]">با تغییر پارامترها در شبیه‌ساز بالا و تحلیل روابط فیزیکی، مجدداً گزینه مناسب را انتخاب فرمایید.</p>
+                `;
+            }
+            if (window.lucide) window.lucide.createIcons();
+        }
+    }
+
+    async mount(type, containerId, mode = 'native') {
         const container = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
         if (!container) return;
 
         const simId = this.resolveSimId(type);
         this.activeSimId = simId;
         const sim = this.catalog.find(s => s.id === simId) || this.catalog[0];
+
+        // Fetch fresh lab progress if user is logged in
+        if (window.api && window.api.token && !this.userLabProgress) {
+            try {
+                this.userLabProgress = await window.api.getLabProgress();
+            } catch (e) {
+                console.warn('Could not fetch lab progress:', e);
+            }
+        }
+
+        const todayClaimed = (this.userLabProgress && this.userLabProgress.today_claimed_actions) || [];
+        const isExpRunClaimed = todayClaimed.includes(`${sim.id}_experiment_run`);
+        const isLogbookClaimed = todayClaimed.includes(`${sim.id}_logbook_note`);
+        const isChallengeClaimed = todayClaimed.includes(`${sim.id}_concept_challenge`);
+        const challenge = this.getChallengeForSim(sim);
 
         this.currentLiveState = {
             labId: sim.id,
@@ -1292,12 +1510,20 @@ class PhysicsSimulators {
                         <span>جعبه ابزار</span>
                     </button>
 
-                    <button id="claim-lab-xp-${sim.id}" 
-                        onclick="window.claimLabXp('${sim.id}', '${sim.title}')" 
+                    ${isExpRunClaimed ? `
+                    <button id="claim-lab-action-experiment_run-${sim.id}" disabled 
+                        class="px-3.5 py-1.5 rounded-xl bg-emerald-950/90 border border-emerald-600/70 text-emerald-300 text-xs font-bold flex items-center gap-1.5 cursor-default">
+                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        <span>آزمایش ثبت‌شده (+۲۰ XP)</span>
+                    </button>
+                    ` : `
+                    <button id="claim-lab-action-experiment_run-${sim.id}" 
+                        onclick="window.claimLabAction('${sim.id}', '${sim.title}', 'experiment_run', 20)" 
                         class="btn-duo-green text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md hover:scale-105 transition-all">
                         <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i>
                         <span>ثبت آزمایش (+۲۰ XP)</span>
                     </button>
+                    `}
                 </div>
             </div>
 
@@ -1346,22 +1572,27 @@ class PhysicsSimulators {
                     <button onclick="window.physicsSimulators.switchInfoTab('steps')" id="sim-tab-btn-steps" 
                         class="px-3.5 py-1.5 rounded-xl bg-teal-500 text-slate-950 font-black shadow flex items-center gap-1.5 transition-all">
                         <i data-lucide="list-ordered" class="w-3.5 h-3.5"></i>
-                        <span>دستور کار و سناریوی آزمایش</span>
+                        <span>دستور کار و سناریو</span>
                     </button>
                     <button onclick="window.physicsSimulators.switchInfoTab('formula')" id="sim-tab-btn-formula" 
                         class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all">
                         <i data-lucide="sigma" class="w-3.5 h-3.5"></i>
-                        <span>روابط و فرمول‌های حاکم</span>
+                        <span>روابط و فرمول‌ها</span>
                     </button>
                     <button onclick="window.physicsSimulators.switchInfoTab('logbook')" id="sim-tab-btn-logbook" 
                         class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all">
                         <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                        <span>دفترچه ثبت مشاهدات</span>
+                        <span>دفترچه ثبت مشاهدات ${isLogbookClaimed ? '<span class="text-[10px] text-emerald-400 font-bold">✓ ثبت‌شده</span>' : '<span class="text-[10px] text-teal-300">(+۱۵ XP)</span>'}</span>
+                    </button>
+                    <button onclick="window.physicsSimulators.switchInfoTab('challenge')" id="sim-tab-btn-challenge" 
+                        class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-amber-400"></i>
+                        <span>چالش مفهومی سمپاد ${isChallengeClaimed ? '<span class="text-[10px] text-emerald-400 font-bold">✓ حل‌شده</span>' : '<span class="text-[10px] text-amber-300">(+۱۰ XP)</span>'}</span>
                     </button>
                     <button onclick="window.physicsSimulators.switchInfoTab('misconceptions')" id="sim-tab-btn-misconceptions" 
                         class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center gap-1.5 transition-all">
                         <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400"></i>
-                        <span>تله‌های تستی و اشتباهات رایج</span>
+                        <span>تله‌های تستی سمپاد</span>
                     </button>
                 </div>
 
@@ -1404,20 +1635,60 @@ class PhysicsSimulators {
                 <!-- Tab Content 3: Logbook -->
                 <div id="sim-info-tab-logbook" class="hidden space-y-3 text-xs">
                     <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-                        <label class="block font-bold text-teal-300 text-xs">یادداشت داده‌ها، اندازه‌گیری‌ها و نتیجه‌گیری آزمایش:</label>
-                        <textarea id="live-lab-notes-input" rows="3" placeholder="برای نمونه: چگالی آب را ۱ اندازه گرفتم، با افزایش جرم چگالی تغییر نکرد و فقط حجم متناسب با آن بالا رفت..."
+                        <label class="block font-bold text-teal-300 text-xs">یادداشت داده‌ها، اندازه‌گیری‌ها و نتیجه‌گیری علمی آزمایش:</label>
+                        <textarea id="live-lab-notes-input" rows="3" placeholder="برای نمونه: داده‌های آزمایش را با مقادیر مختلف ثبت کردم و رابطه تئوری به طور دقیق اثبات شد..."
                             class="w-full p-3 rounded-xl border border-slate-700 bg-slate-950 text-white text-xs outline-none focus:border-teal-400"></textarea>
                         <div class="flex items-center justify-between">
-                            <span class="text-[10px] text-slate-400">یادداشت شما در فایل چاپی گزارش کار ثبت خواهد شد.</span>
-                            <button onclick="window.physicsSimulators.saveLogbookNote()" class="btn-duo-green text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow">
-                                <i data-lucide="save" class="w-3.5 h-3.5"></i>
-                                <span>ذخیره در دفترچه گزارش کار</span>
+                            <span class="text-[10px] text-slate-400">یادداشت شما در فایل چاپی گزارش کار ثبت و در پایگاه ذخیره می‌گردد.</span>
+                            ${isLogbookClaimed ? `
+                            <button disabled class="px-4 py-2 rounded-xl bg-emerald-950/80 border border-emerald-600/70 text-emerald-300 text-xs font-bold flex items-center gap-1.5 cursor-default">
+                                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                <span>مشاهدات ثبت شد (+۱۵ XP)</span>
                             </button>
+                            ` : `
+                            <button id="claim-lab-action-logbook_note-${sim.id}" onclick="window.physicsSimulators.saveLogbookNote()" class="btn-duo-green text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow">
+                                <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                                <span>ذخیره مشاهدات در کارنامه (+۱۵ XP)</span>
+                            </button>
+                            `}
                         </div>
                     </div>
                 </div>
 
-                <!-- Tab Content 4: Misconceptions -->
+                <!-- Tab Content 4: SAMPAD Conceptual Challenge -->
+                <div id="sim-info-tab-challenge" class="hidden space-y-4 text-xs">
+                    <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                                <i data-lucide="award" class="w-4 h-4"></i>
+                                <span>چالش مفهومی آزمایشگاه برای دانش‌آموزان استعدادهای درخشان (+۱۰ XP)</span>
+                            </span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold">سمپاد</span>
+                        </div>
+                        <p class="text-white text-xs sm:text-sm font-semibold leading-relaxed">${challenge.q}</p>
+                        <div class="space-y-2 mt-2" id="challenge-options-group-${sim.id}">
+                            ${challenge.options.map((opt, oIdx) => `
+                            <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-teal-500/60 cursor-pointer transition-all">
+                                <input type="radio" name="lab-challenge-${sim.id}" value="${oIdx}" class="mt-0.5 accent-teal-500" ${isChallengeClaimed && oIdx === challenge.correct ? 'checked' : ''}>
+                                <span class="text-slate-200 text-xs leading-relaxed">${opt}</span>
+                            </label>
+                            `).join('')}
+                        </div>
+                        <div id="challenge-feedback-${sim.id}" class="${isChallengeClaimed ? 'p-3 rounded-xl bg-emerald-950/80 border border-emerald-500/70 text-emerald-200 text-xs block' : 'hidden'}">
+                            ${isChallengeClaimed ? `<span class="flex items-center gap-1 font-bold text-emerald-400"><i data-lucide="check-circle" class="w-4 h-4"></i> امتیاز چالش قبلاً دریافت شده است: ${challenge.explanation}</span>` : ''}
+                        </div>
+                        ${!isChallengeClaimed ? `
+                        <div class="flex items-center justify-end pt-2">
+                            <button id="claim-lab-action-concept_challenge-${sim.id}" onclick="window.physicsSimulators.submitSelectedChallenge('${sim.id}')" class="btn-duo-yellow text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow">
+                                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                                <span>بررسی و ثبت پاسخ چالش (+۱۰ XP)</span>
+                            </button>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <!-- Tab Content 5: Misconceptions -->
                 <div id="sim-info-tab-misconceptions" class="hidden space-y-3 text-xs">
                     <div class="p-4 rounded-2xl bg-amber-950/40 border border-amber-800/60 text-amber-200 leading-relaxed text-[11px]">
                         <div class="flex items-center gap-2 font-black text-amber-300 text-xs mb-1.5">
@@ -1436,7 +1707,7 @@ class PhysicsSimulators {
     }
 
     switchInfoTab(targetTab) {
-        ['steps', 'formula', 'logbook', 'misconceptions'].forEach(t => {
+        ['steps', 'formula', 'logbook', 'challenge', 'misconceptions'].forEach(t => {
             const btn = document.getElementById(`sim-tab-btn-${t}`);
             const content = document.getElementById(`sim-info-tab-${t}`);
             if (btn && content) {
@@ -1496,7 +1767,7 @@ class PhysicsSimulators {
         }
     }
 
-    saveLogbookNote() {
+    async saveLogbookNote() {
         const input = document.getElementById('live-lab-notes-input');
         if (!input) return;
         const val = input.value.trim();
@@ -1507,7 +1778,10 @@ class PhysicsSimulators {
         if (!this.currentLiveState) this.currentLiveState = {};
         if (!this.currentLiveState.params) this.currentLiveState.params = {};
         this.currentLiveState.params['مشاهدات و یادداشت آزمایشگر'] = val;
-        alert('یادداشت شما با موفقیت در گزارش کار آزمایش ذخیره شد. می‌توانید از جعبه ابزار دکمه چاپ گزارش کار را بزنید.');
+
+        const simType = this.activeSimId || (this.currentLiveState && this.currentLiveState.labId) || 'density';
+        const title = (this.currentLiveState && this.currentLiveState.title) || 'آزمایشگاه فیزیک';
+        await window.claimLabAction(simType, title, 'logbook_note', 15);
     }
 
     // =========================================================================
@@ -1854,7 +2128,7 @@ class PhysicsSimulators {
             <div class="flex items-center justify-end gap-2 pt-1">
                 <button onclick="window.physicsSimulators.printReport()" class="btn-duo-green text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md">
                     <i data-lucide="printer" class="w-4 h-4"></i>
-                    <span>چاپ و دانلود گزارش آزمایش (PDF)</span>
+                    <span>چاپ و تحویل رسمی گزارش آزمایش (PDF) (+۱۵ XP)</span>
                 </button>
             </div>
         </div>
@@ -1869,9 +2143,13 @@ class PhysicsSimulators {
         const live = this.currentLiveState || {};
         const title = live.title || 'گزارش کار آزمایشگاه فیزیک';
         const params = live.params || {};
-        const obsEl = document.getElementById('logbook-observations');
+        const obsEl = document.getElementById('logbook-observations') || document.getElementById('live-lab-notes-input');
         const obs = obsEl ? obsEl.value : '';
         const user = window.store?.currentUser || {};
+
+        // Award XP for lab report generation
+        const simType = this.activeSimId || (this.currentLiveState && this.currentLiveState.labId) || 'density';
+        window.claimLabAction(simType, title, 'lab_report', 15);
 
         const printWindow = window.open('', '_blank');
         if (!printWindow) {
@@ -1892,10 +2170,16 @@ class PhysicsSimulators {
             <title>${title}</title>
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Vazirmatn:wght@400;600;700;800&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Vazirmatn:wght@400;600;700;800&display=swap" rel="stylesheet">
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
             <style>
-                body { font-family: 'Vazirmatn', 'Inter', system-ui, -apple-system, sans-serif; direction: rtl; padding: 30px; color: #0f172a; line-height: 1.6; }
+                @font-face {
+                    font-family: 'Vazirmatn';
+                    src: local('Vazirmatn'), local('Vazir'), local('B Vazir');
+                    font-weight: 100 900;
+                    font-style: normal;
+                }
+                body { font-family: 'Vazirmatn', 'Vazir', system-ui, -apple-system, sans-serif; direction: rtl; padding: 30px; color: #0f172a; line-height: 1.6; }
                 .font-mono, td:nth-child(2) { font-family: 'JetBrains Mono', 'Vazirmatn', monospace; direction: ltr; }
                 .header { text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 15px; margin-bottom: 20px; }
                 .meta { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px; font-weight: bold; }
@@ -1942,35 +2226,80 @@ class PhysicsSimulators {
 // Global singleton instance
 window.physicsSimulators = new PhysicsSimulators();
 
-// Gamification XP Award Handler
-window.claimLabXp = async function(simType, labTitleFa) {
+// Precise Gamification XP Award Handler (Multi-Action Tracking)
+window.claimLabAction = async function(simType, labTitleFa, actionType = 'experiment_run', xpAmount = 20) {
     if (!window.api || !window.api.token) {
         if (window.openAuthModal) window.openAuthModal('login');
-        return;
+        return null;
     }
-    const btn = document.getElementById(`claim-lab-xp-${simType}`);
+    const btn = document.getElementById(`claim-lab-action-${actionType}-${simType}`) || document.getElementById(`claim-lab-xp-${simType}`);
+    const originalContent = btn ? btn.innerHTML : '';
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = `<span class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block"></span>`;
     }
     try {
-        const res = await window.api.recordLabActivity(simType, labTitleFa, 20);
+        const res = await window.api.recordLabActivity(simType, labTitleFa, actionType, xpAmount);
+        
+        // Update local cache in singleton
+        if (window.physicsSimulators) {
+            if (!window.physicsSimulators.userLabProgress) {
+                window.physicsSimulators.userLabProgress = {
+                    total_lab_xp: 0,
+                    completed_labs_count: 0,
+                    completed_sim_ids: [],
+                    today_claimed_actions: []
+                };
+            }
+            const prog = window.physicsSimulators.userLabProgress;
+            const actionKey = `${simType}_${actionType}`;
+            if (!prog.today_claimed_actions.includes(actionKey)) {
+                prog.today_claimed_actions.push(actionKey);
+            }
+            if (!prog.completed_sim_ids.includes(simType)) {
+                prog.completed_sim_ids.push(simType);
+                prog.completed_labs_count = prog.completed_sim_ids.length;
+            }
+            if (res.xp_awarded) {
+                prog.total_lab_xp += res.xp_awarded;
+            }
+        }
+
+        if (res.already_claimed) {
+            if (btn) {
+                btn.className = 'px-3.5 py-1.5 rounded-xl bg-slate-800/90 border border-slate-600 text-slate-300 text-xs font-bold flex items-center gap-1.5 cursor-default';
+                btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5 text-cyan-400"></i><span>قبلاً دریافت شده</span>`;
+                if (window.lucide) window.lucide.createIcons();
+            }
+            if (window.store && window.store.showXpToast) {
+                window.store.showXpToast(0, `امتیاز این بخش قبلاً امروز برای این آزمایش ثبت شده است.`);
+            }
+            return res;
+        }
+
         if (btn) {
             btn.className = 'px-3.5 py-1.5 rounded-xl bg-emerald-950/90 border border-emerald-500 text-emerald-300 text-xs font-bold flex items-center gap-1.5 cursor-default';
-            btn.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i><span>امتیاز ثبت شد (+۲۰ XP)</span>`;
+            btn.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i><span>امتیاز ثبت شد (+${res.xp_awarded} XP)</span>`;
             if (window.lucide) window.lucide.createIcons();
         }
         if (window.store && window.store.showXpToast) {
-            window.store.showXpToast(res.xp_awarded || 20, `آزمایشگاه ${labTitleFa}`);
+            window.store.showXpToast(res.xp_awarded || xpAmount, `${res.action_title_fa || 'فعالیت آزمایشگاهی'}: ${labTitleFa}`);
         }
         if (window.store && window.store.refreshUser) {
             await window.store.refreshUser();
         }
+        return res;
     } catch (err) {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = `<span>تلاش مجدد ثبت</span>`;
+            btn.innerHTML = originalContent || `<span>تلاش مجدد ثبت</span>`;
         }
-        console.warn('Lab XP claim error:', err);
+        console.warn('Lab action XP claim error:', err);
+        return null;
     }
+};
+
+// Backward-compatible alias
+window.claimLabXp = function(simType, labTitleFa) {
+    return window.claimLabAction(simType, labTitleFa, 'experiment_run', 20);
 };

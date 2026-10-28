@@ -1603,6 +1603,22 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
         desc: 'بررسی جرم، حجم و نیروی شناوری ارشمیدس', formula: '\\rho = m/V', goals: []
     };
 
+    let labProgress = null;
+    if (window.api && window.api.token) {
+        try {
+            labProgress = await window.api.getLabProgress();
+            if (window.physicsSimulators) {
+                window.physicsSimulators.userLabProgress = labProgress;
+            }
+        } catch (e) {
+            console.warn('Could not load lab progress in catalog view:', e);
+        }
+    }
+
+    const completedCount = labProgress ? labProgress.completed_labs_count : 0;
+    const totalXp = labProgress ? labProgress.total_lab_xp : 0;
+    const progressPct = simCatalog.length > 0 ? Math.round((completedCount / simCatalog.length) * 100) : 0;
+
     container.innerHTML = `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <!-- Hero Header -->
@@ -1670,6 +1686,41 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
             </div>
         </div>
 
+        <!-- Student Lab Progress & Gamification Bar -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-teal-500/30 text-white shadow-xl space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-400 border border-teal-500/40 flex items-center justify-center font-black">
+                        <i data-lucide="award" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-400 block font-bold">کارنامه و پیشرفت آزمایشگاهی شما:</span>
+                        <span class="text-sm sm:text-base font-extrabold text-white flex items-center gap-1.5">
+                            <span class="font-mono text-emerald-400">${totalXp} XP</span>
+                            <span class="text-xs text-slate-300 font-normal">امتیاز کسب‌شده در فعالیت‌های تجربی و گزارش کار</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 text-xs font-bold">
+                    <div class="text-right">
+                        <span class="text-slate-400 text-[10px] block">آزمایش‌های تکمیل‌شده:</span>
+                        <span class="text-emerald-400 font-mono text-sm">${completedCount} / ${simCatalog.length} آزمایش</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-400 text-[10px] block">درصد تکمیل:</span>
+                        <span class="text-cyan-300 font-mono text-sm">${progressPct}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress track -->
+            <div class="w-full h-2 rounded-full bg-slate-950 border border-slate-800 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-teal-500 via-cyan-400 to-emerald-400 rounded-full transition-all duration-500" 
+                    style="width: ${Math.min(100, progressPct)}%"></div>
+            </div>
+        </div>
+
         <!-- Experiment Selector Grid -->
         <div class="space-y-3">
             <div class="flex items-center justify-between text-xs font-bold text-slate-400">
@@ -1690,6 +1741,7 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                     return s.grade.toString() === gradeFilter && s.gradeKey !== 'space';
                 }).map(s => {
                     const isSelected = s.id === activeSim;
+                    const isCompleted = labProgress && labProgress.completed_sim_ids && labProgress.completed_sim_ids.includes(s.id);
                     const gradeColor = s.gradeKey === 'space'
                         ? 'text-cyan-400 bg-cyan-950/60 border-cyan-800/40'
                         : (s.gradeKey === 'featured' ? 'text-sky-300 bg-sky-950/60 border-sky-800/40' : (s.grade === 7 ? 'text-amber-400 bg-amber-950/60 border-amber-800/40' : (s.grade === 8 ? 'text-blue-400 bg-blue-950/60 border-blue-800/40' : 'text-purple-400 bg-purple-950/60 border-purple-800/40')));
@@ -1702,9 +1754,17 @@ async function renderSimulatorsCatalogView(container, activeSim = 'density', cur
                             <span class="w-7 h-7 rounded-xl bg-slate-800 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
                                 <i data-lucide="${s.icon || 'atom'}" class="w-3.5 h-3.5"></i>
                             </span>
-                            <span class="text-[9px] px-1.5 py-0.5 rounded border font-mono font-bold ${gradeColor}">
-                                ${s.gradeTitle}
-                            </span>
+                            <div class="flex items-center gap-1">
+                                ${isCompleted ? `
+                                <span class="text-[9px] px-1 py-0.5 rounded border font-bold text-emerald-300 bg-emerald-950/80 border-emerald-700/60 flex items-center gap-0.5">
+                                    <i data-lucide="check" class="w-2.5 h-2.5"></i>
+                                    <span>انجام‌شده</span>
+                                </span>
+                                ` : ''}
+                                <span class="text-[9px] px-1.5 py-0.5 rounded border font-mono font-bold ${gradeColor}">
+                                    ${s.gradeTitle}
+                                </span>
+                            </div>
                         </div>
                         <div>
                             <span class="text-xs font-bold block truncate leading-tight">${s.title}</span>
