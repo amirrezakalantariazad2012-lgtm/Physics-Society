@@ -13,3 +13,5 @@ python-multipart>=0.0.9
 httpx>=0.27.0
 pytest>=8.0.0
 psycopg2-binary>=2.9.9
+websockets>=12.0.0
+wsproto>=1.2.0

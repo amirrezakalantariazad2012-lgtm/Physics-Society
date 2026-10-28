@@ -948,8 +948,14 @@ class PhysicsSimulators {
         // Exact match
         if (this.catalog.some(s => s.id === raw)) return raw;
 
+        // Match by localFile or file basename
+        const matchByFile = this.catalog.find(s => s.localFile === raw || s.localFile === `${raw}.html` || s.localFile.replace('.html', '') === raw);
+        if (matchByFile) return matchByFile.id;
+
         // Clean aliases mapping to official PhET simulations
         const aliasMap = {
+            'energy-skate-park': 'energy-skate',
+            'energy-skate': 'energy-skate',
             'calorimetry': 'energy-forms',
             'energy': 'energy-skate',
             'skate': 'energy-skate',

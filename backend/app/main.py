@@ -122,7 +122,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(self), display-capture=(self), geolocation=()"
     
     # Prevent stale caching of HTML, JS, CSS, and Simulators so code updates appear immediately in all views
     path = request.url.path
