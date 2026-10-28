@@ -41,6 +41,8 @@ def init_live_db():
             room_code TEXT PRIMARY KEY,
             title TEXT NOT NULL,
             sim_id TEXT NOT NULL,
+            sim_title TEXT DEFAULT '',
+            is_locked INTEGER DEFAULT 1,
             grade INTEGER NOT NULL,
             teacher_name TEXT NOT NULL,
             current_state_json TEXT NOT NULL,
@@ -51,6 +53,15 @@ def init_live_db():
             updated_at REAL NOT NULL
         )
         """)
+        # Ensure schema migrations for existing SQLite databases
+        try:
+            conn.execute("ALTER TABLE rooms ADD COLUMN sim_title TEXT DEFAULT '';")
+        except Exception:
+            pass
+        try:
+            conn.execute("ALTER TABLE rooms ADD COLUMN is_locked INTEGER DEFAULT 1;")
+        except Exception:
+            pass
         conn.execute("""
         CREATE TABLE IF NOT EXISTS chat_messages (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -194,6 +205,7 @@ def ensure_event_listener_started():
 class RoomCreateRequest(BaseModel):
     title: str = Field(..., min_length=3, max_length=150)
     sim_id: str = Field("motion-1d", min_length=2, max_length=50)
+    sim_title: Optional[str] = Field("حرکت بر روی خط راست", max_length=150)
     grade: Optional[int] = Field(9, ge=7, le=9)
     teacher_name: Optional[str] = Field("دبیر فیزیک سمپاد", max_length=100)
 
@@ -215,13 +227,20 @@ class PollCreateRequest(BaseModel):
 class PollVoteRequest(BaseModel):
     option_index: int
 
+class ChangeSimulatorRequest(BaseModel):
+    sim_id: str
+    sim_title: Optional[str] = ""
+
+class ToggleLockRequest(BaseModel):
+    is_locked: bool
+
 @router.get("/rooms")
 async def list_live_rooms():
     """Returns active live laboratory classrooms with live student counts across all workers"""
     ensure_event_listener_started()
     now = time.time()
     with get_db() as conn:
-        cur = conn.execute("SELECT room_code, title, sim_id, grade, teacher_name, created_at, updated_at FROM rooms ORDER BY updated_at DESC LIMIT 20")
+        cur = conn.execute("SELECT room_code, title, sim_id, COALESCE(sim_title, '') as sim_title, COALESCE(is_locked, 1) as is_locked, grade, teacher_name, created_at, updated_at FROM rooms ORDER BY updated_at DESC LIMIT 20")
         rows = cur.fetchall()
         result = []
         for r in rows:
@@ -232,6 +251,8 @@ async def list_live_rooms():
                 "room_code": r["room_code"],
                 "title": r["title"],
                 "sim_id": r["sim_id"],
+                "sim_title": r["sim_title"],
+                "is_locked": bool(r["is_locked"]),
                 "grade": r["grade"],
                 "teacher_name": r["teacher_name"],
                 "viewers_count": viewers_count,
@@ -257,9 +278,9 @@ async def create_live_room(req: RoomCreateRequest):
 
     with get_db() as conn:
         conn.execute("""
-        INSERT INTO rooms (room_code, title, sim_id, grade, teacher_name, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
-        """, (code, req.title, req.sim_id, req.grade, req.teacher_name, default_state, default_notes, now, now))
+        INSERT INTO rooms (room_code, title, sim_id, sim_title, is_locked, grade, teacher_name, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, created_at, updated_at)
+        VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, NULL, NULL, ?, ?)
+        """, (code, req.title, req.sim_id, req.sim_title or "", req.grade, req.teacher_name, default_state, default_notes, now, now))
         conn.commit()
 
     return {
@@ -267,6 +288,7 @@ async def create_live_room(req: RoomCreateRequest):
         "room_code": code,
         "title": req.title,
         "sim_id": req.sim_id,
+        "sim_title": req.sim_title or "",
         "share_url": f"/#live-lab/{code}"
     }
 
@@ -276,7 +298,7 @@ async def get_room_details(room_code: str):
     ensure_event_listener_started()
     now = time.time()
     with get_db() as conn:
-        cur = conn.execute("SELECT room_code, title, sim_id, grade, teacher_name, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, created_at FROM rooms WHERE room_code = ?", (room_code,))
+        cur = conn.execute("SELECT room_code, title, sim_id, COALESCE(sim_title, '') as sim_title, COALESCE(is_locked, 1) as is_locked, grade, teacher_name, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, created_at FROM rooms WHERE room_code = ?", (room_code,))
         row = cur.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="اتاق پخش زنده یافت نشد.")
@@ -298,6 +320,8 @@ async def get_room_details(room_code: str):
             "room_code": row["room_code"],
             "title": row["title"],
             "sim_id": row["sim_id"],
+            "sim_title": row["sim_title"],
+            "is_locked": bool(row["is_locked"]),
             "grade": row["grade"],
             "teacher_name": row["teacher_name"],
             "viewers_count": viewers_count,
@@ -314,7 +338,7 @@ async def sync_room_state(room_code: str, since: float = Query(0.0)):
     """Fast polling sync endpoint guaranteeing lockstep across multi-worker Uvicorn instances"""
     ensure_event_listener_started()
     with get_db() as conn:
-        cur = conn.execute("SELECT current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, updated_at FROM rooms WHERE room_code = ?", (room_code,))
+        cur = conn.execute("SELECT sim_id, COALESCE(sim_title, '') as sim_title, COALESCE(is_locked, 1) as is_locked, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json, updated_at FROM rooms WHERE room_code = ?", (room_code,))
         row = cur.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Room not found")
@@ -330,6 +354,9 @@ async def sync_room_state(room_code: str, since: float = Query(0.0)):
 
         return {
             "updated_at": row["updated_at"],
+            "sim_id": row["sim_id"],
+            "sim_title": row["sim_title"],
+            "is_locked": bool(row["is_locked"]),
             "current_state": json.loads(row["current_state_json"]),
             "teacher_notes": json.loads(row["teacher_notes_json"]),
             "active_poll": json.loads(row["active_poll_json"]) if row["active_poll_json"] else None,
@@ -450,6 +477,32 @@ async def submit_poll_vote(room_code: str, req: PollVoteRequest):
     await broadcast_to_local_sockets(room_code, {"type": "poll_update", **payload})
     return {"success": True, "votes": votes, "total": total}
 
+@router.post("/rooms/{room_code}/change-simulator")
+async def change_room_simulator(room_code: str, req: ChangeSimulatorRequest):
+    """Teacher switches the active laboratory simulator for all connected students in real-time"""
+    ensure_event_listener_started()
+    now_t = time.time()
+    with get_db() as conn:
+        conn.execute("UPDATE rooms SET sim_id = ?, sim_title = ?, updated_at = ? WHERE room_code = ?", (req.sim_id, req.sim_title or "", now_t, room_code))
+        conn.commit()
+    sim_payload = {"sim_id": req.sim_id, "sim_title": req.sim_title or "", "timestamp": now_t}
+    publish_event(room_code, "simulator_changed", sim_payload)
+    await broadcast_to_local_sockets(room_code, {"type": "simulator_changed", **sim_payload})
+    return {"success": True, **sim_payload}
+
+@router.post("/rooms/{room_code}/toggle-lock")
+async def toggle_room_lock(room_code: str, req: ToggleLockRequest):
+    """Teacher toggles lock on student interactions across all connected devices"""
+    ensure_event_listener_started()
+    now_t = time.time()
+    with get_db() as conn:
+        conn.execute("UPDATE rooms SET is_locked = ?, updated_at = ? WHERE room_code = ?", (1 if req.is_locked else 0, now_t, room_code))
+        conn.commit()
+    lock_payload = {"is_locked": req.is_locked, "timestamp": now_t}
+    publish_event(room_code, "lock_toggled", lock_payload)
+    await broadcast_to_local_sockets(room_code, {"type": "lock_toggled", **lock_payload})
+    return {"success": True, **lock_payload}
+
 @router.websocket("/ws/{room_code}")
 async def live_lab_websocket(
     websocket: WebSocket,
@@ -492,13 +545,16 @@ async def live_lab_websocket(
 
     # Send initial room state to newly joined user
     with get_db() as conn:
-        cur = conn.execute("SELECT current_state_json, teacher_notes_json, active_poll_json, poll_votes_json FROM rooms WHERE room_code = ?", (room_code,))
+        cur = conn.execute("SELECT sim_id, COALESCE(sim_title, '') as sim_title, COALESCE(is_locked, 1) as is_locked, current_state_json, teacher_notes_json, active_poll_json, poll_votes_json FROM rooms WHERE room_code = ?", (room_code,))
         row = cur.fetchone()
         if row:
             await websocket.send_text(json.dumps({
                 "type": "welcome",
                 "room_code": room_code,
                 "role": role,
+                "sim_id": row["sim_id"],
+                "sim_title": row["sim_title"],
+                "is_locked": bool(row["is_locked"]),
                 "viewers_count": total_viewers,
                 "state": json.loads(row["current_state_json"]),
                 "notes": json.loads(row["teacher_notes_json"]),
@@ -629,7 +685,31 @@ async def live_lab_websocket(
                     publish_event(room_code, "chat_message", chat_data)
                     await broadcast_to_local_sockets(room_code, {"type": "chat_message", **chat_data})
 
-            # 9. Ping Heartbeat & Viewer Update
+            # 9. Change Active Laboratory Simulator (Teacher Switching Experiment Live)
+            elif msg_type == "change_simulator":
+                new_sim_id = data.get("sim_id", "").strip()
+                sim_title = data.get("sim_title", "").strip()
+                if new_sim_id:
+                    now_t = time.time()
+                    with get_db() as conn:
+                        conn.execute("UPDATE rooms SET sim_id = ?, sim_title = ?, updated_at = ? WHERE room_code = ?", (new_sim_id, sim_title, now_t, room_code))
+                        conn.commit()
+                    sim_event = {"sim_id": new_sim_id, "sim_title": sim_title, "timestamp": now_t}
+                    publish_event(room_code, "simulator_changed", sim_event)
+                    await broadcast_to_local_sockets(room_code, {"type": "simulator_changed", **sim_event})
+
+            # 10. Toggle Student Interaction Lock
+            elif msg_type == "toggle_lock":
+                is_locked = bool(data.get("is_locked", True))
+                now_t = time.time()
+                with get_db() as conn:
+                    conn.execute("UPDATE rooms SET is_locked = ?, updated_at = ? WHERE room_code = ?", (1 if is_locked else 0, now_t, room_code))
+                    conn.commit()
+                lock_event = {"is_locked": is_locked, "timestamp": now_t}
+                publish_event(room_code, "lock_toggled", lock_event)
+                await broadcast_to_local_sockets(room_code, {"type": "lock_toggled", **lock_event})
+
+            # 11. Ping Heartbeat & Viewer Update
             elif msg_type == "ping":
                 now_t = time.time()
                 with get_db() as conn:
