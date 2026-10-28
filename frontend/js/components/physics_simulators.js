@@ -898,7 +898,6 @@ const SIMULATOR_CATALOG = [
         formula: 'v = \\frac{\\Delta x}{\\Delta t} = \\text{شیب } x-t \\quad , \\quad a = \\frac{\\Delta v}{\\Delta t} \\quad , \\quad \\Delta x = \\text{مساحت زیر } v-t',
         badge: 'The Physics Classroom — تحلیل مفهومی نمودار',
         languageFa: 'خیر (انگلیسی ساده)',
-        needsVpn: 'خیر (دسترسی آزاد)',
         externalUrl: 'https://www.physicsclassroom.com/Physics-Interactives/1-D-Kinematics',
         goals: [
             'تحلیل رفتار متحرک با شتاب ثابت مثبت و منفی و بررسی شرط تندشونده یا کندشونده بودن',
@@ -933,7 +932,6 @@ const SIMULATOR_CATALOG = [
         formula: 'R \\cdot d_R = E \\cdot d_E \\quad , \\quad A = \\frac{R}{E} = \\frac{d_E}{d_R} \\quad , \\quad A_{\\text{pulley}} = n \\text{ (طناب‌های حامی)}',
         badge: 'Walter Fendt — ماشین‌های ساده، اهرم و قرقره',
         languageFa: 'خیر (چندزبانه)',
-        needsVpn: 'خیر (دسترسی آزاد)',
         externalUrl: 'https://www.walter-fendt.de/html5/phen/lever_en.htm',
         goals: [
             'بررسی قانون تعادل گشتاور نیروها در اهرم‌های نوع اول، دوم و سوم',
@@ -968,7 +966,6 @@ const SIMULATOR_CATALOG = [
         formula: '\\sum \\vec{F} = m\\vec{a} \\quad , \\quad N = mg \\cos\\theta \\quad , \\quad f_s \\le \\mu_s N \\quad , \\quad f_k = \\mu_k N',
         badge: 'oPhysics — دیاگرام جسم آزاد (FBD) و شیب',
         languageFa: 'خیر',
-        needsVpn: 'خیر (دسترسی آزاد)',
         externalUrl: 'https://www.ophysics.com/f1.html',
         goals: [
             'رسم و درک برداری ۴ نیروی اصلی وارد بر جسم: وزن (W)، عمودی سطح (N)، اصطکاک (f) و نیروی اعمالی (F)',
@@ -1252,7 +1249,7 @@ class PhysicsSimulators {
                         <div class="flex flex-wrap items-center gap-2">
                             <h3 class="font-extrabold text-sm sm:text-base text-white">${sim.title}</h3>
                             <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/60 font-bold">
-                                بومی و آفلاین (بدون فیلترشکن)
+                                بومی و آفلاین
                             </span>
                             <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold">
                                 ${sim.gradeTitle}
