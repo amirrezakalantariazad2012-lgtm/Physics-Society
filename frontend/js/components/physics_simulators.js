@@ -1182,13 +1182,38 @@ class PhysicsSimulators {
 
             <!-- Standalone IFrame Viewport (100% Offline, Same-Origin) -->
             <div id="sim-viewport-frame-wrapper" class="relative w-full ${frameHeight} bg-slate-950 flex flex-col justify-center items-center overflow-hidden">
+                <!-- Smooth Loading Overlay -->
+                <div id="sim-frame-loader" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950 text-teal-400 gap-3 transition-opacity duration-300">
+                    <div class="w-10 h-10 border-4 border-teal-500/20 border-t-teal-400 rounded-full animate-spin"></div>
+                    <span class="text-xs font-bold text-slate-300">در حال آماده‌سازی و بارگذاری شبیه‌ساز فیزیک...</span>
+                </div>
+
+                <!-- Resilient Error Boundary -->
+                <div id="sim-frame-error" class="hidden absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/95 text-slate-200 p-6 text-center gap-3">
+                    <i data-lucide="alert-circle" class="w-10 h-10 text-amber-400"></i>
+                    <h4 class="font-black text-sm text-white">عدم پاسخگویی شبیه‌ساز</h4>
+                    <p class="text-xs text-slate-400 max-w-sm">در صورتی که شبیه‌ساز به درستی بارگذاری نشده است، می‌توانید آن را دوباره راه‌اندازی کنید یا در پنجره مجزا باز نمایید.</p>
+                    <div class="flex items-center gap-3 mt-2">
+                        <button onclick="window.physicsSimulators.reloadActiveFrame()" class="px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center gap-1.5">
+                            <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+                            <span>تلاش مجدد</span>
+                        </button>
+                        <button onclick="window.physicsSimulators.openInStandaloneTab('${sim.localUrl}')" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 font-bold text-xs flex items-center gap-1.5 border border-slate-700">
+                            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                            <span>پنجره مستقل</span>
+                        </button>
+                    </div>
+                </div>
+
                 <iframe 
                     id="sim-active-iframe"
                     src="${sim.localUrl}" 
                     title="${sim.title}"
                     class="w-full h-full border-0 select-none bg-slate-950"
-                    allow="fullscreen; autoplay; accelerometer; gyroscope"
-                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+                    allow="fullscreen; autoplay; accelerometer; gyroscope; clipboard-write; microphone; camera"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads"
+                    onload="(function(){ const l = document.getElementById('sim-frame-loader'); if (l) l.classList.add('hidden'); if(window.lucide) window.lucide.createIcons(); })()"
+                    onerror="(function(){ const e = document.getElementById('sim-frame-error'); if (e) e.classList.remove('hidden'); if(window.lucide) window.lucide.createIcons(); })()"
                     loading="eager">
                 </iframe>
             </div>
@@ -1337,10 +1362,16 @@ class PhysicsSimulators {
 
     reloadActiveFrame() {
         const iframe = document.getElementById('sim-active-iframe');
+        const loader = document.getElementById('sim-frame-loader');
+        const errorBoundary = document.getElementById('sim-frame-error');
+        if (loader) loader.classList.remove('hidden');
+        if (errorBoundary) errorBoundary.classList.add('hidden');
         if (iframe) {
             const currentSrc = iframe.src;
-            iframe.src = '';
-            setTimeout(() => { iframe.src = currentSrc; }, 50);
+            iframe.src = 'about:blank';
+            setTimeout(() => { 
+                iframe.src = currentSrc; 
+            }, 60);
         }
     }
 

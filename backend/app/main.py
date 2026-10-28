@@ -96,7 +96,24 @@ class SlidingWindowRateLimiter:
 
 rate_limiter = SlidingWindowRateLimiter()
 
-# 1. Security Headers Middleware (OWASP Secure Headers Recommendation)
+import logging
+import traceback
+
+logger = logging.getLogger("physics_society.core")
+
+@app.exception_handler(Exception)
+async def global_unhandled_exception_handler(request: Request, exc: Exception):
+    """Prevents worker crashes by catching unhandled exceptions and returning structured JSON"""
+    logger.error(f"[Unhandled Error at {request.method} {request.url.path}]: {str(exc)}\n{traceback.format_exc()}")
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "خطای غیرمنتظره در سرور رخ داده است. لطفاً چند لحظه بعد تلاش کنید.",
+            "path": request.url.path
+        }
+    )
+
+# 1. Security Headers & Caching Middleware
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -106,11 +123,20 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     
-    # Inject CSP on non-API/docs routes
+    # Static & Simulator Caching for instant sub-second lab loads
+    if request.url.path.startswith("/simulators") or request.url.path.startswith("/static/assets"):
+        response.headers["Cache-Control"] = "public, max-age=86400, stale-while-revalidate=604800"
+
+    # Inject comprehensive CSP supporting PhET WebWorkers, Audio, and offline simulations
     if not request.url.path.startswith("/api/docs") and not request.url.path.startswith("/api/redoc"):
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com; "
+            "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://unpkg.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
             "img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; "
+            "media-src 'self' data: blob:; "
+            "worker-src 'self' blob: data:; "
+            "child-src 'self' blob: data:; "
             "connect-src 'self' https://openrouter.ai https://api.openai.com; frame-src 'self' data: blob:; frame-ancestors 'self';"
         )
     return response
