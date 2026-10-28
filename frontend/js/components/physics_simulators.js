@@ -1441,6 +1441,9 @@ class PhysicsSimulators {
 
         const isDuoPoint = container.id === 'duo-sim-mount-point';
         const frameHeight = isDuoPoint ? 'h-[500px]' : 'h-[640px] sm:h-[720px]';
+        const buster = Date.now();
+        const baseSimUrl = sim.localUrl || '';
+        const simIframeSrc = baseSimUrl ? (baseSimUrl.includes('?') ? `${baseSimUrl}&v=${buster}` : `${baseSimUrl}?v=${buster}`) : '';
 
         container.innerHTML = `
         <div id="sim-master-card" class="rounded-3xl bg-slate-900 border border-slate-700/80 overflow-hidden shadow-2xl flex flex-col space-y-0 transition-all">
@@ -1539,7 +1542,8 @@ class PhysicsSimulators {
 
                 <iframe 
                     id="sim-active-iframe"
-                    src="${sim.localUrl}" 
+                    data-base-url="${baseSimUrl}"
+                    src="${simIframeSrc}" 
                     title="${sim.title}"
                     class="w-full h-full border-0 select-none bg-white"
                     allow="fullscreen; autoplay; accelerometer; gyroscope; clipboard-write; microphone; camera"
@@ -1713,7 +1717,8 @@ class PhysicsSimulators {
 
     openInStandaloneTab(url) {
         if (!url) return;
-        window.open(url, '_blank');
+        const cleanUrl = url.split('?')[0];
+        window.open(`${cleanUrl}?v=${Date.now()}`, '_blank');
     }
 
     toggleFullscreen(elementId) {
@@ -1744,10 +1749,11 @@ class PhysicsSimulators {
         if (loader) loader.classList.remove('hidden');
         if (errorBoundary) errorBoundary.classList.add('hidden');
         if (iframe) {
-            const currentSrc = iframe.src;
+            const raw = iframe.getAttribute('data-base-url') || iframe.src;
+            const baseUrl = raw.split('?')[0];
             iframe.src = 'about:blank';
             setTimeout(() => { 
-                iframe.src = currentSrc; 
+                iframe.src = `${baseUrl}?v=${Date.now()}`; 
             }, 60);
         }
     }

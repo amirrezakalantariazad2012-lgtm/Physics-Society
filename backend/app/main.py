@@ -123,9 +123,19 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     
-    # Static & Simulator Caching for instant sub-second lab loads
-    if request.url.path.startswith("/simulators") or request.url.path.startswith("/static/assets"):
-        response.headers["Cache-Control"] = "public, max-age=86400, stale-while-revalidate=604800"
+    # Prevent stale caching of HTML, JS, CSS, and Simulators so code updates appear immediately in all views
+    path = request.url.path
+    if (
+        path.startswith("/simulators")
+        or path.endswith((".html", ".js", ".css"))
+        or path.startswith("/static/js")
+        or not ("." in path.split("/")[-1])
+    ):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    elif path.startswith("/static/assets"):
+        response.headers["Cache-Control"] = "public, max-age=3600"
 
     # Inject comprehensive CSP supporting PhET WebWorkers, Audio, and offline simulations
     if not request.url.path.startswith("/api/docs") and not request.url.path.startswith("/api/redoc"):
