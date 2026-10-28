@@ -177,6 +177,10 @@ async function renderCurrentView() {
         if (window.renderLeaderboardsView) {
             await window.renderLeaderboardsView('app-main-content');
         }
+    } else if (view === 'live-lab') {
+        if (window.liveLab) {
+            await window.liveLab.render(mainContainer, params.id || null);
+        }
     } else if (view === 'simulators') {
         await renderSimulatorsCatalogView(mainContainer, params.id || 'density');
     } else if (view === 'badges') {
@@ -267,7 +271,13 @@ async function renderLandingView(container) {
                             <span>آزمایشگاه‌های ۲۷گانه PhET</span>
                         </button>
 
-                        <a href="https://github.com/amirrezakalantariazad2012-lgtm/Physics-Society/releases/latest/download/physics-society.apk" 
+                        <button onclick="window.store.setView('live-lab')" class="px-5 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-rose-600/20 flex items-center gap-2 transition-all hover:scale-[1.02]">
+                            <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                            <i data-lucide="radio" class="w-4 h-4"></i>
+                            <span>پخش زنده کلاس دبیر</span>
+                        </button>
+
+                        <a href="/downloads/physics-society.apk" download="PhysicsSociety-SAMPAD.apk" 
                            target="_blank" 
                            rel="noopener noreferrer" 
                            class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 flex items-center gap-2 transition-all hover:scale-[1.02]"

@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from app.config import settings
 from app.database import engine, Base, SessionLocal
 import app.models
-from app.routers import auth, curriculum, exams, competitions, gamification, admin, system, ai
+from app.routers import auth, curriculum, exams, competitions, gamification, admin, system, ai, live_lab
 from app.seed.curriculum_seed import seed_base_system
 from app.seed.question_bank import seed_complete_curriculum_and_questions
 
@@ -213,6 +213,7 @@ app.include_router(competitions.router, prefix="/api")
 app.include_router(gamification.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
+app.include_router(live_lab.router, prefix="/api")
 
 # Uploaded files directory for study materials & notes (Persisted in volume data/uploads)
 uploads_dir = os.path.abspath(settings.UPLOAD_DIR)
@@ -237,6 +238,35 @@ if os.path.exists(frontend_dir):
                 "Clear-Site-Data": '"cache"'
             }
         )
+
+    # Direct Android APK Download Routes (Hosted locally on server)
+    base_project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+    @app.get("/downloads/physics-society.apk", include_in_schema=False)
+    @app.get("/api/download/apk", tags=["System"])
+    async def download_android_apk():
+        apk_candidates = [
+            os.path.join(frontend_dir, "downloads", "physics-society.apk"),
+            os.path.join(base_project_dir, "frontend", "downloads", "physics-society.apk"),
+            os.path.join(base_project_dir, "downloads", "physics-society.apk"),
+            os.path.join(base_project_dir, "release-output", "physics-society.apk"),
+        ]
+        for p in apk_candidates:
+            if os.path.isfile(p):
+                return FileResponse(
+                    path=p,
+                    media_type="application/vnd.android.package-archive",
+                    filename="PhysicsSociety-SAMPAD-v2.1.apk",
+                    headers={
+                        "Cache-Control": "public, max-age=3600",
+                        "Content-Disposition": 'attachment; filename="PhysicsSociety-SAMPAD-v2.1.apk"'
+                    }
+                )
+        return JSONResponse(status_code=404, content={"detail": "فایل نصبی اپلیکیشن اندروید روی سرور یافت نشد."})
+
+    downloads_dir = os.path.join(frontend_dir, "downloads")
+    if os.path.exists(downloads_dir):
+        app.mount("/downloads", StaticFiles(directory=downloads_dir), name="downloads")
 
     simulators_dir = os.path.join(frontend_dir, "simulators")
     if os.path.exists(simulators_dir):

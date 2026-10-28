@@ -919,6 +919,7 @@
             updateHUD();
             redrawTrack();
             redrawGraphs();
+            broadcastLiveState();
         }
 
         function animationLoop(timestamp) {
@@ -1280,6 +1281,7 @@
                 isDraggingGlider = true;
                 isRunning = false;
                 updatePlayBtn();
+            broadcastLiveState();
             } else {
                 // Otherwise start panning camera
                 isPanningTrack = true;
@@ -1331,6 +1333,7 @@
                     isDraggingGlider = true;
                     isRunning = false;
                     updatePlayBtn();
+            broadcastLiveState();
                 } else {
                     isPanningTrack = true;
                     panStartX = e.touches[0].clientX;
@@ -1646,6 +1649,7 @@
         function togglePlay() {
             isRunning = !isRunning;
             updatePlayBtn();
+            broadcastLiveState();
         }
 
         function updatePlayBtn() {
@@ -1660,6 +1664,7 @@
         function stepForward(dt = 0.1) {
             isRunning = false;
             updatePlayBtn();
+            broadcastLiveState();
             simStep(dt);
         }
 
@@ -1671,6 +1676,7 @@
         function resetAll() {
             isRunning = false;
             updatePlayBtn();
+            broadcastLiveState();
             x0 = 0.0;
             v0 = 0.0;
             aConst = 0.0;
@@ -1844,7 +1850,68 @@
             updateHUD();
             redrawTrack();
             redrawGraphs();
+            broadcastLiveState();
         }
+
+        
+        // --- REAL-TIME CLASSROOM SYNCHRONIZATION HOOKS (TEACHER & STUDENT) ---
+        function broadcastLiveState() {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'TEACHER_SIM_STATE_UPDATE',
+                    payload: {
+                        x0: x0,
+                        v0: v0,
+                        a: aConst,
+                        curX: curX,
+                        curV: curV,
+                        curA: curA,
+                        curT: curT,
+                        isRunning: isRunning
+                    }
+                }, '*');
+            }
+        }
+
+        window.addEventListener('message', function(event) {
+            if (!event.data || typeof event.data !== 'object') return;
+            var msg = event.data;
+            if (msg.type === 'SYNC_SIM_STATE') {
+                var p = msg.payload || {};
+                if (typeof p.x0 === 'number') {
+                    x0 = p.x0;
+                    var np = document.getElementById('num-pos');
+                    var sp = document.getElementById('slider-pos');
+                    if (np) np.value = x0.toFixed(1);
+                    if (sp) sp.value = Math.max(-50, Math.min(50, x0));
+                }
+                if (typeof p.v0 === 'number') {
+                    v0 = p.v0;
+                    var nv = document.getElementById('num-vel');
+                    var sv = document.getElementById('slider-vel');
+                    if (nv) nv.value = v0.toFixed(1);
+                    if (sv) sv.value = Math.max(-25, Math.min(25, v0));
+                }
+                if (typeof p.a === 'number') {
+                    aConst = p.a;
+                    var na = document.getElementById('num-acc');
+                    var sa = document.getElementById('slider-acc');
+                    if (na) na.value = aConst.toFixed(1);
+                    if (sa) sa.value = Math.max(-10, Math.min(10, aConst));
+                }
+                if (typeof p.curX === 'number') curX = p.curX;
+                if (typeof p.curV === 'number') curV = p.curV;
+                if (typeof p.curA === 'number') curA = p.curA;
+                if (typeof p.curT === 'number') curT = p.curT;
+                if (typeof p.isRunning === 'boolean' && p.isRunning !== isRunning) {
+                    togglePlay();
+                }
+                if (p.reset) resetAll();
+                updateHUD();
+                redrawTrack();
+                redrawGraphs();
+            }
+        });
 
         // Start initialization on DOM load
         window.addEventListener('DOMContentLoaded', init);

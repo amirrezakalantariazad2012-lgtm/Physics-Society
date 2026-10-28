@@ -53,6 +53,11 @@ function renderNavbar() {
                         <i data-lucide="flask-conical" class="w-4 h-4 ${isTabActive('simulators') ? 'text-teal-600 dark:text-teal-400' : 'text-slate-400'}"></i>
                         <span>آزمایشگاه PhET</span>
                     </a>
+                    <a href="#live-lab" onclick="window.store.setView('live-lab')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('live-lab') ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 font-bold border border-rose-200 dark:border-rose-800/80 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60'}">
+                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                        <i data-lucide="radio" class="w-4 h-4 ${isTabActive('live-lab') ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}"></i>
+                        <span>کلاس زنده دبیر</span>
+                    </a>
                     <a href="#competitions" onclick="window.store.setView('competitions')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${isTabActive('competitions') ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 font-bold border border-amber-200 dark:border-amber-800/80 shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60'}">
                         <i data-lucide="trophy" class="w-4 h-4 ${isTabActive('competitions') ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'}"></i>
                         <span>لیگ‌ها و مسابقات</span>
@@ -76,7 +81,7 @@ function renderNavbar() {
                 <!-- User Stats & Actions -->
                 <div class="flex items-center gap-1.5 sm:gap-3">
                     <!-- Android APK Download Link -->
-                    <a href="https://github.com/amirrezakalantariazad2012-lgtm/Physics-Society/releases/latest/download/physics-society.apk" 
+                    <a href="/downloads/physics-society.apk" 
                        target="_blank" 
                        rel="noopener noreferrer"
                        class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-900/30 transition-all hover:scale-105" 
@@ -150,7 +155,7 @@ function renderNavbar() {
 
         <!-- Mobile Slide-Down Drawer Menu -->
         <div id="mobile-nav-drawer" class="hidden md:hidden border-t border-slate-200 dark:border-slate-800 bg-white/98 dark:bg-slate-900/98 px-4 py-5 space-y-4 shadow-2xl">
-            <a href="https://github.com/amirrezakalantariazad2012-lgtm/Physics-Society/releases/latest/download/physics-society.apk" 
+            <a href="/downloads/physics-society.apk" 
                target="_blank" 
                rel="noopener noreferrer"
                class="w-full p-3 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-bold text-xs flex items-center justify-between shadow-lg shadow-emerald-950/40">
@@ -187,6 +192,11 @@ function renderNavbar() {
                 <button onclick="window.store.setView('simulators'); window.toggleMobileDrawer(false)" class="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-right flex items-center gap-2 text-teal-300">
                     <i data-lucide="flask-conical" class="w-4 h-4"></i>
                     <span>آزمایشگاه فیزیک</span>
+                </button>
+                <button onclick="window.store.setView('live-lab'); window.toggleMobileDrawer(false)" class="p-3 rounded-xl bg-rose-950/50 hover:bg-rose-900/50 text-right flex items-center gap-2 text-rose-300 border border-rose-800/60 font-bold col-span-2">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                    <i data-lucide="radio" class="w-4 h-4"></i>
+                    <span>ورود به آزمایشگاه زنده دبیر (Live Classroom)</span>
                 </button>
                 <button onclick="window.store.setView('competitions'); window.toggleMobileDrawer(false)" class="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-right flex items-center gap-2 text-amber-300">
                     <i data-lucide="trophy" class="w-4 h-4"></i>

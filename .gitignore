@@ -9,6 +9,8 @@ build/
 develop-eggs/
 dist/
 downloads/
+!frontend/downloads/
+!frontend/downloads/**
 eggs/
 .eggs/
 lib/
