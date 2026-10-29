@@ -242,31 +242,31 @@ class ExamRunner {
             <div id="exam-anticheat-banner" class="hidden p-3 rounded-2xl bg-rose-950/90 border border-rose-500/60 text-rose-200 text-xs font-bold animate-shake"></div>
 
             <!-- Sticky Top HUD / Exam Header -->
-            <div class="quantum-card backdrop-blur-xl p-4 sm:p-5 rounded-3xl sticky top-20 z-30 transition-all shadow-2xl">
+            <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-lg sticky top-20 z-30 transition-all">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-cyan-950/80 text-quantum-cyan border border-quantum-cyan/30">آزمون استاندارد فیزیک</span>
-                            <span class="text-xs font-extrabold text-slate-400">سؤال ${this.currentIndex + 1} از ${stats.total}</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400">آزمون استاندارد فیزیک</span>
+                            <span class="text-xs font-extrabold text-slate-500 dark:text-slate-400">سؤال ${this.currentIndex + 1} از ${stats.total}</span>
                         </div>
-                        <h2 class="font-extrabold text-base sm:text-lg text-white line-clamp-1">${this.title}</h2>
+                        <h2 class="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white line-clamp-1">${this.title}</h2>
                     </div>
 
                     <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
                         <!-- Quick Formula Sheet Button -->
-                        <button onclick="window.currentExamRunner.openFormulaModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-950/80 hover:bg-purple-900/80 text-quantum-violet border border-purple-500/40 text-xs font-bold transition-all shadow-sm" title="فرمول‌نامه سریع فیزیک">
+                        <button onclick="window.currentExamRunner.openFormulaModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-950/80 hover:bg-sky-900/80 text-sky-300 border border-sky-800/80 text-xs font-bold transition-all" title="فرمول‌نامه سریع فیزیک">
                             <i data-lucide="file-text" class="w-4 h-4"></i>
                             <span class="hidden sm:inline">فرمول‌نامه سریع</span>
                         </button>
 
                         <!-- Timer Box -->
-                        <div id="exam-timer-box" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-space-950/90 text-quantum-cyan border border-quantum-cyan/40 font-mono font-bold text-sm shadow-neon-cyan">
-                            <i data-lucide="clock" class="w-4 h-4 text-quantum-cyan animate-pulse"></i>
+                        <div id="exam-timer-box" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-mono font-bold text-sm">
+                            <i data-lucide="clock" class="w-4 h-4 text-blue-500"></i>
                             <span id="exam-timer-display">--:--</span>
                         </div>
 
                         <!-- Submit Button -->
-                        <button onclick="window.currentExamRunner.confirmSubmit()" class="btn-quantum-emerald text-xs shadow-md">
+                        <button onclick="window.currentExamRunner.confirmSubmit()" class="btn-duo-green text-white font-black px-4 py-2 rounded-xl text-xs shadow-md">
                             ثبت و پایان
                         </button>
                     </div>
@@ -274,12 +274,12 @@ class ExamRunner {
 
                 <!-- Progress Bar -->
                 <div class="mt-3">
-                    <div class="w-full bg-space-950 rounded-full h-2 overflow-hidden flex border border-space-800">
-                        <div class="bg-gradient-to-r from-cyan-500 to-quantum-cyan h-2 transition-all duration-300 rounded-full shadow-neon-cyan" style="width: ${stats.percent}%"></div>
+                    <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden flex">
+                        <div class="bg-gradient-to-r from-blue-500 to-emerald-500 h-2 transition-all duration-300 rounded-full" style="width: ${stats.percent}%"></div>
                     </div>
-                    <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1.5 font-mono">
+                    <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1 font-mono">
                         <span>پیشرفت: ${stats.answered} از ${stats.total} (${stats.percent}٪)</span>
-                        ${stats.flaggedCount > 0 ? `<span class="text-amber-400 font-bold flex items-center gap-1">🚩 ${stats.flaggedCount} نشان‌شده</span>` : ''}
+                        ${stats.flaggedCount > 0 ? `<span class="text-amber-500 font-bold flex items-center gap-1">🚩 ${stats.flaggedCount} نشان‌شده</span>` : ''}
                     </div>
                 </div>
             </div>
@@ -288,28 +288,28 @@ class ExamRunner {
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
                 <!-- Question Details & Form -->
                 <div class="lg:col-span-3 space-y-4">
-                    <div class="quantum-card p-6 sm:p-8 rounded-3xl space-y-6">
+                    <div class="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
                         <!-- Top Metadata & Flag Toggle -->
-                        <div class="flex items-center justify-between border-b border-space-800 pb-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span class="px-3 py-1 rounded-full text-xs font-black ${q.question_type === 'mcq' ? 'bg-cyan-950/80 text-quantum-cyan border border-quantum-cyan/40' : 'bg-space-850 text-slate-300 border border-space-700'}">
+                                <span class="px-3 py-1 rounded-full text-xs font-black ${q.question_type === 'mcq' ? 'bg-sky-950/80 text-sky-300 border border-sky-800/80' : 'bg-slate-800 text-slate-300 border border-slate-700'}">
                                     ${q.question_type === 'mcq' ? 'چهارگزینه‌ای استاندارد' : 'تشریحی / مسأله فیزیک'} (${q.points} نمره)
                                 </span>
-                                <span class="text-xs px-2.5 py-0.5 rounded-lg font-bold ${q.difficulty === 'hard' ? 'bg-rose-950/50 text-rose-300 border border-rose-500/40' : q.difficulty === 'easy' ? 'bg-emerald-950/50 text-emerald-300 border border-emerald-500/40' : 'bg-amber-950/50 text-amber-300 border border-amber-500/40'}">
+                                <span class="text-xs px-2.5 py-0.5 rounded-lg font-bold ${q.difficulty === 'hard' ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/40' : q.difficulty === 'easy' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40' : 'bg-amber-50 text-amber-600 dark:bg-amber-950/40'}">
                                     سطح: ${q.difficulty === 'hard' ? 'سخت و المپیادی' : q.difficulty === 'easy' ? 'مبتدی و آسان' : 'متوسط'}
                                 </span>
                             </div>
 
                             <!-- Flag for Review Button -->
-                            <button onclick="window.currentExamRunner.toggleFlag(${q.id})" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${isFlagged ? 'bg-amber-950/60 border-amber-400 text-amber-300 shadow-sm' : 'border-space-700 text-slate-400 hover:text-amber-400 hover:border-amber-400/50'}">
-                                <i data-lucide="flag" class="w-3.5 h-3.5 ${isFlagged ? 'fill-amber-400 text-amber-400' : ''}"></i>
+                            <button onclick="window.currentExamRunner.toggleFlag(${q.id})" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${isFlagged ? 'bg-amber-50 dark:bg-amber-950/60 border-amber-400 text-amber-600 dark:text-amber-300 shadow-sm' : 'border-slate-200 dark:border-slate-700 text-slate-500 hover:text-amber-500'}">
+                                <i data-lucide="flag" class="w-3.5 h-3.5 ${isFlagged ? 'fill-amber-500 text-amber-500' : ''}"></i>
                                 <span>${isFlagged ? 'نشان‌شده برای بازبینی' : 'علامت‌گذاری برای بازبینی'}</span>
                             </button>
                         </div>
 
                         <!-- Question Prompt -->
                         <div class="space-y-3">
-                            <h3 class="text-base sm:text-lg font-bold text-white leading-relaxed text-justify">
+                            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-relaxed text-justify">
                                 ${q.prompt_fa}
                             </h3>
                             ${q.source_ref ? `<div class="text-[11px] text-slate-400 font-medium">منبع: ${q.source_ref}</div>` : ''}
@@ -321,12 +321,12 @@ class ExamRunner {
                             ${(q.options || []).map((opt, oIdx) => {
                                 const isSelected = currentAns.selected_option_key === opt.option_key;
                                 return `
-                                <label class="flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${isSelected ? 'border-quantum-cyan bg-cyan-950/40 text-white shadow-neon-cyan' : 'border-space-750 hover:border-space-600 bg-space-950/70 text-slate-200'}">
+                                <label class="flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${isSelected ? 'border-blue-500 bg-blue-50/70 dark:bg-blue-950/40 text-blue-900 dark:text-blue-100 shadow-sm' : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200'}">
                                     <input type="radio" name="opt_${q.id}" value="${opt.option_key}"
                                         ${isSelected ? 'checked' : ''}
                                         onchange="window.currentExamRunner.selectOption('${q.id}', '${opt.option_key}')"
-                                        class="w-4 h-4 text-quantum-cyan focus:ring-quantum-cyan" />
-                                    <span class="font-mono font-bold text-xs w-7 h-7 rounded-xl flex items-center justify-center shrink-0 ${isSelected ? 'bg-quantum-cyan text-space-950 font-black' : 'bg-space-850 text-slate-300 border border-space-700'}">
+                                        class="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                                    <span class="font-mono font-bold text-xs w-7 h-7 rounded-xl flex items-center justify-center shrink-0 ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
                                         ${opt.option_key}
                                     </span>
                                     <span class="text-sm font-semibold flex-1 leading-relaxed">${opt.text_fa}</span>
@@ -337,7 +337,7 @@ class ExamRunner {
 
                             ${currentAns.selected_option_key ? `
                             <div class="pt-2 text-left">
-                                <button onclick="window.currentExamRunner.clearCurrentOption(${q.id})" class="text-xs text-rose-400 hover:text-rose-300 font-bold px-3 py-1.5 rounded-lg hover:bg-rose-950/40 transition-all inline-flex items-center gap-1">
+                                <button onclick="window.currentExamRunner.clearCurrentOption(${q.id})" class="text-xs text-rose-500 hover:text-rose-600 font-bold px-3 py-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all inline-flex items-center gap-1">
                                     <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
                                     <span>پاک کردن گزینه انتخاب‌شده (حذف پاسخ)</span>
                                 </button>
@@ -348,10 +348,10 @@ class ExamRunner {
                         <!-- Written Question Toolbar & Live KaTeX Preview -->
                         <div class="space-y-3 pt-2">
                             <!-- Physics Symbol Bar -->
-                            <div class="p-2.5 rounded-2xl bg-space-950/80 border border-space-800 space-y-2">
-                                <div class="flex items-center justify-between text-[11px] font-bold text-slate-400">
+                            <div class="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
+                                <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
                                     <span>درج سریع نمادها و یکاهای فیزیک:</span>
-                                    <span class="text-[10px] text-quantum-cyan font-sans">روی نماد کلیک کنید</span>
+                                    <span class="text-[10px] text-blue-500 font-sans">روی نماد کلیک کنید</span>
                                 </div>
                                 <div class="flex flex-wrap gap-1.5">
                                     ${[
@@ -374,7 +374,7 @@ class ExamRunner {
                                         { label: 'توان x²', val: 'x^2' },
                                         { label: '≈ تقریبی', val: '\\approx ' }
                                     ].map(sym => `
-                                        <button type="button" onclick="window.currentExamRunner.insertSymbol('${sym.val.replace(/\\/g, '\\\\')}')" class="px-2 py-1 rounded-lg bg-space-850 hover:bg-space-800 border border-space-700 text-[11px] font-mono text-slate-300 hover:text-quantum-cyan transition-all">
+                                        <button type="button" onclick="window.currentExamRunner.insertSymbol('${sym.val.replace(/\\/g, '\\\\')}')" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-blue-900/40 border border-slate-200 dark:border-slate-600 text-[11px] font-mono text-slate-700 dark:text-slate-200 transition-all shadow-2xs">
                                             ${sym.label}
                                         </button>
                                     `).join('')}
@@ -386,7 +386,7 @@ class ExamRunner {
                                 <textarea id="written-answer-input" rows="7"
                                     oninput="window.currentExamRunner.setWrittenText('${q.id}', this.value)"
                                     placeholder="پاسخ را با تشریح مراحل، روابط فیزیکی، جایگذاری اعداد و یکاها بنویسید..."
-                                    class="w-full p-4 rounded-2xl border-2 border-space-700 focus:border-quantum-cyan bg-space-950/80 text-white text-sm outline-none leading-relaxed font-sans">${currentAns.written_response_text || ''}</textarea>
+                                    class="w-full p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 focus:border-blue-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-sm outline-none leading-relaxed font-sans">${currentAns.written_response_text || ''}</textarea>
                                 
                                 <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
                                     <span>نکته: فرمول‌ها را درون $...$ بنویسید تا به صورت ریاضی نمایش داده شوند.</span>
@@ -395,13 +395,13 @@ class ExamRunner {
                             </div>
 
                             <!-- Live MathJax / KaTeX Render Preview -->
-                            <div class="p-4 rounded-2xl bg-space-950/80 border border-space-800 space-y-2">
-                                <div class="flex items-center gap-2 text-xs font-bold text-quantum-cyan">
+                            <div class="p-4 rounded-2xl bg-blue-50/50 dark:bg-slate-800/60 border border-blue-200 dark:border-slate-700 space-y-2">
+                                <div class="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400">
                                     <i data-lucide="eye" class="w-3.5 h-3.5"></i>
                                     <span>پیش‌نمایش ریاضی و استدلال علمی پاسخ شما:</span>
                                 </div>
-                                <div id="written-math-preview" class="text-sm text-slate-200 min-h-[40px] leading-relaxed break-words katex-ltr-container" dir="ltr">
-                                    ${currentAns.written_response_text ? currentAns.written_response_text : '<span class="text-xs text-slate-400 italic font-sans" dir="rtl">به محض تایپ، فرمول‌ها و استدلال شما در اینجا زنده نمایش می‌یابند...</span>'}
+                                <div id="written-math-preview" class="text-sm text-slate-800 dark:text-slate-200 min-h-[40px] leading-relaxed break-words">
+                                    ${currentAns.written_response_text ? currentAns.written_response_text : '<span class="text-xs text-slate-400 italic">به محض تایپ، فرمول‌ها و استدلال شما در اینجا زنده نمایش می‌یابند...</span>'}
                                 </div>
                             </div>
                         </div>
@@ -411,17 +411,17 @@ class ExamRunner {
                     <!-- Bottom Nav Controls -->
                     <div class="flex items-center justify-between pt-2">
                         <button onclick="window.currentExamRunner.prevQuestion()"
-                            ${this.currentIndex === 0 ? 'disabled class="opacity-40 cursor-not-allowed px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 bg-space-800 text-slate-500"' : 'class="btn-quantum-cyan flex items-center gap-2"'}
-                            class="px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2">
+                            ${this.currentIndex === 0 ? 'disabled class="opacity-40 cursor-not-allowed"' : 'class="btn-duo-blue text-white"'}
+                            class="px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shadow-sm">
                             <i data-lucide="chevron-right" class="w-4 h-4"></i>
                             <span>سؤال قبلی</span>
                         </button>
 
-                        <span class="text-xs text-slate-400 font-sans hidden sm:inline">سؤال <span class="font-mono text-quantum-cyan">${this.currentIndex + 1}</span> از <span class="font-mono">${stats.total}</span></span>
+                        <span class="text-xs text-slate-400 font-sans hidden sm:inline">سؤال <span class="font-mono">${this.currentIndex + 1}</span> از <span class="font-mono">${stats.total}</span></span>
 
                         <button onclick="window.currentExamRunner.nextQuestion()"
-                            ${this.currentIndex === this.questions.length - 1 ? 'disabled class="opacity-40 cursor-not-allowed px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 bg-space-800 text-slate-500"' : 'class="btn-quantum-cyan flex items-center gap-2"'}
-                            class="px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2">
+                            ${this.currentIndex === this.questions.length - 1 ? 'disabled class="opacity-40 cursor-not-allowed"' : 'class="btn-duo-blue text-white"'}
+                            class="px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shadow-sm">
                             <span>سؤال بعدی</span>
                             <i data-lucide="chevron-left" class="w-4 h-4"></i>
                         </button>
@@ -430,13 +430,13 @@ class ExamRunner {
 
                 <!-- Right Side: Interactive Question Palette (نقشه هوشمند سؤالات) -->
                 <div class="lg:col-span-1 space-y-4">
-                    <div class="quantum-card p-5 rounded-3xl sticky top-48 space-y-4">
-                        <div class="flex items-center justify-between border-b border-space-800 pb-3">
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm sticky top-48 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                             <div class="flex items-center gap-2">
-                                <i data-lucide="layout-grid" class="w-4 h-4 text-quantum-cyan"></i>
-                                <h4 class="text-xs font-black text-white">نقشه سؤالات آزمون</h4>
+                                <i data-lucide="layout-grid" class="w-4 h-4 text-blue-500"></i>
+                                <h4 class="text-xs font-black text-slate-800 dark:text-white">نقشه سؤالات آزمون</h4>
                             </div>
-                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-space-850 text-quantum-cyan border border-space-700 font-bold">${stats.answered}/${stats.total}</span>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">${stats.answered}/${stats.total}</span>
                         </div>
 
                         <!-- 4-State Question Grid -->
@@ -447,15 +447,15 @@ class ExamRunner {
                                 const isFlag = this.flagged.has(item.id);
                                 const isCurrent = idx === this.currentIndex;
 
-                                let stateClass = 'bg-space-850 text-slate-400 hover:bg-space-800 border border-space-750';
+                                let stateClass = 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700';
                                 if (hasAns && !isFlag) {
-                                    stateClass = 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 font-bold shadow-sm';
+                                    stateClass = 'bg-emerald-500 text-white font-bold shadow-2xs';
                                 } else if (isFlag) {
-                                    stateClass = 'bg-amber-500/20 text-amber-300 border border-amber-500/60 font-black shadow-sm';
+                                    stateClass = 'bg-amber-400 text-amber-950 font-black border-2 border-amber-500 shadow-2xs';
                                 }
 
                                 if (isCurrent) {
-                                    stateClass += ' ring-2 ring-quantum-cyan scale-105 z-10 shadow-neon-cyan';
+                                    stateClass += ' ring-4 ring-sky-500 scale-105 z-10';
                                 }
 
                                 return `
@@ -470,24 +470,24 @@ class ExamRunner {
                         </div>
 
                         <!-- Legend -->
-                        <div class="pt-3 border-t border-space-800 space-y-1.5 text-[11px] text-slate-400">
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1.5 text-[11px] text-slate-500 dark:text-slate-400">
                             <div class="flex items-center justify-between">
-                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block shadow-sm shadow-emerald-400/50"></span> پاسخ‌داده</span>
-                                <span class="font-bold text-emerald-400 font-mono">${stats.answered}</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> پاسخ‌داده</span>
+                                <span class="font-bold text-emerald-600">${stats.answered}</span>
                             </div>
                             <div class="flex items-center justify-between">
-                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block shadow-sm shadow-amber-400/50"></span> نشان بازبینی 🚩</span>
-                                <span class="font-bold text-amber-400 font-mono">${stats.flaggedCount}</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> نشان بازبینی 🚩</span>
+                                <span class="font-bold text-amber-500">${stats.flaggedCount}</span>
                             </div>
                             <div class="flex items-center justify-between">
-                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-space-700 inline-block"></span> بدون‌پاسخ</span>
-                                <span class="font-bold text-slate-400 font-mono">${stats.unanswered}</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 inline-block"></span> بدون‌پاسخ</span>
+                                <span class="font-bold text-slate-400">${stats.unanswered}</span>
                             </div>
                         </div>
 
                         <!-- Final Submit Trigger inside palette -->
                         <div class="pt-2">
-                            <button onclick="window.currentExamRunner.confirmSubmit()" class="w-full btn-quantum-emerald py-2.5 rounded-2xl text-xs shadow-md">
+                            <button onclick="window.currentExamRunner.confirmSubmit()" class="w-full btn-duo-green text-white font-black py-2.5 rounded-2xl text-xs shadow-md">
                                 اتمام و تحویل برگه
                             </button>
                         </div>
@@ -597,20 +597,20 @@ class ExamRunner {
         if (!modalContainer) return;
 
         modalContainer.innerHTML = `
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-space-950/85 backdrop-blur-md animate-fade-in">
-            <div class="quantum-card rounded-3xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-scale-up border border-space-700">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-fade-in">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-scale-up">
                 <!-- Modal Header -->
-                <div class="p-5 border-b border-space-800 flex items-center justify-between bg-space-950/80">
+                <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/60">
                     <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 rounded-xl bg-purple-500/20 text-quantum-violet border border-purple-500/40 flex items-center justify-center font-bold">
+                        <div class="w-9 h-9 rounded-xl bg-sky-950/80 text-sky-400 border border-sky-800/80 flex items-center justify-center font-bold">
                             <i data-lucide="file-text" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <h3 class="font-extrabold text-base text-white">فرمول‌نامه رسمی فیزیک دوره اول متوسطه</h3>
-                            <span class="text-xs text-slate-400">مرجع سریع روابط، تعاریف و یکاهای استاندارد SI</span>
+                            <h3 class="font-extrabold text-base text-slate-900 dark:text-white">فرمول‌نامه رسمی فیزیک دوره اول متوسطه</h3>
+                            <span class="text-xs text-slate-500">مرجع سریع روابط، تعاریف و یکاهای استاندارد SI</span>
                         </div>
                     </div>
-                    <button onclick="window.currentExamRunner.closeFormulaModal()" class="w-8 h-8 rounded-xl bg-space-850 text-slate-400 hover:text-white flex items-center justify-center transition-all border border-space-700">
+                    <button onclick="window.currentExamRunner.closeFormulaModal()" class="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white flex items-center justify-center transition-all">
                         <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -618,11 +618,11 @@ class ExamRunner {
                 <!-- Modal Body with Formulas -->
                 <div class="p-6 overflow-y-auto space-y-6 text-sm">
                     <!-- Section 1: چگالی و ماده -->
-                    <div class="p-4 rounded-2xl bg-space-950/80 border border-space-800 space-y-2">
-                        <h4 class="font-black text-quantum-cyan flex items-center gap-2">
+                    <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+                        <h4 class="font-black text-sky-300 flex items-center gap-2">
                             <span>⚖️ چگالی، جرم و حجم (پایه هفتم)</span>
                         </h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-300">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
                             <div>رابطه چگالی: $\\rho = \\frac{m}{V}$</div>
                             <div>تبدیل یکا: $1 \\text{ g/cm}^3 = 1000 \\text{ kg/m}^3$</div>
                             <div>وزن جسم: $W = m \\cdot g \\quad (g \\approx 9.8 \\text{ N/kg})$</div>
@@ -631,11 +631,11 @@ class ExamRunner {
                     </div>
 
                     <!-- Section 2: حرکت و نیرو -->
-                    <div class="p-4 rounded-2xl bg-space-950/80 border border-space-800 space-y-2">
-                        <h4 class="font-black text-quantum-cyan flex items-center gap-2">
+                    <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+                        <h4 class="font-black text-sky-300 flex items-center gap-2">
                             <span>🚀 حرکت، سرعت، شتاب و قوانین نیوتون (پایه نهم)</span>
                         </h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-300">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
                             <div>تندی و سرعت متوسط: $v_{\\text{av}} = \\frac{\\Delta x}{\\Delta t}$</div>
                             <div>شتاب متوسط: $a = \\frac{\\Delta v}{\\Delta t} = \\frac{v_2 - v_1}{t_2 - t_1}$</div>
                             <div>قانون دوم نیوتون: $F_{\\text{net}} = m \\cdot a$</div>
@@ -644,11 +644,11 @@ class ExamRunner {
                     </div>
 
                     <!-- Section 3: فشار و شاره‌ها -->
-                    <div class="p-4 rounded-2xl bg-space-950/80 border border-space-800 space-y-2">
-                        <h4 class="font-black text-quantum-cyan flex items-center gap-2">
+                    <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+                        <h4 class="font-black text-sky-300 flex items-center gap-2">
                             <span>💧 فشار در جامدات و مایعات (پایه نهم)</span>
                         </h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-300">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
                             <div>تعریف عمومی فشار: $P = \\frac{F}{A} \\quad (1 \\text{ Pa} = 1 \\text{ N/m}^2)$</div>
                             <div>فشار مایعات ساکن: $P = \\rho \\cdot g \\cdot h$</div>
                             <div>فشار کل (با جو): $P_{\\text{total}} = P_0 + \\rho g h$</div>
@@ -657,11 +657,11 @@ class ExamRunner {
                     </div>
 
                     <!-- Section 4: الکتریسیته و مغناطیس -->
-                    <div class="p-4 rounded-2xl bg-space-950/80 border border-space-800 space-y-2">
-                        <h4 class="font-black text-quantum-cyan flex items-center gap-2">
+                    <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+                        <h4 class="font-black text-sky-300 flex items-center gap-2">
                             <span>⚡ الکتریسیته و مدارهای الکتریکی (پایه هشتم)</span>
                         </h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-300">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
                             <div>قانون اهم: $V = I \\cdot R \\quad (1 \\ \\Omega = 1 \\text{ V/A})$</div>
                             <div>شدت جریان الکتریکی: $I = \\frac{q}{t}$</div>
                             <div>توان مصرفی: $P = V \\cdot I = R \\cdot I^2$</div>
@@ -670,11 +670,11 @@ class ExamRunner {
                     </div>
 
                     <!-- Section 5: کار و انرژی و گرما -->
-                    <div class="p-4 rounded-2xl bg-space-950/80 border border-space-800 space-y-2">
-                        <h4 class="font-black text-quantum-cyan flex items-center gap-2">
+                    <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-2">
+                        <h4 class="font-black text-sky-300 flex items-center gap-2">
                             <span>🔥 کار، انرژی، توان و گرما (پایه‌های هفتم و هشتم)</span>
                         </h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-300">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
                             <div>کار نیروی ثابت: $W = F \\cdot d \\cdot \\cos(\\theta)$</div>
                             <div>انرژی جنبشی: $K = \\frac{1}{2} m v^2$</div>
                             <div>انرژی پتانسیل گرانشی: $U = m \\cdot g \\cdot h$</div>
@@ -686,8 +686,8 @@ class ExamRunner {
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="p-4 bg-space-950/80 border-t border-space-800 text-left">
-                    <button onclick="window.currentExamRunner.closeFormulaModal()" class="btn-quantum-cyan text-xs">
+                <div class="p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 text-left">
+                    <button onclick="window.currentExamRunner.closeFormulaModal()" class="btn-duo-blue text-white font-bold px-6 py-2 rounded-xl text-xs">
                         متوجه شدم و بازگشت به آزمون
                     </button>
                 </div>
@@ -711,56 +711,56 @@ class ExamRunner {
         if (!submitModalContainer) return;
 
         submitModalContainer.innerHTML = `
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-space-950/85 backdrop-blur-md animate-fade-in">
-            <div class="quantum-card rounded-3xl max-w-md w-full shadow-2xl overflow-hidden p-6 space-y-5 animate-scale-up border border-space-700">
-                <div class="w-14 h-14 rounded-2xl bg-cyan-500/15 text-quantum-cyan border border-quantum-cyan/30 flex items-center justify-center mx-auto shadow-neon-cyan">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-fade-in">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden p-6 space-y-5 animate-scale-up">
+                <div class="w-14 h-14 rounded-2xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 flex items-center justify-center mx-auto">
                     <i data-lucide="check-check" class="w-7 h-7"></i>
                 </div>
 
                 <div class="text-center space-y-1">
-                    <h3 class="text-lg font-black text-white">ارزیابی وضعیت و ثبت نهایی آزمون</h3>
-                    <p class="text-xs text-slate-400">وضعیت پاسخ‌دهی شما به شرح زیر است:</p>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white">ارزیابی وضعیت و ثبت نهایی آزمون</h3>
+                    <p class="text-xs text-slate-500">وضعیت پاسخ‌دهی شما به شرح زیر است:</p>
                 </div>
 
                 <!-- Stats Summary Badges -->
                 <div class="grid grid-cols-3 gap-2 text-center">
-                    <div class="p-3 rounded-2xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-300">
-                        <span class="block text-xl font-black font-mono">${stats.answered}</span>
-                        <span class="text-[11px] font-bold">پاسخ‌داده</span>
+                    <div class="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                        <span class="block text-xl font-black text-emerald-600 font-mono">${stats.answered}</span>
+                        <span class="text-[11px] font-bold text-sky-300">پاسخ‌داده</span>
                     </div>
-                    <div class="p-3 rounded-2xl ${stats.unanswered > 0 ? 'bg-rose-950/50 border border-rose-500/40 text-rose-300' : 'bg-space-850 border border-space-700 text-slate-400'}">
+                    <div class="p-3 rounded-2xl ${stats.unanswered > 0 ? 'bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600' : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400'}">
                         <span class="block text-xl font-black font-mono">${stats.unanswered}</span>
                         <span class="text-[11px] font-bold">بدون‌پاسخ</span>
                     </div>
-                    <div class="p-3 rounded-2xl ${stats.flaggedCount > 0 ? 'bg-amber-950/50 border border-amber-500/40 text-amber-300' : 'bg-space-850 border border-space-700 text-slate-400'}">
+                    <div class="p-3 rounded-2xl ${stats.flaggedCount > 0 ? 'bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-600' : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-400'}">
                         <span class="block text-xl font-black font-mono">${stats.flaggedCount}</span>
                         <span class="text-[11px] font-bold">نشان‌دار 🚩</span>
                     </div>
                 </div>
 
                 ${stats.unanswered > 0 ? `
-                <div class="p-3 rounded-2xl bg-rose-950/40 border border-rose-500/40 text-rose-300 text-xs font-semibold flex items-center gap-2">
-                    <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-400"></i>
+                <div class="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-500"></i>
                     <span>هشدار: شما ${stats.unanswered} سؤال پاسخ‌نداده دارید!</span>
                 </div>
                 ` : `
-                <div class="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center gap-2">
-                    <i data-lucide="check-circle-2" class="w-4 h-4 shrink-0 text-emerald-400"></i>
+                <div class="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800 text-sky-300 text-xs font-semibold flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 shrink-0 text-emerald-500"></i>
                     <span>عالی! به تمامی سؤالات پاسخ داده‌اید.</span>
                 </div>
                 `}
 
                 <!-- Action Buttons -->
                 <div class="space-y-2 pt-2">
-                    <button onclick="window.currentExamRunner.closeSubmitModal(); window.currentExamRunner.submitExam()" class="w-full btn-quantum-emerald py-3 rounded-2xl text-sm shadow-md">
+                    <button onclick="window.currentExamRunner.closeSubmitModal(); window.currentExamRunner.submitExam()" class="w-full btn-duo-green text-white font-black py-3 rounded-2xl text-sm shadow-md">
                         تأیید قطعی و تحویل پاسخ‌نامه
                     </button>
                     ${stats.flaggedCount > 0 ? `
-                    <button onclick="window.currentExamRunner.jumpToFirstFlagged()" class="w-full py-2.5 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 font-bold text-xs transition-all">
+                    <button onclick="window.currentExamRunner.jumpToFirstFlagged()" class="w-full py-2.5 rounded-2xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-950 dark:hover:bg-amber-900 text-amber-900 dark:text-amber-200 font-bold text-xs transition-all">
                         بازبینی سؤالات نشان‌دار (🚩)
                     </button>
                     ` : ''}
-                    <button onclick="window.currentExamRunner.closeSubmitModal()" class="w-full py-2.5 rounded-2xl bg-space-850 hover:bg-space-800 border border-space-700 text-slate-300 font-bold text-xs transition-all">
+                    <button onclick="window.currentExamRunner.closeSubmitModal()" class="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs transition-all">
                         بازگشت و ادامه آزمون
                     </button>
                 </div>
@@ -847,36 +847,36 @@ class ExamRunner {
         container.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
             <!-- Score Card -->
-            <div class="quantum-card rounded-3xl p-8 shadow-2xl text-center space-y-5">
-                <div class="w-20 h-20 mx-auto rounded-3xl flex items-center justify-center ${res.is_passed ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-neon-cyan' : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'}">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-xl text-center space-y-5">
+                <div class="w-20 h-20 mx-auto rounded-3xl flex items-center justify-center ${res.is_passed ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'} shadow-md">
                     <i data-lucide="${res.is_passed ? 'check-circle' : 'alert-circle'}" class="w-10 h-10"></i>
                 </div>
 
                 <div class="space-y-1">
-                    <h2 class="text-2xl font-black text-white">${res.exam_title_fa}</h2>
-                    <p class="text-xs text-slate-400">کارنامه ارزیابی علمی و تحلیلی QUANTUM CUT</p>
+                    <h2 class="text-2xl font-black text-slate-800 dark:text-white">${res.exam_title_fa}</h2>
+                    <p class="text-xs text-slate-500">کارنامه ارزیابی علمی و تحلیلی</p>
                 </div>
 
                 <div class="flex items-center justify-center gap-6 py-2">
                     <div class="text-center">
-                        <span class="text-4xl sm:text-5xl font-black text-white font-mono">${res.final_score}</span>
+                        <span class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white font-mono">${res.final_score}</span>
                         <span class="text-sm font-normal text-slate-400 font-mono"> / ${res.total_possible_points}</span>
-                        <span class="block text-xs font-bold text-slate-400 mt-1">نمره نهایی</span>
+                        <span class="block text-xs font-bold text-slate-500 mt-1">نمره نهایی</span>
                     </div>
-                    <div class="w-px h-12 bg-space-800"></div>
+                    <div class="w-px h-12 bg-slate-200 dark:bg-slate-700"></div>
                     <div class="text-center">
-                        <span class="text-4xl sm:text-5xl font-black ${res.is_passed ? 'text-quantum-cyan' : 'text-rose-400'} font-sans"><span class="font-mono">${res.percentage}</span>%</span>
-                        <span class="block text-xs font-bold text-slate-400 mt-1">درصد کسب‌شده</span>
+                        <span class="text-4xl sm:text-5xl font-black ${res.is_passed ? 'text-emerald-500' : 'text-rose-500'} font-sans"><span class="font-mono">${res.percentage}</span>%</span>
+                        <span class="block text-xs font-bold text-slate-500 mt-1">درصد کسب‌شده</span>
                     </div>
                 </div>
 
-                <div class="inline-flex flex-wrap items-center justify-center gap-3 px-5 py-2 rounded-full text-xs font-black ${res.is_passed ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40' : 'bg-rose-950/80 text-rose-300 border border-rose-500/40'}">
+                <div class="inline-flex flex-wrap items-center justify-center gap-3 px-5 py-2 rounded-full text-xs font-black ${res.is_passed ? 'bg-emerald-50 dark:bg-emerald-950/40 text-sky-300 border border-emerald-200 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'}">
                     <span>${res.is_passed ? 'تبریک! نمره قبولی را کسب کردید 🎉' : 'نیاز به مرور مباحث و تمرین مجدد 💡'}</span>
-                    <span class="font-sans text-quantum-gold">• ⚡ +<span class="font-mono">${res.xp_earned || 0}</span> XP دریافت شد</span>
+                    <span class="font-sans text-amber-500">• ⚡ +<span class="font-mono">${res.xp_earned || 0}</span> XP دریافت شد</span>
                 </div>
 
                 ${res.feedback_fa ? `
-                <div class="p-4 rounded-2xl bg-space-950/80 border border-space-800 text-xs sm:text-sm text-slate-300 leading-relaxed text-justify max-w-2xl mx-auto shadow-inner">
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed text-justify max-w-2xl mx-auto">
                     ${res.feedback_fa}
                 </div>
                 ` : ''}
@@ -884,19 +884,19 @@ class ExamRunner {
 
             <!-- Filter Controls for Question Breakdown -->
             <div class="flex items-center justify-between flex-wrap gap-3">
-                <h3 class="font-black text-lg text-white flex items-center gap-2">
-                    <i data-lucide="clipboard-list" class="w-5 h-5 text-quantum-cyan"></i>
+                <h3 class="font-black text-lg text-slate-800 dark:text-white flex items-center gap-2">
+                    <i data-lucide="clipboard-list" class="w-5 h-5 text-blue-500"></i>
                     <span>تحلیل تفصیلی و پاسخ‌نامه تشریحی سؤالات</span>
                 </h3>
 
-                <div class="flex items-center gap-1.5 p-1 rounded-xl bg-space-900 border border-space-750 text-xs font-bold shadow-md">
-                    <button onclick="window.currentExamRunner.setResultFilter('all')" class="px-3.5 py-1.5 rounded-lg transition-all ${this.resultFilter === 'all' ? 'btn-quantum-cyan text-xs font-bold' : 'text-slate-400 hover:text-white'}">
+                <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">
+                    <button onclick="window.currentExamRunner.setResultFilter('all')" class="px-3 py-1.5 rounded-lg transition-all ${this.resultFilter === 'all' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'}">
                         همه سؤالات (${totalQ})
                     </button>
-                    <button onclick="window.currentExamRunner.setResultFilter('incorrect')" class="px-3.5 py-1.5 rounded-lg transition-all ${this.resultFilter === 'incorrect' ? 'bg-rose-950/80 text-rose-300 border border-rose-500/40 font-bold' : 'text-slate-400 hover:text-white'}">
+                    <button onclick="window.currentExamRunner.setResultFilter('incorrect')" class="px-3 py-1.5 rounded-lg transition-all ${this.resultFilter === 'incorrect' ? 'bg-white dark:bg-slate-900 text-rose-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'}">
                         نادرست‌ها (${wrongCount}) ❌
                     </button>
-                    <button onclick="window.currentExamRunner.setResultFilter('correct')" class="px-3.5 py-1.5 rounded-lg transition-all ${this.resultFilter === 'correct' ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-bold' : 'text-slate-400 hover:text-white'}">
+                    <button onclick="window.currentExamRunner.setResultFilter('correct')" class="px-3 py-1.5 rounded-lg transition-all ${this.resultFilter === 'correct' ? 'bg-white dark:bg-slate-900 text-emerald-600 shadow-2xs' : 'text-slate-600 dark:text-slate-400'}">
                         صحیح‌ها (${correctCount}) ✔️
                     </button>
                 </div>
@@ -905,51 +905,51 @@ class ExamRunner {
             <!-- Question Review Cards -->
             <div class="space-y-4">
                 ${filteredQuestions.map((q, idx) => `
-                <div class="quantum-card rounded-3xl p-6 border ${q.is_correct ? 'border-emerald-500/40' : 'border-rose-500/40'} shadow-sm space-y-4">
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border ${q.is_correct ? 'border-emerald-200 dark:border-emerald-900/60' : 'border-rose-200 dark:border-rose-900/60'} shadow-sm space-y-4">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-slate-400">سؤال ${idx + 1} (${q.final_score} از ${q.max_score} نمره)</span>
-                        <span class="text-xs font-black px-3 py-1 rounded-full ${q.is_correct ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40' : 'bg-rose-950/80 text-rose-300 border border-rose-500/40'}">
+                        <span class="text-xs font-bold text-slate-500">سؤال ${idx + 1} (${q.final_score} از ${q.max_score} نمره)</span>
+                        <span class="text-xs font-black px-3 py-1 rounded-full ${q.is_correct ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'}">
                             ${q.is_correct ? 'صحیح ✔️' : 'نادرست یا ناقص ❌'}
                         </span>
                     </div>
 
-                    <p class="text-sm font-bold text-white leading-relaxed text-justify">${q.prompt_fa}</p>
+                    <p class="text-sm font-bold text-slate-900 dark:text-white leading-relaxed text-justify">${q.prompt_fa}</p>
 
                     ${q.question_type === 'mcq' ? `
                     <div class="text-xs space-y-2 pt-2">
                         <div class="flex items-center gap-2">
-                            <span class="text-slate-400">پاسخ شما:</span>
-                            <span class="font-black font-mono px-2 py-0.5 rounded-md ${q.is_correct ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40' : 'bg-rose-950/80 text-rose-300 border border-rose-500/40'}">
+                            <span class="text-slate-500">پاسخ شما:</span>
+                            <span class="font-black font-mono px-2 py-0.5 rounded-md ${q.is_correct ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950' : 'bg-rose-100 text-rose-700 dark:bg-rose-950'}">
                                 ${q.selected_option_key || 'بدون پاسخ'}
                             </span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-slate-400">گزینه صحیح مرجع:</span>
-                            <span class="font-black font-mono text-quantum-cyan px-2 py-0.5 rounded-md bg-cyan-950/80 border border-quantum-cyan/30">
+                            <span class="text-slate-500">گزینه صحیح مرجع:</span>
+                            <span class="font-black font-mono text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60">
                                 ${q.correct_option_key || '-'}
                             </span>
                         </div>
                         ${q.explanation_fa ? `
-                        <div class="p-3.5 rounded-2xl bg-space-950/80 border border-space-800 text-slate-300 leading-relaxed text-justify mt-2">
-                            <span class="font-bold block mb-1 text-quantum-cyan">تحلیل و تشریح علمی:</span>
+                        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 leading-relaxed text-justify mt-2">
+                            <span class="font-bold block mb-1 text-slate-900 dark:text-white">تحلیل و تشریح علمی:</span>
                             ${q.explanation_fa}
                         </div>
                         ` : ''}
                     </div>
                     ` : `
                     <div class="text-xs space-y-2 pt-2">
-                        <div class="p-3.5 rounded-2xl bg-space-950/80 border border-space-800">
-                            <span class="font-bold block mb-1 text-slate-400">پاسخ ارسالی شما:</span>
-                            <div class="text-slate-200 leading-relaxed font-sans">${q.written_response_text || 'بدون پاسخ'}</div>
+                        <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                            <span class="font-bold block mb-1 text-slate-600 dark:text-slate-400">پاسخ ارسالی شما:</span>
+                            <div class="text-slate-800 dark:text-slate-200 leading-relaxed font-sans">${q.written_response_text || 'بدون پاسخ'}</div>
                         </div>
-                        <div class="p-3.5 rounded-2xl bg-cyan-950/40 border border-quantum-cyan/30 text-quantum-cyan">
+                        <div class="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 text-blue-900 dark:text-blue-200">
                             <span class="font-bold block mb-1">پاسخ مرجع کتاب درسی و رابریک:</span>
-                            <div class="leading-relaxed text-slate-200">${q.reference_answer_fa || '-'}</div>
+                            <div class="leading-relaxed">${q.reference_answer_fa || '-'}</div>
                         </div>
                         ${q.feedback_fa ? `
-                        <div class="p-3.5 rounded-2xl bg-space-950/80 border border-space-800">
-                            <span class="font-bold block mb-1 text-slate-400">بازخورد ارزیابی هوشمند:</span>
-                            <div class="text-slate-300 leading-relaxed">${q.feedback_fa}</div>
+                        <div class="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                            <span class="font-bold block mb-1 text-slate-600 dark:text-slate-400">بازخورد ارزیابی هوشمند:</span>
+                            <div class="text-slate-700 dark:text-slate-300 leading-relaxed">${q.feedback_fa}</div>
                         </div>
                         ` : ''}
                     </div>
@@ -960,7 +960,7 @@ class ExamRunner {
 
             <!-- Back to Curriculum Navigation -->
             <div class="text-center pt-6">
-                <button onclick="window.store.setView('curriculum')" class="btn-quantum-cyan text-sm px-10 py-3.5">
+                <button onclick="window.store.setView('curriculum')" class="btn-duo-blue text-white font-black px-10 py-4 rounded-2xl shadow-lg text-sm">
                     بازگشت به برنامه درسی و مباحث
                 </button>
             </div>

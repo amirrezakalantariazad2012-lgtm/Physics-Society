@@ -17,50 +17,48 @@ class AdminViews {
         const container = document.getElementById(this.containerId);
         if (!container) return;
 
-        window.currentAdminViews = this;
-
         container.innerHTML = `
-        <div class="max-w-7xl mx-auto px-4 py-8 space-y-8 font-sans">
+        <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
             <!-- Admin Top Bar -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#080d1a]/95 p-6 rounded-3xl border border-cyan-500/25 shadow-2xl shadow-cyan-950/40 backdrop-blur-xl">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
                 <div>
-                    <div class="flex items-center gap-2 text-cyan-400 font-bold text-xs mb-1">
-                        <i data-lucide="shield-check" class="w-4 h-4 text-cyan-400"></i>
-                        <span>مرکز فرماندهی کوانتوم کات • استعدادهای درخشان شهید بهشتی دو</span>
+                    <div class="flex items-center gap-2 text-rose-600 font-bold text-xs mb-1">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i>
+                        <span>پنل مدیریت انجمن فیزیک شهید بهشتی دو دوره اول</span>
                     </div>
-                    <h1 class="text-2xl font-extrabold text-white tracking-wide">پنل جامع مدیریت آموزشی QUANTUM CUT</h1>
+                    <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">پنل جامع مدیریت آموزشی</h1>
                 </div>
 
                 <!-- Admin Tabs Navigation (Responsive Horizontal Scroll on Mobile) -->
-                <div class="flex items-center sm:flex-wrap gap-1.5 p-1.5 rounded-2xl bg-[#060a14] border border-cyan-500/20 text-xs font-bold overflow-x-auto no-scrollbar w-full sm:w-auto">
-                    <button onclick="window.currentAdminViews.switchTab('overview')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'overview' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(0,240,255,0.3)] font-black' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
+                <div class="flex items-center sm:flex-wrap gap-1.5 p-1.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 text-xs font-bold overflow-x-auto no-scrollbar w-full sm:w-auto">
+                    <button onclick="window.currentAdminViews.switchTab('overview')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'overview' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         داشبورد
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('curriculum')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'curriculum' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(0,240,255,0.3)] font-black' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
+                    <button onclick="window.currentAdminViews.switchTab('curriculum')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'curriculum' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         سرفصل‌ها و درسنامه‌ساز
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('materials')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'materials' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(0,240,255,0.3)] font-black' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        درسنامه‌ها و جزوات
+                    <button onclick="window.currentAdminViews.switchTab('materials')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'materials' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
+                        درسنامه‌ها و جزوات متفرقه
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('competitions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'competitions' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(0,240,255,0.3)] font-black' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        لیگ‌ها و مسابقات
+                    <button onclick="window.currentAdminViews.switchTab('competitions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'competitions' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
+                        مدیریت لیگ‌ها و مسابقات
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('questions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'questions' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(0,240,255,0.3)] font-black' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
+                    <button onclick="window.currentAdminViews.switchTab('questions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'questions' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         بانک سؤالات
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('reviews')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'reviews' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(0,240,255,0.3)] font-black' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        مرکز بازبینی
+                    <button onclick="window.currentAdminViews.switchTab('reviews')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'reviews' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
+                        مرکز بازبینی و تصحیح
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('validation')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'validation' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(0,240,255,0.3)] font-black' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        اعتبارسنجی
+                    <button onclick="window.currentAdminViews.switchTab('validation')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'validation' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
+                        اعتبارسنجی سؤالات
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('ai')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'ai' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(0,240,255,0.3)] font-black' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        هوش مصنوعی
+                    <button onclick="window.currentAdminViews.switchTab('ai')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'ai' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
+                        تنظیمات هوش مصنوعی
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('textbooks')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'textbooks' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(0,240,255,0.3)] font-black' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        کتاب‌های PDF
+                    <button onclick="window.currentAdminViews.switchTab('textbooks')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'textbooks' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
+                        کتاب‌ها و استخراج PDF
                     </button>
-                    <button onclick="window.currentAdminViews.switchTab('students')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'students' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_12px_rgba(0,240,255,0.3)] font-black' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
+                    <button onclick="window.currentAdminViews.switchTab('students')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'students' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
                         دانش‌آموزان
                     </button>
                 </div>
@@ -68,9 +66,7 @@ class AdminViews {
 
             <!-- Tab Content Container -->
             <div id="admin-tab-content">
-                <div class="text-center py-16">
-                    <div class="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin mx-auto shadow-[0_0_15px_rgba(0,240,255,0.3)]"></div>
-                </div>
+                <div class="text-center py-12"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div></div>
             </div>
         </div>
         `;
@@ -94,70 +90,70 @@ class AdminViews {
             <div class="space-y-6">
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div class="bg-[#080d1a]/95 p-6 rounded-3xl border border-cyan-500/20 shadow-xl shadow-cyan-950/30 backdrop-blur-xl">
+                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
                         <span class="text-xs text-slate-400 font-bold block mb-1">دانش‌آموزان ثبت‌نامی</span>
-                        <span class="text-3xl font-extrabold text-white font-mono">${data.total_students}</span>
+                        <span class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">${data.total_students}</span>
                     </div>
-                    <div class="bg-[#080d1a]/95 p-6 rounded-3xl border border-cyan-500/20 shadow-xl shadow-cyan-950/30 backdrop-blur-xl">
+                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
                         <span class="text-xs text-slate-400 font-bold block mb-1">کل پرسش‌های فعال</span>
-                        <span class="text-3xl font-extrabold text-cyan-300 font-mono text-glow-cyan">${data.total_questions}</span>
+                        <span class="text-3xl font-extrabold text-blue-600 font-mono">${data.total_questions}</span>
                     </div>
-                    <div class="bg-[#080d1a]/95 p-6 rounded-3xl border border-violet-500/20 shadow-xl shadow-violet-950/30 backdrop-blur-xl">
+                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
                         <span class="text-xs text-slate-400 font-bold block mb-1">آزمون‌های برگزار شده</span>
-                        <span class="text-3xl font-extrabold text-violet-300 font-mono">${data.total_attempts}</span>
+                        <span class="text-3xl font-extrabold text-indigo-600 font-mono">${data.total_attempts}</span>
                     </div>
-                    <div class="bg-[#080d1a]/95 p-6 rounded-3xl border border-amber-500/20 shadow-xl shadow-amber-950/30 backdrop-blur-xl">
+                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
                         <span class="text-xs text-slate-400 font-bold block mb-1">پاسخ‌های در صف بازبینی دبیر</span>
-                        <span class="text-3xl font-extrabold text-amber-300 font-mono">${data.pending_written_reviews}</span>
+                        <span class="text-3xl font-extrabold text-amber-600 font-mono">${data.pending_written_reviews}</span>
                     </div>
                 </div>
 
                 <!-- Admin Quick Command Deck -->
-                <div class="p-6 rounded-3xl bg-gradient-to-r from-[#0a1122] via-[#0f1b33] to-[#0a1122] border border-cyan-500/30 shadow-[0_0_25px_rgba(0,240,255,0.15)] space-y-4">
+                <div class="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-cyan-500/30 cyber-glow-cyan space-y-4">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <i data-lucide="terminal" class="w-5 h-5 text-cyan-400"></i>
-                            <h3 class="text-sm font-extrabold text-white tracking-wide">مرکز فرماندهی و دسترسی‌های سریع مدیر (Admin Control Deck)</h3>
+                            <h3 class="text-sm font-extrabold text-white">مرکز فرماندهی و دسترسی‌های سریع مدیر (Admin Control Deck)</h3>
                         </div>
-                        <span class="text-[11px] px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-sans font-bold shadow-sm">مدیریت انجمن فیزیک</span>
+                        <span class="text-[11px] px-2.5 py-1 rounded-full bg-sky-950/80 border border-sky-800/80 text-sky-300 font-sans font-medium">مدیریت انجمن فیزیک</span>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-                        <button onclick="window.currentAdminViews.switchTab('curriculum'); setTimeout(() => window.currentAdminViews.openCreateChapterModal(), 200)" class="p-3.5 rounded-2xl bg-[#0c1527]/90 hover:bg-[#0f1b33] border border-purple-500/30 hover:border-purple-400/60 text-right flex items-center justify-between transition-all group shadow-sm">
+                        <button onclick="window.currentAdminViews.switchTab('curriculum'); setTimeout(() => window.currentAdminViews.openCreateChapterModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-purple-500/40 text-right flex items-center justify-between transition-all group">
                             <div>
                                 <span class="block text-xs font-black text-purple-300 group-hover:text-white">📖 سرفصل‌ها و درسنامه‌ساز</span>
                                 <span class="text-[11px] text-slate-400">طراحی فصول و دروس بدون کد</span>
                             </div>
                             <i data-lucide="book-plus" class="w-5 h-5 text-purple-400"></i>
                         </button>
-                        <button onclick="window.currentAdminViews.switchTab('materials'); setTimeout(() => window.currentAdminViews.openCreateMaterialModal(), 200)" class="p-3.5 rounded-2xl bg-[#0c1527]/90 hover:bg-[#0f1b33] border border-emerald-500/30 hover:border-emerald-400/60 text-right flex items-center justify-between transition-all group shadow-sm">
+                        <button onclick="window.currentAdminViews.switchTab('materials'); setTimeout(() => window.currentAdminViews.openCreateMaterialModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-emerald-500/40 text-right flex items-center justify-between transition-all group">
                             <div>
                                 <span class="block text-xs font-black text-emerald-300 group-hover:text-white">📄 بارگذاری جزوه و درسنامه</span>
                                 <span class="text-[11px] text-slate-400">بانک درسنامه‌های متفرقه</span>
                             </div>
                             <i data-lucide="file-plus" class="w-5 h-5 text-emerald-400"></i>
                         </button>
-                        <button onclick="window.currentAdminViews.switchTab('competitions'); setTimeout(() => window.currentAdminViews.openCreateCompetitionModal(), 200)" class="p-3.5 rounded-2xl bg-[#0c1527]/90 hover:bg-[#0f1b33] border border-cyan-500/30 hover:border-cyan-400/60 text-right flex items-center justify-between transition-all group shadow-sm">
+                        <button onclick="window.currentAdminViews.switchTab('competitions'); setTimeout(() => window.currentAdminViews.openCreateCompetitionModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-cyan-500/30 text-right flex items-center justify-between transition-all group">
                             <div>
                                 <span class="block text-xs font-black text-cyan-300 group-hover:text-white">➕ ساخت مسابقه یا چالش</span>
                                 <span class="text-[11px] text-slate-400">لیگ هفتگی، ماهانه یا سرعتی</span>
                             </div>
                             <i data-lucide="trophy" class="w-5 h-5 text-cyan-400"></i>
                         </button>
-                        <button onclick="window.currentAdminViews.switchTab('competitions')" class="p-3.5 rounded-2xl bg-[#0c1527]/90 hover:bg-[#0f1b33] border border-violet-500/30 hover:border-violet-400/60 text-right flex items-center justify-between transition-all group shadow-sm">
+                        <button onclick="window.currentAdminViews.switchTab('competitions')" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-violet-500/30 text-right flex items-center justify-between transition-all group">
                             <div>
                                 <span class="block text-xs font-black text-violet-300 group-hover:text-white">⚖️ داوری پاسخ‌های مسابقات</span>
                                 <span class="text-[11px] text-slate-400">بررسی، نمره‌دهی و بازخورد</span>
                             </div>
                             <i data-lucide="clipboard-check" class="w-5 h-5 text-violet-400"></i>
                         </button>
-                        <button onclick="window.currentAdminViews.switchTab('ai')" class="p-3.5 rounded-2xl bg-[#0c1527]/90 hover:bg-[#0f1b33] border border-teal-500/30 hover:border-teal-400/60 text-right flex items-center justify-between transition-all group shadow-sm">
+                        <button onclick="window.currentAdminViews.switchTab('ai')" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-teal-500/30 text-right flex items-center justify-between transition-all group">
                             <div>
                                 <span class="block text-xs font-black text-teal-300 group-hover:text-white">⚡ پایش هوش مصنوعی نکسورا</span>
                                 <span class="text-[11px] text-slate-400">تست تاخیر و مدل‌های آزاد</span>
                             </div>
                             <i data-lucide="cpu" class="w-5 h-5 text-teal-400"></i>
                         </button>
-                        <button onclick="window.currentAdminViews.switchTab('questions')" class="p-3.5 rounded-2xl bg-[#0c1527]/90 hover:bg-[#0f1b33] border border-amber-500/30 hover:border-amber-400/60 text-right flex items-center justify-between transition-all group shadow-sm">
+                        <button onclick="window.currentAdminViews.switchTab('questions')" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-amber-500/30 text-right flex items-center justify-between transition-all group">
                             <div>
                                 <span class="block text-xs font-black text-amber-300 group-hover:text-white">📚 بانک سؤالات و طراحی نو</span>
                                 <span class="text-[11px] text-slate-400">طراحی تستی و تشریحی</span>
@@ -168,14 +164,14 @@ class AdminViews {
                 </div>
 
                 <!-- Recent Activity Logs -->
-                <div class="bg-[#080d1a]/95 rounded-3xl p-6 border border-cyan-500/20 shadow-xl backdrop-blur-xl space-y-4">
-                    <h3 class="font-bold text-base text-white">رویدادها و گزارش‌های امنیتی اخیر (Audit Logs)</h3>
-                    <div class="divide-y divide-cyan-500/10">
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <h3 class="font-bold text-base text-slate-800 dark:text-white">رویدادها و گزارش‌های امنیتی اخیر (Audit Logs)</h3>
+                    <div class="divide-y divide-slate-100 dark:divide-slate-800">
                         ${(data.recent_logs && data.recent_logs.length > 0) ? data.recent_logs.map(l => `
                         <div class="py-3 flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-2.5">
-                                <span class="px-2 py-0.5 rounded-md bg-slate-900 border border-cyan-500/20 text-cyan-400 font-mono text-[11px]">${l.action}</span>
-                                <span class="text-slate-300">موجودیت: ${l.target_entity} (شناسه: ${l.target_id || '-'})</span>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-mono text-[11px]">${l.action}</span>
+                                <span class="text-slate-600 dark:text-slate-300">موجودیت: ${l.target_entity} (شناسه: ${l.target_id || '-'})</span>
                             </div>
                             <span class="text-slate-400 font-mono">${window.formatPersianTime ? window.formatPersianTime(l.created_at) : (l.created_at || '-')}</span>
                         </div>
@@ -190,13 +186,13 @@ class AdminViews {
             const allPassed = reports.length > 0 && reports.every(r => r.is_fully_compliant);
 
             target.innerHTML = `
-            <div class="bg-[#080d1a]/95 rounded-3xl p-6 sm:p-8 border border-cyan-500/20 shadow-xl backdrop-blur-xl space-y-6">
-                <div class="flex items-center justify-between border-b border-cyan-500/15 pb-4">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div>
-                        <h2 class="text-lg font-bold text-white">گزارش خودکار انطباق محتوای آموزشی و بانک سؤالات</h2>
-                        <p class="text-xs text-slate-400 mt-0.5">بررسی حد نصاب الزامی: حداقل ۲۰ سؤال چهارگزینه‌ای معتبر و ۱۰ سؤال تشریحی بارم‌بندی‌شده به ازای تک‌تک فصل‌ها</p>
+                        <h2 class="text-lg font-bold text-slate-800 dark:text-white">گزارش خودکار انطباق محتوای آموزشی و بانک سؤالات</h2>
+                        <p class="text-xs text-slate-500">بررسی حد نصاب الزامی: حداقل ۲۰ سؤال چهارگزینه‌ای معتبر و ۱۰ سؤال تشریحی بارم‌بندی‌شده به ازای تک‌تک فصل‌ها</p>
                     </div>
-                    <div class="px-4 py-2 rounded-xl text-xs font-bold ${allPassed ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 shadow-sm' : 'bg-rose-950/80 text-rose-300 border border-rose-500/40'}">
+                    <div class="px-4 py-2 rounded-xl text-xs font-bold ${allPassed ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
                         ${allPassed ? 'تأیید کامل تمامی ۱۲ فصل (PASS)' : 'عدم انطباق برخی فصول'}
                     </div>
                 </div>
@@ -204,7 +200,7 @@ class AdminViews {
                 <div class="overflow-x-auto">
                     <table class="w-full text-right text-xs">
                         <thead>
-                            <tr class="border-b border-cyan-500/20 text-slate-400">
+                            <tr class="border-b border-slate-200 dark:border-slate-700 text-slate-400">
                                 <th class="p-3">پایه</th>
                                 <th class="p-3">فصل</th>
                                 <th class="p-3">عنوان فصل فیزیک</th>
@@ -213,24 +209,24 @@ class AdminViews {
                                 <th class="p-3 text-center">وضعیت انطباق</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-cyan-500/10 text-slate-300 font-medium">
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-200 font-medium">
                             ${reports.length === 0 ? `
                             <tr>
                                 <td colspan="6" class="p-6 text-center text-slate-400">اطلاعات اعتبارسنجی در دسترس نیست.</td>
                             </tr>
                             ` : reports.map(r => `
-                            <tr class="hover:bg-slate-800/40 transition-colors">
-                                <td class="p-3 font-bold text-white">پایه ${r.grade_number}</td>
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                                <td class="p-3 font-bold">پایه ${r.grade_number}</td>
                                 <td class="p-3">فصل ${r.chapter_number}</td>
-                                <td class="p-3 font-bold text-cyan-300">${r.chapter_title_fa}</td>
-                                <td class="p-3 text-center font-mono font-bold ${r.actual_valid_mcq_count >= 20 ? 'text-emerald-400' : 'text-rose-400'}">
+                                <td class="p-3 font-bold">${r.chapter_title_fa}</td>
+                                <td class="p-3 text-center font-mono font-bold ${r.actual_valid_mcq_count >= 20 ? 'text-emerald-600' : 'text-rose-600'}">
                                     ${r.actual_valid_mcq_count} / ۲۰
                                 </td>
-                                <td class="p-3 text-center font-mono font-bold ${r.actual_valid_written_count >= 10 ? 'text-emerald-400' : 'text-rose-400'}">
+                                <td class="p-3 text-center font-mono font-bold ${r.actual_valid_written_count >= 10 ? 'text-emerald-600' : 'text-rose-600'}">
                                     ${r.actual_valid_written_count} / ۱۰
                                 </td>
                                 <td class="p-3 text-center">
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${r.is_fully_compliant ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40' : 'bg-rose-950/80 text-rose-300 border border-rose-500/40'}">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${r.is_fully_compliant ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
                                         <i data-lucide="${r.is_fully_compliant ? 'check' : 'x'}" class="w-3.5 h-3.5"></i>
                                         ${r.is_fully_compliant ? 'تأیید شد' : 'ناقص'}
                                     </span>
@@ -245,13 +241,13 @@ class AdminViews {
         } else if (this.activeTab === 'questions') {
             const data = await window.api.getQuestions({ limit: 50 });
             target.innerHTML = `
-            <div class="bg-[#080d1a]/95 rounded-3xl p-6 border border-cyan-500/20 shadow-xl backdrop-blur-xl space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyan-500/15 pb-4">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div>
-                        <h3 class="font-bold text-base text-white">فهرست و جستجوی بانک سؤالات (${data.total} پرسش ثبت شده)</h3>
-                        <p class="text-xs text-slate-400 mt-0.5">شامل سؤالات استاندارد چهارگزینه‌ای و مسائل تشریحی به تفکیک پایه‌ها و فصول</p>
+                        <h3 class="font-bold text-base text-slate-800 dark:text-white">فهرست و جستجوی بانک سؤالات (${data.total} پرسش ثبت شده)</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">شامل سؤالات استاندارد چهارگزینه‌ای و مسائل تشریحی به تفکیک پایه‌ها و فصول</p>
                     </div>
-                    <button onclick="window.currentAdminViews.openCreateQuestionModal()" class="btn-quantum-cyan text-xs font-black px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 self-start sm:self-auto hover:scale-105 transition-all">
+                    <button onclick="window.currentAdminViews.openCreateQuestionModal()" class="btn-duo-blue text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 self-start sm:self-auto hover:scale-105 transition-all">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
                         <span>➕ طراح سؤال جدید (بدون کدنویسی)</span>
                     </button>
@@ -259,27 +255,27 @@ class AdminViews {
 
                 <div class="space-y-3">
                     ${(data.questions && data.questions.length > 0) ? data.questions.map(q => `
-                    <div class="p-4 rounded-2xl bg-[#0c1527]/80 border border-cyan-500/15 hover:border-cyan-400/40 transition-all space-y-2">
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all space-y-2">
                         <div class="flex items-center justify-between text-xs">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded-md font-bold text-[11px] ${q.question_type === 'mcq' ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/40' : 'bg-purple-950 text-purple-300 border border-purple-500/40'}">
+                                <span class="px-2 py-0.5 rounded font-bold text-[11px] ${q.question_type === 'mcq' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300'}">
                                     ${q.question_type === 'mcq' ? 'تستی' : 'تشریحی'}
                                 </span>
-                                <span class="text-slate-300 font-semibold">${q.chapter_title_fa || 'فصل فیزیک'} (پایه ${q.grade_number || '-'})</span>
+                                <span class="text-slate-500 font-semibold">${q.chapter_title_fa || 'فصل فیزیک'} (پایه ${q.grade_number || '-'})</span>
                                 <span class="text-[10px] text-slate-400 font-sans font-medium">سطح: ${q.difficulty === 'hard' ? 'سخت' : q.difficulty === 'easy' ? 'آسان' : 'متوسط'}</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <span class="text-cyan-400 font-sans text-[11px] font-bold"><span class="font-mono">${q.points || 1}</span> نمره</span>
-                                <button onclick="window.currentAdminViews.deleteQuestion(${q.id}, '${(q.prompt_fa || '').substring(0, 35).replace(/'/g, "\\'")}')" class="text-rose-400 hover:text-rose-300 p-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1" title="حذف دائمی این سؤال">
+                                <span class="text-slate-500 font-sans text-[11px] font-bold"><span class="font-mono">${q.points || 1}</span> نمره</span>
+                                <button onclick="window.currentAdminViews.deleteQuestion(${q.id}, '${(q.prompt_fa || '').substring(0, 35).replace(/'/g, "\\'")}')" class="text-rose-500 hover:text-rose-700 p-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1" title="حذف دائمی این سؤال">
                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                     <span class="hidden sm:inline">حذف</span>
                                 </button>
                             </div>
                         </div>
-                        <p class="text-xs font-semibold text-slate-200 leading-relaxed text-justify">${q.prompt_fa || ''}</p>
-                        ${q.source_ref ? `<span class="text-[11px] text-slate-400 block font-sans">مرجع: <span class="font-mono text-cyan-400/80">${q.source_ref}</span></span>` : ''}
+                        <p class="text-xs font-semibold text-slate-800 dark:text-white leading-relaxed text-justify">${q.prompt_fa || ''}</p>
+                        ${q.source_ref ? `<span class="text-[11px] text-slate-400 block font-sans">مرجع: <span class="font-mono">${q.source_ref}</span></span>` : ''}
                     </div>
-                    `).join('') : '<div class="p-8 text-center text-xs text-slate-400 bg-slate-900/40 rounded-2xl border border-dashed border-cyan-500/20">هیچ سؤالی در بانک اطلاعاتی یافت نشد.</div>'}
+                    `).join('') : '<div class="p-8 text-center text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/20 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">هیچ سؤالی در بانک اطلاعاتی یافت نشد.</div>'}
                 </div>
             </div>
             `;
@@ -287,39 +283,39 @@ class AdminViews {
             const rawQueue = await window.api.getWrittenQueue();
             const queue = Array.isArray(rawQueue) ? rawQueue : (rawQueue && Array.isArray(rawQueue.items) ? rawQueue.items : []);
             target.innerHTML = `
-            <div class="bg-[#080d1a]/95 rounded-3xl p-6 border border-cyan-500/20 shadow-xl backdrop-blur-xl space-y-6">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
                 <div>
-                    <h3 class="font-bold text-base text-white">صف بازبینی و تصحیح نمرات تشریحی توسط دبیر</h3>
-                    <p class="text-xs text-slate-400 mt-1">مشاهده پیشنهاد هوش مصنوعی، تأیید یا ویرایش نمره با ثبت در دفترچه ممیزی (Audit)</p>
+                    <h3 class="font-bold text-base text-slate-800 dark:text-white">صف بازبینی و تصحیح نمرات تشریحی توسط دبیر</h3>
+                    <p class="text-xs text-slate-500 mt-1">مشاهده پیشنهاد هوش مصنوعی، تأیید یا ویرایش نمره با ثبت در دفترچه ممیزی (Audit)</p>
                 </div>
 
                 <div class="space-y-4">
                     ${queue.length === 0 ? '<p class="text-xs text-slate-400 py-6 text-center">هیچ پاسخی در صف بازبینی نیست.</p>' : queue.map(item => `
-                    <div class="p-5 rounded-2xl bg-[#0c1527]/80 border border-cyan-500/15 space-y-3">
+                    <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3">
                         <div class="flex items-center justify-between text-xs">
-                            <span class="font-bold text-white">${item.student_name} • ${item.exam_title_fa}</span>
-                            <span class="px-2.5 py-1 rounded-full font-bold ${item.review_status === 'pending_review' ? 'bg-amber-950/80 text-amber-300 border border-amber-500/40' : 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'}">
+                            <span class="font-bold text-slate-700 dark:text-slate-200">${item.student_name} • ${item.exam_title_fa}</span>
+                            <span class="px-2.5 py-1 rounded-full font-bold ${item.review_status === 'pending_review' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">
                                 وضعیت: ${item.review_status === 'pending_review' ? 'نیازمند بررسی دبیر' : 'تأیید شده'}
                             </span>
                         </div>
 
-                        <div class="text-xs space-y-2">
-                            <div class="font-bold text-slate-200">سؤال: ${item.question_prompt_fa}</div>
-                            <div class="p-3 rounded-xl bg-[#060a14] border border-cyan-500/20">
-                                <span class="font-bold block mb-1 text-cyan-300">پاسخ دانش‌آموز:</span>
-                                <span class="text-slate-200">${item.student_response_text || 'بدون پاسخ'}</span>
+                        <div class="text-xs space-y-1">
+                            <div class="font-bold text-slate-800 dark:text-white">سؤال: ${item.question_prompt_fa}</div>
+                            <div class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                                <span class="font-bold block mb-1">پاسخ دانش‌آموز:</span>
+                                ${item.student_response_text || 'بدون پاسخ'}
                             </div>
-                            <div class="p-3 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-cyan-200">
-                                <span class="font-bold block mb-1 text-cyan-300">پاسخ مرجع کتاب درسی:</span>
+                            <div class="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200">
+                                <span class="font-bold block mb-1">پاسخ مرجع کتاب درسی:</span>
                                 ${item.reference_answer_fa}
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between pt-2 border-t border-cyan-500/10 text-xs">
-                            <div class="font-bold text-slate-300">
-                                نمره پیشنهادی هوش مصنوعی: <span class="font-mono text-cyan-300 font-bold">${item.ai_score}</span> از ${item.max_score}
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-700 text-xs">
+                            <div class="font-bold text-slate-700 dark:text-slate-200">
+                                نمره پیشنهادی هوش مصنوعی: <span class="font-mono text-blue-600">${item.ai_score}</span> از ${item.max_score}
                             </div>
-                            <button onclick="window.currentAdminViews.openOverrideModal(${item.student_answer_id}, ${item.final_score}, ${item.max_score})" class="btn-quantum-cyan font-bold px-4 py-1.5 rounded-xl text-xs shadow-sm">
+                            <button onclick="window.currentAdminViews.openOverrideModal(${item.student_answer_id}, ${item.final_score}, ${item.max_score})" class="btn-duo-blue text-white font-bold px-4 py-1.5 rounded-xl text-xs">
                                 ویرایش و اعمال نظر دبیر
                             </button>
                         </div>
@@ -331,16 +327,16 @@ class AdminViews {
         } else if (this.activeTab === 'ai') {
             const aiConf = await window.api.getAiConfig();
             target.innerHTML = `
-            <div class="bg-[#080d1a]/95 rounded-3xl p-6 sm:p-8 border border-cyan-500/20 shadow-xl backdrop-blur-xl space-y-6 max-w-2xl">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 max-w-2xl">
                 <div>
-                    <h3 class="font-bold text-lg text-white">پیکربندی ارائه‌دهنده هوش مصنوعی (AI Provider)</h3>
-                    <p class="text-xs text-slate-400 mt-1">پشتیبانی مستقل از انواع ارائه‌دهندگان (OpenAI, DeepSeek, OpenRouter, Ollama و Mock آزمایشی)</p>
+                    <h3 class="font-bold text-lg text-slate-800 dark:text-white">پیکربندی ارائه‌دهنده هوش مصنوعی (AI Provider)</h3>
+                    <p class="text-xs text-slate-500 mt-1">پشتیبانی مستقل از انواع ارائه‌دهندگان (OpenAI, DeepSeek, OpenRouter, Ollama و Mock آزمایشی)</p>
                 </div>
 
                 <form onsubmit="window.currentAdminViews.saveAiConfig(event)" class="space-y-4 text-xs font-semibold">
                     <div>
-                        <label class="block text-slate-300 mb-1">نوع ارائه‌دهنده (Provider):</label>
-                        <select id="ai-provider" class="w-full p-3 rounded-xl border border-cyan-500/30 bg-[#060a14] text-white outline-none focus:border-cyan-400">
+                        <label class="block text-slate-600 dark:text-slate-300 mb-1">نوع ارائه‌دهنده (Provider):</label>
+                        <select id="ai-provider" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white">
                             <option value="mock" ${aiConf.provider_name === 'mock' ? 'selected' : ''}>شبیه‌ساز داخلی (Mock - بدون نیاز به اینترنت و کلید)</option>
                             <option value="openai" ${aiConf.provider_name === 'openai' ? 'selected' : ''}>OpenAI (سازگار با ChatGPT)</option>
                             <option value="openrouter" ${aiConf.provider_name === 'openrouter' ? 'selected' : ''}>OpenRouter (دسترسی به تمام مدل‌ها)</option>
@@ -350,48 +346,48 @@ class AdminViews {
                     </div>
 
                     <div>
-                        <label class="block text-slate-300 mb-1">نشانی پایه API (Base URL):</label>
-                        <input type="text" id="ai-base-url" value="${aiConf.base_url}" class="w-full p-3 rounded-xl border border-cyan-500/30 bg-[#060a14] text-white font-mono outline-none focus:border-cyan-400" />
+                        <label class="block text-slate-600 dark:text-slate-300 mb-1">نشانی پایه API (Base URL):</label>
+                        <input type="text" id="ai-base-url" value="${aiConf.base_url}" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
                     </div>
 
                     <div>
-                        <label class="block text-slate-300 mb-1">شناسه مدل عمومی (Default Model Name):</label>
-                        <input type="text" id="ai-model-name" value="${aiConf.model_name}" class="w-full p-3 rounded-xl border border-cyan-500/30 bg-[#060a14] text-white font-mono outline-none focus:border-cyan-400" />
+                        <label class="block text-slate-600 dark:text-slate-300 mb-1">شناسه مدل عمومی (Default Model Name):</label>
+                        <input type="text" id="ai-model-name" value="${aiConf.model_name}" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
                     </div>
 
                     <!-- Task Specific Model Routing -->
-                    <div class="p-4 rounded-2xl bg-[#0c1527]/80 border border-cyan-500/20 space-y-3">
-                        <span class="text-xs font-bold text-violet-300 block">مسیریابی وظیفه‌محور مدل‌ها (Task-Specific Model Routing)</span>
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3">
+                        <span class="text-xs font-bold text-violet-600 dark:text-violet-400 block">مسیریابی وظیفه‌محور مدل‌ها (Task-Specific Model Routing)</span>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-slate-400 text-[11px] mb-1">مدل معلم هوشمند (Tutoring):</label>
-                                <input type="text" id="ai-tutoring-model" value="${aiConf.tutoring_model || aiConf.model_name}" class="w-full p-2.5 rounded-lg border border-cyan-500/30 bg-[#060a14] text-white font-mono text-xs outline-none focus:border-cyan-400" />
+                                <label class="block text-slate-500 text-[11px] mb-1">مدل معلم هوشمند (Tutoring):</label>
+                                <input type="text" id="ai-tutoring-model" value="${aiConf.tutoring_model || aiConf.model_name}" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-mono text-xs" />
                             </div>
                             <div>
-                                <label class="block text-slate-400 text-[11px] mb-1">مدل تصحیح تشریحی (Grading):</label>
-                                <input type="text" id="ai-grading-model" value="${aiConf.grading_model || aiConf.model_name}" class="w-full p-2.5 rounded-lg border border-cyan-500/30 bg-[#060a14] text-white font-mono text-xs outline-none focus:border-cyan-400" />
+                                <label class="block text-slate-500 text-[11px] mb-1">مدل تصحیح تشریحی (Grading):</label>
+                                <input type="text" id="ai-grading-model" value="${aiConf.grading_model || aiConf.model_name}" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-mono text-xs" />
                             </div>
                             <div>
-                                <label class="block text-slate-400 text-[11px] mb-1">مدل تولید سؤال (Generation):</label>
-                                <input type="text" id="ai-generation-model" value="${aiConf.generation_model || aiConf.model_name}" class="w-full p-2.5 rounded-lg border border-cyan-500/30 bg-[#060a14] text-white font-mono text-xs outline-none focus:border-cyan-400" />
+                                <label class="block text-slate-500 text-[11px] mb-1">مدل تولید سؤال (Generation):</label>
+                                <input type="text" id="ai-generation-model" value="${aiConf.generation_model || aiConf.model_name}" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-mono text-xs" />
                             </div>
                             <div>
-                                <label class="block text-slate-400 text-[11px] mb-1">مدل تحلیل اشتباهات (Explanation):</label>
-                                <input type="text" id="ai-explanation-model" value="${aiConf.explanation_model || aiConf.model_name}" class="w-full p-2.5 rounded-lg border border-cyan-500/30 bg-[#060a14] text-white font-mono text-xs outline-none focus:border-cyan-400" />
+                                <label class="block text-slate-500 text-[11px] mb-1">مدل تحلیل اشتباهات (Explanation):</label>
+                                <input type="text" id="ai-explanation-model" value="${aiConf.explanation_model || aiConf.model_name}" class="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-mono text-xs" />
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-slate-300 mb-1">کلید دسترسی (API Key) - نگهداری امن در سرور:</label>
-                        <input type="password" id="ai-api-key" placeholder="${aiConf.api_key_masked}" class="w-full p-3 rounded-xl border border-cyan-500/30 bg-[#060a14] text-white font-mono outline-none focus:border-cyan-400" />
+                        <label class="block text-slate-600 dark:text-slate-300 mb-1">کلید دسترسی (API Key) - نگهداری امن در سرور:</label>
+                        <input type="password" id="ai-api-key" placeholder="${aiConf.api_key_masked}" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-mono" />
                     </div>
 
                     <div class="flex items-center gap-3 pt-4">
-                        <button type="submit" class="btn-quantum-emerald px-6 py-2.5 rounded-xl text-xs font-bold shadow-md">
+                        <button type="submit" class="btn-duo-green text-white font-bold px-6 py-2.5 rounded-xl shadow-sm">
                             ذخیره تنظیمات
                         </button>
-                        <button type="button" onclick="window.currentAdminViews.runAiConnectionTest()" class="btn-quantum-cyan px-6 py-2.5 rounded-xl text-xs font-bold shadow-md">
+                        <button type="button" onclick="window.currentAdminViews.runAiConnectionTest()" class="btn-duo-blue text-white font-bold px-6 py-2.5 rounded-xl shadow-sm">
                             تست اتصال زنده
                         </button>
                     </div>
@@ -409,31 +405,31 @@ class AdminViews {
             }
 
             target.innerHTML = `
-            <div class="bg-[#080d1a]/95 rounded-3xl p-6 border border-cyan-500/20 shadow-xl backdrop-blur-xl space-y-6">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
                 <div>
-                    <h3 class="font-bold text-base text-white">مدیریت کتاب‌های درسی و بارگذاری دستی PDF</h3>
-                    <p class="text-xs text-slate-400 mt-1">وضعیت پردازش ۶ منبع رسمی و سمپاد، استخراج خودکار سرفصل‌ها و آپلود جایگزین</p>
+                    <h3 class="font-bold text-base text-slate-800 dark:text-white">مدیریت کتاب‌های درسی و بارگذاری دستی PDF</h3>
+                    <p class="text-xs text-slate-500 mt-1">وضعیت پردازش ۶ منبع رسمی و سمپاد، استخراج خودکار سرفصل‌ها و آپلود جایگزین</p>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     ${allBooks.map(b => `
-                    <div class="p-5 rounded-2xl bg-[#0c1527]/80 border border-cyan-500/15 space-y-3">
+                    <div class="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3">
                         <div class="flex items-center justify-between text-xs">
-                            <span class="font-bold text-white">${b.title_fa}</span>
-                            <span class="px-2.5 py-0.5 rounded-full font-bold text-[11px] ${b.source_status === 'completed' ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40' : 'bg-amber-950 text-amber-300 border border-amber-500/40'}">
+                            <span class="font-bold text-slate-800 dark:text-white">${b.title_fa}</span>
+                            <span class="px-2 py-0.5 rounded-full font-bold ${b.source_status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
                                 ${b.source_status === 'completed' ? 'پردازش شده' : 'در انتظار'}
                             </span>
                         </div>
                         <div class="text-[11px] text-slate-400 space-y-1">
-                            <div>کد منبع: <span class="font-mono text-cyan-400/90">${b.code}</span></div>
-                            <div>تعداد صفحات: <span class="text-slate-200 font-bold">${b.page_count}</span> صفحه</div>
-                            <div>ناشر: <span class="text-slate-300">${b.publisher_fa}</span></div>
+                            <div>کد منبع: <span class="font-mono">${b.code}</span></div>
+                            <div>تعداد صفحات: ${b.page_count} صفحه</div>
+                            <div>ناشر: ${b.publisher_fa}</div>
                         </div>
 
                         <!-- Manual PDF Upload Form -->
-                        <form onsubmit="window.currentAdminViews.uploadManualPdf(event, ${b.id})" class="pt-2 border-t border-cyan-500/10 flex items-center gap-2">
-                            <input type="file" name="pdf_file" accept=".pdf" required class="text-xs text-slate-400 file:px-3 file:py-1 file:rounded-xl file:border-0 file:bg-slate-800 file:text-slate-200 file:text-xs" />
-                            <button type="submit" class="btn-quantum-cyan px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm">
+                        <form onsubmit="window.currentAdminViews.uploadManualPdf(event, ${b.id})" class="pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center gap-2">
+                            <input type="file" name="pdf_file" accept=".pdf" required class="text-xs text-slate-400 file:px-2 file:py-1 file:rounded-lg file:border-0 file:bg-slate-200 file:text-xs" />
+                            <button type="submit" class="btn-duo-blue text-white px-3 py-1 rounded-lg text-xs font-bold">
                                 آپلود PDF
                             </button>
                         </form>
@@ -580,13 +576,13 @@ class AdminViews {
         const comps = await window.api.getCompetitions().catch(() => []);
 
         target.innerHTML = `
-        <div class="bg-[#080d1a]/95 rounded-3xl p-6 sm:p-8 border border-cyan-500/20 shadow-xl shadow-cyan-950/30 backdrop-blur-xl space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cyan-500/15 pb-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div>
-                    <h3 class="font-extrabold text-lg text-white">مدیریت مسابقات و لیگ‌های کوانتومی</h3>
+                    <h3 class="font-extrabold text-lg text-slate-800 dark:text-white">مدیریت مسابقات و لیگ‌های کوانتومی</h3>
                     <p class="text-xs text-slate-400 mt-1">تعریف مراحل لیگ هفتگی، جام‌های ماهانه، تعیین زمان آزمون، نمره منفی و تصحیح پاسخ‌ها</p>
                 </div>
-                <button onclick="window.currentAdminViews.openCreateCompetitionModal()" class="btn-quantum-emerald text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 self-start sm:self-auto shadow-md hover:scale-105 transition-all">
+                <button onclick="window.currentAdminViews.openCreateCompetitionModal()" class="btn-duo-green text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 self-start sm:self-auto">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
                     <span>تعریف مسابقه / مرحله جدید</span>
                 </button>
@@ -936,18 +932,18 @@ class AdminViews {
         const totalDownloads = materials.reduce((acc, m) => acc + (m.download_count || 0), 0);
 
         target.innerHTML = `
-        <div class="bg-[#080d1a]/95 rounded-3xl p-6 sm:p-8 border border-cyan-500/20 shadow-xl shadow-cyan-950/30 backdrop-blur-xl space-y-6">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
             <!-- Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cyan-500/15 pb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div>
-                    <div class="flex items-center gap-2 text-cyan-400 font-bold text-xs mb-1">
+                    <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs mb-1">
                         <i data-lucide="folder-git-2" class="w-4 h-4"></i>
                         <span>سامانه مدیریت محتوای متفرقه فیزیک</span>
                     </div>
-                    <h3 class="font-extrabold text-lg text-white">مدیریت درسنامه‌ها، جزوات و فایل‌های متفرقه</h3>
-                    <p class="text-xs text-slate-400 mt-1">بارگذاری جزوات دبیران، خلاصه‌های درسی، فرمول‌نامه‌ها، نمونه سؤالات امتحانی و فایل‌های تکمیلی فیزیک</p>
+                    <h3 class="font-extrabold text-lg text-slate-800 dark:text-white">مدیریت درسنامه‌ها، جزوات و فایل‌های متفرقه</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">بارگذاری جزوات دبیران، خلاصه‌های درسی، فرمول‌نامه‌ها، نمونه سؤالات امتحانی و فایل‌های تکمیلی فیزیک</p>
                 </div>
-                <button onclick="window.currentAdminViews.openCreateMaterialModal()" class="btn-quantum-emerald text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 self-start sm:self-auto shadow-md hover:scale-105 transition-all">
+                <button onclick="window.currentAdminViews.openCreateMaterialModal()" class="btn-duo-green text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 self-start sm:self-auto shadow-md hover:scale-105 transition-all">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
                     <span>➕ بارگذاری جزوه یا فایل جدید</span>
                 </button>
@@ -1493,23 +1489,23 @@ class AdminViews {
             target.innerHTML = `
             <div class="space-y-6">
                 <!-- Header & Action Deck -->
-                <div class="bg-[#080d1a]/95 rounded-3xl p-6 sm:p-8 border border-cyan-500/20 shadow-xl shadow-cyan-950/30 backdrop-blur-xl space-y-5">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cyan-500/15 pb-5">
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
                         <div>
-                            <div class="flex items-center gap-2 text-cyan-400 font-bold text-xs mb-1">
+                            <div class="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold text-xs mb-1">
                                 <i data-lucide="sparkles" class="w-4 h-4"></i>
                                 <span>سامانه مدیریت محتوای آموزشی بدون نیاز به کدنویسی (Zero-Code Curriculum CMS)</span>
                             </div>
-                            <h2 class="text-xl font-black text-white">طراحی و مدیریت سرفصل‌ها و درسنامه‌ها</h2>
-                            <p class="text-xs text-slate-400 mt-1">تعداد کل فصول ثبت‌شده: <strong class="text-cyan-400 font-mono">${totalChapters}</strong> فصل | تعداد کل درسنامه‌ها: <strong class="text-emerald-400 font-mono">${totalLessons}</strong> درسنامه</p>
+                            <h2 class="text-xl font-black text-slate-900 dark:text-white">طراحی و مدیریت سرفصل‌ها و درسنامه‌ها</h2>
+                            <p class="text-xs text-slate-500 mt-1">تعداد کل فصول ثبت‌شده: <strong class="text-purple-600 font-mono">${totalChapters}</strong> فصل | تعداد کل درسنامه‌ها: <strong class="text-emerald-500 font-mono">${totalLessons}</strong> درسنامه</p>
                         </div>
 
                         <div class="flex items-center gap-2 flex-wrap">
-                            <button onclick="window.currentAdminViews.openCreateChapterModal()" class="btn-quantum-cyan text-xs font-black px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 hover:scale-105 transition-all">
+                            <button onclick="window.currentAdminViews.openCreateChapterModal()" class="btn-duo-blue text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 hover:scale-105 transition-all">
                                 <i data-lucide="folder-plus" class="w-4 h-4"></i>
                                 <span>➕ ایجاد فصل جدید</span>
                             </button>
-                            <button onclick="window.currentAdminViews.openCreateLessonModal()" class="btn-quantum-emerald text-xs font-black px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 hover:scale-105 transition-all">
+                            <button onclick="window.currentAdminViews.openCreateLessonModal()" class="btn-duo-green text-white text-xs font-black px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 hover:scale-105 transition-all">
                                 <i data-lucide="file-plus" class="w-4 h-4"></i>
                                 <span>➕ ایجاد درسنامه جدید</span>
                             </button>
@@ -2159,22 +2155,22 @@ class AdminViews {
             target.innerHTML = `
             <div class="space-y-6">
                 <!-- Header Card & Quick Actions -->
-                <div class="bg-[#080d1a]/95 rounded-3xl p-6 sm:p-8 border border-cyan-500/20 shadow-xl shadow-cyan-950/30 backdrop-blur-xl space-y-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cyan-500/15 pb-5">
+                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
                         <div>
-                            <div class="flex items-center gap-2 text-cyan-400 font-bold text-xs mb-1">
+                            <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-xs mb-1">
                                 <i data-lucide="shield" class="w-4 h-4"></i>
                                 <span>سامانه جامع نظارت و کنترل دانش‌آموزان (Full Student Control Suite)</span>
                             </div>
-                            <h2 class="text-xl font-black text-white">مدیریت حساب‌ها، مشخصات، رمز عبور، امتیازها و آزمون‌ها</h2>
-                            <p class="text-xs text-slate-400 mt-1">کنترل کامل دانش‌آموز: ویرایش مشخصات، تغییر پایه، بازنشانی مستقیم کلمه عبور، اهدای امتیاز/تجربه، مشاهده کارنامه و ریست کردن تلاش آزمون</p>
+                            <h2 class="text-xl font-black text-slate-900 dark:text-white">مدیریت حساب‌ها، مشخصات، رمز عبور، امتیازها و آزمون‌ها</h2>
+                            <p class="text-xs text-slate-500 mt-1">کنترل کامل دانش‌آموز: ویرایش مشخصات، تغییر پایه، بازنشانی مستقیم کلمه عبور، اهدای امتیاز/تجربه، مشاهده کارنامه و ریست کردن تلاش آزمون</p>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <button onclick="window.currentAdminViews.openCreateStudentModal()" class="btn-quantum-emerald text-xs font-extrabold px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 hover:scale-105 transition-all">
+                            <button onclick="window.currentAdminViews.openCreateStudentModal()" class="btn-duo-green text-white font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 hover:scale-105 transition-all">
                                 <i data-lucide="user-plus" class="w-4 h-4"></i>
                                 <span>➕ ثبت‌نام دانش‌آموز جدید</span>
                             </button>
-                            <button onclick="window.currentAdminViews.loadTabContent()" class="p-2.5 rounded-xl border border-cyan-500/30 bg-[#060a14] hover:bg-slate-800 text-slate-300" title="به‌روزرسانی جدول">
+                            <button onclick="window.currentAdminViews.loadTabContent()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300" title="به‌روزرسانی جدول">
                                 <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                             </button>
                         </div>

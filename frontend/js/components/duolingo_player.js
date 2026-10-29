@@ -1,6 +1,5 @@
 /**
- * QUANTUM CUT — Socratic Multi-Step Interactive Lesson Player
- * Fully preserved logic, elevated with deep-space cyberpunk UI
+ * Duolingo-Inspired Multi-Step Interactive Lesson Player
  */
 class DuolingoPlayer {
     constructor(lesson, containerId) {
@@ -25,7 +24,7 @@ class DuolingoPlayer {
         if (blocks.intro) {
             this.steps.push({
                 type: 'intro',
-                title: 'مقدمه و جرقه مفهومی',
+                title: 'مقدمه و جرقه ذهنی',
                 content: blocks.intro,
                 icon: 'sparkles'
             });
@@ -109,11 +108,11 @@ class DuolingoPlayer {
         if (currentStepObj.type === 'intro') {
             stepHtml = `
             <div class="space-y-6 text-center max-w-xl mx-auto py-8">
-                <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 flex items-center justify-center">
                     <i data-lucide="sparkles" class="w-8 h-8"></i>
                 </div>
-                <h3 class="text-2xl font-black text-white tracking-tight">${this.lesson.title_fa}</h3>
-                <div class="p-6 rounded-2xl bg-slate-950/70 border border-cyan-500/20 text-slate-200 text-sm sm:text-base leading-relaxed text-justify shadow-inner">
+                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">${this.lesson.title_fa}</h3>
+                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-base leading-relaxed text-justify">
                     ${currentStepObj.content}
                 </div>
             </div>
@@ -121,22 +120,22 @@ class DuolingoPlayer {
         } else if (currentStepObj.type === 'theory') {
             stepHtml = `
             <div class="space-y-6 max-w-2xl mx-auto py-4">
-                <div class="flex items-center gap-3 border-b border-cyan-500/15 pb-3">
-                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center justify-center shadow-md shadow-cyan-500/20">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 flex items-center justify-center">
                         <i data-lucide="book-open" class="w-5 h-5"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-black text-white">${currentStepObj.title}</h3>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white">${currentStepObj.title}</h3>
                 </div>
-                <div class="text-slate-200 text-sm sm:text-base leading-relaxed text-justify space-y-4">
-                    <p class="leading-loose">${currentStepObj.content}</p>
+                <div class="text-slate-700 dark:text-slate-200 text-base leading-relaxed text-justify space-y-4">
+                    <p>${currentStepObj.content}</p>
                     ${currentStepObj.definition ? `
-                    <div class="p-4 rounded-xl bg-cyan-950/40 border-r-4 border-cyan-400 text-cyan-200 border border-cyan-500/20">
-                        <span class="font-bold block mb-1 text-cyan-300">تعریف علمی:</span>
+                    <div class="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/40 border-r-4 border-blue-500 text-blue-900 dark:text-blue-200">
+                        <span class="font-bold block mb-1">تعریف علمی:</span>
                         ${currentStepObj.definition}
                     </div>
                     ` : ''}
                     ${currentStepObj.formula ? `
-                    <div class="p-4 rounded-xl bg-slate-950/90 border border-cyan-500/30 font-mono text-center text-lg text-cyan-300 shadow-md">
+                    <div class="p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-mono text-center text-lg text-slate-800 dark:text-slate-100">
                         ${currentStepObj.formula}
                     </div>
                     ` : ''}
@@ -147,12 +146,12 @@ class DuolingoPlayer {
             stepHtml = `
             <div class="space-y-4 max-w-2xl mx-auto py-2">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center justify-center shadow-md shadow-cyan-500/20">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-100 dark:bg-cyan-950/60 text-cyan-400 flex items-center justify-center shadow-md shadow-cyan-500/20">
                         <i data-lucide="atom" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg sm:text-xl font-black text-white">${currentStepObj.title}</h3>
-                        <p class="text-xs text-slate-400">با تغییر متغیرهای فیزیکی، پدیده‌ها و فرمول‌ها را به صورت تجربی و ملموس آزمایش کنید</p>
+                        <h3 class="text-xl font-black text-slate-800 dark:text-white">${currentStepObj.title}</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">با تغییر متغیرهای فیزیکی، پدیده‌ها و فرمول‌ها را به صورت تجربی و ملموس آزمایش کنید</p>
                     </div>
                 </div>
                 <div id="duo-sim-mount-point" class="w-full"></div>
@@ -161,13 +160,13 @@ class DuolingoPlayer {
         } else if (currentStepObj.type === 'experiment') {
             stepHtml = `
             <div class="space-y-6 max-w-2xl mx-auto py-4">
-                <div class="flex items-center gap-3 border-b border-emerald-500/15 pb-3">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center">
                         <i data-lucide="flask-conical" class="w-5 h-5"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-black text-white">${currentStepObj.title}</h3>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white">${currentStepObj.title}</h3>
                 </div>
-                <div class="p-6 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 text-emerald-100 text-sm sm:text-base leading-relaxed text-justify">
+                <div class="p-6 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-slate-700 dark:text-slate-200 text-base leading-relaxed text-justify">
                     ${currentStepObj.content}
                 </div>
             </div>
@@ -175,13 +174,13 @@ class DuolingoPlayer {
         } else if (currentStepObj.type === 'misconception') {
             stepHtml = `
             <div class="space-y-6 max-w-2xl mx-auto py-4">
-                <div class="flex items-center gap-3 border-b border-rose-500/20 pb-3">
-                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/40 text-rose-600 flex items-center justify-center">
                         <i data-lucide="alert-triangle" class="w-5 h-5"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-black text-rose-300">${currentStepObj.title}</h3>
+                    <h3 class="text-xl font-bold text-rose-700 dark:text-rose-400">${currentStepObj.title}</h3>
                 </div>
-                <div class="p-6 rounded-2xl bg-rose-950/30 border border-rose-500/30 text-rose-100 text-sm sm:text-base leading-relaxed text-justify">
+                <div class="p-6 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900 text-slate-700 dark:text-slate-200 text-base leading-relaxed text-justify">
                     ${currentStepObj.content}
                 </div>
             </div>
@@ -191,11 +190,10 @@ class DuolingoPlayer {
             stepHtml = `
             <div class="space-y-6 max-w-xl mx-auto py-4">
                 <div class="text-center">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/70 text-cyan-300 border border-cyan-500/30 text-xs font-bold font-mono mb-2">
-                        <i data-lucide="zap" class="w-3.5 h-3.5 text-cyan-400"></i>
-                        <span>CONCEPTUAL CHECK • تمرین مفهومی</span>
+                    <span class="inline-block px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 text-xs font-bold mb-2">
+                        تمرین تعاملی
                     </span>
-                    <h4 class="text-base sm:text-lg font-bold text-white leading-relaxed mt-2">
+                    <h4 class="text-lg font-bold text-slate-800 dark:text-white leading-relaxed">
                         ${ex.prompt_fa}
                     </h4>
                 </div>
@@ -205,11 +203,11 @@ class DuolingoPlayer {
                     ${ex.options_json.map((opt, i) => `
                     <button onclick="window.currentDuolingoPlayer.selectOption(${i})" 
                         id="duo-opt-${i}"
-                        class="duo-option w-full p-4 rounded-2xl border text-right font-medium transition-all ${this.selectedOption === i ? 'border-cyan-400 bg-cyan-950/40 text-cyan-200 shadow-lg shadow-cyan-500/20' : 'border-slate-800 hover:border-slate-700 bg-slate-900/80 text-slate-200'}">
-                        <span class="inline-flex w-7 h-7 rounded-xl items-center justify-center border ${this.selectedOption === i ? 'border-cyan-400 bg-cyan-500/20 text-cyan-300' : 'border-slate-700 bg-slate-800 text-slate-400'} text-xs ml-3 font-mono font-bold">
+                        class="duo-option w-full p-4 rounded-xl border-2 text-right font-medium text-slate-700 dark:text-slate-200 transition-all ${this.selectedOption === i ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300' : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800'}">
+                        <span class="inline-flex w-7 h-7 rounded-lg items-center justify-center border border-slate-300 dark:border-slate-600 text-xs ml-3 font-bold">
                             ${i + 1}
                         </span>
-                        <span class="text-xs sm:text-sm">${opt}</span>
+                        ${opt}
                     </button>
                     `).join('')}
                 </div>
@@ -218,7 +216,7 @@ class DuolingoPlayer {
                     <input type="text" id="duo-input-ans" 
                         placeholder="پاسخ خود را اینجا بنویسید..." 
                         oninput="window.currentDuolingoPlayer.setInputValue(this.value)"
-                        class="w-full p-4 text-center rounded-2xl border border-cyan-500/30 focus:border-cyan-400 bg-slate-950/80 text-white text-base sm:text-lg font-bold outline-none shadow-inner" />
+                        class="w-full p-4 text-center rounded-xl border-2 border-slate-200 dark:border-slate-700 focus:border-blue-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-white text-lg font-bold outline-none" />
                 </div>
                 `}
             </div>
@@ -226,14 +224,14 @@ class DuolingoPlayer {
         } else if (currentStepObj.type === 'summary') {
             stepHtml = `
             <div class="space-y-6 text-center max-w-lg mx-auto py-8">
-                <div class="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-xl shadow-emerald-500/30 animate-bounce">
+                <div class="w-20 h-20 mx-auto rounded-3xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center animate-bounce">
                     <i data-lucide="award" class="w-10 h-10"></i>
                 </div>
-                <h3 class="text-2xl font-black text-white">تبریک! درسنامه با موفقیت تکمیل شد</h3>
-                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">${currentStepObj.content}</p>
-                <div class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold font-mono text-sm shadow-md">
-                    <i data-lucide="zap" class="w-5 h-5 text-amber-400 fill-amber-400"></i>
-                    <span>+${this.lesson.xp_reward || 25} XP AWARDED</span>
+                <h3 class="text-2xl font-bold text-slate-800 dark:text-white">آفرین! درس با موفقیت تکمیل شد</h3>
+                <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">${currentStepObj.content}</p>
+                <div class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-700 dark:text-amber-300 font-bold">
+                    <i data-lucide="zap" class="w-5 h-5 text-amber-500 fill-amber-500"></i>
+                    <span>+${this.lesson.xp_reward || 25} امتیاز تجربه (XP) کسب کردید</span>
                 </div>
             </div>
             `;
@@ -243,17 +241,17 @@ class DuolingoPlayer {
         <div class="max-w-3xl mx-auto px-4 py-6">
             <!-- Progress Header -->
             <div class="flex items-center gap-4 mb-6">
-                <button onclick="window.store.setView('curriculum')" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/60 transition-colors" title="خروج از درسنامه">
+                <button onclick="window.store.setView('curriculum')" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
-                <div class="flex-1 bg-slate-900 border border-slate-800 rounded-full h-3 overflow-hidden p-0.5">
-                    <div class="bg-gradient-to-r from-cyan-500 via-blue-500 to-emerald-400 h-full rounded-full transition-all duration-300 shadow-sm shadow-cyan-500/50" style="width: ${progressPercent}%"></div>
+                <div class="flex-1 bg-slate-200 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
+                    <div class="bg-gradient-to-r from-emerald-500 to-green-400 h-full transition-all duration-300" style="width: ${progressPercent}%"></div>
                 </div>
-                <span class="text-xs font-mono font-bold text-cyan-400">${this.currentStep + 1} / ${this.totalSteps}</span>
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 font-sans">${this.currentStep + 1} / ${this.totalSteps}</span>
             </div>
 
             <!-- Content Area -->
-            <div class="min-h-[380px] flex flex-col justify-center quantum-card p-6 sm:p-10 relative">
+            <div class="min-h-[380px] flex flex-col justify-center bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-sm relative">
                 ${stepHtml}
 
                 <!-- Feedback Banner for Exercises -->
@@ -261,10 +259,10 @@ class DuolingoPlayer {
             </div>
 
             <!-- Bottom Action Footer -->
-            <div class="mt-6 flex items-center justify-between border-t border-slate-800 pt-6">
+            <div class="mt-6 flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-6">
                 <div>
                     ${this.currentStep > 0 && currentStepObj.type !== 'summary' ? `
-                    <button onclick="window.currentDuolingoPlayer.prevStep()" class="btn-quantum-secondary px-5 py-2.5 rounded-xl text-xs sm:text-sm">
+                    <button onclick="window.currentDuolingoPlayer.prevStep()" class="px-5 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-sm">
                         قبلی
                     </button>
                     ` : '<div></div>'}
@@ -273,16 +271,16 @@ class DuolingoPlayer {
                 <div>
                     ${currentStepObj.type === 'exercise' ? `
                     <button id="duo-check-btn" onclick="window.currentDuolingoPlayer.checkExercise()" 
-                        class="btn-quantum-primary text-slate-950 font-black px-8 py-3 rounded-2xl text-xs sm:text-sm ${this.selectedOption === null ? 'opacity-50 cursor-not-allowed' : ''}">
+                        class="btn-duo-green text-white font-bold px-8 py-3 rounded-2xl shadow-md text-sm ${this.selectedOption === null ? 'opacity-50 cursor-not-allowed' : ''}">
                         بررسی پاسخ
                     </button>
                     ` : currentStepObj.type === 'summary' ? `
-                    <button onclick="window.currentDuolingoPlayer.finishLesson()" class="btn-quantum-primary text-slate-950 font-black px-8 py-3 rounded-2xl text-xs sm:text-sm flex items-center gap-2">
+                    <button onclick="window.currentDuolingoPlayer.finishLesson()" class="btn-duo-green text-white font-bold px-8 py-3.5 rounded-2xl shadow-md text-sm flex items-center gap-2">
                         <span>بازگشت به برنامه درسی</span>
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
                     </button>
                     ` : `
-                    <button onclick="window.currentDuolingoPlayer.nextStep()" class="btn-quantum-primary text-slate-950 font-black px-8 py-3 rounded-2xl text-xs sm:text-sm flex items-center gap-2">
+                    <button onclick="window.currentDuolingoPlayer.nextStep()" class="btn-duo-blue text-white font-bold px-8 py-3 rounded-2xl shadow-md text-sm flex items-center gap-2">
                         <span>ادامه</span>
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
                     </button>
@@ -317,9 +315,9 @@ class DuolingoPlayer {
 
         document.querySelectorAll('.duo-option').forEach((el, i) => {
             if (i === idx) {
-                el.className = 'duo-option w-full p-4 rounded-2xl border text-right font-medium transition-all border-cyan-400 bg-cyan-950/40 text-cyan-200 shadow-lg shadow-cyan-500/20';
+                el.className = 'duo-option w-full p-4 rounded-xl border-2 text-right font-medium transition-all border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300';
             } else {
-                el.className = 'duo-option w-full p-4 rounded-2xl border text-right font-medium transition-all border-slate-800 hover:border-slate-700 bg-slate-900/80 text-slate-200';
+                el.className = 'duo-option w-full p-4 rounded-xl border-2 text-right font-medium transition-all border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200';
             }
         });
     }
@@ -359,76 +357,141 @@ class DuolingoPlayer {
                 if (window.store && window.store.refreshUser) {
                     window.store.refreshUser();
                 }
-                banner.className = 'mt-6 p-4 rounded-2xl flex items-center justify-between bg-emerald-950/70 border border-emerald-500/50 text-emerald-200';
+                banner.className = 'mt-6 p-4 rounded-2xl flex items-center justify-between bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200';
                 banner.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400 shrink-0"></i>
+                        <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-600"></i>
                         <div>
-                            <span class="font-bold block text-sm">عالی بود! پاسخ کاملاً صحیح است (+${gainedXp} XP)</span>
-                            <span class="text-xs text-emerald-300/90">${res.explanation_fa || ''}</span>
+                            <span class="font-bold block">عالی بود! پاسخ کاملاً صحیح است (+${gainedXp} XP)</span>
+                            <span class="text-xs text-emerald-700 dark:text-emerald-300">${res.explanation_fa}</span>
                         </div>
                     </div>
                 `;
             } else {
-                window.store.playSound('incorrect');
-                banner.className = 'mt-6 p-4 rounded-2xl flex items-center justify-between bg-rose-950/70 border border-rose-500/50 text-rose-200';
+                window.store.playSound('wrong');
+                banner.className = 'mt-6 p-5 rounded-2xl flex flex-col gap-3 bg-rose-950/40 border border-rose-800 text-rose-200 shadow-lg';
                 banner.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="alert-circle" class="w-6 h-6 text-rose-400 shrink-0"></i>
-                        <div>
-                            <span class="font-bold block text-sm">پاسخ نادرست بود؛ اما یادگیری در بازبینی اشتباه است!</span>
-                            <span class="text-xs text-rose-300/90">${res.explanation_fa || 'دوباره به مفهوم درس مراجعه کنید.'}</span>
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="x-circle" class="w-6 h-6 text-rose-500 shrink-0 mt-0.5"></i>
+                            <div>
+                                <span class="font-bold text-base block text-rose-300">پاسخ نادرست بود</span>
+                                <span class="text-xs text-rose-200/90 leading-relaxed">${res.explanation_fa || 'پاسخ ارسالی با اصول علمی این مبحث تطابق ندارد.'}</span>
+                            </div>
                         </div>
+                        <button id="duo-ai-help-btn" onclick="window.currentDuolingoPlayer.askAIWhyWrong()" 
+                            class="shrink-0 px-3.5 py-1.5 rounded-xl bg-violet-600/30 hover:bg-violet-600/50 border border-violet-500/50 text-violet-300 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm">
+                            <i data-lucide="bot" class="w-4 h-4 text-violet-400"></i>
+                            <span>تحلیل هوشمند کج‌فهمی (AI)</span>
+                        </button>
                     </div>
+                    <div id="duo-ai-analysis-container" class="hidden mt-2 pt-3 border-t border-rose-900/50"></div>
                 `;
             }
 
             banner.classList.remove('hidden');
-            if (checkBtn) {
-                checkBtn.innerText = 'ادامه درس';
-                checkBtn.onclick = () => this.nextStep();
-            }
+
+            // Change button to Continue
+            checkBtn.innerText = 'ادامه';
+            checkBtn.className = 'btn-duo-blue text-white font-bold px-8 py-3 rounded-2xl shadow-md text-sm';
+            checkBtn.onclick = () => this.nextStep();
 
             if (window.lucide) window.lucide.createIcons();
-            if (window.renderMathInPage) window.renderMathInPage(banner);
         } catch (e) {
-            console.error('Error submitting exercise:', e);
+            alert(e.message);
+        }
+    }
+
+    async askAIWhyWrong() {
+        const container = document.getElementById('duo-ai-analysis-container');
+        const btn = document.getElementById('duo-ai-help-btn');
+        if (!container) return;
+
+        if (btn) {
+            btn.innerHTML = `<span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-violet-400 border-t-transparent rounded-full ml-1.5"></span> در حال تحلیل هوشمند...`;
+            btn.disabled = true;
+        }
+
+        const currentStepObj = this.steps[this.currentStep];
+        const ex = currentStepObj.exercise;
+        const currentGradeId = window.store?.user?.grade_id || 1;
+
+        try {
+            const aiData = await window.api.askAiTutor({
+                grade_id: currentGradeId,
+                chapter_id: this.lesson.chapter_id,
+                lesson_id: this.lesson.id,
+                student_query: `در تمرین «${ex.prompt_fa}»، پاسخ من اشتباه شد. لطفاً علت کج‌فهمی علمی، رابطه فیزیکی و نکته کلیدی را توضیح دهید.`
+            });
+
+            container.classList.remove('hidden');
+            container.innerHTML = `
+                <div class="p-4 rounded-xl bg-slate-900/90 border border-violet-500/40 shadow-inner space-y-3">
+                    <div class="flex items-center gap-2 text-violet-400 font-bold text-xs">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-violet-400"></i>
+                        <span>تحلیل معلم هوشمند فیزیک:</span>
+                    </div>
+                    <p class="text-xs text-slate-200 leading-relaxed">${aiData.response_fa}</p>
+                    ${aiData.related_formulas && aiData.related_formulas.length ? `
+                    <div class="p-2.5 rounded-lg bg-black/40 border border-violet-900/50">
+                        <span class="text-[11px] font-bold text-cyan-400 block mb-1">فرمول‌های مرتبط:</span>
+                        <div class="flex flex-wrap gap-2 text-xs font-mono text-cyan-300 dir-ltr katex-ltr-isolated" dir="ltr">
+                            ${aiData.related_formulas.join(' &nbsp;|&nbsp; ')}
+                        </div>
+                    </div>` : ''}
+                    ${aiData.key_hints && aiData.key_hints.length ? `
+                    <ul class="text-[11px] text-amber-300/90 list-disc list-inside space-y-1">
+                        ${aiData.key_hints.map(h => `<li>${h}</li>`).join('')}
+                    </ul>` : ''}
+                </div>
+            `;
+            if (btn) btn.classList.add('hidden');
+            if (window.lucide) window.lucide.createIcons();
+            if (window.renderMathInPage) setTimeout(window.renderMathInPage, 50);
+        } catch (err) {
+            container.classList.remove('hidden');
+            container.innerHTML = `<span class="text-xs text-rose-300">خطا در دریافت تحلیل هوشمند: ${err.message}</span>`;
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="bot" class="w-4 h-4 text-violet-400"></i><span>تلاش مجدد تحلیل</span>`;
+            }
         }
     }
 
     nextStep() {
+        this.selectedOption = null;
+        this.isAnswerChecked = false;
         if (this.currentStep < this.totalSteps - 1) {
             this.currentStep++;
-            this.selectedOption = null;
-            this.isAnswerChecked = false;
-            this.isCorrect = false;
+            if (this.currentStep === this.totalSteps - 1) {
+                window.store.playSound('celebrate');
+                // Complete lesson on server and synchronize student XP
+                window.api.completeLesson(this.lesson.id).then(compRes => {
+                    const earned = (compRes && compRes.xp_earned) ? compRes.xp_earned : 30;
+                    if (window.store && window.store.showXpToast) {
+                        window.store.showXpToast(earned, `تکمیل موفقیت‌آمیز درس: ${this.lesson.title_fa}`);
+                    }
+                    if (window.store && window.store.refreshUser) {
+                        window.store.refreshUser();
+                    }
+                }).catch(err => console.warn('Lesson complete notice:', err));
+            }
             this.render();
-            window.store.playSound('click');
         }
     }
 
     prevStep() {
         if (this.currentStep > 0) {
-            this.currentStep--;
             this.selectedOption = null;
             this.isAnswerChecked = false;
-            this.isCorrect = false;
+            this.currentStep--;
             this.render();
-            window.store.playSound('click');
         }
     }
 
     async finishLesson() {
-        try {
-            await window.api.completeLesson(this.lesson.id);
-            if (window.store && window.store.showXpToast) {
-                window.store.showXpToast(this.lesson.xp_reward || 25, 'تکمیل موفقیت‌آمیز درسنامه فیزیک');
-            }
-            if (window.store && window.store.refreshUser) {
-                await window.store.refreshUser();
-            }
-        } catch (e) {
-            console.warn('Lesson completion sync notice:', e);
+        if (window.store && window.store.refreshUser) {
+            await window.store.refreshUser();
         }
         window.store.setView('curriculum');
     }

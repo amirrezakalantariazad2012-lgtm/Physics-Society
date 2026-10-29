@@ -1454,25 +1454,25 @@ class PhysicsSimulators {
         const simIframeSrc = baseSimUrl ? `${baseSimUrl}?phet_theme=white&build=3.2&v=${buster}` : '';
 
         container.innerHTML = `
-        <div id="sim-master-card" class="rounded-3xl bg-[#080d1a]/95 border border-cyan-500/20 overflow-hidden shadow-2xl shadow-cyan-950/40 flex flex-col space-y-0 transition-all backdrop-blur-xl">
+        <div id="sim-master-card" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl flex flex-col space-y-0 transition-all">
             <!-- Academic Control Toolbar (MIT / CERN Standard) -->
-            <div class="p-3.5 sm:p-4 bg-gradient-to-r from-[#0a1122] via-[#0f1b33] to-[#0a1122] border-b border-cyan-500/20 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <span class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_12px_rgba(0,240,255,0.8)]"></span>
+            <div class="p-3.5 sm:p-4 bg-slate-50/90 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-md shadow-emerald-500/30"></span>
                     <div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <h3 class="font-extrabold text-sm sm:text-base text-white tracking-wide">${sim.title}</h3>
-                            <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-bold shadow-sm">
+                            <h3 class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">${sim.title}</h3>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700/60 font-bold">
                                 بومی و آفلاین
                             </span>
-                            <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/40 font-bold shadow-sm">
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 dark:bg-sky-950 text-blue-700 dark:text-sky-300 border border-blue-200 dark:border-sky-800 font-bold">
                                 ${sim.gradeTitle}
                             </span>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-400 mt-1">
-                            <span class="text-cyan-400/90 font-medium">${sim.ministryBook}</span>
-                            <span class="text-slate-600">•</span>
-                            <span class="text-amber-400/90 font-medium">${sim.sampadBook}</span>
+                        <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            <span class="text-blue-600 dark:text-teal-400 font-medium">${sim.ministryBook}</span>
+                            <span>•</span>
+                            <span class="text-amber-600 dark:text-amber-400 font-medium">${sim.sampadBook}</span>
                         </div>
                     </div>
                 </div>
@@ -1481,41 +1481,41 @@ class PhysicsSimulators {
                 <div class="flex items-center flex-wrap gap-1.5 sm:gap-2">
                     <button onclick="window.physicsSimulators.openInStandaloneTab('${sim.localUrl}')" 
                         title="باز کردن در صفحه جداگانه / پنجره تمام‌صفحه مستقل برای نمایش روی تخته هوشمند"
-                        class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-cyan-950/60 text-cyan-300 font-bold border border-cyan-500/30 flex items-center gap-1.5 text-xs transition-all shadow-sm hover:shadow-[0_0_10px_rgba(0,240,255,0.2)]">
-                        <i data-lucide="external-link" class="w-3.5 h-3.5 text-cyan-400"></i>
+                        class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-blue-600 dark:text-teal-300 font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 text-xs transition-all shadow-sm">
+                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                         <span>پنجره مستقل</span>
                     </button>
 
                     <button onclick="window.physicsSimulators.toggleFullscreen('sim-viewport-frame-wrapper')" 
                         title="نمایش تمام‌صفحه"
-                        class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 text-xs font-bold border border-slate-700/80 flex items-center gap-1.5 transition-all shadow-sm">
-                        <i data-lucide="maximize" class="w-3.5 h-3.5 text-slate-300"></i>
+                        class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all shadow-sm">
+                        <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
                         <span>تمام‌صفحه</span>
                     </button>
 
                     <button onclick="window.physicsSimulators.reloadActiveFrame()" 
                         title="راه‌اندازی مجدد شبیه‌ساز"
-                        class="p-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition-all shadow-sm">
+                        class="p-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-all shadow-sm">
                         <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
                     </button>
 
                     <button onclick="window.physicsSimulators.openLabToolboxModal('caliper')" 
                         title="جعبه ابزار آزمایشگاهی (کولیس، کرونومتر، مولتی‌متر)"
-                        class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600/30 to-blue-600/30 hover:from-cyan-600/40 hover:to-blue-600/40 text-cyan-200 border border-cyan-400/40 text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all hover:shadow-[0_0_12px_rgba(0,240,255,0.3)]">
-                        <i data-lucide="wrench" class="w-3.5 h-3.5 text-cyan-300"></i>
+                        class="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-cyan-700/80 hover:bg-blue-100 dark:hover:bg-cyan-600 text-blue-700 dark:text-white border border-blue-200 dark:border-transparent text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all">
+                        <i data-lucide="wrench" class="w-3.5 h-3.5"></i>
                         <span>جعبه ابزار</span>
                     </button>
 
                     ${isExpRunClaimed ? `
                     <button id="claim-lab-action-experiment_run-${sim.id}" disabled 
-                        class="px-3.5 py-1.5 rounded-xl bg-emerald-950/90 border border-emerald-500/60 text-emerald-300 text-xs font-bold flex items-center gap-1.5 cursor-default shadow-sm">
+                        class="px-3.5 py-1.5 rounded-xl bg-emerald-950/90 border border-emerald-600/70 text-emerald-300 text-xs font-bold flex items-center gap-1.5 cursor-default">
                         <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
                         <span>آزمایش ثبت‌شده (+۲۰ XP)</span>
                     </button>
                     ` : `
                     <button id="claim-lab-action-experiment_run-${sim.id}" 
                         onclick="window.claimLabAction('${sim.id}', '${sim.title}', 'experiment_run', 20)" 
-                        class="btn-quantum-emerald text-xs px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 shadow-md hover:scale-105 transition-all">
+                        class="btn-duo-green text-white font-bold px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md hover:scale-105 transition-all">
                         <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i>
                         <span>ثبت آزمایش (+۲۰ XP)</span>
                     </button>
@@ -1526,22 +1526,22 @@ class PhysicsSimulators {
             <!-- Standalone IFrame Viewport (100% Offline, Same-Origin) -->
             <div id="sim-viewport-frame-wrapper" class="relative w-full ${frameHeight} bg-white flex flex-col justify-center items-center overflow-hidden">
                 <!-- Smooth Loading Overlay -->
-                <div id="sim-frame-loader" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#070b16] text-cyan-400 gap-3 transition-opacity duration-300">
-                    <div class="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin shadow-[0_0_20px_rgba(0,240,255,0.4)]"></div>
-                    <span class="text-xs font-bold text-slate-300">در حال مقداردهی شبیه‌ساز فیزیک کوانتوم...</span>
+                <div id="sim-frame-loader" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white text-sky-600 gap-3 transition-opacity duration-300">
+                    <div class="w-10 h-10 border-4 border-sky-500/20 border-t-sky-600 rounded-full animate-spin"></div>
+                    <span class="text-xs font-bold text-slate-700">در حال آماده‌سازی و بارگذاری شبیه‌ساز فیزیک...</span>
                 </div>
 
                 <!-- Resilient Error Boundary -->
-                <div id="sim-frame-error" class="hidden absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#070b16] text-slate-200 p-6 text-center gap-3">
-                    <i data-lucide="alert-circle" class="w-12 h-12 text-amber-400"></i>
-                    <h4 class="font-black text-sm text-white">عدم پاسخگویی شبیه‌ساز</h4>
-                    <p class="text-xs text-slate-400 max-w-sm">در صورتی که شبیه‌ساز به درستی بارگذاری نشده است، می‌توانید آن را دوباره راه‌اندازی کنید یا در پنجره مجزا باز نمایید.</p>
+                <div id="sim-frame-error" class="hidden absolute inset-0 z-20 flex flex-col items-center justify-center bg-white text-slate-800 p-6 text-center gap-3">
+                    <i data-lucide="alert-circle" class="w-10 h-10 text-amber-500"></i>
+                    <h4 class="font-black text-sm text-slate-900">عدم پاسخگویی شبیه‌ساز</h4>
+                    <p class="text-xs text-slate-500 max-w-sm">در صورتی که شبیه‌ساز به درستی بارگذاری نشده است، می‌توانید آن را دوباره راه‌اندازی کنید یا در پنجره مجزا باز نمایید.</p>
                     <div class="flex items-center gap-3 mt-2">
-                        <button onclick="window.physicsSimulators.reloadActiveFrame()" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md">
+                        <button onclick="window.physicsSimulators.reloadActiveFrame()" class="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center gap-1.5">
                             <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
                             <span>تلاش مجدد</span>
                         </button>
-                        <button onclick="window.physicsSimulators.openInStandaloneTab('${sim.localUrl}')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs flex items-center gap-1.5 border border-cyan-500/30">
+                        <button onclick="window.physicsSimulators.openInStandaloneTab('${sim.localUrl}')" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-sky-700 font-bold text-xs flex items-center gap-1.5 border border-slate-300">
                             <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                             <span>پنجره مستقل</span>
                         </button>
@@ -1563,46 +1563,43 @@ class PhysicsSimulators {
             </div>
 
             <!-- Bottom Multi-Tab Educational Panel -->
-            <div class="p-4 sm:p-6 bg-gradient-to-b from-[#091020] to-[#060a14] border-t border-cyan-500/20 space-y-4">
+            <div class="p-4 sm:p-6 bg-slate-50 dark:bg-slate-900/95 border-t border-slate-200 dark:border-slate-800 space-y-4">
                 <!-- Tab Selector -->
-                <div class="flex flex-wrap items-center gap-2 border-b border-cyan-500/15 pb-3 text-xs font-bold">
+                <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 dark:border-slate-800/80 pb-3 text-xs font-bold">
                     <button onclick="window.physicsSimulators.switchInfoTab('steps')" id="sim-tab-btn-steps" 
-                        class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black shadow-[0_0_15px_rgba(0,240,255,0.3)] flex items-center gap-1.5 transition-all">
+                        class="px-3.5 py-1.5 rounded-xl bg-blue-600 text-white font-black shadow flex items-center gap-1.5 transition-all">
                         <i data-lucide="list-ordered" class="w-3.5 h-3.5"></i>
                         <span>دستور کار و سناریو</span>
                     </button>
                     <button onclick="window.physicsSimulators.switchInfoTab('formula')" id="sim-tab-btn-formula" 
-                        class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 flex items-center gap-1.5 transition-all">
-                        <i data-lucide="sigma" class="w-3.5 h-3.5 text-cyan-400"></i>
+                        class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all">
+                        <i data-lucide="sigma" class="w-3.5 h-3.5"></i>
                         <span>روابط و فرمول‌ها</span>
                     </button>
                     <button onclick="window.physicsSimulators.switchInfoTab('logbook')" id="sim-tab-btn-logbook" 
-                        class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 flex items-center gap-1.5 transition-all">
-                        <i data-lucide="edit-3" class="w-3.5 h-3.5 text-emerald-400"></i>
-                        <span>دفترچه ثبت مشاهدات ${isLogbookClaimed ? '<span class="text-[10px] text-emerald-400 font-bold">✓ ثبت‌شده</span>' : '<span class="text-[10px] text-cyan-300">(+۱۵ XP)</span>'}</span>
+                        class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all">
+                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                        <span>دفترچه ثبت مشاهدات ${isLogbookClaimed ? '<span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ ثبت‌شده</span>' : '<span class="text-[10px] text-blue-600 dark:text-teal-300">(+۱۵ XP)</span>'}</span>
                     </button>
                     <button onclick="window.physicsSimulators.switchInfoTab('challenge')" id="sim-tab-btn-challenge" 
-                        class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 flex items-center gap-1.5 transition-all">
-                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-amber-400"></i>
-                        <span>چالش مفهومی سمپاد ${isChallengeClaimed ? '<span class="text-[10px] text-emerald-400 font-bold">✓ حل‌شده</span>' : '<span class="text-[10px] text-amber-400">(+۱۰ XP)</span>'}</span>
+                        class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all">
+                        <i data-lucide="help-circle" class="w-3.5 h-3.5 text-amber-500"></i>
+                        <span>چالش مفهومی سمپاد ${isChallengeClaimed ? '<span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ حل‌شده</span>' : '<span class="text-[10px] text-amber-600 dark:text-amber-300">(+۱۰ XP)</span>'}</span>
                     </button>
                     <button onclick="window.physicsSimulators.switchInfoTab('misconceptions')" id="sim-tab-btn-misconceptions" 
-                        class="px-3.5 py-1.5 rounded-xl bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 flex items-center gap-1.5 transition-all">
-                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400"></i>
+                        class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all">
+                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-500"></i>
                         <span>تله‌های تستی سمپاد</span>
                     </button>
                 </div>
 
                 <!-- Tab Content 1: Steps -->
                 <div id="sim-info-tab-steps" class="space-y-3 text-xs">
-                    <h5 class="text-sm font-bold text-cyan-300 flex items-center gap-2">
-                        <i data-lucide="target" class="w-4 h-4 text-cyan-400"></i>
-                        <span>مراحل پیشنهادی انجام آزمایش برای یادگیری کامل:</span>
-                    </h5>
+                    <h5 class="text-sm font-bold text-teal-300">مراحل پیشنهادی انجام آزمایش برای یادگیری کامل:</h5>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         ${sim.experimentSteps.map((step, idx) => `
-                        <div class="p-3.5 rounded-2xl bg-[#0c1527]/80 border border-cyan-500/15 flex items-start gap-3 shadow-sm hover:border-cyan-500/30 transition-all">
-                            <span class="w-6 h-6 rounded-xl bg-cyan-950/80 text-cyan-300 border border-cyan-400/40 flex items-center justify-center font-bold text-xs shrink-0 shadow-[0_0_8px_rgba(0,240,255,0.3)]">
+                        <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800 flex items-start gap-3">
+                            <span class="w-6 h-6 rounded-xl bg-teal-900/60 text-teal-400 border border-teal-500/40 flex items-center justify-center font-bold text-xs shrink-0">
                                 ${idx + 1}
                             </span>
                             <p class="text-slate-300 leading-relaxed text-[11px]">${step}</p>
@@ -1613,18 +1610,18 @@ class PhysicsSimulators {
 
                 <!-- Tab Content 2: Formulas -->
                 <div id="sim-info-tab-formula" class="hidden space-y-3 text-xs">
-                    <div class="p-5 rounded-2xl bg-[#0c1527]/90 border border-cyan-500/20 text-center font-mono shadow-inner">
-                        <span class="text-[11px] text-slate-400 block mb-2 font-sans">رابطه ریاضی و فیزیکی حاکم بر این پدیده:</span>
-                        <div class="katex-ltr-container text-base sm:text-lg text-cyan-300 py-2">
+                    <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-center font-mono">
+                        <span class="text-[11px] text-slate-400 block mb-1">رابطه ریاضی و فیزیکی حاکم بر این پدیده:</span>
+                        <div class="katex-ltr-container text-base sm:text-lg text-cyan-300">
                             $$${sim.formula}$$
                         </div>
                     </div>
-                    <div class="p-4 rounded-2xl bg-[#0c1527]/80 border border-cyan-500/15 text-slate-300 leading-relaxed text-[11px]">
-                        <strong class="text-cyan-300 font-bold block mb-2">اهداف آموزشی منطبق بر کتب درسی:</strong>
-                        <ul class="space-y-2">
+                    <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300 leading-relaxed text-[11px]">
+                        <strong>اهداف آموزشی منطبق بر کتب درسی:</strong>
+                        <ul class="mt-2 space-y-1.5">
                             ${sim.goals.map(g => `
-                            <li class="flex items-center gap-2.5">
-                                <i data-lucide="check" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
+                            <li class="flex items-center gap-2">
+                                <i data-lucide="check" class="w-3.5 h-3.5 text-teal-400 shrink-0"></i>
                                 <span>${g}</span>
                             </li>
                             `).join('')}
@@ -1634,19 +1631,19 @@ class PhysicsSimulators {
 
                 <!-- Tab Content 3: Logbook -->
                 <div id="sim-info-tab-logbook" class="hidden space-y-3 text-xs">
-                    <div class="p-4 rounded-2xl bg-[#0c1527]/90 border border-cyan-500/20 space-y-3">
-                        <label class="block font-bold text-cyan-300 text-xs">یادداشت داده‌ها، اندازه‌گیری‌ها و نتیجه‌گیری علمی آزمایش:</label>
+                    <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+                        <label class="block font-bold text-teal-300 text-xs">یادداشت داده‌ها، اندازه‌گیری‌ها و نتیجه‌گیری علمی آزمایش:</label>
                         <textarea id="live-lab-notes-input" rows="3" placeholder="برای نمونه: داده‌های آزمایش را با مقادیر مختلف ثبت کردم و رابطه تئوری به طور دقیق اثبات شد..."
-                            class="w-full p-3 rounded-xl border border-cyan-500/30 bg-[#060a14] text-white text-xs outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40"></textarea>
+                            class="w-full p-3 rounded-xl border border-slate-700 bg-slate-950 text-white text-xs outline-none focus:border-teal-400"></textarea>
                         <div class="flex items-center justify-between">
                             <span class="text-[10px] text-slate-400">یادداشت شما در فایل چاپی گزارش کار ثبت و در پایگاه ذخیره می‌گردد.</span>
                             ${isLogbookClaimed ? `
-                            <button disabled class="px-4 py-2 rounded-xl bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 text-xs font-bold flex items-center gap-1.5 cursor-default">
+                            <button disabled class="px-4 py-2 rounded-xl bg-emerald-950/80 border border-emerald-600/70 text-emerald-300 text-xs font-bold flex items-center gap-1.5 cursor-default">
                                 <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
                                 <span>مشاهدات ثبت شد (+۱۵ XP)</span>
                             </button>
                             ` : `
-                            <button id="claim-lab-action-logbook_note-${sim.id}" onclick="window.physicsSimulators.saveLogbookNote()" class="btn-quantum-emerald px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow">
+                            <button id="claim-lab-action-logbook_note-${sim.id}" onclick="window.physicsSimulators.saveLogbookNote()" class="btn-duo-green text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow">
                                 <i data-lucide="save" class="w-3.5 h-3.5"></i>
                                 <span>ذخیره مشاهدات در کارنامه (+۱۵ XP)</span>
                             </button>
@@ -1657,19 +1654,19 @@ class PhysicsSimulators {
 
                 <!-- Tab Content 4: SAMPAD Conceptual Challenge -->
                 <div id="sim-info-tab-challenge" class="hidden space-y-4 text-xs">
-                    <div class="p-4 sm:p-5 rounded-2xl bg-[#0c1527]/90 border border-amber-500/30 space-y-3 shadow-lg">
+                    <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                                <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                            <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                                <i data-lucide="award" class="w-4 h-4"></i>
                                 <span>چالش مفهومی آزمایشگاه برای دانش‌آموزان استعدادهای درخشان (+۱۰ XP)</span>
                             </span>
-                            <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-500/50 font-bold">سمپاد</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold">سمپاد</span>
                         </div>
                         <p class="text-white text-xs sm:text-sm font-semibold leading-relaxed">${challenge.q}</p>
                         <div class="space-y-2 mt-2" id="challenge-options-group-${sim.id}">
                             ${challenge.options.map((opt, oIdx) => `
-                            <label class="flex items-start gap-3 p-3 rounded-xl bg-[#060a14]/80 border border-cyan-500/15 hover:border-cyan-400/50 cursor-pointer transition-all">
-                                <input type="radio" name="lab-challenge-${sim.id}" value="${oIdx}" class="mt-0.5 accent-cyan-400" ${isChallengeClaimed && oIdx === challenge.correct ? 'checked' : ''}>
+                            <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-teal-500/60 cursor-pointer transition-all">
+                                <input type="radio" name="lab-challenge-${sim.id}" value="${oIdx}" class="mt-0.5 accent-teal-500" ${isChallengeClaimed && oIdx === challenge.correct ? 'checked' : ''}>
                                 <span class="text-slate-200 text-xs leading-relaxed">${opt}</span>
                             </label>
                             `).join('')}
@@ -1679,7 +1676,7 @@ class PhysicsSimulators {
                         </div>
                         ${!isChallengeClaimed ? `
                         <div class="flex items-center justify-end pt-2">
-                            <button id="claim-lab-action-concept_challenge-${sim.id}" onclick="window.physicsSimulators.submitSelectedChallenge('${sim.id}')" class="btn-quantum-gold text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow">
+                            <button id="claim-lab-action-concept_challenge-${sim.id}" onclick="window.physicsSimulators.submitSelectedChallenge('${sim.id}')" class="btn-duo-yellow text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow">
                                 <i data-lucide="send" class="w-3.5 h-3.5"></i>
                                 <span>بررسی و ثبت پاسخ چالش (+۱۰ XP)</span>
                             </button>
@@ -1690,9 +1687,9 @@ class PhysicsSimulators {
 
                 <!-- Tab Content 5: Misconceptions -->
                 <div id="sim-info-tab-misconceptions" class="hidden space-y-3 text-xs">
-                    <div class="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/30 text-amber-200 leading-relaxed text-[11px] shadow-sm">
+                    <div class="p-4 rounded-2xl bg-amber-950/40 border border-amber-800/60 text-amber-200 leading-relaxed text-[11px]">
                         <div class="flex items-center gap-2 font-black text-amber-300 text-xs mb-1.5">
-                            <i data-lucide="alert-circle" class="w-4 h-4 text-amber-400"></i>
+                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
                             <span>تله آزمون‌های سمپاد و سوءتفاهم مفهومی متداول:</span>
                         </div>
                         <p>${sim.misconceptions}</p>
@@ -1712,10 +1709,10 @@ class PhysicsSimulators {
             const content = document.getElementById(`sim-info-tab-${t}`);
             if (btn && content) {
                 if (t === targetTab) {
-                    btn.className = 'px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black shadow-[0_0_15px_rgba(0,240,255,0.3)] flex items-center gap-1.5 transition-all';
+                    btn.className = 'px-3.5 py-1.5 rounded-xl bg-blue-600 text-white font-black shadow flex items-center gap-1.5 transition-all';
                     content.classList.remove('hidden');
                 } else {
-                    btn.className = 'px-3.5 py-1.5 rounded-xl bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 flex items-center gap-1.5 transition-all';
+                    btn.className = 'px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:text-white border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 transition-all';
                     content.classList.add('hidden');
                 }
             }
@@ -1795,46 +1792,46 @@ class PhysicsSimulators {
         if (!modal) {
             modal = document.createElement('div');
             modal.id = modalId;
-            modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#04060c]/85 backdrop-blur-xl animate-fade-in';
+            modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md';
             document.body.appendChild(modal);
         }
 
         modal.innerHTML = `
-        <div class="relative w-full max-w-2xl rounded-3xl bg-[#080d1a]/95 border border-cyan-500/30 text-white shadow-2xl shadow-cyan-950/60 flex flex-col max-h-[90vh] overflow-hidden backdrop-blur-2xl">
+        <div class="relative w-full max-w-2xl rounded-3xl bg-slate-900 border border-cyan-500/30 text-white shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
             <!-- Header -->
-            <div class="p-4 sm:p-5 border-b border-cyan-500/20 bg-gradient-to-r from-[#0a1122] via-[#0f1b33] to-[#0a1122] flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-2xl bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 flex items-center justify-center shadow-[0_0_12px_rgba(0,240,255,0.4)]">
+            <div class="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shadow">
                         <i data-lucide="wrench" class="w-4 h-4"></i>
                     </div>
                     <div>
-                        <h3 class="font-extrabold text-sm sm:text-base text-white tracking-wide">جعبه ابزار میز کار فیزیکدان</h3>
-                        <p class="text-[10px] text-cyan-400/80">ابزارهای دقیق اندازه‌گیری و سنجش آزمایشگاهی QUANTUM CUT</p>
+                        <h3 class="font-extrabold text-sm sm:text-base text-white">جعبه ابزار آزاد میز کار فیزیکدان</h3>
+                        <p class="text-[10px] text-slate-400">ابزارهای دقیق اندازه‌گیری و سنجش آزمایشگاهی</p>
                     </div>
                 </div>
-                <button onclick="document.getElementById('${modalId}').remove()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800/80 transition-all">
+                <button onclick="document.getElementById('${modalId}').remove()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
             <!-- Tab Buttons -->
-            <div class="grid grid-cols-4 gap-1.5 p-2 bg-[#060a14] border-b border-cyan-500/15 text-xs font-bold">
-                <button onclick="window.physicsSimulators.renderToolboxTab('caliper')" id="tb-tab-caliper" class="p-2.5 rounded-xl text-center transition-all bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black shadow-[0_0_12px_rgba(0,240,255,0.3)]">
+            <div class="grid grid-cols-4 gap-1 p-2 bg-slate-950/50 border-b border-slate-800 text-xs font-bold">
+                <button onclick="window.physicsSimulators.renderToolboxTab('caliper')" id="tb-tab-caliper" class="p-2 rounded-xl text-center transition-all bg-cyan-600 text-white font-bold">
                     📏 کولیس ورنیه
                 </button>
-                <button onclick="window.physicsSimulators.renderToolboxTab('stopwatch')" id="tb-tab-stopwatch" class="p-2.5 rounded-xl text-center text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
+                <button onclick="window.physicsSimulators.renderToolboxTab('stopwatch')" id="tb-tab-stopwatch" class="p-2 rounded-xl text-center text-slate-400 hover:text-white transition-all">
                     ⏱️ کرونومتر
                 </button>
-                <button onclick="window.physicsSimulators.renderToolboxTab('multimeter')" id="tb-tab-multimeter" class="p-2.5 rounded-xl text-center text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
+                <button onclick="window.physicsSimulators.renderToolboxTab('multimeter')" id="tb-tab-multimeter" class="p-2 rounded-xl text-center text-slate-400 hover:text-white transition-all">
                     ⚡ مولتی‌متر
                 </button>
-                <button onclick="window.physicsSimulators.renderToolboxTab('report')" id="tb-tab-report" class="p-2.5 rounded-xl text-center text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
+                <button onclick="window.physicsSimulators.renderToolboxTab('report')" id="tb-tab-report" class="p-2 rounded-xl text-center text-slate-400 hover:text-white transition-all">
                     📝 گزارش کار
                 </button>
             </div>
 
             <!-- Mount Content Area -->
-            <div id="toolbox-tab-mount" class="p-5 overflow-y-auto flex-1 bg-gradient-to-b from-[#080d1a] to-[#050811]"></div>
+            <div id="toolbox-tab-mount" class="p-5 overflow-y-auto flex-1"></div>
         </div>
         `;
 
@@ -1850,8 +1847,8 @@ class PhysicsSimulators {
             const btn = document.getElementById(`tb-tab-${t}`);
             if (btn) {
                 btn.className = t === tab
-                    ? 'p-2.5 rounded-xl text-center transition-all bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black shadow-[0_0_12px_rgba(0,240,255,0.3)]'
-                    : 'p-2.5 rounded-xl text-center text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all';
+                    ? 'p-2 rounded-xl text-center transition-all bg-cyan-600 text-white font-bold shadow'
+                    : 'p-2 rounded-xl text-center text-slate-400 hover:text-white transition-all';
             }
         });
 
@@ -1887,12 +1884,12 @@ class PhysicsSimulators {
 
         container.innerHTML = `
         <div class="space-y-4 text-xs">
-            <div class="flex items-center justify-between p-4 rounded-2xl bg-[#0c1527] border border-cyan-500/25 shadow-inner">
+            <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
                 <div>
-                    <span class="text-slate-400 block text-[11px] mb-1">مقدار خوانده‌شده از کولیس با دقت ۰٫۱ میلی‌متر:</span>
-                    <span id="sim-calip-val" class="text-xl font-black text-cyan-300 font-mono tracking-wider">24.6 mm</span>
+                    <span class="text-slate-400 block text-[11px]">مقدار خوانده‌شده از کولیس با دقت ۰٫۱ میلی‌متر:</span>
+                    <span id="sim-calip-val" class="text-lg font-black text-cyan-300 font-mono">24.6 mm</span>
                 </div>
-                <div class="text-right text-[11px] text-slate-400 space-y-0.5">
+                <div class="text-right text-[11px] text-slate-400">
                     <div>خط‌کش اصلی: <span id="sim-calip-main" class="text-white font-bold">24 mm</span></div>
                     <div>انطباق ورنیه: <span id="sim-calip-vern" class="text-amber-400 font-bold">۰٫۶ mm</span></div>
                 </div>
@@ -1900,32 +1897,32 @@ class PhysicsSimulators {
 
             <!-- Jaw Slider Control -->
             <div>
-                <label class="block text-slate-300 font-bold mb-2">تنظیم دهانه کولیس (۰ تا ۵۰ میلی‌متر):</label>
-                <input type="range" min="0" max="50" step="0.1" value="24.6" id="sim-calip-slider" class="physics-slider w-full accent-cyan-400" />
+                <label class="block text-slate-300 font-bold mb-1">تنظیم دهانه کولیس (۰ تا ۵۰ میلی‌متر):</label>
+                <input type="range" min="0" max="50" step="0.1" value="24.6" id="sim-calip-slider" class="physics-slider w-full" />
             </div>
 
             <!-- Fine Step Buttons -->
             <div class="flex items-center justify-center gap-2 pt-1">
-                <button id="calip-sub-1" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs hover:border-cyan-500/40 transition-all" dir="ltr">- 1 mm</button>
-                <button id="calip-sub-01" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs hover:border-cyan-500/40 transition-all" dir="ltr">- 0.1 mm</button>
-                <button id="calip-add-01" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs hover:border-cyan-500/40 transition-all" dir="ltr">+ 0.1 mm</button>
-                <button id="calip-add-1" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs hover:border-cyan-500/40 transition-all" dir="ltr">+ 1 mm</button>
+                <button id="calip-sub-1" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono text-xs" dir="ltr">- 1 mm</button>
+                <button id="calip-sub-01" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono text-xs" dir="ltr">- 0.1 mm</button>
+                <button id="calip-add-01" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono text-xs" dir="ltr">+ 0.1 mm</button>
+                <button id="calip-add-1" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono text-xs" dir="ltr">+ 1 mm</button>
             </div>
 
             <!-- Caliper Visualizer -->
-            <div class="p-6 rounded-2xl bg-[#060a14] border border-cyan-500/20 flex items-center justify-center overflow-hidden shadow-inner">
+            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden">
                 <div class="relative w-80 h-32 flex flex-col justify-center">
                     <!-- Fixed Caliper Body & Main Scale -->
-                    <div class="w-full h-8 bg-slate-500 border border-slate-400 rounded flex items-center justify-between px-2 text-[7px] text-slate-950 font-mono select-none shadow">
+                    <div class="w-full h-8 bg-slate-400 border border-slate-600 rounded flex items-center justify-between px-2 text-[7px] text-slate-900 font-mono select-none">
                         <span>| 0</span><span>| 10</span><span>| 20</span><span>| 30</span><span>| 40</span><span>| 50mm</span>
                     </div>
                     <!-- Fixed Left Jaw -->
-                    <div class="absolute left-0 top-0 bottom-4 w-4 bg-slate-600 rounded-b-xl border border-slate-500 shadow-md"></div>
+                    <div class="absolute left-0 top-0 bottom-4 w-4 bg-slate-500 rounded-b-xl border border-slate-700"></div>
 
                     <!-- Movable Vernier Jaw -->
                     <div id="sim-calip-jaw" class="absolute left-4 top-2 bottom-0 flex flex-col items-start transition-all duration-75">
-                        <div class="w-4 h-24 bg-gradient-to-b from-cyan-500 to-blue-600 rounded-b-xl border border-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.4)]"></div>
-                        <div class="w-16 h-6 -mt-16 ml-3 bg-slate-900 border border-cyan-400 rounded flex items-center justify-around text-[6px] text-cyan-300 font-mono px-1 shadow">
+                        <div class="w-4 h-24 bg-cyan-600 rounded-b-xl border border-cyan-400 shadow-xl"></div>
+                        <div class="w-16 h-6 -mt-16 ml-3 bg-slate-800 border border-cyan-400 rounded flex items-center justify-around text-[6px] text-cyan-300 font-mono px-1">
                             <span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10</span>
                         </div>
                     </div>
@@ -1969,7 +1966,7 @@ class PhysicsSimulators {
                 return;
             }
             list.innerHTML = this.stopwatchState.laps.map((lap, idx) => `
-                <div class="flex justify-between py-1.5 border-b border-cyan-500/10 text-[11px]">
+                <div class="flex justify-between py-1 border-b border-slate-800 text-[11px]">
                     <span class="text-slate-400">دور ${idx + 1}</span>
                     <span class="text-cyan-400 font-mono font-bold">${lap}</span>
                 </div>
@@ -1979,30 +1976,30 @@ class PhysicsSimulators {
         container.innerHTML = `
         <div class="space-y-5 text-center">
             <!-- Digital Display -->
-            <div class="p-6 rounded-3xl bg-[#060a14] border border-cyan-500/30 shadow-[inset_0_0_30px_rgba(0,240,255,0.1)]">
-                <span id="sw-time-display" class="font-mono text-4xl sm:text-5xl font-black text-cyan-300 tracking-wider text-glow-cyan">
+            <div class="p-6 rounded-3xl bg-slate-950 border border-cyan-500/30 shadow-inner">
+                <span id="sw-time-display" class="font-mono text-4xl sm:text-5xl font-black text-cyan-300 tracking-wider">
                     00:00.00
                 </span>
             </div>
 
             <!-- Control Buttons -->
             <div class="flex items-center justify-center gap-2.5 text-xs">
-                <button id="sw-btn-start" class="btn-quantum-emerald px-5 py-2.5 rounded-2xl flex items-center gap-1.5 shadow-md">
+                <button id="sw-btn-start" class="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 shadow-md">
                     <i data-lucide="${this.stopwatchState.running ? 'pause' : 'play'}" class="w-4 h-4"></i>
                     <span>${this.stopwatchState.running ? 'توقف' : 'شروع'}</span>
                 </button>
-                <button id="sw-btn-lap" class="btn-quantum-cyan px-4 py-2.5 rounded-2xl flex items-center gap-1.5 shadow-md">
+                <button id="sw-btn-lap" class="px-4 py-2.5 rounded-2xl bg-cyan-700 hover:bg-cyan-600 text-white font-bold flex items-center gap-1.5 shadow-md">
                     <i data-lucide="flag" class="w-4 h-4"></i>
                     <span>ثبت دور (Lap)</span>
                 </button>
-                <button id="sw-btn-reset" class="px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold border border-slate-700 transition-all">
+                <button id="sw-btn-reset" class="px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold border border-slate-700">
                     بازنشانی
                 </button>
             </div>
 
             <!-- Lap Times Table -->
-            <div class="text-right p-4 rounded-2xl bg-[#060a14] border border-cyan-500/15 max-h-36 overflow-y-auto">
-                <span class="text-[10px] text-cyan-400 font-bold block mb-1">رکوردهای ثبت‌شده (Laps):</span>
+            <div class="text-right p-3 rounded-2xl bg-slate-950 border border-slate-800 max-h-36 overflow-y-auto">
+                <span class="text-[10px] text-slate-400 font-bold block mb-1">رکوردهای ثبت‌شده (Laps):</span>
                 <div id="sw-laps-list"></div>
             </div>
         </div>
@@ -2019,7 +2016,7 @@ class PhysicsSimulators {
             if (this.stopwatchState.running) {
                 clearInterval(this.stopwatchState.interval);
                 this.stopwatchState.running = false;
-                startBtn.className = 'btn-quantum-emerald px-5 py-2.5 rounded-2xl flex items-center gap-1.5 shadow-md';
+                startBtn.className = 'px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 shadow-md';
                 startBtn.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i><span>شروع</span>`;
             } else {
                 this.stopwatchState.running = true;
@@ -2028,7 +2025,7 @@ class PhysicsSimulators {
                     this.stopwatchState.elapsed = performance.now() - startTime;
                     updateSwDisplay();
                 }, 30);
-                startBtn.className = 'btn-quantum-gold text-slate-950 px-5 py-2.5 rounded-2xl flex items-center gap-1.5 shadow-md';
+                startBtn.className = 'px-5 py-2.5 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white font-bold flex items-center gap-1.5 shadow-md';
                 startBtn.innerHTML = `<i data-lucide="pause" class="w-4 h-4"></i><span>توقف</span>`;
             }
             if (window.lucide) window.lucide.createIcons();
@@ -2050,7 +2047,7 @@ class PhysicsSimulators {
             updateSwDisplay();
             renderLaps();
             if (startBtn) {
-                startBtn.className = 'btn-quantum-emerald px-5 py-2.5 rounded-2xl flex items-center gap-1.5 shadow-md';
+                startBtn.className = 'px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 shadow-md';
                 startBtn.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i><span>شروع</span>`;
             }
             if (window.lucide) window.lucide.createIcons();
@@ -2060,10 +2057,10 @@ class PhysicsSimulators {
     renderMultimeterTool(container) {
         container.innerHTML = `
         <div class="space-y-4 text-xs">
-            <div class="p-5 rounded-3xl bg-[#060a14] border-2 border-amber-500/60 shadow-2xl space-y-4 shadow-amber-950/40">
-                <div class="p-4 rounded-2xl bg-emerald-950/80 border border-emerald-500/60 flex items-center justify-between shadow-inner">
-                    <span class="text-[10px] text-emerald-400 font-mono font-bold tracking-wider">DC AUTO</span>
-                    <span id="mm-display-val" class="font-mono text-3xl font-black text-emerald-300 tracking-wider">
+            <div class="p-5 rounded-3xl bg-slate-950 border-2 border-yellow-500/60 shadow-2xl space-y-4">
+                <div class="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/50 flex items-center justify-between">
+                    <span class="text-[10px] text-emerald-400 font-mono font-bold">DC AUTO</span>
+                    <span id="mm-display-val" class="font-mono text-3xl font-black text-emerald-300">
                         12.00 V
                     </span>
                     <span class="text-xs text-emerald-400 font-mono font-bold">HOLD</span>
@@ -2072,16 +2069,16 @@ class PhysicsSimulators {
                 <div>
                     <label class="block text-slate-300 font-bold mb-2">سلکتور حالت اندازه‌گیری مولتی‌متر:</label>
                     <div class="grid grid-cols-4 gap-2 text-xs">
-                        <button onclick="document.getElementById('mm-display-val').innerText = '12.00 V'" class="p-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-center shadow-md hover:bg-amber-400 transition-all">
+                        <button onclick="document.getElementById('mm-display-val').innerText = '12.00 V'" class="p-2.5 rounded-xl bg-yellow-600 text-slate-950 font-black text-center shadow">
                             V (ولتاژ DC)
                         </button>
-                        <button onclick="document.getElementById('mm-display-val').innerText = '2.00 A'" class="p-2.5 rounded-xl bg-slate-900 text-slate-300 hover:bg-slate-800 text-center font-bold border border-slate-800 transition-all">
+                        <button onclick="document.getElementById('mm-display-val').innerText = '2.00 A'" class="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-center font-bold">
                             A (جریان DC)
                         </button>
-                        <button onclick="document.getElementById('mm-display-val').innerText = '6.00 Ω'" class="p-2.5 rounded-xl bg-slate-900 text-slate-300 hover:bg-slate-800 text-center font-bold border border-slate-800 transition-all">
+                        <button onclick="document.getElementById('mm-display-val').innerText = '6.00 Ω'" class="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-center font-bold">
                             Ω (مقاومت)
                         </button>
-                        <button onclick="document.getElementById('mm-display-val').innerText = '0.0 Ω (BEEP)'" class="p-2.5 rounded-xl bg-slate-900 text-slate-300 hover:bg-slate-800 text-center font-bold border border-slate-800 transition-all">
+                        <button onclick="document.getElementById('mm-display-val').innerText = '0.0 Ω (BEEP)'" class="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-center font-bold">
                             🔊 تست اتصال
                         </button>
                     </div>
@@ -2089,11 +2086,11 @@ class PhysicsSimulators {
 
                 <div class="flex items-center justify-center gap-6 pt-2">
                     <div class="flex items-center gap-2">
-                        <span class="w-3.5 h-3.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]"></span>
+                        <span class="w-3.5 h-3.5 rounded-full bg-red-600 shadow-md"></span>
                         <span class="text-[11px] text-slate-400">پراب مثبت (قرمز)</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="w-3.5 h-3.5 rounded-full bg-slate-950 border border-slate-600 shadow-md"></span>
+                        <span class="w-3.5 h-3.5 rounded-full bg-slate-900 border border-slate-700 shadow-md"></span>
                         <span class="text-[11px] text-slate-400">پراب منفی / COM (مشکی)</span>
                     </div>
                 </div>
@@ -2109,29 +2106,26 @@ class PhysicsSimulators {
 
         let paramRows = '';
         for (const [k, v] of Object.entries(params)) {
-            paramRows += `<tr><td class="p-2.5 border border-cyan-500/20 font-bold text-slate-300 bg-[#0a1122]/60">${k}</td><td class="p-2.5 border border-cyan-500/20 text-cyan-300 font-mono font-bold">${v}</td></tr>`;
+            paramRows += `<tr><td class="p-2 border border-slate-700 font-bold text-slate-300">${k}</td><td class="p-2 border border-slate-700 text-cyan-300 font-mono font-bold">${v}</td></tr>`;
         }
 
         container.innerHTML = `
         <div class="space-y-4 text-xs">
-            <div class="p-4 rounded-2xl bg-[#0c1527] border border-cyan-500/25 shadow-inner">
-                <h5 class="font-bold text-cyan-300 mb-2 flex items-center gap-2">
-                    <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
-                    <span>داده‌های استخراج‌شده از آزمایش جاری: ${title}</span>
-                </h5>
-                <table class="w-full border-collapse border border-cyan-500/20 text-[11px] mt-2 rounded-xl overflow-hidden">
+            <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                <h5 class="font-bold text-cyan-300 mb-1">داده‌های استخراج‌شده از آزمایش جاری: ${title}</h5>
+                <table class="w-full border-collapse border border-slate-700 text-[11px] mt-2">
                     ${paramRows || '<tr><td colspan="2" class="p-3 text-center text-slate-500">ابتدا یک آزمایش را انتخاب کنید</td></tr>'}
                 </table>
             </div>
 
             <div>
-                <label class="block font-bold text-slate-300 mb-1.5">مشاهدات و تحلیل علمی شما از این آزمایش:</label>
+                <label class="block font-bold text-slate-300 mb-1">مشاهدات و تحلیل علمی شما از این آزمایش:</label>
                 <textarea id="logbook-observations" rows="3" placeholder="نتایج به دست آمده و تحلیل روابط فیزیکی را اینجا تایپ کنید..."
-                    class="w-full p-3 rounded-xl border border-cyan-500/30 bg-[#060a14] text-white text-xs outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40"></textarea>
+                    class="w-full p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-white outline-none focus:border-cyan-500"></textarea>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-1">
-                <button onclick="window.physicsSimulators.printReport()" class="btn-quantum-emerald px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md">
+                <button onclick="window.physicsSimulators.printReport()" class="btn-duo-green text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md">
                     <i data-lucide="printer" class="w-4 h-4"></i>
                     <span>چاپ و تحویل رسمی گزارش آزمایش (PDF) (+۱۵ XP)</span>
                 </button>
