@@ -28,6 +28,7 @@ def health_check(db: Session = Depends(get_db)):
     }
 
 @router.get("/system/stats")
+@router.get("/system/public-stats")
 @router.get("/public/stats")
 def public_system_stats(db: Session = Depends(get_db)):
     """Public platform statistics for landing page"""

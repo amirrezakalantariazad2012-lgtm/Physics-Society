@@ -108,6 +108,7 @@ def get_student_dashboard(
         "notifications": unread_notifs
     }
 
+@router.get("/leaderboard")
 @router.get("/leaderboards")
 def get_leaderboards(
     grade_id: Optional[int] = None,
