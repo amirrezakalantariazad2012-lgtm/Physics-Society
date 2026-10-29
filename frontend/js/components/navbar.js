@@ -95,6 +95,12 @@ function renderNavbar() {
                     <a href="#competitions" onclick="window.store.setView('competitions')" class="flex items-center gap-1 px-2 py-1.5 rounded-xl transition-all ${isTabActive('competitions') ? 'bg-amber-50 text-amber-700 font-bold' : 'text-slate-600 hover:bg-slate-100'}">
                         <span>مسابقات</span>
                     </a>
+                    ${user && user.role === 'admin' ? `
+                    <a href="#admin" onclick="window.store.setView('admin')" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl transition-all ${isTabActive('admin') ? 'bg-rose-50 text-rose-700 font-bold border border-rose-200' : 'text-rose-600 hover:bg-rose-50 font-bold'}">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-rose-500"></i>
+                        <span>مدیریت</span>
+                    </a>
+                    ` : ''}
                     <button type="button" onclick="window.toggleMobileDrawer()" class="flex items-center gap-1 px-2 py-1.5 rounded-xl text-slate-500 hover:bg-slate-100 text-xs font-semibold">
                         <span>بیشتر</span>
                         <i data-lucide="chevron-down" class="w-3 h-3"></i>

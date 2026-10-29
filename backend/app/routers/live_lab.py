@@ -561,6 +561,35 @@ async def toggle_room_lock(room_code: str, req: ToggleLockRequest):
     await broadcast_to_local_sockets(room_code, {"type": "lock_toggled", **lock_payload})
     return {"success": True, **lock_payload}
 
+@router.delete("/rooms/{room_code}")
+async def delete_live_room(room_code: str):
+    """Admin or presenter closes and completely removes a live classroom"""
+    ensure_event_listener_started()
+    with get_db() as conn:
+        conn.execute("DELETE FROM rooms WHERE room_code = ?", (room_code,))
+        conn.execute("DELETE FROM chat_messages WHERE room_code = ?", (room_code,))
+        conn.execute("DELETE FROM live_frames WHERE room_code = ?", (room_code,))
+        conn.execute("DELETE FROM active_viewers WHERE room_code = ?", (room_code,))
+        conn.commit()
+
+    latest_room_frames.pop(room_code, None)
+    last_frame_db_save.pop(room_code, None)
+
+    end_payload = {"room_code": room_code, "type": "room_closed"}
+    publish_event(room_code, "room_closed", end_payload)
+    await broadcast_to_local_sockets(room_code, end_payload)
+    return {"success": True, "message": "کلاس با موفقیت بسته شد."}
+
+@router.post("/rooms/{room_code}/clear-chat")
+async def clear_room_chat(room_code: str):
+    """Admin or presenter clears chat messages for the classroom"""
+    with get_db() as conn:
+        conn.execute("DELETE FROM chat_messages WHERE room_code = ?", (room_code,))
+        conn.commit()
+    publish_event(room_code, "chat_cleared", {})
+    await broadcast_to_local_sockets(room_code, {"type": "chat_cleared"})
+    return {"success": True}
+
 @router.websocket("/ws/{room_code}")
 async def live_lab_websocket(
     websocket: WebSocket,

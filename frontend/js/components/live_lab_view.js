@@ -591,16 +591,24 @@ class LiveLabComponent {
                                 </div>
                             </div>
 
-                            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
                                 <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                                     <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-500"></i>
                                     <span>${r.viewers_count} دانش‌آموز حاضر</span>
                                 </span>
-                                <button onclick="window.store.setView('live-lab', { id: '${r.room_code}' })" 
-                                    class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-1">
-                                    <span>ورود به کلاس</span>
-                                    <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
-                                </button>
+                                <div class="flex items-center gap-1.5">
+                                    ${this.isTeacherOrAdmin(user) ? `
+                                    <button onclick="event.stopPropagation(); window.liveLab.deleteRoom('${r.room_code}')" 
+                                        class="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-xs font-bold transition-all" title="حذف و بستن کلاس">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    ` : ''}
+                                    <button onclick="window.store.setView('live-lab', { id: '${r.room_code}' })" 
+                                        class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-1">
+                                        <span>ورود به کلاس</span>
+                                        <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         `;
@@ -893,6 +901,13 @@ class LiveLabComponent {
                         <i data-lucide="repeat" class="w-4 h-4"></i>
                         <span>🧪 تعویض آزمایشگاه (${ALL_LABORATORIES.length})</span>
                     </button>
+
+                    <!-- End Classroom Button (Teacher/Admin Master Control) -->
+                    <button onclick="window.liveLab.endClassroom()" 
+                        class="px-3 py-2 rounded-xl bg-rose-600/90 hover:bg-rose-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all" title="اتمام جلسه و بستن کلاس برای همه">
+                        <i data-lucide="power" class="w-4 h-4"></i>
+                        <span>اتمام کلاس</span>
+                    </button>
                     ` : `
                     <!-- Student Stream Status Pill -->
                     <span id="student-stream-badge" class="px-3 py-1.5 rounded-xl ${this.isStreaming ? 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'} font-bold text-xs flex items-center gap-1.5">
@@ -1139,9 +1154,14 @@ class LiveLabComponent {
                                 <i data-lucide="message-square" class="w-4 h-4 text-blue-500"></i>
                                 <span>گفتگوی علمی کلاس</span>
                             </span>
-                            <button onclick="window.liveLab.sendRaiseHand()" class="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-[11px] border border-amber-200 dark:border-amber-900 flex items-center gap-1">
-                                <span>✋ اجازه گرفتن</span>
-                            </button>
+                            <div class="flex items-center gap-2">
+                                ${this.userRole === 'teacher' ? `
+                                <button onclick="window.liveLab.clearChat()" class="text-[10px] text-rose-500 hover:underline px-1.5 py-0.5 rounded hover:bg-rose-50 dark:hover:bg-rose-950/40">پاک کردن چت</button>
+                                ` : ''}
+                                <button onclick="window.liveLab.sendRaiseHand()" class="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-[11px] border border-amber-200 dark:border-amber-900 flex items-center gap-1">
+                                    <span>✋ اجازه گرفتن</span>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Chat Messages Container -->
@@ -2032,6 +2052,53 @@ class LiveLabComponent {
         }
     }
 
+    async deleteRoom(roomCode) {
+        if (!confirm(`آیا از بستن و حذف کلاس «${roomCode}» اطمینان دارید؟`)) return;
+        try {
+            const res = await fetch(`/api/live-lab/rooms/${roomCode}`, { method: 'DELETE' });
+            if (res.ok) {
+                this.showToast("کلاس با موفقیت حذف شد.");
+                await this.renderLobby(document.getElementById('app-main-content'));
+            } else {
+                alert("خطا در حذف کلاس.");
+            }
+        } catch (e) {
+            console.error("Delete room error:", e);
+        }
+    }
+
+    async endClassroom() {
+        if (!this.currentRoom) return;
+        if (!confirm("آیا مایلید جلسه تدریس را برای تمام دانش‌آموزان خاتمه داده و کلاس را ببندید؟")) return;
+        try {
+            const res = await fetch(`/api/live-lab/rooms/${this.currentRoom}`, { method: 'DELETE' });
+            if (res.ok) {
+                this.cleanupSession();
+                this.showToast("جلسه کلاس با موفقیت خاتمه یافت.");
+                window.store.setView('live-lab');
+            } else {
+                alert("خطا در اتمام کلاس.");
+            }
+        } catch (e) {
+            console.error("End room error:", e);
+        }
+    }
+
+    async clearChat() {
+        if (!this.currentRoom) return;
+        if (!confirm("آیا از پاک کردن تمامی پیام‌های چت کلاس اطمینان دارید؟")) return;
+        try {
+            await fetch(`/api/live-lab/rooms/${this.currentRoom}/clear-chat`, { method: 'POST' });
+            const chatBox = document.getElementById('live-chat-messages');
+            if (chatBox) {
+                chatBox.innerHTML = '<div class="text-[10px] text-slate-400 text-center py-2">گفتگو توسط دبیر یا مدیر سامانه پاک‌سازی شد.</div>';
+            }
+            this.showToast("چت کلاس با موفقیت پاک‌سازی شد.");
+        } catch (e) {
+            console.error("Clear chat error:", e);
+        }
+    }
+
     cleanupSession() {
         if (this.socket) {
             this.socket.close();
@@ -2359,6 +2426,19 @@ class LiveLabComponent {
 
         else if (type === 'chat_message') {
             this.appendChatMessage(data);
+        }
+
+        else if (type === 'chat_cleared') {
+            const chatBox = document.getElementById('live-chat-messages');
+            if (chatBox) {
+                chatBox.innerHTML = '<div class="text-[10px] text-slate-400 text-center py-2">گفتگو توسط دبیر یا مدیر سامانه پاک‌سازی شد.</div>';
+            }
+        }
+
+        else if (type === 'room_closed') {
+            this.cleanupSession();
+            alert("جلسه پخش زنده توسط دبیر یا مدیر سامانه به اتمام رسید.");
+            window.store.setView('live-lab');
         }
     }
 
