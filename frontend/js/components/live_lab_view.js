@@ -479,7 +479,17 @@ class LiveLabComponent {
     }
 
     async renderLobby(container) {
+        if (!container) {
+            container = document.getElementById('app-main-content');
+        }
+        if (!container) return;
+
         this.cleanupSession();
+        const user = this.getEffectiveUser();
+        const isPresenter = this.isTeacherOrAdmin(user);
+        this.userRole = isPresenter ? 'teacher' : 'student';
+        this.userName = user ? (user.full_name || user.name || user.username || (isPresenter ? 'دبیر فیزیک سمپاد' : 'دانش‌آموز')) : (isPresenter ? 'دبیر فیزیک سمپاد' : 'دانش‌آموز');
+
         let rooms = [];
         try {
             const res = await fetch('/api/live-lab/rooms');
