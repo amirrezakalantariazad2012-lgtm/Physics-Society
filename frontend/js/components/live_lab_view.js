@@ -504,45 +504,46 @@ class LiveLabComponent {
         container.innerHTML = `
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
             <!-- Academic Institutional Banner -->
-            <div class="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-4">
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-bold">
+            <div class="relative overflow-hidden rounded-3xl bg-[#080d1a]/95 border border-cyan-500/25 p-6 sm:p-8 shadow-2xl shadow-cyan-950/40 space-y-4 backdrop-blur-xl">
+                <div class="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none"></div>
+                <div class="flex flex-wrap items-center justify-between gap-3 relative z-10">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-300 text-xs font-bold shadow-[0_0_12px_rgba(244,63,94,0.3)]">
                         <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
-                        <span>پخش زنده و میت کلاسی ۲۸ آزمایشگاه فیزیک سمپاد (Google Meet Classroom)</span>
+                        <span>پخش زنده و میت کلاسی ۲۸ آزمایشگاه فیزیک سمپاد (QUANTUM LIVE MEET)</span>
                     </div>
 
                     ${this.userRole === 'teacher' ? `
                     <button onclick="window.liveLab.openCreateModal()" 
-                        class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all hover:scale-105">
+                        class="btn-quantum-cyan px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-lg">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
                         <span>شروع جلسه زنده تدریس آزمایشگاهی (ویژه دبیران)</span>
                     </button>
                     ` : `
                     <button onclick="window.liveLab.openCreateModal()" 
-                        class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-slate-700 flex items-center gap-1.5">
-                        <i data-lucide="radio" class="w-4 h-4 text-rose-500"></i>
+                        class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-xs border border-cyan-500/30 flex items-center gap-1.5 transition-all">
+                        <i data-lucide="radio" class="w-4 h-4 text-rose-400"></i>
                         <span>ایجاد کلاس آزمایشی</span>
                     </button>
                     `}
                 </div>
 
-                <div>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+                <div class="relative z-10">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-wide">
                         میت تعاملی و پخش زنده آزمایشگاه‌های فیزیک
                     </h1>
-                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 max-w-2xl leading-relaxed">
+                    <p class="text-xs sm:text-sm text-slate-300 mt-2 max-w-2xl leading-relaxed">
                         دبیران گرامی می‌توانند در یک محیط مشابه Google Meet تمام ۲۸ آزمایشگاه فیزیک پایه‌های هفتم، هشتم و نهم سمپاد را به طور زنده با کیفیت Full HD و ۶۰ فریم بر ثانیه به اشتراک بگذارند. دانش‌آموزان تک‌تک آزمایش‌ها، اتصالات مدار و نمودارها را به صورت زنده و همگام مشاهده می‌کنند.
                     </p>
                 </div>
 
                 <!-- Quick Join Form -->
-                <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-3">
-                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">ورود مستقیم با شناسه کلاس:</span>
+                <div class="pt-4 border-t border-cyan-500/15 flex flex-wrap items-center gap-3 relative z-10">
+                    <span class="text-xs font-bold text-slate-300">ورود مستقیم با شناسه کلاس:</span>
                     <div class="flex items-center gap-2">
                         <input id="quick-room-code-input" type="text" placeholder="مثال: SMP-404" 
-                            class="px-3.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs uppercase font-bold outline-none focus:border-blue-500 w-36">
+                            class="px-3.5 py-1.5 rounded-xl border border-cyan-500/30 bg-[#060a14] text-white font-mono text-xs uppercase font-bold outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 w-36">
                         <button onclick="window.liveLab.joinFromInput()" 
-                            class="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5">
+                            class="btn-quantum-cyan px-4 py-1.5 rounded-xl text-xs shadow-sm flex items-center gap-1.5">
                             <span>ورود به کلاس</span>
                             <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
                         </button>
@@ -552,24 +553,24 @@ class LiveLabComponent {
 
             <!-- Active Classrooms Grid -->
             <div class="space-y-4">
-                <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-300">
                     <span class="flex items-center gap-2">
-                        <i data-lucide="radio" class="w-4 h-4 text-rose-500 animate-pulse"></i>
-                        <span>جلسات زنده و در حال برگزاری (${rooms.length})</span>
+                        <i data-lucide="radio" class="w-4 h-4 text-rose-400 animate-pulse"></i>
+                        <span class="text-white">جلسات زنده و در حال برگزاری (${rooms.length})</span>
                     </span>
-                    <button onclick="window.liveLab.renderLobby(document.getElementById('app-main-content'))" class="text-blue-600 dark:text-sky-400 hover:underline flex items-center gap-1">
+                    <button onclick="window.liveLab.renderLobby(document.getElementById('app-main-content'))" class="text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1">
                         <i data-lucide="refresh-cw" class="w-3 h-3"></i>
                         <span>بروزرسانی</span>
                     </button>
                 </div>
 
                 ${rooms.length === 0 ? `
-                <div class="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-12 text-center space-y-3">
-                    <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
-                        <i data-lucide="tv" class="w-6 h-6"></i>
+                <div class="rounded-3xl border border-dashed border-cyan-500/20 bg-[#080d1a]/60 p-12 text-center space-y-3 backdrop-blur-sm">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto text-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                        <i data-lucide="tv" class="w-7 h-7"></i>
                     </div>
-                    <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">در حال حاضر هیچ پخش زنده‌ای فعال نیست</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                    <h3 class="font-bold text-sm text-white">در حال حاضر هیچ پخش زنده‌ای فعال نیست</h3>
+                    <p class="text-xs text-slate-400 max-w-sm mx-auto">
                         دبیران گرامی می‌توانند با کلیک بر روی دکمه «شروع جلسه زنده تدریس»، کلاس آنلاین ۲۸ آزمایشگاه را آغاز کنند.
                     </p>
                 </div>
@@ -578,43 +579,44 @@ class LiveLabComponent {
                     ${rooms.map(r => {
                         const lab = getLabInfo(r.sim_id);
                         return `
-                        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md transition-shadow space-y-3 relative overflow-hidden group">
+                        <div class="rounded-3xl bg-[#080d1a]/95 border border-cyan-500/20 p-5 shadow-xl hover:border-cyan-400/50 hover:shadow-[0_0_20px_rgba(0,240,255,0.15)] transition-all space-y-3 relative overflow-hidden group backdrop-blur-xl">
                             <div class="flex items-center justify-between">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${r.is_streaming ? 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'} text-[11px] font-bold">
-                                    <span class="w-2 h-2 rounded-full ${r.is_streaming ? 'bg-rose-500 animate-ping' : 'bg-slate-400'}"></span>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${r.is_streaming ? 'bg-rose-950/80 text-rose-300 border border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : 'bg-slate-900 text-slate-400 border border-slate-800'} text-[11px] font-bold">
+                                    <span class="w-2 h-2 rounded-full ${r.is_streaming ? 'bg-rose-500 animate-ping' : 'bg-slate-500'}"></span>
                                     <span>${r.is_streaming ? 'در حال پخش زنده' : 'آماده برگزاری'}</span>
                                 </span>
-                                <span class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg">${r.room_code}</span>
+                                <span class="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/60 border border-cyan-500/30 px-2.5 py-0.5 rounded-lg">${r.room_code}</span>
                             </div>
 
                             <div>
-                                <h3 class="font-extrabold text-sm text-slate-900 dark:text-white leading-snug">${r.title}</h3>
-                                <div class="mt-2 text-[11px] text-blue-600 dark:text-sky-400 font-bold flex items-center gap-1">
+                                <h3 class="font-extrabold text-sm text-white leading-snug group-hover:text-cyan-300 transition-colors">${r.title}</h3>
+                                <div class="mt-2 text-[11px] text-cyan-400 font-bold flex items-center gap-1.5">
                                     <i data-lucide="flask-conical" class="w-3.5 h-3.5"></i>
                                     <span>${lab.title}</span>
                                 </div>
-                                <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                    <i data-lucide="user-check" class="w-3.5 h-3.5 text-blue-500"></i>
-                                    <span>${r.teacher_name}</span>
-                                    <span>•</span>
+                                <div class="flex items-center gap-2 text-xs text-slate-400 mt-1">
+                                    <i data-lucide="user-check" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                    <span class="text-slate-300">${r.teacher_name}</span>
+                                    <span class="text-slate-600">•</span>
                                     <span>${lab.gradeLabel}</span>
                                 </div>
                             </div>
 
-                            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-                                <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                                    <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-500"></i>
-                                    <span>${r.viewers_count} دانش‌آموز حاضر</span>
+                            <div class="pt-3 border-t border-cyan-500/10 flex items-center justify-between gap-2">
+                                <span class="text-xs text-slate-400 flex items-center gap-1.5">
+                                    <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                    <span class="text-emerald-300 font-bold">${r.viewers_count}</span>
+                                    <span>دانش‌آموز حاضر</span>
                                 </span>
                                 <div class="flex items-center gap-1.5">
                                     ${this.isTeacherOrAdmin(user) ? `
                                     <button onclick="event.stopPropagation(); window.liveLab.deleteRoom('${r.room_code}')" 
-                                        class="p-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/60 dark:hover:bg-rose-900 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-xs font-bold transition-all" title="حذف و بستن کلاس">
+                                        class="p-2 rounded-xl bg-rose-950/60 hover:bg-rose-900 text-rose-400 border border-rose-500/40 text-xs font-bold transition-all shadow-sm" title="حذف و بستن کلاس">
                                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                     </button>
                                     ` : ''}
                                     <button onclick="window.store.setView('live-lab', { id: '${r.room_code}' })" 
-                                        class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-1">
+                                        class="btn-quantum-cyan px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-sm">
                                         <span>ورود به کلاس</span>
                                         <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
                                     </button>
@@ -629,38 +631,38 @@ class LiveLabComponent {
         </div>
 
         <!-- Create Classroom Modal with Full 28 Lab Browser -->
-        <div id="live-lab-create-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm overflow-y-auto">
-            <div class="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden font-sans">
+        <div id="live-lab-create-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#04060c]/85 backdrop-blur-xl overflow-y-auto animate-fade-in">
+            <div class="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-[#080d1a]/95 border border-cyan-500/30 shadow-2xl shadow-cyan-950/60 overflow-hidden font-sans backdrop-blur-2xl">
                 <!-- Modal Header -->
-                <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                    <div class="flex items-center gap-2.5">
-                        <span class="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></span>
-                        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">
+                <div class="p-5 border-b border-cyan-500/20 bg-gradient-to-r from-[#0a1122] via-[#0f1b33] to-[#0a1122] flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="w-3 h-3 rounded-full bg-rose-500 animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.8)]"></span>
+                        <h3 class="font-extrabold text-base text-white tracking-wide">
                             ایجاد پخش زنده آزمایشگاه‌های فیزیک سمپاد
                         </h3>
                     </div>
-                    <button onclick="window.liveLab.closeCreateModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <button onclick="window.liveLab.closeCreateModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-all">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
 
                 <!-- Modal Body (Scrollable) -->
-                <div class="p-6 space-y-5 overflow-y-auto flex-1 text-xs">
+                <div class="p-6 space-y-5 overflow-y-auto flex-1 text-xs bg-gradient-to-b from-[#080d1a] to-[#050811]">
                     <div>
-                        <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1.5">عنوان و موضوع جلسه تدریس:</label>
+                        <label class="block font-bold text-slate-300 mb-1.5">عنوان و موضوع جلسه تدریس:</label>
                         <input id="create-room-title" type="text" placeholder="مثال: اثبات شتاب ثابت و نمودارهای حرکت خط راست سمپاد" 
-                            class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500 font-sans text-xs sm:text-sm">
+                            class="w-full p-3 rounded-xl border border-cyan-500/30 bg-[#060a14] text-white outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 font-sans text-xs sm:text-sm">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">نام دبیر / مدرس ارائه‌دهنده:</label>
+                            <label class="block font-bold text-slate-300 mb-1">نام دبیر / مدرس ارائه‌دهنده:</label>
                             <input id="create-room-teacher" type="text" value="${this.userName}" 
-                                class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500">
+                                class="w-full p-2.5 rounded-xl border border-cyan-500/30 bg-[#060a14] text-white outline-none focus:border-cyan-400">
                         </div>
                         <div>
-                            <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">پایه تحصیلی هدف:</label>
-                            <select id="create-room-grade" class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-blue-500">
+                            <label class="block font-bold text-slate-300 mb-1">پایه تحصیلی هدف:</label>
+                            <select id="create-room-grade" class="w-full p-2.5 rounded-xl border border-cyan-500/30 bg-[#060a14] text-white outline-none focus:border-cyan-400">
                                 <option value="9" selected>پایه نهم (سینماتیک، دینامیک، فشار و نجوم)</option>
                                 <option value="8">پایه هشتم (الکتریسیته، مغناطیس و شکست نور)</option>
                                 <option value="7">پایه هفتم (اندازه‌گیری، چگالی، گرما و انرژی)</option>
@@ -669,14 +671,14 @@ class LiveLabComponent {
                     </div>
 
                     <!-- 28 Laboratories Browser -->
-                    <div class="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                    <div class="space-y-2 pt-3 border-t border-cyan-500/15">
                         <div class="flex items-center justify-between">
-                            <label class="font-bold text-slate-700 dark:text-slate-300">انتخاب آزمایشگاه آغازین از بین ۲۸ آزمایشگاه رسمی:</label>
+                            <label class="font-bold text-slate-300">انتخاب آزمایشگاه آغازین از بین ۲۸ آزمایشگاه رسمی:</label>
                             <div class="flex items-center gap-1 text-[11px]">
-                                <button onclick="window.liveLab.filterGradeTab(0)" id="grade-tab-0" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold bg-blue-600 text-white">همه (۲۸)</button>
-                                <button onclick="window.liveLab.filterGradeTab(7)" id="grade-tab-7" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold text-slate-600 dark:text-slate-400">پایه هفتم (۴)</button>
-                                <button onclick="window.liveLab.filterGradeTab(8)" id="grade-tab-8" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold text-slate-600 dark:text-slate-400">پایه هشتم (۸)</button>
-                                <button onclick="window.liveLab.filterGradeTab(9)" id="grade-tab-9" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold text-slate-600 dark:text-slate-400">پایه نهم (۱۶)</button>
+                                <button onclick="window.liveLab.filterGradeTab(0)" id="grade-tab-0" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-sm">همه (۲۸)</button>
+                                <button onclick="window.liveLab.filterGradeTab(7)" id="grade-tab-7" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white">پایه هفتم (۴)</button>
+                                <button onclick="window.liveLab.filterGradeTab(8)" id="grade-tab-8" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white">پایه هشتم (۸)</button>
+                                <button onclick="window.liveLab.filterGradeTab(9)" id="grade-tab-9" class="grade-filter-btn px-2.5 py-1 rounded-lg font-bold text-slate-400 hover:text-white">پایه نهم (۱۶)</button>
                             </div>
                         </div>
 
@@ -688,16 +690,16 @@ class LiveLabComponent {
                                 data-grade="${lab.grade}"
                                 data-title="${lab.title}"
                                 class="create-lab-card p-3 rounded-xl border text-right cursor-pointer transition-all ${idx === 13 
-                                    ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 ring-2 ring-blue-400' 
-                                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40'}">
+                                    ? 'border-cyan-400 bg-cyan-950/60 ring-2 ring-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.3)]' 
+                                    : 'border-cyan-500/15 hover:border-cyan-400/50 bg-[#060a14]/60'}">
                                 <div class="flex items-center justify-between mb-1">
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lab.grade === 9 ? 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300' : lab.grade === 8 ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300' : 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300'}">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lab.grade === 9 ? 'bg-indigo-950 text-indigo-300 border border-indigo-700/50' : lab.grade === 8 ? 'bg-amber-950 text-amber-300 border border-amber-700/50' : 'bg-cyan-950 text-cyan-300 border border-cyan-700/50'}">
                                         ${lab.gradeLabel}
                                     </span>
                                     <span class="text-[10px] text-slate-400 font-mono">${lab.file}</span>
                                 </div>
-                                <h4 class="font-bold text-xs text-slate-900 dark:text-white truncate">${lab.title}</h4>
-                                <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${lab.topic}</p>
+                                <h4 class="font-bold text-xs text-white truncate">${lab.title}</h4>
+                                <p class="text-[10px] text-slate-400 truncate mt-0.5">${lab.topic}</p>
                             </div>
                             `).join('')}
                         </div>
@@ -706,14 +708,14 @@ class LiveLabComponent {
                 </div>
 
                 <!-- Modal Footer -->
-                <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 flex items-center justify-between">
-                    <span id="selected-lab-preview-name" class="text-xs font-bold text-blue-600 dark:text-sky-400 flex items-center gap-1.5">
-                        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>
+                <div class="p-4 border-t border-cyan-500/20 bg-[#060a14] flex items-center justify-between">
+                    <span id="selected-lab-preview-name" class="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
                         <span>انتخاب شده: حرکت خط راست: مکان، سرعت، شتاب و معادلات سمپاد</span>
                     </span>
                     <div class="flex items-center gap-2">
-                        <button onclick="window.liveLab.closeCreateModal()" class="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-400 font-bold text-xs hover:bg-slate-200 dark:hover:bg-slate-800">انصراف</button>
-                        <button onclick="window.liveLab.submitCreateRoom()" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md flex items-center gap-1.5">
+                        <button onclick="window.liveLab.closeCreateModal()" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white font-bold text-xs hover:bg-slate-800 transition-all">انصراف</button>
+                        <button onclick="window.liveLab.submitCreateRoom()" class="btn-quantum-cyan px-5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md">
                             <i data-lucide="radio" class="w-4 h-4"></i>
                             <span>ایجاد و ورود به کلاس</span>
                         </button>
@@ -872,25 +874,25 @@ class LiveLabComponent {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-4 font-sans">
             
             <!-- Classroom Header & Meet Control Bar -->
-            <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-3">
+            <div class="p-4 sm:p-5 rounded-3xl bg-[#080d1a]/95 border border-cyan-500/20 shadow-2xl shadow-cyan-950/40 flex flex-wrap items-center justify-between gap-3 backdrop-blur-xl">
                 <div class="flex items-center gap-3">
-                    <span class="w-3.5 h-3.5 rounded-full ${this.isStreaming ? 'bg-rose-500 animate-ping' : 'bg-emerald-500'}"></span>
+                    <span class="w-3.5 h-3.5 rounded-full ${this.isStreaming ? 'bg-rose-500 animate-ping shadow-[0_0_12px_rgba(244,63,94,0.8)]' : 'bg-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.8)]'}"></span>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">${details.title}</h2>
-                            <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold">${details.room_code}</span>
+                            <h2 class="text-base sm:text-lg font-extrabold text-white tracking-wide">${details.title}</h2>
+                            <span class="px-2.5 py-0.5 rounded-lg bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 font-mono text-xs font-bold shadow-sm">${details.room_code}</span>
                         </div>
-                        <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            <span class="flex items-center gap-1">
-                                <i data-lucide="user-check" class="w-3.5 h-3.5 text-blue-500"></i>
-                                <span>دبیر: <b>${details.teacher_name}</b></span>
+                        <div class="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="user-check" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                <span>دبیر: <b class="text-slate-200">${details.teacher_name}</b></span>
                             </span>
-                            <span>•</span>
-                            <span id="room-active-lab-name" class="font-bold text-blue-600 dark:text-sky-400">${currentLab.title}</span>
-                            <span>•</span>
+                            <span class="text-slate-600">•</span>
+                            <span id="room-active-lab-name" class="font-bold text-cyan-400">${currentLab.title}</span>
+                            <span class="text-slate-600">•</span>
                             <span class="flex items-center gap-1 font-mono">
-                                <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-500"></i>
-                                <span id="header-viewers-count">${details.viewers_count}</span> نفر آنلاین
+                                <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                <span id="header-viewers-count" class="text-emerald-300 font-bold">${details.viewers_count}</span> نفر آنلاین
                             </span>
                         </div>
                     </div>
@@ -900,55 +902,55 @@ class LiveLabComponent {
                     ${this.userRole === 'teacher' ? `
                     <!-- Teacher Live Streaming Action Button (Google Meet) -->
                     <button id="btn-main-stream" onclick="window.liveLab.toggleScreenBroadcast()" 
-                        class="px-4 py-2 rounded-xl ${this.isStreaming ? 'bg-rose-600 hover:bg-rose-700 text-white animate-pulse' : 'bg-emerald-600 hover:bg-emerald-700 text-white'} font-bold text-xs shadow-md flex items-center gap-2 transition-all">
+                        class="px-4 py-2 rounded-xl ${this.isStreaming ? 'btn-quantum-rose animate-pulse' : 'btn-quantum-emerald'} text-xs font-bold shadow-md flex items-center gap-2 transition-all">
                         <i data-lucide="${this.isStreaming ? 'video-off' : 'video'}" class="w-4 h-4"></i>
                         <span id="main-stream-btn-text">${this.isStreaming ? '⏹️ توقف اشتراک تصویر' : '🖥️ شروع اشتراک زنده آزمایشگاه (Meet)'}</span>
                     </button>
 
                     <!-- Switch Laboratory Button (All 28 Labs) -->
                     <button onclick="window.liveLab.openSimSwitcherModal()" 
-                        class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5">
+                        class="btn-quantum-cyan px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5">
                         <i data-lucide="repeat" class="w-4 h-4"></i>
                         <span>🧪 تعویض آزمایشگاه (${ALL_LABORATORIES.length})</span>
                     </button>
 
                     <!-- End Classroom Button (Teacher/Admin Master Control) -->
                     <button onclick="window.liveLab.endClassroom()" 
-                        class="px-3 py-2 rounded-xl bg-rose-600/90 hover:bg-rose-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all" title="اتمام جلسه و بستن کلاس برای همه">
+                        class="px-3.5 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-500/40 font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all" title="اتمام جلسه و بستن کلاس برای همه">
                         <i data-lucide="power" class="w-4 h-4"></i>
                         <span>اتمام کلاس</span>
                     </button>
                     ` : `
                     <!-- Student Stream Status Pill -->
-                    <span id="student-stream-badge" class="px-3 py-1.5 rounded-xl ${this.isStreaming ? 'bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'} font-bold text-xs flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full ${this.isStreaming ? 'bg-rose-500 animate-ping' : 'bg-slate-400'}"></span>
+                    <span id="student-stream-badge" class="px-3 py-1.5 rounded-xl ${this.isStreaming ? 'bg-rose-950/80 text-rose-300 border border-rose-500/40 shadow-[0_0_10px_rgba(244,63,94,0.3)]' : 'bg-slate-900 text-slate-400 border border-slate-800'} font-bold text-xs flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full ${this.isStreaming ? 'bg-rose-500 animate-ping' : 'bg-slate-500'}"></span>
                         <span id="student-stream-badge-text">${this.isStreaming ? '🔴 در حال تماشای زنده تدریس دبیر' : '⚪ در انتظار اشتراک تصویر دبیر'}</span>
                     </span>
 
                     <!-- Student View Mode Toggle (Stream vs Solo) -->
-                    <div id="student-view-mode-group" class="${this.isStudentLocked ? 'opacity-60 pointer-events-none' : ''} flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                    <div id="student-view-mode-group" class="${this.isStudentLocked ? 'opacity-60 pointer-events-none' : ''} flex items-center bg-[#060a14] p-1 rounded-xl border border-cyan-500/20 text-xs font-bold">
                         <button onclick="window.liveLab.setStudentViewMode('stream')" id="mode-btn-stream" 
-                            class="px-2.5 py-1 rounded-lg ${this.activeViewMode === 'stream' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                            class="px-2.5 py-1 rounded-lg ${this.activeViewMode === 'stream' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}">
                             📺 تصویر زنده دبیر
                         </button>
                         <button onclick="window.liveLab.setStudentViewMode('solo')" id="mode-btn-solo" 
-                            class="px-2.5 py-1 rounded-lg ${this.activeViewMode === 'solo' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}">
+                            class="px-2.5 py-1 rounded-lg ${this.activeViewMode === 'solo' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'}">
                             🧪 کار انفرادی
                         </button>
                     </div>
                     `}
 
                     <!-- Fullscreen & Share -->
-                    <button onclick="window.liveLab.toggleFullscreen()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700" title="تمام‌صفحه">
+                    <button onclick="window.liveLab.toggleFullscreen()" class="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700/80 transition-all" title="تمام‌صفحه">
                         <i data-lucide="maximize" class="w-4 h-4"></i>
                     </button>
 
-                    <button onclick="window.liveLab.openShareModal()" class="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-bold text-xs border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5 shadow-sm">
+                    <button onclick="window.liveLab.openShareModal()" class="px-3 py-2 rounded-xl bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 font-bold text-xs border border-indigo-500/40 flex items-center gap-1.5 shadow-sm transition-all">
                         <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
                         <span>اشتراک</span>
                     </button>
 
-                    <button onclick="window.store.setView('live-lab')" class="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 font-bold text-xs border border-rose-200 dark:border-rose-900 flex items-center gap-1.5">
+                    <button onclick="window.store.setView('live-lab')" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-rose-950/60 text-slate-300 hover:text-rose-300 font-bold text-xs border border-slate-700/80 hover:border-rose-500/40 flex items-center gap-1.5 transition-all">
                         <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                         <span>خروج</span>
                     </button>
@@ -961,20 +963,20 @@ class LiveLabComponent {
                 <!-- Left Column (8 cols): Google Meet Cinema Screen or Laboratory Workbench -->
                 <div class="lg:col-span-8 space-y-4">
                     
-                    <div id="live-stage-wrapper" class="relative w-full h-[540px] sm:h-[640px] rounded-2xl bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden select-none flex items-center justify-center">
+                    <div id="live-stage-wrapper" class="relative w-full h-[540px] sm:h-[640px] rounded-3xl bg-[#060a14] border border-cyan-500/25 shadow-2xl shadow-cyan-950/50 overflow-hidden select-none flex items-center justify-center">
                         
                         <!-- Teacher Controls Toolbar (Inside Stage) -->
                         ${this.userRole === 'teacher' ? `
-                        <div class="absolute top-3 left-3 right-3 z-30 flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-slate-900/90 backdrop-blur text-white border border-slate-700 text-xs shadow-xl">
+                        <div class="absolute top-3 left-3 right-3 z-30 flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-2xl bg-[#080d1a]/90 backdrop-blur-md text-white border border-cyan-500/30 text-xs shadow-2xl">
                             <div class="flex items-center gap-2 font-bold ${this.isStreaming ? 'text-rose-400' : 'text-slate-400'}">
-                                <span class="w-2.5 h-2.5 rounded-full ${this.isStreaming ? 'bg-rose-500 animate-ping' : 'bg-slate-500'}"></span>
+                                <span class="w-2.5 h-2.5 rounded-full ${this.isStreaming ? 'bg-rose-500 animate-ping shadow-[0_0_8px_rgba(244,63,94,0.8)]' : 'bg-slate-500'}"></span>
                                 <span id="teacher-stream-indicator">${this.isStreaming ? 'پخش زنده ۶۰ فریم فعال است' : 'آماده اشتراک تصویر'}</span>
                             </div>
 
                             <div class="flex items-center flex-wrap gap-1.5">
                                 <!-- Record Button -->
                                 <button onclick="window.liveLab.toggleRecording()" id="btn-stage-record" 
-                                    class="px-2.5 py-1 rounded-lg ${this.isRecording ? 'bg-rose-600 text-white animate-pulse' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'} font-bold text-[11px] flex items-center gap-1">
+                                    class="px-2.5 py-1 rounded-xl ${this.isRecording ? 'btn-quantum-rose animate-pulse' : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700'} font-bold text-[11px] flex items-center gap-1">
                                     <i data-lucide="disc" class="w-3.5 h-3.5"></i>
                                     <span id="record-text">${this.isRecording ? 'توقف ضبط' : 'ضبط ویدیو'}</span>
                                 </button>
@@ -982,7 +984,7 @@ class LiveLabComponent {
                                 <!-- Toggle Student Lock -->
                                 <button onclick="window.liveLab.toggleStudentLock()" 
                                     id="btn-toggle-student-lock"
-                                    class="px-2.5 py-1 rounded-lg ${this.isStudentLocked ? 'bg-amber-600 hover:bg-amber-500' : 'bg-slate-800 hover:bg-slate-700'} font-bold text-[11px] flex items-center gap-1">
+                                    class="px-2.5 py-1 rounded-xl ${this.isStudentLocked ? 'btn-quantum-gold text-slate-950' : 'bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700'} font-bold text-[11px] flex items-center gap-1">
                                     <i data-lucide="${this.isStudentLocked ? 'lock' : 'unlock'}" class="w-3 h-3"></i>
                                     <span id="btn-lock-text">${this.isStudentLocked ? 'قفل کلاس: فعال' : 'آزمایش آزاد'}</span>
                                 </button>
@@ -990,17 +992,17 @@ class LiveLabComponent {
                                 <!-- Laser Pointer Mode -->
                                 <button onclick="window.liveLab.toggleLaserMode()" 
                                     id="btn-toggle-laser"
-                                    class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 font-bold text-[11px] flex items-center gap-1">
+                                    class="px-2.5 py-1 rounded-xl btn-quantum-rose font-bold text-[11px] flex items-center gap-1">
                                     <i data-lucide="sparkles" class="w-3 h-3"></i>
                                     <span id="btn-laser-text">🔦 لیزر تدریس</span>
                                 </button>
 
-                                <button onclick="window.liveLab.promptAddTeacherNote()" class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 font-bold text-[11px] flex items-center gap-1">
+                                <button onclick="window.liveLab.promptAddTeacherNote()" class="px-2.5 py-1 rounded-xl btn-quantum-violet font-bold text-[11px] flex items-center gap-1">
                                     <i data-lucide="plus" class="w-3 h-3"></i>
                                     <span>نکته تخته</span>
                                 </button>
 
-                                <button onclick="window.liveLab.promptStartPoll()" class="px-2 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 font-bold text-[11px] flex items-center gap-1">
+                                <button onclick="window.liveLab.promptStartPoll()" class="px-2.5 py-1 rounded-xl btn-quantum-gold text-slate-950 font-bold text-[11px] flex items-center gap-1">
                                     <i data-lucide="help-circle" class="w-3 h-3"></i>
                                     <span>کوییز کلاسی</span>
                                 </button>
@@ -1010,7 +1012,7 @@ class LiveLabComponent {
                         <!-- Teacher Laboratory Workbench (Interactive iframe) -->
                         <iframe id="live-sim-iframe" 
                             src="${getLabUrl(this.currentSimId, 'teacher')}" 
-                            class="w-full h-full border-0 rounded-2xl bg-white" 
+                            class="w-full h-full border-0 rounded-3xl bg-white" 
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                             loading="eager">
                         </iframe>
@@ -1019,24 +1021,24 @@ class LiveLabComponent {
                         <canvas id="live-laser-canvas" class="absolute inset-0 z-20 pointer-events-none w-full h-full"></canvas>
                         ` : `
                         <!-- Student Meet Stage -->
-                        <div id="student-stream-viewport" class="relative w-full h-full flex items-center justify-center bg-slate-950">
+                        <div id="student-stream-viewport" class="relative w-full h-full flex items-center justify-center bg-[#060a14]">
                             
                             <!-- Live WebRTC Video Element (Google Meet Feed) -->
                             <video id="live-meet-video" autoplay playsinline muted 
-                                class="${this.isStreaming && this.activeViewMode === 'stream' ? 'block' : 'hidden'} w-full h-full object-contain bg-slate-950"></video>
+                                class="${this.isStreaming && this.activeViewMode === 'stream' ? 'block' : 'hidden'} w-full h-full object-contain bg-[#060a14]"></video>
                             
                             <!-- Live Canvas Mirror (Direct real-time simulation broadcast) -->
                             <canvas id="live-auto-mirror-canvas" 
-                                class="${this.isStreaming && this.activeViewMode === 'stream' ? 'block' : 'hidden'} w-full h-full object-contain bg-slate-900 rounded-2xl shadow-inner"></canvas>
+                                class="${this.isStreaming && this.activeViewMode === 'stream' ? 'block' : 'hidden'} w-full h-full object-contain bg-[#080d1a] rounded-3xl shadow-inner"></canvas>
                             
                             <!-- Live Fallback Canvas (Instant frame snapshot receiver) -->
                             <canvas id="live-fallback-canvas" 
-                                class="hidden w-full h-full object-contain bg-slate-950"></canvas>
+                                class="hidden w-full h-full object-contain bg-[#060a14]"></canvas>
 
                             <!-- Student Solo Mode iframe (Available only when unlocked) -->
                             <iframe id="live-sim-iframe" 
                                 src="${getLabUrl(this.currentSimId, 'student')}" 
-                                class="${this.activeViewMode === 'solo' && !this.isStudentLocked ? 'block' : 'hidden'} w-full h-full border-0 bg-white" 
+                                class="${this.activeViewMode === 'solo' && !this.isStudentLocked ? 'block' : 'hidden'} w-full h-full border-0 bg-white rounded-3xl" 
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                 loading="eager">
                             </iframe>
@@ -1044,35 +1046,35 @@ class LiveLabComponent {
                             <!-- Virtual Classroom Waiting Lounge (Shown when stream is not yet broadcasting) -->
                             <div id="stream-waiting-lounge" class="${!this.isStreaming && this.activeViewMode === 'stream' ? 'flex' : 'hidden'} flex-col items-center justify-center p-8 text-center text-white space-y-4 max-w-lg">
                                 <div class="relative">
-                                    <div class="w-20 h-20 rounded-2xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                                    <div class="w-20 h-20 rounded-3xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shadow-[0_0_20px_rgba(0,240,255,0.25)]">
                                         <i data-lucide="video" class="w-10 h-10 animate-pulse"></i>
                                     </div>
-                                    <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-950"></span>
+                                    <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-400 border-2 border-[#060a14] animate-ping"></span>
                                 </div>
                                 <h3 class="font-extrabold text-lg text-white">کلاس فیزیک زنده سمپاد در حال برگزاری است</h3>
-                                <p class="text-xs text-slate-400 leading-relaxed">
+                                <p class="text-xs text-slate-300 leading-relaxed">
                                     دبیر محترم (${details.teacher_name}) در حال آماده‌سازی آزمایشگاه است.<br>
                                     به محض شروع اشتراک تصویر، پخش زنده به صورت خودکار با کیفیت Full HD در این قاب نمایش داده خواهد شد.
                                 </p>
                                 <div class="flex items-center gap-3 pt-2">
-                                    <span class="px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800 text-[11px] font-mono font-bold flex items-center gap-1.5">
+                                    <span class="px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-sm">
                                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                                         <span>سرور سمپاد آنلاین • پینگ &lt; 5ms</span>
                                     </span>
-                                    <span class="px-3 py-1 rounded-full bg-slate-900 text-slate-300 border border-slate-800 text-[11px] font-mono">
-                                        حاضرین: <span id="lounge-viewers-count">${details.viewers_count}</span> نفر
+                                    <span class="px-3 py-1 rounded-full bg-slate-900 text-slate-300 border border-slate-700 text-[11px] font-mono">
+                                        حاضرین: <span id="lounge-viewers-count" class="text-cyan-300 font-bold">${details.viewers_count}</span> نفر
                                     </span>
                                 </div>
                             </div>
 
                             <!-- Student Interaction Lock Blocker (When in Solo mode and Teacher locks) -->
-                            <div id="student-lock-blocker" class="${this.isStudentLocked && this.activeViewMode === 'solo' ? 'flex' : 'hidden'} absolute inset-0 z-20 flex-col items-center justify-center p-6 text-center bg-slate-950/85 backdrop-blur-sm text-white space-y-3">
-                                <div class="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
-                                    <i data-lucide="lock" class="w-6 h-6"></i>
+                            <div id="student-lock-blocker" class="${this.isStudentLocked && this.activeViewMode === 'solo' ? 'flex' : 'hidden'} absolute inset-0 z-20 flex-col items-center justify-center p-6 text-center bg-[#04060c]/85 backdrop-blur-md text-white space-y-3">
+                                <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center mx-auto shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+                                    <i data-lucide="lock" class="w-7 h-7"></i>
                                 </div>
-                                <h3 class="font-bold text-sm">توجه کلاسی: آزمایشگاه قفل شد</h3>
+                                <h3 class="font-bold text-sm text-white">توجه کلاسی: آزمایشگاه قفل شد</h3>
                                 <p class="text-xs text-slate-300 max-w-sm leading-relaxed">دبیر محترم دسترسی به آزمایشگاه انفرادی را قفل نمودند. لطفاً تصویر زنده تدریس را دنبال فرمایید.</p>
-                                <button onclick="window.liveLab.setStudentViewMode('stream')" class="px-4 py-1.5 rounded-xl bg-blue-600 text-white font-bold text-xs">تماشای تصویر زنده دبیر</button>
+                                <button onclick="window.liveLab.setStudentViewMode('stream')" class="btn-quantum-cyan px-4 py-2 rounded-xl text-xs font-bold shadow-md">تماشای تصویر زنده دبیر</button>
                             </div>
 
                             <!-- Laser Pointer Overlay Surface for Student -->
@@ -1082,38 +1084,44 @@ class LiveLabComponent {
                     </div>
 
                     <!-- Dynamic Educational Context Bar (نوار تحلیل و فرمول‌های علمی آزمایشگاه فعال) -->
-                    <div id="live-educational-card" class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 shadow-sm space-y-3 font-sans">
-                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                            <div class="flex items-center gap-2">
-                                <span id="edu-lab-grade" class="px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs">
+                    <div id="live-educational-card" class="rounded-3xl bg-[#080d1a]/95 border border-cyan-500/20 p-4 sm:p-5 shadow-xl space-y-3 font-sans backdrop-blur-xl">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-cyan-500/15 pb-3">
+                            <div class="flex items-center gap-2.5">
+                                <span id="edu-lab-grade" class="px-2.5 py-0.5 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-500/40 font-bold text-xs">
                                     ${currentLab.gradeLabel}
                                 </span>
-                                <h3 id="edu-lab-title" class="font-extrabold text-sm text-slate-900 dark:text-white">
+                                <h3 id="edu-lab-title" class="font-extrabold text-sm sm:text-base text-white">
                                     ${currentLab.title}
                                 </h3>
                             </div>
-                            <span id="edu-lab-topic" class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                            <span id="edu-lab-topic" class="text-xs text-slate-400 font-medium">
                                 ${currentLab.topic}
                             </span>
                         </div>
 
                         <!-- KaTeX Formula Display -->
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 text-center">
-                            <span class="text-[10px] text-slate-400 block mb-1 font-mono">رابطه علمی حاکم بر این آزمایشگاه (FORMULA MATRIX):</span>
-                            <div id="edu-lab-formula" class="text-sm sm:text-base font-bold text-sky-600 dark:text-sky-300 academic-mono katex-ltr-container" dir="ltr">
+                        <div class="p-4 rounded-2xl bg-[#060a14] border border-cyan-500/20 text-center shadow-inner">
+                            <span class="text-[10px] text-slate-400 block mb-1.5 font-mono">رابطه علمی حاکم بر این آزمایشگاه (FORMULA MATRIX):</span>
+                            <div id="edu-lab-formula" class="text-sm sm:text-base font-bold text-cyan-300 academic-mono katex-ltr-container py-1" dir="ltr">
                                 $$${currentLab.formula}$$
                             </div>
                         </div>
 
                         <!-- Objectives & Misconceptions Grid -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                            <div class="p-3 rounded-xl bg-blue-50/50 dark:bg-slate-800/40 border border-blue-100 dark:border-slate-700/60 space-y-1">
-                                <span class="font-bold text-blue-700 dark:text-sky-300 block">🎯 اهداف آموزشی آزمایش:</span>
-                                <p id="edu-lab-goals" class="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">${currentLab.goals}</p>
+                            <div class="p-3.5 rounded-2xl bg-[#0c1527]/80 border border-cyan-500/15 space-y-1.5">
+                                <span class="font-bold text-cyan-300 flex items-center gap-1.5">
+                                    <i data-lucide="target" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                    <span>اهداف آموزشی آزمایش:</span>
+                                </span>
+                                <p id="edu-lab-goals" class="text-slate-300 text-[11px] leading-relaxed">${currentLab.goals}</p>
                             </div>
-                            <div class="p-3 rounded-xl bg-rose-50/50 dark:bg-slate-800/40 border border-rose-100 dark:border-slate-700/60 space-y-1">
-                                <span class="font-bold text-rose-700 dark:text-rose-300 block">⚠️ هشدار بدفهمی رایج علمی:</span>
-                                <p id="edu-lab-misconception" class="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">${currentLab.misconception}</p>
+                            <div class="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/30 space-y-1.5">
+                                <span class="font-bold text-amber-300 flex items-center gap-1.5">
+                                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400"></i>
+                                    <span>هشدار بدفهمی رایج علمی:</span>
+                                </span>
+                                <p id="edu-lab-misconception" class="text-amber-200/90 text-[11px] leading-relaxed">${currentLab.misconception}</p>
                             </div>
                         </div>
                     </div>
@@ -1123,34 +1131,34 @@ class LiveLabComponent {
                 <div class="lg:col-span-4 space-y-4">
                     
                     <!-- Live Quick Poll Card (If active) -->
-                    <div id="live-poll-card" class="${details.active_poll ? '' : 'hidden'} p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/70 shadow-sm space-y-3">
+                    <div id="live-poll-card" class="${details.active_poll ? '' : 'hidden'} p-4 rounded-3xl bg-[#080d1a]/95 border border-amber-500/40 shadow-xl space-y-3 backdrop-blur-xl">
                         <div class="flex items-center justify-between">
-                            <span class="inline-flex items-center gap-1.5 text-xs font-black text-amber-900 dark:text-amber-200">
-                                <i data-lucide="help-circle" class="w-4 h-4 text-amber-500"></i>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-black text-amber-300">
+                                <i data-lucide="help-circle" class="w-4 h-4 text-amber-400"></i>
                                 <span>پرسش فوری دبیر (کوییز کلاسی)</span>
                             </span>
-                            <span id="live-poll-total" class="text-[10px] font-mono text-amber-700 dark:text-amber-300 font-bold">۰ پاسخ</span>
+                            <span id="live-poll-total" class="text-[10px] font-mono text-amber-400 font-bold">۰ پاسخ</span>
                         </div>
-                        <p id="live-poll-question" class="text-xs font-bold text-slate-900 dark:text-white leading-relaxed"></p>
-                        <div id="live-poll-options" class="space-y-1.5"></div>
+                        <p id="live-poll-question" class="text-xs font-bold text-white leading-relaxed"></p>
+                        <div id="live-poll-options" class="space-y-2"></div>
                     </div>
 
                     <!-- Teacher Live Chalkboard Notes Card -->
-                    <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                    <div class="p-4 rounded-3xl bg-[#080d1a]/95 border border-cyan-500/20 shadow-xl space-y-3 backdrop-blur-xl">
                         <div class="flex items-center justify-between">
-                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
-                                <i data-lucide="file-text" class="w-4 h-4 text-indigo-500"></i>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-white">
+                                <i data-lucide="file-text" class="w-4 h-4 text-cyan-400"></i>
                                 <span>تخته یادداشت‌های دبیر</span>
                             </span>
                             ${this.userRole === 'teacher' ? `
-                            <button onclick="window.liveLab.clearTeacherNotes()" class="text-[10px] text-rose-500 hover:underline">پاک کردن همه</button>
+                            <button onclick="window.liveLab.clearTeacherNotes()" class="text-[10px] text-rose-400 hover:underline">پاک کردن همه</button>
                             ` : ''}
                         </div>
                         <div id="teacher-notes-list" class="space-y-2 max-h-48 overflow-y-auto text-xs pr-1">
                             ${(!details.notes || details.notes.length === 0) ? `
-                            <p class="text-[11px] text-slate-400 text-center py-3">یادداشتی ثبت نشده است.</p>
+                            <p class="text-[11px] text-slate-500 text-center py-3">یادداشتی ثبت نشده است.</p>
                             ` : details.notes.map(n => `
-                            <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 leading-relaxed text-[11px]">
+                            <div class="p-2.5 rounded-xl bg-[#0c1527] border border-cyan-500/15 text-slate-200 leading-relaxed text-[11px]">
                                 ${n}
                             </div>
                             `).join('')}
@@ -1158,35 +1166,35 @@ class LiveLabComponent {
                     </div>
 
                     <!-- Classroom Academic Chat -->
-                    <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-[340px] overflow-hidden">
-                        <div class="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold">
-                            <span class="flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
-                                <i data-lucide="message-square" class="w-4 h-4 text-blue-500"></i>
+                    <div class="rounded-3xl bg-[#080d1a]/95 border border-cyan-500/20 shadow-xl flex flex-col h-[340px] overflow-hidden backdrop-blur-xl">
+                        <div class="p-3 border-b border-cyan-500/15 flex items-center justify-between text-xs font-bold">
+                            <span class="flex items-center gap-1.5 text-white">
+                                <i data-lucide="message-square" class="w-4 h-4 text-cyan-400"></i>
                                 <span>گفتگوی علمی کلاس</span>
                             </span>
                             <div class="flex items-center gap-2">
                                 ${this.userRole === 'teacher' ? `
-                                <button onclick="window.liveLab.clearChat()" class="text-[10px] text-rose-500 hover:underline px-1.5 py-0.5 rounded hover:bg-rose-50 dark:hover:bg-rose-950/40">پاک کردن چت</button>
+                                <button onclick="window.liveLab.clearChat()" class="text-[10px] text-rose-400 hover:underline px-1.5 py-0.5 rounded hover:bg-rose-950/40">پاک کردن چت</button>
                                 ` : ''}
-                                <button onclick="window.liveLab.sendRaiseHand()" class="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold text-[11px] border border-amber-200 dark:border-amber-900 flex items-center gap-1">
+                                <button onclick="window.liveLab.sendRaiseHand()" class="px-2.5 py-1 rounded-lg bg-amber-950/60 text-amber-300 font-bold text-[11px] border border-amber-500/40 flex items-center gap-1 hover:bg-amber-900/60 transition-all">
                                     <span>✋ اجازه گرفتن</span>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Chat Messages Container -->
-                        <div id="live-chat-messages" class="flex-1 p-3 overflow-y-auto space-y-2 text-xs">
-                            <div class="text-[10px] text-slate-400 text-center py-2">
+                        <div id="live-chat-messages" class="flex-1 p-3 overflow-y-auto space-y-2 text-xs bg-gradient-to-b from-[#080d1a] to-[#050811]">
+                            <div class="text-[10px] text-slate-500 text-center py-2">
                                 به گفتگوی برخط کلاس فیزیک سمپاد خوش آمدید.
                             </div>
                         </div>
 
                         <!-- Chat Input Box -->
-                        <div class="p-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-1.5 bg-slate-50 dark:bg-slate-850">
+                        <div class="p-2 border-t border-cyan-500/15 flex items-center gap-2 bg-[#060a14]">
                             <input id="live-chat-input" type="text" placeholder="پیام یا پرسش علمی خود را بنویسید..." 
                                 onkeydown="if(event.key==='Enter') window.liveLab.sendChatMessage()"
-                                class="flex-1 p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none text-xs font-sans">
-                            <button onclick="window.liveLab.sendChatMessage()" class="p-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white">
+                                class="flex-1 p-2.5 rounded-xl border border-cyan-500/30 bg-[#080d1a] text-white outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 text-xs font-sans">
+                            <button onclick="window.liveLab.sendChatMessage()" class="p-2.5 rounded-xl btn-quantum-cyan flex items-center justify-center">
                                 <i data-lucide="send" class="w-3.5 h-3.5 rotate-180"></i>
                             </button>
                         </div>
@@ -1196,49 +1204,49 @@ class LiveLabComponent {
         </div>
 
         <!-- Simulator Switcher Modal (All 28 Laboratories) -->
-        <div id="live-sim-switcher-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm overflow-y-auto">
-            <div class="w-full max-w-3xl max-h-[85vh] flex flex-col rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden font-sans">
-                <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="repeat" class="w-5 h-5 text-blue-500"></i>
-                        <h3 class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+        <div id="live-sim-switcher-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#04060c]/85 backdrop-blur-xl overflow-y-auto animate-fade-in">
+            <div class="w-full max-w-3xl max-h-[85vh] flex flex-col rounded-3xl bg-[#080d1a]/95 border border-cyan-500/30 shadow-2xl shadow-cyan-950/60 overflow-hidden font-sans backdrop-blur-2xl">
+                <div class="p-4 border-b border-cyan-500/20 bg-gradient-to-r from-[#0a1122] via-[#0f1b33] to-[#0a1122] flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <i data-lucide="repeat" class="w-5 h-5 text-cyan-400"></i>
+                        <h3 class="font-extrabold text-sm sm:text-base text-white tracking-wide">
                             تغییر فوری آزمایشگاه تدریس (تمام ۲۸ آزمایشگاه فیزیک سمپاد)
                         </h3>
                     </div>
-                    <button onclick="window.liveLab.closeSimSwitcherModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <button onclick="window.liveLab.closeSimSwitcherModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-all">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
                 
-                <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-850 text-xs">
+                <div class="p-4 border-b border-cyan-500/15 flex flex-wrap items-center justify-between gap-3 bg-[#060a14] text-xs">
                     <input id="switcher-search-input" type="text" placeholder="جستجو بر اساس نام آزمایشگاه یا مبحث درسی..." 
                         oninput="window.liveLab.filterSwitcherLabs(this.value)"
-                        class="flex-1 p-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none">
+                        class="flex-1 p-2.5 rounded-xl border border-cyan-500/30 bg-[#080d1a] text-white outline-none focus:border-cyan-400">
                     <div class="flex items-center gap-1 font-bold">
-                        <button onclick="window.liveLab.filterSwitcherGrade(0)" id="switch-tab-0" class="switch-grade-tab px-2.5 py-1 rounded-lg bg-blue-600 text-white">همه (۲۸)</button>
-                        <button onclick="window.liveLab.filterSwitcherGrade(7)" id="switch-tab-7" class="switch-grade-tab px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400">هفتم (۴)</button>
-                        <button onclick="window.liveLab.filterSwitcherGrade(8)" id="switch-tab-8" class="switch-grade-tab px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400">هشتم (۸)</button>
-                        <button onclick="window.liveLab.filterSwitcherGrade(9)" id="switch-tab-9" class="switch-grade-tab px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400">نهم و سمپاد (۱۶)</button>
+                        <button onclick="window.liveLab.filterSwitcherGrade(0)" id="switch-tab-0" class="switch-grade-tab px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-sm">همه (۲۸)</button>
+                        <button onclick="window.liveLab.filterSwitcherGrade(7)" id="switch-tab-7" class="switch-grade-tab px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">هفتم (۴)</button>
+                        <button onclick="window.liveLab.filterSwitcherGrade(8)" id="switch-tab-8" class="switch-grade-tab px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">هشتم (۸)</button>
+                        <button onclick="window.liveLab.filterSwitcherGrade(9)" id="switch-tab-9" class="switch-grade-tab px-2.5 py-1 rounded-lg text-slate-400 hover:text-white">نهم و سمپاد (۱۶)</button>
                     </div>
                 </div>
 
-                <div id="switcher-labs-grid" class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 overflow-y-auto flex-1 max-h-[50vh]">
+                <div id="switcher-labs-grid" class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 overflow-y-auto flex-1 max-h-[50vh] bg-gradient-to-b from-[#080d1a] to-[#050811]">
                     ${ALL_LABORATORIES.map(lab => `
                     <div onclick="window.liveLab.changeSimulator('${lab.id}')" 
                         data-grade="${lab.grade}"
                         data-title="${lab.title}"
                         data-topic="${lab.topic}"
                         class="switcher-lab-card p-3 rounded-xl border text-right cursor-pointer transition-all ${lab.id === this.currentSimId 
-                            ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 ring-2 ring-blue-400' 
-                            : 'border-slate-200 dark:border-slate-800 hover:border-blue-400 bg-slate-50/50 dark:bg-slate-800/40'}">
+                            ? 'border-cyan-400 bg-cyan-950/60 ring-2 ring-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.3)]' 
+                            : 'border-cyan-500/15 hover:border-cyan-400/50 bg-[#060a14]/60'}">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full ${lab.grade === 9 ? 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300' : lab.grade === 8 ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300' : 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300'}">
+                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full ${lab.grade === 9 ? 'bg-indigo-950 text-indigo-300 border border-indigo-700/50' : lab.grade === 8 ? 'bg-amber-950 text-amber-300 border border-amber-700/50' : 'bg-cyan-950 text-cyan-300 border border-cyan-700/50'}">
                                 ${lab.gradeLabel}
                             </span>
                             <span class="text-[9px] text-slate-400 font-mono">${lab.file}</span>
                         </div>
-                        <h4 class="font-bold text-xs text-slate-900 dark:text-white truncate">${lab.title}</h4>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${lab.topic}</p>
+                        <h4 class="font-bold text-xs text-white truncate">${lab.title}</h4>
+                        <p class="text-[10px] text-slate-400 truncate mt-0.5">${lab.topic}</p>
                     </div>
                     `).join('')}
                 </div>
@@ -1246,16 +1254,16 @@ class LiveLabComponent {
         </div>
 
         <!-- Share Classroom Modal -->
-        <div id="live-share-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
-            <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-2xl space-y-4 font-sans text-center">
-                <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-sky-400 flex items-center justify-center mx-auto">
-                    <i data-lucide="share-2" class="w-6 h-6"></i>
+        <div id="live-share-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#04060c]/85 backdrop-blur-xl animate-fade-in">
+            <div class="w-full max-w-md rounded-3xl bg-[#080d1a]/95 border border-cyan-500/30 p-6 shadow-2xl shadow-cyan-950/60 space-y-4 font-sans text-center backdrop-blur-2xl">
+                <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 flex items-center justify-center mx-auto shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+                    <i data-lucide="share-2" class="w-7 h-7"></i>
                 </div>
                 <div>
-                    <h3 class="font-extrabold text-base text-slate-900 dark:text-white">اشتراک‌گذاری کلاس با دانش‌آموزان</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">شناسه و نشانی این کلاس را برای حضور همزمان دانش‌آموزان ارسال فرمایید:</p>
+                    <h3 class="font-extrabold text-base text-white tracking-wide">اشتراک‌گذاری کلاس با دانش‌آموزان</h3>
+                    <p class="text-xs text-slate-300 mt-1">شناسه و نشانی این کلاس را برای حضور همزمان دانش‌آموزان ارسال فرمایید:</p>
                 </div>
-                <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center font-mono font-black text-lg text-blue-600 dark:text-sky-400">
+                <div class="p-3.5 rounded-2xl bg-[#060a14] border border-cyan-500/30 text-center font-mono font-black text-xl text-cyan-300 tracking-wider text-glow-cyan">
                     ${details.room_code}
                 </div>
                 <div class="flex items-center gap-2">
@@ -2473,10 +2481,10 @@ class LiveLabComponent {
 
             return `
             <button onclick="window.liveLab.submitVote(${idx})" 
-                class="w-full relative overflow-hidden p-2.5 rounded-xl border ${isVoted ? 'border-amber-500 ring-2 ring-amber-400 bg-amber-100/50 dark:bg-amber-950/60' : 'border-amber-200 dark:border-amber-900/80 bg-white dark:bg-slate-900 hover:bg-amber-50/50'} text-right transition-all flex items-center justify-between text-xs font-bold">
-                <div class="absolute inset-y-0 right-0 bg-amber-400/20 dark:bg-amber-500/20 pointer-events-none transition-all duration-500" style="width: ${pct}%"></div>
-                <span class="relative z-10 text-slate-800 dark:text-slate-100 truncate">${opt}</span>
-                <span class="relative z-10 text-[10px] font-mono text-amber-700 dark:text-amber-300 mr-2">${pct}٪ (${voteCount})</span>
+                class="w-full relative overflow-hidden p-3 rounded-2xl border ${isVoted ? 'border-amber-400 ring-2 ring-amber-400/50 bg-amber-950/70 shadow-[0_0_12px_rgba(245,158,11,0.3)]' : 'border-amber-500/25 bg-[#060a14] hover:border-amber-400/50'} text-right transition-all flex items-center justify-between text-xs font-bold">
+                <div class="absolute inset-y-0 right-0 bg-amber-500/20 pointer-events-none transition-all duration-500" style="width: ${pct}%"></div>
+                <span class="relative z-10 text-white truncate">${opt}</span>
+                <span class="relative z-10 text-[10px] font-mono text-amber-300 mr-2">${pct}٪ (${voteCount})</span>
             </button>
             `;
         }).join('');

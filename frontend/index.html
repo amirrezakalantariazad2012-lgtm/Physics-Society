@@ -11,12 +11,17 @@
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
     <title>انجمن فیزیک شهید بهشتی دو دوره اول</title>
 
-    <!-- Immediate Light Theme Enforcer -->
+    <!-- Immediate Theme Enforcer (Default Deep Space Cyberpunk) -->
     <script>
         try {
-            localStorage.setItem('theme', 'light');
-            document.documentElement.classList.remove('dark');
-            document.documentElement.classList.add('light');
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+            } else {
+                document.documentElement.classList.remove('light');
+                document.documentElement.classList.add('dark');
+            }
         } catch(e) {}
     </script>
 
@@ -28,6 +33,24 @@
             theme: {
                 extend: {
                     colors: {
+                        space: {
+                            950: '#04060c',
+                            900: '#060913',
+                            850: '#0b1020',
+                            800: '#0f172a',
+                            750: '#131e36',
+                            700: '#1a2948',
+                            600: '#223862'
+                        },
+                        quantum: {
+                            cyan: '#00f0ff',
+                            blue: '#38bdf8',
+                            violet: '#a855f7',
+                            purple: '#8b5cf6',
+                            gold: '#fbbf24',
+                            emerald: '#10b981',
+                            rose: '#f43f5e'
+                        },
                         primary: {
                             50: '#eff6ff',
                             100: '#dbeafe',
@@ -41,20 +64,26 @@
                             900: '#1e3a8a',
                         },
                         duo: {
-                            green: '#58cc02',
-                            greenDark: '#46a302',
-                            yellow: '#ffc800',
-                            yellowDark: '#e5b400',
-                            blue: '#1cb0f6',
-                            blueDark: '#1899d6',
-                            red: '#ff4b4b',
-                            redDark: '#ea2b2b'
+                            green: '#10b981',
+                            greenDark: '#059669',
+                            yellow: '#f59e0b',
+                            yellowDark: '#d97706',
+                            blue: '#0284c7',
+                            blueDark: '#0369a1',
+                            red: '#ef4444',
+                            redDark: '#dc2626'
                         }
                     },
                     fontFamily: {
                         sans: ['Vazirmatn', 'Vazir', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
                         mono: ['JetBrains Mono', 'Fira Code', 'ui-monospace', 'monospace'],
                         en: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 20px -3px rgba(0, 240, 255, 0.35)',
+                        'neon-violet': '0 0 20px -3px rgba(168, 85, 247, 0.35)',
+                        'quantum-card': '0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 0 15px -2px rgba(56, 189, 248, 0.12)',
+                        'quantum-hover': '0 15px 35px -5px rgba(0, 0, 0, 0.6), 0 0 25px -2px rgba(0, 240, 255, 0.25)',
                     }
                 }
             }
@@ -87,10 +116,10 @@
     <div id="navbar-container" class="relative z-40 w-full"></div>
 
     <!-- Main Content Container (SPA Views Rendered Here) -->
-    <main id="app-main-content" class="flex-1 w-full relative z-10 pb-20 md:pb-6"></main>
+    <main id="app-main-content" class="flex-1 w-full relative z-10 pt-16 lg:mr-64 pb-20 md:pb-8 transition-all duration-300"></main>
 
     <!-- Footer -->
-    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-10 mt-auto transition-colors relative z-10 pb-28 md:pb-10">
+    <footer class="bg-white dark:bg-space-950/95 border-t border-slate-200 dark:border-space-800 py-10 mt-auto transition-colors relative z-10 pb-28 md:pb-10 lg:mr-64 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                 <div class="md:col-span-2 space-y-3">
