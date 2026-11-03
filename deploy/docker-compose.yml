@@ -29,13 +29,13 @@ services:
       - internal_net
 
   # ----------------------------------------------------------------------------
-  # 2. FastAPI Application Backend & Worker
+  # 2. PHP Application Server & Backend
   # ----------------------------------------------------------------------------
   app:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    container_name: physics_fastapi_prod
+    container_name: physics_php_prod
     restart: always
     depends_on:
       db:

@@ -11,8 +11,8 @@
 
 | لایه | تکنولوژی انتخابی | دلایل انتخاب و توجیه فنی |
 | :--- | :--- | :--- |
-| **Backend Framework** | **Python 3.12 + FastAPI** | عملکرد نزدیک به Go/NodeJS به لطف Starlette و Uvicorn، پشتیبانی کامل از اعتبارسنجی داده با Pydantic V2، مستندسازی خودکار OpenAPI/Swagger و سازگاری بومی با ابزارهای پردازش زبان طبیعی و هوش مصنوعی. |
-| **Database & ORM** | **PostgreSQL 16 + SQLAlchemy 2.0** | تراکنش‌های ACID قابل اتکا، کلیدهای خارجی سخت‌گیرانه، ایندکس‌های کارآمد و قابلیت ارتقا بدون وقفه. در محیط تست و توسعه محلی، بدون تغییر در مدل‌ها از SQLite3 با فعال‌سازی قفل‌های ForeignKey Pragma استفاده می‌شود. |
+| **Backend Framework** | **Modern PHP 8+ (Pure Native Architecture)** | عملکرد بسیار بالا، قابلیت استقرار مستقیم روی تمامی هاست‌های اشتراکی cPanel، DirectAdmin، Apache، Nginx و سرورهای اختصاصی بدون نیاز به Composer یا پیش‌نیازهای پیچیده. |
+| **Database & ORM** | **Native PDO (SQLite 3 / MySQL / MariaDB)** | تراکنش‌های ACID قابل اتکا، کلیدهای خارجی سخت‌گیرانه، ایندکس‌های کارآمد و قابلیت ارتقا بدون وقفه. پشتیبانی کامل و بدون دردسر از پایگاه داده سبک و پرسرعت SQLite 3 و MySQL. |
 | **Authentication** | **Argon2id + Stateless JWT** | استفاده از امن‌ترین الگوریتم هش رمزعبور مقاوم در برابر حملات ASIC/GPU (برنده مسابقه Password Hashing Competition) به همراه توکن‌های JWT بدون نیاز به ذخیره نشست‌های سرگردان. |
 | **Frontend Architecture** | **Vanilla JS SPA + Tailwind CSS + Lucide + KaTeX** | عدم نیاز به ابزارهای پیچیده باندلر (Vite/Webpack) که بر روی سرورهای با دسترسی محدود مشکل ایجاد می‌کنند؛ سرعت بارگذاری آنی، نمایش روان فرمول‌های ریاضی و فیزیکی به زبان لاتین با KaTeX و راست‌چینی استاندارد (RTL). |
 | **Reverse Proxy** | **Nginx 1.25 Alpine** | محافظت در برابر حملات Brute-Force از طریق Rate Limiting، فشرده‌سازی خودکار Gzip، مدیریت نشست‌های SSL Let's Encrypt و کش دارایی‌های ایستا. |
@@ -123,7 +123,7 @@ erDiagram
 sequenceDiagram
     autonumber
     actor S as دانش‌آموز
-    participant API as سرور FastAPI
+    participant API as سرور PHP API
     participant AI as موتور ارزیابی هوش مصنوعی
     participant DB as پایگاه داده
     actor T as دبیر فیزیک (مدیر)

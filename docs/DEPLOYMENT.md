@@ -96,54 +96,45 @@ curl http://localhost/api/health
 برای فعال‌سازی HTTPS بر روی دامنه مدرسه (مثلاً `physics.beheshti2.ir`):
 
 ```bash
-# اجرای اسکریپت خودکار با ذکر دامنه و ایمیل مسئول IT مدرسه
-bash init-letsencrypt.sh physics.beheshti2.ir admin@beheshti2.ir
+# اجرای اسکریپت خودکار PHP با ذکر دامنه و ایمیل مسئول IT مدرسه
+php deploy/ssl.php physics.beheshti2.ir admin@beheshti2.ir
 ```
 
 این اسکریپت گواهی‌نامه ۴۰۹۶ بیتی RSA را از سرورهای Let's Encrypt دریافت کرده و در ولوم امن `physics_certbot_conf` قرار داده و Nginx را مجدداً لود می‌کند.
 
 ---
 
-## ۶. ایجاد حساب مدیر سامانه و بررسی محتوا در سرور
+## ۶. ورود مدیر سامانه و بررسی محتوا در سرور
 
-پس از راه‌اندازی کانتینرها، حساب مدیر اولیه را مستقیماً از داخل کانتینر اپلیکیشن ایجاد نمایید:
+پس از راه‌اندازی، حساب مدیر اولیه مستقیماً با اطلاعات زیر در دیتابیس فعال است:
+- نام کاربری: `admin` یا `QUANTUM CUT`
+- رمز عبور: `QUANTUM CUT`
 
+تست سلامت و اعتبارسنجی پوشش بانک سوالات و آزمون‌ها:
 ```bash
-docker compose exec app python -m app.cli create-admin \
-  --username admin \
-  --email admin@beheshti2.ir \
-  --fullname "مدیر سامانه فیزیک شهید بهشتی ۲"
-```
-
-تایید سلامت و پوشش ۳۶۰ سوال فیزیک:
-```bash
-docker compose exec app python -m app.cli validate-content
+php backend/tests/test_suite.php
 ```
 
 ---
 
 ## ۷. زمان‌بندی پشتیبان‌گیری خودکار (Automated Cron Backup)
 
-جهت جلوگیری از هرگونه از دست رفتن داده‌ها، اسکریپت `deploy/backup.sh` به صورت خودکار از دیتابیس PostgreSQL و فایل‌های درسی دامپ گرفته، فشرده‌سازی کرده و نسخه‌های قدیمی‌تر از ۱۴ روز را حذف می‌کند.
+جهت جلوگیری از هرگونه از دست رفتن داده‌ها، اسکریپت `deploy/backup.php` به صورت خودکار از دیتابیس SQLite/MySQL و فایل‌های درسی دامپ گرفته، فشرده‌سازی کرده و نسخه‌های قدیمی‌تر از ۱۴ روز را حذف می‌کند.
 
-اسکریپت را به عنوان تسک زمان‌بندی‌شده روزانه در Cron لینوکس ثبت کنید:
+اسکریپت را به عنوان تسک زمان‌بندی‌شده روزانه در Cron لینوکس یا سی‌پنل ثبت کنید:
 ```bash
-# اعطای دسترسی اجرایی
-chmod +x /opt/physics-society/deploy/backup.sh
-chmod +x /opt/physics-society/deploy/restore.sh
-
 # باز کردن ویرایشگر کرون روت
 sudo crontab -e
 ```
 خط زیر را برای اجرای هر شب ساعت ۰۳:۰۰ بامداد اضافه کنید:
 ```cron
-0 3 * * * /opt/physics-society/deploy/backup.sh >> /var/log/physics_backup.log 2>&1
+0 3 * * * php /opt/physics-society/deploy/backup.php >> /var/log/physics_backup.log 2>&1
 ```
 
 ### بازیابی نسخه پشتیبان (Disaster Recovery):
 در صورت بروز نقص فنی یا نیاز به بازگردانی داده‌ها:
 ```bash
-bash /opt/physics-society/deploy/restore.sh /var/backups/physics_platform/physics_backup_20261021_030000.tar.gz
+php deploy/restore.php /var/backups/physics_platform/physics_backup_20261021_030000.tar.gz
 ```
 
 ---

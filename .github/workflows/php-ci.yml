@@ -1,0 +1,37 @@
+name: PHP Test Suite & Quality Verification
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  php-verification:
+    name: 🐘 PHP 8.3 Syntax Check & Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Check out repository
+        uses: actions/checkout@v4
+
+      - name: 🐘 Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, curl, openssl, pdo, pdo_sqlite, sqlite3, fileinfo
+
+      - name: 🔍 PHP Syntax Verification (Lint)
+        run: |
+          find . -type f -name "*.php" -not -path "*/vendor/*" -exec php -l {} +
+
+      - name: 🧪 Execute Backend PHP Test Suite
+        run: |
+          php backend/tests/test_suite.php
+
+      - name: 📱 Verify Mobile App Pipeline (PHP)
+        run: |
+          php build_apk_pipeline.php

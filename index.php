@@ -1,0 +1,354 @@
+<?php
+/**
+ * QUANTUM CUT — Physics Educational Platform (Pure PHP Edition)
+ * Main Single Page Application Host & Web Entrypoint
+ */
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/backend/config.php';
+
+// Production OWASP Security & Anti-Cache Headers
+header("X-Content-Type-Options: nosniff");
+header("X-Frame-Options: SAMEORIGIN");
+header("X-XSS-Protection: 1; mode=block");
+header("Referrer-Policy: strict-origin-when-cross-origin");
+header("Cache-Control: no-cache, no-store, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+header("Content-Type: text/html; charset=UTF-8");
+?>
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="h-full overflow-x-hidden max-w-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="description" content="انجمن فیزیک شهید بهشتی دو دوره اول - پلتفرم پیشرفته و تعاملی آموزش فیزیک، لیگ‌های علمی، شبیه‌سازهای آزمایشگاهی و تصحیح هوش مصنوعی">
+    <meta name="theme-color" content="#f8fafc">
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <title>انجمن فیزیک شهید بهشتی دو دوره اول</title>
+
+    <!-- Immediate Light Theme Enforcer -->
+    <script>
+        try {
+            localStorage.setItem('theme', 'light');
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+        } catch(e) {}
+    </script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        duo: {
+                            green: '#58cc02',
+                            greenDark: '#46a302',
+                            yellow: '#ffc800',
+                            yellowDark: '#e5b400',
+                            blue: '#1cb0f6',
+                            blueDark: '#1899d6',
+                            red: '#ff4b4b',
+                            redDark: '#ea2b2b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'Vazir', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'ui-monospace', 'monospace'],
+                        en: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Typography: Vazirmatn (Persian), Inter (English), JetBrains Mono (Math/Code/Units) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+
+    <!-- KaTeX for Scientific Formulas and Equations (Self-Hosted Offline First with CDN Fallback) -->
+    <link rel="stylesheet" href="/assets/katex/katex.min.css">
+    <script src="/assets/katex/katex.min.js"></script>
+    <script src="/assets/katex/auto-render.min.js"></script>
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased transition-colors duration-200 relative overflow-x-hidden max-w-full w-full">
+
+    <!-- Interactive Scientific Particle / Constellation Canvas Background -->
+    <canvas id="physics-particles-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-35 dark:opacity-45"></canvas>
+
+    <!-- Top Navigation Bar -->
+    <div id="navbar-container" class="relative z-40 w-full"></div>
+
+    <!-- Main Content Container (SPA Views Rendered Here) -->
+    <main id="app-main-content" class="flex-1 w-full relative z-10 pb-20 md:pb-6"></main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-10 mt-auto transition-colors relative z-10 pb-28 md:pb-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="md:col-span-2 space-y-3">
+                    <div class="flex items-center gap-3">
+                        <img src="/assets/quantum-cut-logo.svg" alt="انجمن فیزیک شهید بهشتی دو دوره اول" class="h-9 w-auto">
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-md">
+                        پلتفرم تخصصی آموزش و یادگیری تعاملی فیزیک، طراحی‌شده بر اساس سرفصل‌های کتاب درسی رسمی و کتب تکمیلی استعدادهای درخشان برای پایه‌های هفتم، هشتم و نهم دوره اول متوسطه.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-slate-900 dark:text-white mb-3">دسترسی سریع</h4>
+                    <ul class="space-y-2 text-xs text-slate-600 dark:text-slate-400">
+                        <li><a href="#curriculum" onclick="window.store.setView('curriculum')" class="hover:text-cyan-400 transition-colors">سرفصل دروس و مباحث فیزیک</a></li>
+                        <li><a href="#competitions" onclick="window.store.setView('competitions')" class="hover:text-cyan-400 transition-colors">مسابقات و لیگ‌های کوانتومی</a></li>
+                        <li><a href="#leaderboards" onclick="window.store.setView('leaderboards')" class="hover:text-cyan-400 transition-colors">جدول رتبه‌بندی دانش‌آموزان</a></li>
+                        <li><a href="#badges" onclick="window.store.setView('badges')" class="hover:text-cyan-400 transition-colors">مدال‌ها و دستاوردها</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-slate-900 dark:text-white mb-3">منابع علمی</h4>
+                    <ul class="space-y-2 text-xs text-slate-600 dark:text-slate-400">
+                        <li>کتاب علوم تجربی پایه هفتم، هشتم و نهم (بخش‌های فیزیک)</li>
+                        <li>کتب تکمیلی علوم دوره اول سمپاد (استعدادهای درخشان)</li>
+                        <li>سامانه تصحیح هوشمند تشریحی با سنجه ارزیابی روبیک</li>
+                        <li>بانک تخصصی سوالات مفهومی و محاسباتی فیزیک</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-500 gap-4">
+                <span>© انجمن فیزیک شهید بهشتی دو دوره اول — تمامی حقوق محفوظ است.</span>
+                <div class="flex items-center gap-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        سامانه فعال است (PHP 8)
+                    </span>
+                    <a href="/api/system/health" target="_blank" class="hover:text-blue-600">وضعیت سلامت API</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Cyberpunk AI Tutor Button (When widget is closed) -->
+    <div id="ai-tutor-floating-container" class="fixed bottom-20 sm:bottom-6 left-4 sm:left-6 z-40">
+        <button id="ai-tutor-btn" onclick="window.toggleAiTutorModal(true)" 
+            class="relative group flex items-center gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl bg-slate-900/90 text-white border border-violet-500/50 hover:border-violet-400 cyber-glow-violet transition-all duration-300 transform hover:-translate-y-1 shadow-2xl">
+            <span class="absolute -top-1 -right-1 w-3 h-3 bg-cyan-400 rounded-full animate-ping"></span>
+            <span class="absolute -top-1 -right-1 w-3 h-3 bg-cyan-400 rounded-full"></span>
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-violet-600 to-cyan-500 flex items-center justify-center text-white shadow-md">
+                <i data-lucide="bot" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </div>
+            <div class="text-right">
+                <span class="text-xs font-bold block text-violet-200">معلم هوشمند فیزیک</span>
+                <span class="text-[10px] text-cyan-300 font-sans">AI Copilot</span>
+            </div>
+        </button>
+    </div>
+
+    <!-- AI Tutor Interactive Floating Copilot Window (Non-blocking, Context-Aware & Mobile Bottom Sheet) -->
+    <div id="ai-tutor-modal" class="hidden fixed bottom-0 sm:bottom-5 left-0 right-0 sm:left-5 sm:right-auto z-50 w-full sm:w-[440px] max-w-full sm:max-w-[calc(100vw-1.5rem)] h-[85vh] sm:h-[600px] max-h-[92vh] sm:max-h-[calc(100vh-4rem)] rounded-t-3xl sm:rounded-3xl bg-slate-900/95 border-t-2 sm:border-2 border-violet-500/50 shadow-2xl cyber-glow-violet backdrop-blur-xl flex flex-col overflow-hidden transition-all duration-300 pointer-events-auto">
+        <!-- Mobile drag indicator -->
+        <div class="sm:hidden w-10 h-1 bg-slate-600/60 rounded-full mx-auto my-1.5 shrink-0"></div>
+        <!-- Floating Window Header -->
+        <div class="p-3.5 sm:p-4 border-b border-slate-800 bg-slate-950/80 flex items-center justify-between gap-2 shrink-0 cursor-move select-none" id="ai-copilot-header">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-violet-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-violet-500/30 shrink-0">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                        <h3 class="font-extrabold text-white text-xs truncate">دستیار هوشمند انجمن فیزیک</h3>
+                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono font-bold">GPT Oss 120B</span>
+                    </div>
+                    <p class="text-[10px] text-violet-300/80 truncate" id="ai-tutor-grade-label">موتور تخصصی Inferbase AI • مدل GPT Oss 120B</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1 shrink-0">
+                <select id="ai-model-selector" title="انتخاب مدل هوش مصنوعی" class="bg-slate-800/90 text-[10px] text-cyan-300 font-sans border border-cyan-500/30 rounded-lg px-2 py-1 outline-none focus:border-cyan-400">
+                    <option value="openai-gpt-oss-120b" selected>🚀 GPT Oss 120B (فعال)</option>
+                    <option value="auto">⚡ مسیریاب خودکار نکسورا</option>
+                    <option value="deepseek-v3-2">DeepSeek V3.2</option>
+                </select>
+                <!-- Minimize Button -->
+                <button type="button" onclick="window.minimizeAiCopilot()" title="کوچک‌نمایی / شناور کردن" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
+                    <i data-lucide="minus" class="w-4 h-4"></i>
+                </button>
+                <!-- Close Button -->
+                <button type="button" onclick="window.toggleAiTutorModal(false)" title="بستن پنجره" class="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Live Page Context Telemetry Bar -->
+        <div id="ai-copilot-context-bar" class="px-3.5 py-2 bg-slate-950/60 border-b border-violet-500/20 flex items-center justify-between gap-2 shrink-0 text-[11px]">
+            <div class="flex items-center gap-1.5 text-cyan-300 truncate">
+                <i data-lucide="compass" class="w-3.5 h-3.5 text-cyan-400 shrink-0"></i>
+                <span class="truncate font-semibold" id="ai-current-page-text">زمینه: در حال بارگذاری صفحه...</span>
+            </div>
+            <button type="button" onclick="window.askAboutCurrentPage()" 
+                class="shrink-0 px-2.5 py-1 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 text-[10px] font-bold flex items-center gap-1 transition-all hover:scale-105">
+                <span>💡 پرسش از این صفحه</span>
+            </button>
+        </div>
+
+        <!-- Dialogue Body (Scrollable) -->
+        <div id="ai-tutor-chat-body" class="p-4 overflow-y-auto flex-1 space-y-3.5 text-xs">
+            <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-violet-500/20 text-slate-200 leading-relaxed shadow-sm">
+                سلام! من دستیار هوشمند همراه شما در سامانه انجمن فیزیک شهید بهشتی دو دوره اول هستم.
+                پنجره من شناور است تا بتوانی هم‌زمان صفحه درس، آزمایش یا مسابقه را ببینی.
+                هر سؤالی درباره مفاهیم فیزیک یا محتوای صفحه داری بپرس!
+            </div>
+
+            <!-- Quick Topic Chips -->
+            <div class="space-y-1.5 pt-1">
+                <span class="text-[10px] text-slate-400 font-bold block">موضوعات پیشنهادی سریع:</span>
+                <div class="flex flex-wrap gap-1.5">
+                    <button onclick="window.askQuickTutor('چگالی چطور محاسبه می‌شود و یکای آن چیست؟')" class="px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-cyan-300 border border-cyan-800/40 text-[10px] transition-colors">
+                        چگالی و یکای SI
+                    </button>
+                    <button onclick="window.askQuickTutor('قانون دوم نیوتون را با مثال توضیح بده')" class="px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-violet-300 border border-violet-800/40 text-[10px] transition-colors">
+                        قانون دوم نیوتون (F=ma)
+                    </button>
+                    <button onclick="window.askQuickTutor('تفاوت جرم و وزن در سطح ماه و زمین چیست؟')" class="px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-amber-300 border border-amber-800/40 text-[10px] transition-colors">
+                        تفاوت جرم و وزن
+                    </button>
+                    <button onclick="window.askQuickTutor('اصل پاسکال و بالابر هیدرولیکی چگونه کار می‌کند؟')" class="px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-emerald-300 border border-emerald-800/40 text-[10px] transition-colors">
+                        فشار و اصل پاسکال
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Footer -->
+        <form id="ai-tutor-form" onsubmit="window.handleAiTutorSubmit(event)" class="p-3 border-t border-slate-800 bg-slate-950/90 flex items-center gap-2 shrink-0">
+            <input type="text" id="ai-tutor-input" placeholder="پرسش یا نکته مورد نظر خود را بنویسید..." 
+                class="flex-1 p-2.5 rounded-xl border border-slate-700 bg-slate-900 text-white text-xs outline-none focus:border-cyan-500 transition-colors" />
+            <button type="submit" id="ai-tutor-submit-btn" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-bold text-xs flex items-center gap-1 hover:opacity-95 transition-opacity shrink-0">
+                <span>ارسال</span>
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- Core Scripts -->
+    <script>
+        // Force client cache refresh across all browsers & tabs
+        (function() {
+            const CURRENT_APP_BUILD = '2026.11.03.v4.0.0-php-edition';
+            try {
+                const lastBuild = localStorage.getItem('phy_build_tag');
+                if (lastBuild && lastBuild !== CURRENT_APP_BUILD) {
+                    localStorage.setItem('phy_build_tag', CURRENT_APP_BUILD);
+                    if ('caches' in window) {
+                        caches.keys().then(names => {
+                            for (let name of names) caches.delete(name);
+                        });
+                    }
+                    window.location.reload(true);
+                } else {
+                    localStorage.setItem('phy_build_tag', CURRENT_APP_BUILD);
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <script src="/js/store.js?v=4.0.0-php"></script>
+    <script src="/js/api.js?v=4.0.0-php"></script>
+    <script src="/js/components/navbar.js?v=4.0.0-php"></script>
+    <script src="/js/components/physics_simulators.js?v=4.0.0-php"></script>
+    <script src="/js/components/live_lab_view.js?v=4.0.0-php"></script>
+    <script src="/js/components/duolingo_player.js?v=4.0.0-php"></script>
+    <script src="/js/components/exam_runner.js?v=4.0.0-php"></script>
+    <script src="/js/components/competition_view.js?v=4.0.0-php"></script>
+    <script src="/js/components/leaderboards.js?v=4.0.0-php"></script>
+    <script src="/js/components/admin_views.js?v=4.0.0-php"></script>
+    <script src="/js/app.js?v=4.0.0-php"></script>
+
+    <!-- Math & KaTeX Automatic Scientific Formula Renderer -->
+    <script>
+        function renderMathInPage(targetEl = document.body) {
+            if (!targetEl) targetEl = document.body;
+            if (window.renderMathInElement) {
+                try {
+                    window.renderMathInElement(targetEl, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false},
+                            {left: '\\(', right: '\\)', display: false},
+                            {left: '\\[', right: '\\]', display: true}
+                        ],
+                        throwOnError: false,
+                        ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code"]
+                    });
+                } catch (e) {
+                    console.warn('Math rendering notice:', e);
+                }
+            }
+            if (window.katex && targetEl) {
+                const mathContainers = targetEl.querySelectorAll('.katex-ltr-container, .academic-mono');
+                mathContainers.forEach(el => {
+                    if (el.querySelector('.katex')) return;
+                    let raw = el.textContent.trim();
+                    if (raw.startsWith('$$') && raw.endsWith('$$')) {
+                        raw = raw.slice(2, -2).trim();
+                    } else if (raw.startsWith('$') && raw.endsWith('$')) {
+                        raw = raw.slice(1, -1).trim();
+                    }
+                    if (raw && (raw.includes('\\') || raw.includes('^') || raw.includes('_') || raw.includes('='))) {
+                        try {
+                            window.katex.render(raw, el, { displayMode: true, throwOnError: false });
+                        } catch (err) {
+                            console.warn('KaTeX fallback error:', err);
+                        }
+                    }
+                });
+            }
+        }
+        window.renderMathInPage = renderMathInPage;
+        window.renderScientificFormulas = renderMathInPage;
+
+        window.addEventListener('view-changed', () => setTimeout(renderMathInPage, 80));
+        window.addEventListener('user-changed', () => setTimeout(renderMathInPage, 100));
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMathInPage();
+            const mainApp = document.getElementById('app-main-content');
+            if (mainApp && window.MutationObserver) {
+                let renderTimeout = null;
+                const observer = new MutationObserver(() => {
+                    if (renderTimeout) clearTimeout(renderTimeout);
+                    renderTimeout = setTimeout(() => {
+                        renderMathInPage(mainApp);
+                    }, 50);
+                });
+                observer.observe(mainApp, { childList: true, subtree: true });
+            }
+        });
+    </script>
+</body>
+</html>

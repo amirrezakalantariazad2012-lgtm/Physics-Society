@@ -1,12 +1,12 @@
 # QUANTUM CUT — پلتفرم پیشرفته فیزیک، مسابقات کوانتومی و هوش مصنوعی
 ## پلتفرم جامع یادگیری تعاملی، لیگ‌های علمی و دستیار هوشمند سقراطی (پایه‌های هفتم، هشتم و نهم)
 
-[![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688.svg)](https://fastapi.tiangolo.com/)
+[![PHP 8.0+](https://img.shields.io/badge/PHP-8.0%2B-777BB4.svg?logo=php&logoColor=white)](https://www.php.net/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Migrated%20to%20PHP-009688.svg)]()
 [![Tests](https://img.shields.io/badge/Tests-37%20Passed%20(100%25)-brightgreen.svg)]()
 [![Android](https://img.shields.io/badge/Android%20App-v2.2.0-3DDC84.svg?logo=android&logoColor=white)](/downloads/physics-society.apk)
 [![PhET](https://img.shields.io/badge/PhET%20Labs-29%20Offline%20Sims-0284c7.svg)]()
-[![AI Engine](https://img.shields.io/badge/AI%20Engine-Nexora%20Multi--Model-8B5CF6.svg)](https://openrouter.ai/)
+[![AI Engine](https://img.shields.io/badge/AI%20Engine-Inferbase%20%7C%20GPT%20Oss%20120B-8B5CF6.svg)](https://api.inferbase.ai/)
 [![Anti--Cheat](https://img.shields.io/badge/Security-Anti--Cheat%20Suite-22D3EE.svg)]()
 [![Curriculum](https://img.shields.io/badge/Curriculum-Pure%20Physics%20%2B%20SAMPAD-f59e0b.svg)]()
 
@@ -28,10 +28,12 @@
 - **پنجره غیرمسدودکننده و مینیمایزبل:** هوش مصنوعی به جای مودال‌های تمام‌صفحه سنتی، در قالب یک پنجره شناور ارگونومیک در گوشه تصویر قرار دارد و مانع از مشاهده، اسکرول یا حل تمرین در صفحه سایت نمی‌شود.
 - **آگاهی لحظه‌ای از محتوای صفحه (Page-Context Awareness):** پنجره با تشخیص لحظه‌ای صفحه (سرفصل، درسنامه، فصل، آزمایشگاه یا سوال مسابقه) تله‌متری مربوطه را نمایش می‌دهد.
 - **دکمه تک‌کلیکه «💡 پرسش از این صفحه»:** استخراج خودکار متن و مفاهیم درس جاری و ارسال مستقیم به مدل هوش مصنوعی.
-- **موتور چندمدلی نکسورا (Nexora Multi-Model Engine):**
-  - اتصال مستقیم به زنجیره مدل‌های رایگان و پرسرعت OpenRouter نظیر `poolside/laguna-s-2.1:free` و `nvidia/nemotron-3.5-lightning:free`.
-  - طبقه‌بندی هوشمند خطاها، سنجش تاخیر پینگ مدل‌ها و فالبک خودکار بدون توقف سرویس.
-  - تمیزسازی متون، حذف تگ‌های سیستمی و ارائه فرمول‌های لاتک همراه با قابلیت کپی.
+- **موتور هوش مصنوعی فوق‌پیشرفته Inferbase AI:**
+  - مجهز به مدل پرچمدار و توانمند **GPT Oss 120B** (`openai-gpt-oss-120b`) از طریق بستر پرسرعت Inferbase.
+  - نمایش رسمی نام مدل فعال (**GPT Oss 120B**) در بالای کادر چت و زیر تمامی پاسخ‌ها.
+  - روش تدریس سقراطی (Socratic Method) برای راهنمایی مفهومی و گام‌به‌گام دانش‌آموزان به جای ارائه مستقیم پاسخ.
+  - سیستم پاکسازی خروجی از هرگونه تگ زائد سیستمی و رندرینگ خودکار فرمول‌های ریاضی و فیزیک با LaTeX KaTeX.
+  - پایداری کامل و فالبک هوشمند محلی در صورت بروز قطعی‌های ارتباطی.
 
 ### ۲. برنامه درسی ۱۰۰٪ تخصصی فیزیک (Pure Physics Curriculum)
 - **پالایش کامل محتوا:** حذف نوار محدوده موضوعی و ارائه انحصاری ۱۲ فصل تخصصی فیزیک دوره اول متوسطه.
@@ -107,109 +109,104 @@
 └──────────────────────────────┬──────────────────────────────┘
                                │ HTTPS / JSON REST API
 ┌──────────────────────────────▼──────────────────────────────┐
-│               Backend Service: Python FastAPI                │
-│  - Authentication: Argon2id + Stateless JWT                 │
-│  - ORM: SQLAlchemy 2.0 (Relational Database)                │
-│  - Multi-Model AI Engine (OpenRouter + Fallback Chain)      │
+│              Backend Service: Modern Pure PHP 8             │
+│  - Authentication: Argon2id + Pure PHP Stateless JWT        │
+│  - Database: Native PDO (SQLite 3 / MySQL / MariaDB)        │
+│  - AI Engine: Inferbase API (Model: GPT Oss 120B)            │
 │  - Anti-Cheat Time Verification & Automated Grading Engine  │
 │  - RBAC: Super-Admin / Teacher / Student                    │
+│  - Zero Composer Dependency: Ready for Any Shared Host!     │
 └──────────────────────────────┬──────────────────────────────┘
                                │
 ┌──────────────────────────────▼──────────────────────────────┐
 │                  Database & Storage Layer                   │
-│  - Production: PostgreSQL 16 Alpine                         │
-│  - Development / Testing: SQLite 3                          │
+│  - Production / cPanel: SQLite 3 or MySQL / MariaDB         │
+│  - Local dev: SQLite 3 (physics_platform.db)                │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📦 راه‌اندازی سریع در محیط توسعه (Local Quickstart)
+## 📦 راه‌اندازی سریع در محیط توسعه با PHP (Local Quickstart)
 
 ### پیش‌نیازها
-- Python نسخه 3.11 یا 3.12 یا 3.13
-- Git
+- PHP نسخه 8.0 یا بالاتر (با اکستنشن‌های `pdo_sqlite` یا `pdo_mysql`، `curl`، `openssl`، `mbstring`)
 
 ### مراحل اجرا:
 
-1. **کلون کردن مخزن:**
+1. **اجرای سرور داخلی PHP:**
    ```bash
-   git clone https://github.com/amirrezakalantariazad2012-lgtm/Physics-Society.git
-   cd Physics-Society
+   php -S 127.0.0.1:8000 router.php
    ```
 
-2. **ایجاد محیط مجازی و نصب پیش‌نیازها:**
-   ```bash
-   python -m venv venv
-   # در ویندوز (PowerShell):
-   .\venv\Scripts\Activate.ps1
-   # در لینوکس / مک:
-   source venv/bin/activate
-
-   pip install -r backend/requirements.txt
-   ```
-
-3. **تنظیم فایل محیطی (`.env`):**
-   یک کپی از روی `.env.example` بسازید و کلیدهای مورد نظر را تنظیم کنید:
-   ```bash
-   cp .env.example .env
-   ```
-   > نکته: برای استفاده از هوش مصنوعی زنده نکسورا، مقدار `AI_API_KEY` را در فایل `.env` وارد نمایید (این فایل در `.gitignore` محافظت شده است).
-
-4. **اجرای سرور بک‌اند و رابط کاربری:**
-   ```bash
-   python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload
-   ```
-
-5. **مشاهده در مرورگر:**
+2. **مشاهده در مرورگر:**
    - پلتفرم دانش‌آموزان و دبیران: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-   - مستندات تعاملی Swagger API: [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs)
+   - وضعیت سلامت سیستم (Health API): [http://127.0.0.1:8000/api/system/health](http://127.0.0.1:8000/api/system/health)
+
+---
+
+## 🚀 استقرار روی هاست اشتراکی و سرورهای PHP (cPanel / DirectAdmin / Apache / Nginx)
+
+پروژه به گونه‌ای مهندسی شده است که **بدون نیاز به Composer یا دسترسی SSH یا ترمینال**، روی تمامی هاست‌های اشتراکی PHP ایران و خارج اجرا می‌شود:
+
+1. کلیه فایل‌های پروژه را در پوشه `public_html` یا روت هاست آپلود و اکسترکت کنید.
+2. فایل `.htaccess` به صورت پیش‌فرض تمام درخواست‌های `/api/*` را به هسته روتینگ PHP و سایر درخواست‌ها را به برنامه تک‌صفحه‌ای هدایت می‌کند.
+3. در صورت تمایل به استفاده از MySQL به جای SQLite پیش‌فرض، مقادیر اتصال دیتابیس را در فایل `.env` وارد نمایید.
 
 ---
 
 ## 🔑 اطلاعات حساب کاربری مدیر ارشد (Admin Credentials)
 
 برای ورود به پنل مدیریت سامانه با اختیارات کامل:
-- **نام کاربری:** `QUANTUM CUT`
-- **رمز عبور:** `QUANTUM CUT`
-
-> دکمه ورود سریع به عنوان مدیر ارشد در پنجره ورود قرار داده شده است.
+- **نام کاربری:** `QUANTUM CUT` یا `admin`
+- **رمز عبور:** `QUANTUM CUT` یا `admin`
 
 ---
 
 ## 🧪 اجرای تست‌های خودکار (Automated Testing)
 
-سامانه دارای **۳۱ تست جامع خودکار** در حوزه‌های احراز هویت، هوش مصنوعی، آزمون‌ها، مسابقات و ضدتقلب است:
+سامانه دارای تست‌های خودکار پیاده‌سازی شده در PHP برای تمامی بخش‌های احراز هویت، بانک سوالات، هوش مصنوعی، آزمون‌ها و ضدتقلب است:
 
 ```bash
-# از پوشه ریشه پروژه:
-pytest backend/tests -v
+php backend/tests/test_suite.php
 ```
 
 خروجی تست‌ها:
 ```
-backend/tests/test_ai_grading.py PASSED (3 tests)
-backend/tests/test_auth.py PASSED (3 tests)
-backend/tests/test_competitions.py PASSED (1 test)
-backend/tests/test_curriculum.py PASSED (1 test)
-backend/tests/test_exam_engine.py PASSED (2 tests)
-backend/tests/test_gamification.py PASSED (1 test)
-backend/tests/test_nexora_and_leagues.py PASSED (4 tests)
-backend/tests/test_question_counts.py PASSED (16 tests)
-====================== 31 passed in 14.16s ======================
+========================================================
+   QUANTUM CUT — PHP TEST SUITE (PHP 8.3)
+========================================================
+ [PASS] Database PDO Connection
+ [PASS] Database Question Bank Seeded (390 Questions)
+ [PASS] Curriculum Chapters Available (12 Chapters)
+ [PASS] Admin User Record Exists
+ [PASS] Login with 'QUANTUM CUT' Credentials
+ [PASS] Login with 'admin' Credentials
+ [PASS] Student User Record Exists
+ [PASS] Student Password Verification
+ [PASS] JWT Token Generation & Verification
+ [PASS] Grades List (7th, 8th, 9th)
+ [PASS] Interactive Lessons & Exercises Available
+ [PASS] Exam Attempt Session & Deterministic Scoring
+ [PASS] XP Award & Daily Streak Idempotency
+ [PASS] Nexora AI Guidance & Anti-Hallucination Cleaning
+ [PASS] Live Lab Room Lifecycle Management
+--------------------------------------------------------
+SUMMARY: 100% of tests PASSED!
+========================================================
 ```
 
 ---
 
 ## 🚢 استقرار سرور با Docker Compose (Production Deployment)
 
-استقرار کامل پروژه شامل Nginx، FastAPI و PostgreSQL 16:
+استقرار کامل پروژه با وب‌سرور، کانتینر PHP 8.3 و دیتابیس:
 
 ```bash
 cd deploy
 docker compose up -d --build
 docker compose ps
-curl http://localhost/api/health
+curl http://localhost/api/system/health
 ```
 
 ---

@@ -1,0 +1,38 @@
+# QUANTUM CUT — Apache/LiteSpeed Server Configuration (cPanel/DirectAdmin Ready)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Pass Authorization header to PHP in Apache / FastCGI / cPanel environments
+    RewriteCond %{HTTP:Authorization} ^(.*)
+    RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+
+    # Route all /api/* requests to api/index.php
+    RewriteCond %{REQUEST_URI} ^/api(/.*)?$ [NC]
+    RewriteRule ^api(/.*)?$ api/index.php [QSA,L]
+
+    # Serve existing files directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Fallback to SPA entrypoint for client-side routing
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Correct MIME Types
+<IfModule mod_mime.c>
+    AddType text/css .css
+    AddType application/javascript .js
+    AddType image/svg+xml .svg
+    AddType font/woff2 .woff2
+    AddType application/vnd.android.package-archive .apk
+</IfModule>

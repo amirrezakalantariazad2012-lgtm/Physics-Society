@@ -1,54 +1,33 @@
 # ==============================================================================
-# Dockerfile: Production Container for Physics Association Platform
+# Dockerfile: Production PHP Container for Physics Association Platform
 # Shahid Beheshti 2 High School (دبیرستان استعدادهای درخشان شهید بهشتی ۲)
 # ==============================================================================
 
-FROM python:3.12-slim-bookworm
+FROM php:8.3-apache
 
-# Prevent Python from writing .pyc files and enable unbuffered logging
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app/backend
+# Enable Apache mod_rewrite & mod_headers
+RUN a2enmod rewrite headers
 
-WORKDIR /app
-
-# Install minimal OS dependencies for PostgreSQL client, curl healthcheck, and OCR/PDF
+# Install system dependencies & SQLite / PDO MySQL
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    libsqlite3-dev \
+    libzip-dev \
     curl \
-    postgresql-client \
-    ca-certificates \
-    libmagic1 \
+    && docker-php-ext-install pdo pdo_sqlite pdo_mysql \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python requirements
-COPY backend/requirements.txt /app/backend/requirements.txt
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r /app/backend/requirements.txt
+WORKDIR /var/www/html
 
-# Copy backend application source
-COPY backend /app/backend
+# Copy application files
+COPY . /var/www/html/
 
-# Copy frontend static application
-COPY frontend /app/frontend
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 /var/www/html
 
-# Copy initial textbooks data directory
-COPY data /app/data
+EXPOSE 80
 
-# Create directory for uploads and logs
-RUN mkdir -p /app/data/uploads /app/data/textbooks /app/data/logs
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://127.0.0.1/api/system/health || exit 1
 
-# Create non-root system user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser && \
-    chown -R appuser:appuser /app
-
-USER appuser
-
-# Expose internal FastAPI port
-EXPOSE 8000
-
-# Container healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD curl -f http://127.0.0.1:8000/api/health || exit 1
-
-# Production server entrypoint with 4 Uvicorn worker processes
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--proxy-headers", "--forwarded-allow-ips", "*"]
+CMD ["apache2-foreground"]
