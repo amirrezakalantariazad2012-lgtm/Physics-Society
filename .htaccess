@@ -1,4 +1,4 @@
-# QUANTUM CUT — Apache/LiteSpeed Server Configuration (cPanel/DirectAdmin Ready)
+# QUANTUM CUT — Apache/LiteSpeed Server Configuration (cPanel/DirectAdmin 100% PHP Ready)
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
@@ -13,6 +13,11 @@
 
     # Rewrite any legacy .html simulator request to .php
     RewriteRule ^simulators/(.+)\.html$ simulators/$1.php [L,QSA]
+
+    # Rewrite legacy .js or .css requests to .php if the corresponding .php file exists
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME}\.php -f
+    RewriteRule ^(.+)$ $1.php [L,QSA]
 
     # Serve existing files directly
     RewriteCond %{REQUEST_FILENAME} -f [OR]

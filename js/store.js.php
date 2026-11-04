@@ -1,3 +1,10 @@
+<?php
+/**
+ * QUANTUM CUT — Client Script (Pure PHP Edition)
+ */
+declare(strict_types=1);
+header('Content-Type: application/javascript; charset=utf-8');
+?>
 /**
  * Global App Store, Sound Effects & Utilities
  */

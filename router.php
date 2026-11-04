@@ -1,6 +1,6 @@
 <?php
 /**
- * QUANTUM CUT — Local PHP Development Router
+ * QUANTUM CUT — Local PHP Development Router (100% Pure PHP Edition)
  * Run with: php -S 127.0.0.1:8000 router.php
  */
 
@@ -14,17 +14,23 @@ if (str_starts_with($uri, '/api')) {
     exit;
 }
 
-// 2. Backward compatibility: if an old .html simulator link is accessed, resolve to .php
-if (str_starts_with($uri, '/simulators/') && str_ends_with($uri, '.html')) {
-    $phpUri = substr($uri, 0, -5) . '.php';
-    if (is_file(__DIR__ . $phpUri)) {
-        require __DIR__ . $phpUri;
+// 2. Backward compatibility: if an old .html, .js, or .css link is accessed, resolve to .php
+$filePath = __DIR__ . $uri;
+if (!is_file($filePath)) {
+    if (is_file($filePath . '.php')) {
+        require $filePath . '.php';
         exit;
+    }
+    if (str_starts_with($uri, '/simulators/') && str_ends_with($uri, '.html')) {
+        $simPhp = __DIR__ . substr($uri, 0, -5) . '.php';
+        if (is_file($simPhp)) {
+            require $simPhp;
+            exit;
+        }
     }
 }
 
-// 3. Direct PHP Script Execution (e.g. /simulators/phet/*.php)
-$filePath = __DIR__ . $uri;
+// 3. Direct PHP Script Execution (e.g. /js/*.php, /css/*.php, /simulators/phet/*.php)
 if (is_file($filePath)) {
     $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
     
@@ -34,8 +40,6 @@ if (is_file($filePath)) {
     }
 
     $mimes = [
-        'css' => 'text/css',
-        'js' => 'application/javascript',
         'json' => 'application/json',
         'svg' => 'image/svg+xml',
         'png' => 'image/png',

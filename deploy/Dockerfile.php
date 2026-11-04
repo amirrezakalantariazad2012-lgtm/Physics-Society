@@ -1,3 +1,10 @@
+<?php
+/**
+ * QUANTUM CUT — Containerfile (Pure PHP Edition)
+ */
+declare(strict_types=1);
+header('Content-Type: text/plain; charset=utf-8');
+?>
 # ==============================================================================
 # Dockerfile: Production PHP Container for Physics Association Platform
 # Shahid Beheshti 2 High School (دبیرستان استعدادهای درخشان شهید بهشتی ۲)

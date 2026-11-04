@@ -1,3 +1,10 @@
+<?php
+/**
+ * QUANTUM CUT — Client Script (Pure PHP Edition)
+ */
+declare(strict_types=1);
+header('Content-Type: application/javascript; charset=utf-8');
+?>
 /**
  * QUANTUM CUT — Advanced Competitions & Multi-Tier League Arena
  * Supports: Weekly Leagues, Monthly Masters, Seasonal Tournaments, Live Timers,

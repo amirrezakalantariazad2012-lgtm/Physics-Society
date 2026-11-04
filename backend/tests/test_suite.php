@@ -224,6 +224,12 @@ $htmlSims = glob(__DIR__ . '/../../simulators/phet/*.html');
 assertTest("PhET Simulators Converted to 100% PHP (29 Sims)", count($phpSims) === 29);
 assertTest("Zero Legacy HTML Simulators Remaining", count($htmlSims) === 0);
 
+// 100% Pure PHP Codebase Integrity
+$jsFiles = glob(__DIR__ . '/../../js/*.js');
+$cssFiles = glob(__DIR__ . '/../../css/*.css');
+assertTest("Zero Legacy JS Code Files (All Converted to PHP)", count($jsFiles) === 0);
+assertTest("Zero Legacy CSS Code Files (All Converted to PHP)", count($cssFiles) === 0);
+
 echo "\n--------------------------------------------------------\n";
 echo "SUMMARY: Total: $totalTests | Passed: $passedTests | Failed: $failedTests\n";
 if ($failedTests === 0) {

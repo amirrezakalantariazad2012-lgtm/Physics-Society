@@ -1,3 +1,10 @@
+<?php
+/**
+ * QUANTUM CUT — Client Script (Pure PHP Edition)
+ */
+declare(strict_types=1);
+header('Content-Type: application/javascript; charset=utf-8');
+?>
 /**
  * QUANTUM CUT — Responsive RTL Navbar & Mobile Dock Component
  * Fully adaptive across Mobile, Tablet, Laptop & Desktop.

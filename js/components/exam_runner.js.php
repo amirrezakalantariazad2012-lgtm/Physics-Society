@@ -1,3 +1,10 @@
+<?php
+/**
+ * QUANTUM CUT — Client Script (Pure PHP Edition)
+ */
+declare(strict_types=1);
+header('Content-Type: application/javascript; charset=utf-8');
+?>
 /**
  * Timed Examination Runner Component (SAMPAD & Olympiad High-Precision Grade)
  * Features:

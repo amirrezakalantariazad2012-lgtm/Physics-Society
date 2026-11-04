@@ -88,15 +88,15 @@ header("Content-Type: text/html; charset=UTF-8");
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
 
     <!-- KaTeX for Scientific Formulas and Equations (Self-Hosted Offline First with CDN Fallback) -->
-    <link rel="stylesheet" href="/assets/katex/katex.min.css">
-    <script src="/assets/katex/katex.min.js"></script>
-    <script src="/assets/katex/auto-render.min.js"></script>
+    <link rel="stylesheet" href="/assets/katex/katex.min.css.php">
+    <script src="/assets/katex/katex.min.js.php"></script>
+    <script src="/assets/katex/auto-render.min.js.php"></script>
 
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css.php">
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased transition-colors duration-200 relative overflow-x-hidden max-w-full w-full">
 
@@ -277,17 +277,17 @@ header("Content-Type: text/html; charset=UTF-8");
             } catch(e) {}
         })();
     </script>
-    <script src="/js/store.js?v=4.0.0-php"></script>
-    <script src="/js/api.js?v=4.0.0-php"></script>
-    <script src="/js/components/navbar.js?v=4.0.0-php"></script>
-    <script src="/js/components/physics_simulators.js?v=4.0.0-php"></script>
-    <script src="/js/components/live_lab_view.js?v=4.0.0-php"></script>
-    <script src="/js/components/duolingo_player.js?v=4.0.0-php"></script>
-    <script src="/js/components/exam_runner.js?v=4.0.0-php"></script>
-    <script src="/js/components/competition_view.js?v=4.0.0-php"></script>
-    <script src="/js/components/leaderboards.js?v=4.0.0-php"></script>
-    <script src="/js/components/admin_views.js?v=4.0.0-php"></script>
-    <script src="/js/app.js?v=4.0.0-php"></script>
+    <script src="/js/store.js.php?v=4.0.0-php"></script>
+    <script src="/js/api.js.php?v=4.0.0-php"></script>
+    <script src="/js/components/navbar.js.php?v=4.0.0-php"></script>
+    <script src="/js/components/physics_simulators.js.php?v=4.0.0-php"></script>
+    <script src="/js/components/live_lab_view.js.php?v=4.0.0-php"></script>
+    <script src="/js/components/duolingo_player.js.php?v=4.0.0-php"></script>
+    <script src="/js/components/exam_runner.js.php?v=4.0.0-php"></script>
+    <script src="/js/components/competition_view.js.php?v=4.0.0-php"></script>
+    <script src="/js/components/leaderboards.js.php?v=4.0.0-php"></script>
+    <script src="/js/components/admin_views.js.php?v=4.0.0-php"></script>
+    <script src="/js/app.js.php?v=4.0.0-php"></script>
 
     <!-- Math & KaTeX Automatic Scientific Formula Renderer -->
     <script>

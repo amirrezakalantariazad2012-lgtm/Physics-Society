@@ -3,16 +3,17 @@
 
 # Enforce PHP classification for all project code
 *.php linguist-language=PHP
-simulators/* linguist-language=PHP
-simulators/phet/* linguist-language=PHP
+simulators/** linguist-language=PHP
+js/** linguist-language=PHP
+css/** linguist-language=PHP
+backend/** linguist-language=PHP
+api/** linguist-language=PHP
+deploy/** linguist-language=PHP
 
-# Treat all client scripts, stylesheets, and configs as vendored to enforce 100% PHP
-*.js linguist-vendored
-*.css linguist-vendored
-*.yml linguist-vendored
-*.yaml linguist-vendored
-Dockerfile linguist-vendored
-deploy/* linguist-vendored
-assets/* linguist-vendored
+# Exclude vendor binary assets, fonts, and workflows from language stats
+assets/katex/fonts/* linguist-vendored
+data/textbooks/* linguist-vendored
 downloads/* linguist-vendored
 .github/* linguist-vendored
+*.yml linguist-vendored
+*.yaml linguist-vendored

@@ -1,3 +1,10 @@
+<?php
+/**
+ * QUANTUM CUT — Stylesheet (Pure PHP Edition)
+ */
+declare(strict_types=1);
+header('Content-Type: text/css; charset=utf-8');
+?>
 /* Vazirmatn (Persian), Inter (English), JetBrains Mono (Scientific/Math/Monospace) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@100..900&display=swap');
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');

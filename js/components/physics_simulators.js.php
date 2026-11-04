@@ -1,3 +1,10 @@
+<?php
+/**
+ * QUANTUM CUT — Client Script (Pure PHP Edition)
+ */
+declare(strict_types=1);
+header('Content-Type: application/javascript; charset=utf-8');
+?>
 /**
  * Physics Laboratory Simulators Catalog & Interactive Workbench
  * Physics Society of Shahid Beheshti 2 (Grades 7, 8, 9)

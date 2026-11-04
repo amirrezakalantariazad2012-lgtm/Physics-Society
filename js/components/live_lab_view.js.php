@@ -1,3 +1,10 @@
+<?php
+/**
+ * QUANTUM CUT — Client Script (Pure PHP Edition)
+ */
+declare(strict_types=1);
+header('Content-Type: application/javascript; charset=utf-8');
+?>
 /**
  * QUANTUM CUT — Academic Live Physics Laboratory & Synchronized Classroom Broadcasting
  * Supports live broadcasting and real-time switching across ALL 28 Physics Laboratories (Grades 7, 8, 9 & SAMPAD).
