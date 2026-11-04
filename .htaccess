@@ -11,6 +11,9 @@
     RewriteCond %{REQUEST_URI} ^/api(/.*)?$ [NC]
     RewriteRule ^api(/.*)?$ api/index.php [QSA,L]
 
+    # Rewrite any legacy .html simulator request to .php
+    RewriteRule ^simulators/(.+)\.html$ simulators/$1.php [L,QSA]
+
     # Serve existing files directly
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d

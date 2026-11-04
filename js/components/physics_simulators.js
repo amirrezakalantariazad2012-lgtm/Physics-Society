@@ -37,8 +37,8 @@ const SIMULATOR_CATALOG = [
         "چگالی مایع را از آب (۱ g/cm³) به روغن یا گلیسیرین تغییر داده و وضعیت شناوری جسم را بررسی کنید."
 ],
         misconceptions: "اشتباه رایج: جسم سنگین‌تر همیشه در آب فرو می‌رود! در حالی که شناوری یا ته‌نشینی تنها به «چگالی» وابسته است نه جرم کل (قایق غول‌پیکر فولادی شناور می‌ماند چون چگالی میانگین آن کمتر از آب است).",
-        localFile: "density.html",
-        localUrl: "/simulators/phet/density.html",
+        localFile: "density.php",
+        localUrl: "/simulators/phet/density.php",
         phetSlug: "density"
     },
 
@@ -71,8 +71,8 @@ const SIMULATOR_CATALOG = [
         "اصطکاک را فعال کرده و تبدیل شدن انرژی مکانیکی به انرژی حرارتی (قرمز) را تحلیل نمایید."
 ],
         misconceptions: "اشتباه رایج: انرژی هنگام توقف ناشی از اصطکاک نابود می‌شود! خیر، انرژی طبق اصل پایستگی از فرم مکانیکی به فرم گرمایی (جنبش مولکولی) دگرگون شده است.",
-        localFile: "energy-skate-park.html",
-        localUrl: "/simulators/phet/energy-skate-park.html",
+        localFile: "energy-skate-park.php",
+        localUrl: "/simulators/phet/energy-skate-park.php",
         phetSlug: "energy-skate-park-basics"
     },
 
@@ -104,8 +104,8 @@ const SIMULATOR_CATALOG = [
         "بلوک آهن داغ را به داخل ظرف آب خنک منتقل کرده و دمای تعادل نهایی هر دو را رصد کنید."
 ],
         misconceptions: "اشتباه رایج: دما و گرما هم‌معنی هستند! دما میانگین انرژی جنبشی ذرات است، در حالی که گرما مقدار انرژی منتقل‌شده به علت اختلاف دما است.",
-        localFile: "energy-forms.html",
-        localUrl: "/simulators/phet/energy-forms.html",
+        localFile: "energy-forms.php",
+        localUrl: "/simulators/phet/energy-forms.php",
         phetSlug: "energy-forms-and-changes"
     },
 
@@ -137,8 +137,8 @@ const SIMULATOR_CATALOG = [
         "گرانش را به ماه یا مشتری تغییر داده و تفاوت در تندی نوسان را مقایسه کنید."
 ],
         misconceptions: "اشتباه رایج: وزنه سنگین‌تر سریع‌تر نوسان می‌کند! خیر، جرم هیچ نقشی در دوره تناوب آونگ ساده ندارد.",
-        localFile: "pendulum-lab.html",
-        localUrl: "/simulators/phet/pendulum-lab.html",
+        localFile: "pendulum-lab.php",
+        localUrl: "/simulators/phet/pendulum-lab.php",
         phetSlug: "pendulum-lab"
     },
 
@@ -168,8 +168,8 @@ const SIMULATOR_CATALOG = [
         "چراغ حرارتی زیر ظرف را روشن کنید و افزایش تندی جنبش مولکول‌ها و فشار را رصد کنید."
 ],
         misconceptions: "اشتباه رایج: در گازها ذرات به هم چسبیده‌اند و ساکن هستند! در گازها فضای خالی بسیار زیادی بین ذرات وجود دارد و ذرات با سرعت صدها متر بر ثانیه در حرکتند.",
-        localFile: "states-of-matter-basics.html",
-        localUrl: "/simulators/phet/states-of-matter-basics.html",
+        localFile: "states-of-matter-basics.php",
+        localUrl: "/simulators/phet/states-of-matter-basics.php",
         phetSlug: "states-of-matter-basics"
     },
 
@@ -204,8 +204,8 @@ const SIMULATOR_CATALOG = [
         "یک لامپ دوم را یک‌بار به صورت متوالی (سری) و بار دیگر به صورت موازی به مدار بیفزایید و تفاوت درخشش و جریان را ثبت کنید."
 ],
         misconceptions: "اشتباه رایج: جریان الکتریکی در لامپ‌ها مصرف شده و کم می‌شود! خیر، شدت جریان بار در سرتاسر یک شاخه ثابت است و تنها انرژی الکتریکی به نور و گرما تبدیل می‌شود.",
-        localFile: "circuit-dc.html",
-        localUrl: "/simulators/phet/circuit-dc.html",
+        localFile: "circuit-dc.php",
+        localUrl: "/simulators/phet/circuit-dc.php",
         phetSlug: "circuit-construction-kit-dc"
     },
 
@@ -237,8 +237,8 @@ const SIMULATOR_CATALOG = [
         "بادکنک را به آرامی به دیوار نزدیک کنید و عقب‌نشینی بارهای منفی سطح دیوار (قطبش القایی) را رصد کنید."
 ],
         misconceptions: "اشتباه رایج: پروتون‌ها در اثر مالش از جسمی به جسم دیگر می‌روند! پروتون‌ها در هسته اتم محبوسند؛ این تنها الکترون‌های مدار خارجی هستند که منتقل می‌شوند.",
-        localFile: "balloons-static.html",
-        localUrl: "/simulators/phet/balloons-static.html",
+        localFile: "balloons-static.php",
+        localUrl: "/simulators/phet/balloons-static.php",
         phetSlug: "balloons-and-static-electricity"
     },
 
@@ -270,8 +270,8 @@ const SIMULATOR_CATALOG = [
         "به تب «Prisms» رفته، منشور مثلثی بگذارید و چشمه نور سفید را روشن نمایید تا پاشندگی به ۷ رنگ رنگین‌کمان پدیدار گردد."
 ],
         misconceptions: "اشتباه رایج: نور همیشه هنگام عبور از مرز دو ماده می‌شکند! اگر زاویه تابش صفر درجه باشد (تابش عمود بر سطح)، پرتو بدون انحراف زاویه‌ای مستقیماً عبور می‌کند هرچند سرعت آن تغییر می‌یابد.",
-        localFile: "bending-light.html",
-        localUrl: "/simulators/phet/bending-light.html",
+        localFile: "bending-light.php",
+        localUrl: "/simulators/phet/bending-light.php",
         phetSlug: "bending-light"
     },
 
@@ -303,8 +303,8 @@ const SIMULATOR_CATALOG = [
         "شیء را بین کانون و عدسی ببرید (p < f) تا تشکیل تصویر مجازی، مستقیم و بزرگ‌تر در پشت شیء را مشاهده نمایید."
 ],
         misconceptions: "اشتباه رایج: تصویر مجازی را می‌توان روی پرده تشکیل داد! تصویر مجازی از امتداد فرضی پرتوها به دست می‌آید و بدون ابزار نوری یا چشم مستقیماً روی پرده دیده نمی‌شود.",
-        localFile: "geometric-optics.html",
-        localUrl: "/simulators/phet/geometric-optics.html",
+        localFile: "geometric-optics.php",
+        localUrl: "/simulators/phet/geometric-optics.php",
         phetSlug: "geometric-optics"
     },
 
@@ -336,8 +336,8 @@ const SIMULATOR_CATALOG = [
         "آهنربا را درون سیم‌پیچ کاملاً ساکن نگه دارید و ببینید آیا ولتاژی القا می‌شود یا خیر."
 ],
         misconceptions: "اشتباه رایج: حضور آهنربای بسیار قوی در کنار سیم‌پیچ همواره برق تولید می‌کند! خیر، تنها «تغییر» شار مغناطیسی برحسب زمان است که نیروی محرکه القایی ایجاد می‌کند (آهنربای ساکن هیچ برقی تولید نمی‌کند).",
-        localFile: "faradays-law.html",
-        localUrl: "/simulators/phet/faradays-law.html",
+        localFile: "faradays-law.php",
+        localUrl: "/simulators/phet/faradays-law.php",
         phetSlug: "faradays-law"
     },
 
@@ -367,8 +367,8 @@ const SIMULATOR_CATALOG = [
         "فاصله دو بار را نصف کنید؛ مشاهده کنید نیرو ۴ برابر افزایش می‌یابد."
 ],
         misconceptions: "اشتباه رایج: بار با مقدار بیشتر نیروی بزرگ‌تری به بار کوچک‌تر وارد می‌کند! طبق قانون سوم نیوتون و قانون کولن، هر دو بار نیروی کاملاً برابر به یکدیگر وارد می‌کنند.",
-        localFile: "coulombs-law.html",
-        localUrl: "/simulators/phet/coulombs-law.html",
+        localFile: "coulombs-law.php",
+        localUrl: "/simulators/phet/coulombs-law.php",
         phetSlug: "coulombs-law"
     },
 
@@ -399,8 +399,8 @@ const SIMULATOR_CATALOG = [
         "حسگر E-Field را حرکت داده و شدت میدان را در نقاط مختلف بخوانید."
 ],
         misconceptions: "اشتباه رایج: خطوط میدان الکتریکی می‌توانند یکدیگر را قطع کنند! هرگز؛ زیرا در نقطه تقاطع دو جهت برای بردار یکتای میدان به وجود می‌آید که غیرممکن است.",
-        localFile: "charges-and-fields.html",
-        localUrl: "/simulators/phet/charges-and-fields.html",
+        localFile: "charges-and-fields.php",
+        localUrl: "/simulators/phet/charges-and-fields.php",
         phetSlug: "charges-and-fields"
     },
 
@@ -435,8 +435,8 @@ const SIMULATOR_CATALOG = [
         "پس از شروع حرکت، اصطکاک را صفر کنید و مشاهده نمایید جسم بدون نیاز به هیچ نیرویی تا ابد با تندی ثابت به حرکت ادامه می‌دهد."
 ],
         misconceptions: "اشتباه رایج: برای تداوم حرکت با سرعت ثابت نیاز به نیروی مداوم است! این دیدگاه ارسطویی اشتباه است؛ طبق قانون اول نیوتون اگر برآیند نیروها صفر باشد متحرک با سرعت ثابت به مسیرش ادامه می‌دهد.",
-        localFile: "forces-motion.html",
-        localUrl: "/simulators/phet/forces-motion.html",
+        localFile: "forces-motion.php",
+        localUrl: "/simulators/phet/forces-motion.php",
         phetSlug: "forces-and-motion-basics"
     },
 
@@ -468,8 +468,8 @@ const SIMULATOR_CATALOG = [
         "به تب «Energy» بروید و نمودار سهمی شکل انرژی ذخیره‌شده برحسب جابه‌جایی را بررسی کنید."
 ],
         misconceptions: "اشتباه رایج: اگر فنر را دو برابر بکشیم، انرژی ذخیره‌شده دو برابر می‌شود! خیر، انرژی کشسانی با «توان دوم» تغییر طول متناسب است؛ بنابراین با دو برابر شدن کشیدگی، انرژی ۴ برابر می‌شود.",
-        localFile: "hookes-law.html",
-        localUrl: "/simulators/phet/hookes-law.html",
+        localFile: "hookes-law.php",
+        localUrl: "/simulators/phet/hookes-law.php",
         phetSlug: "hookes-law"
     },
 
@@ -501,8 +501,8 @@ const SIMULATOR_CATALOG = [
         "وزنه علامت سوال قرمز را آویزان کرده و جرم آن را با مقایسه کشیدگی فنر محاسبه نمایید."
 ],
         misconceptions: "اشتباه رایج: دوره تناوب فنر در ماه کندتر از زمین است چون جاذبه ماه کمتر است! دوره تناوب فنر T=2π√(m/k) مستقل از g است (برعکس آونگ ساده).",
-        localFile: "masses-springs.html",
-        localUrl: "/simulators/phet/masses-springs.html",
+        localFile: "masses-springs.php",
+        localUrl: "/simulators/phet/masses-springs.php",
         phetSlug: "masses-and-springs"
     },
 
@@ -534,8 +534,8 @@ const SIMULATOR_CATALOG = [
         "کلید جو (Atmosphere) را خاموش کنید تا تنها فشار هیدرواستاتیک ناشی از خود مایع دیده شود."
 ],
         misconceptions: "اشتباه رایج: فشار در کف یک ظرف پهن بیشتر از کف یک لوله باریک با همان ارتفاع آب است! خیر، فشار شاره ساکن صرفاً به عمق (h) و چگالی (ρ) وابسته است و شکل یا پهنای ظرف اثری ندارد.",
-        localFile: "under-pressure.html",
-        localUrl: "/simulators/phet/under-pressure.html",
+        localFile: "under-pressure.php",
+        localUrl: "/simulators/phet/under-pressure.php",
         phetSlug: "under-pressure"
     },
 
@@ -567,8 +567,8 @@ const SIMULATOR_CATALOG = [
         "پایه‌های نگهدارنده را بردارید تا صحت برابری گشتاورها (۱۰ × ۱ = ۵ × ۲) را تماشا کنید."
 ],
         misconceptions: "اشتباه رایج: برای تعادل، جرم دو طرف همیشه باید مساوی باشد! خیر، گشتاور (حاصل‌ضرب وزن در فاصله تا تکیه‌گاه) باید برابر باشد؛ بنابراین یک وزنه کوچک در فاصله دور می‌تواند وزنه سنگین نزدیک را متعادل سازد.",
-        localFile: "balancing-act.html",
-        localUrl: "/simulators/phet/balancing-act.html",
+        localFile: "balancing-act.php",
+        localUrl: "/simulators/phet/balancing-act.php",
         phetSlug: "balancing-act"
     },
 
@@ -600,8 +600,8 @@ const SIMULATOR_CATALOG = [
         "کشش طناب (Tension) را بین کم و زیاد جابه‌جا کنید و تغییر چشمگیر در تندی انتشار موج را مشاهده کنید."
 ],
         misconceptions: "اشتباه رایج: با افزایش فرکانس منبع، سرعت انتشار موج در طناب زیاد می‌شود! سرعت انتشار موج صرفاً به ویژگی‌های محیط (جنس و کشش طناب) بستگی دارد نه فرکانس منبع. با افزایش فرکانس، طول موج کوچک می‌شود تا v ثابت بماند.",
-        localFile: "wave-on-a-string.html",
-        localUrl: "/simulators/phet/wave-on-a-string.html",
+        localFile: "wave-on-a-string.php",
+        localUrl: "/simulators/phet/wave-on-a-string.php",
         phetSlug: "wave-on-a-string"
     },
 
@@ -632,8 +632,8 @@ const SIMULATOR_CATALOG = [
         "مقاومت هوا را فعال کرده و تفاوت خط سیر را مقایسه کنید."
 ],
         misconceptions: "اشتباه رایج: پرتابه در بالاترین نقطه شتابش صفر می‌شود! شتاب پرتابه در تمام طول مسیر همواره ثابت و برابر با شتاب گرانش g به سمت پایین است؛ تنها سرعت عمودی در اوج صفر می‌شود.",
-        localFile: "projectile-motion.html",
-        localUrl: "/simulators/phet/projectile-motion.html",
+        localFile: "projectile-motion.php",
+        localUrl: "/simulators/phet/projectile-motion.php",
         phetSlug: "projectile-motion"
     },
 
@@ -664,8 +664,8 @@ const SIMULATOR_CATALOG = [
         "خاصیت کشسانی (Elasticity) را به صفر درصد تغییر دهید و به هم چسبیدن گوی‌ها را بررسی کنید."
 ],
         misconceptions: "اشتباه رایج: در تصادف دو خودرو، انرژی جنبشی پایسته می‌ماند! تصادف خودروها یک برخورد کاملاً ناکشسان است که بخش عمده انرژی جنبشی صرف دفرمه شدن فلزات، شکستن شیشه‌ها، تولید صدا و گرما می‌شود.",
-        localFile: "collision-lab.html",
-        localUrl: "/simulators/phet/collision-lab.html",
+        localFile: "collision-lab.php",
+        localUrl: "/simulators/phet/collision-lab.php",
         phetSlug: "collision-lab"
     },
 
@@ -699,8 +699,8 @@ const SIMULATOR_CATALOG = [
             "از دکمه‌های سناریوهای آماده (حرکت یکنواخت، شتاب ثابت تندشونده، ترمز و توقف، حرکت رفت و برگشتی) برای مقایسه با مسائل کتاب درسی استفاده کنید."
         ],
         misconceptions: "اشتباه رایج: هرگاه شتاب متحرک منفی باشد متحرک حتماً کندشونده است! خیر؛ علامت شتاب به جهت بردار بستگی دارد؛ اگر سرعت متحرک هم منفی باشد (حرکت در جهت منفی محور)، شتاب منفی به معنای تندشونده بودن حرکت در جهت منفی است (هم‌علامت بودن a و v شرط تندشوندگی است).",
-        localFile: "kinematics-1d.html",
-        localUrl: "/simulators/phet/kinematics-1d.html",
+        localFile: "kinematics-1d.php",
+        localUrl: "/simulators/phet/kinematics-1d.php",
         phetSlug: "motion-1d"
     },
 
@@ -732,8 +732,8 @@ const SIMULATOR_CATALOG = [
         "گزینه مساحت زیر منحنی (Integral/Area) را فعال کنید تا جابه‌جایی را با ضرب مساحت مستطیل یا مثلث زیر نمودار بسنجید."
 ],
         misconceptions: "اشتباه رایج: هرگاه شتاب متحرک صفر باشد، متحرک ساکن است! خیر؛ اگر شتاب صفر باشد، سرعت ثابت است و متحرک می‌تواند با سرعت ثابت بسیار بالایی در حرکت یکنواخت باشد.",
-        localFile: "calculus-grapher.html",
-        localUrl: "/simulators/phet/calculus-grapher.html",
+        localFile: "calculus-grapher.php",
+        localUrl: "/simulators/phet/calculus-grapher.php",
         phetSlug: "calculus-grapher"
     },
 
@@ -765,8 +765,8 @@ const SIMULATOR_CATALOG = [
         "گزینه مؤلفه‌ها (Component Style) را روشن کنید تا مثلث قائم‌الزاویه مؤلفه‌های افقی و عمودی روی شبکه شطرنجی نمایان شود."
 ],
         misconceptions: "اشتباه رایج: مسافت و جابه‌جایی همیشه با هم برابرند! خیر؛ مسافت همواره بزرگ‌تر یا مساوی با اندازه جابه‌جایی است، و این دو تنها در صورتی برابرند که متحرک روی خط مستقیم و بدون برگشت به عقب حرکت کند.",
-        localFile: "vector-addition.html",
-        localUrl: "/simulators/phet/vector-addition.html",
+        localFile: "vector-addition.php",
+        localUrl: "/simulators/phet/vector-addition.php",
         phetSlug: "vector-addition"
     },
 
@@ -801,8 +801,8 @@ const SIMULATOR_CATALOG = [
         "کلید خاموش کردن گرانش (Gravity Off) را بزنید و پرتاب شدن جسم در امتداد خط مماس را تماشا کنید."
 ],
         misconceptions: "اشتباه رایج: فضانوردان در ایستگاه فضایی به این دلیل معلق هستند که جاذبه زمین صفر است! خیر، در ارتفاع ۴۰۰ کیلومتری زمین نزدیک به ۹۰ درصد جاذبه زمین وجود دارد؛ دلیل معلق بودن فضانوردان سقوط آزاد پیوسته همراه با سرعت مماس مداری است.",
-        localFile: "gravity-and-orbits.html",
-        localUrl: "/simulators/phet/gravity-and-orbits.html",
+        localFile: "gravity-and-orbits.php",
+        localUrl: "/simulators/phet/gravity-and-orbits.php",
         phetSlug: "gravity-and-orbits"
     },
 
@@ -833,8 +833,8 @@ const SIMULATOR_CATALOG = [
         "سرعت اولیه سیاره را اندکی تغییر دهید و تغییر شکل مدار از دایره به بیضی کشیده را ببینید."
 ],
         misconceptions: "اشتباه رایج: مدارهای سیارات دایره‌ای بی‌نقص هستند! طبق قوانین کپلر و نیوتون، مدار تمام اجرام منظومه شمسی بیضی است که خورشید در یکی از کانون‌های آن قرار دارد.",
-        localFile: "my-solar-system.html",
-        localUrl: "/simulators/phet/my-solar-system.html",
+        localFile: "my-solar-system.php",
+        localUrl: "/simulators/phet/my-solar-system.php",
         phetSlug: "my-solar-system"
     },
 
@@ -865,8 +865,8 @@ const SIMULATOR_CATALOG = [
         "جرم یکی از کره‌ها را ۳ برابر کنید و سه برابر شدن نیرو را ثبت نمایید."
 ],
         misconceptions: "اشتباه رایج: جسم سنگین‌تر نیروی بیشتری به جسم سبک وارد می‌کند! طبق قانون سوم نیوتون، زمین و ماه نیروی گرانشی دقیقاً هم‌اندازه و خلاف جهت به یکدیگر وارد می‌کنند.",
-        localFile: "gravity-force-lab-basics.html",
-        localUrl: "/simulators/phet/gravity-force-lab-basics.html",
+        localFile: "gravity-force-lab-basics.php",
+        localUrl: "/simulators/phet/gravity-force-lab-basics.php",
         phetSlug: "gravity-force-lab-basics"
     },
 
@@ -896,8 +896,8 @@ const SIMULATOR_CATALOG = [
         "ابزار مساحت‌روبی در بازه‌های زمانی معین را فعال کنید و برابری مساحت‌ها را بررسی کنید."
 ],
         misconceptions: "اشتباه رایج: علت پیدایش فصل‌ها نزدیک و دور شدن زمین از خورشید است! خیر، مدار زمین به دایره بسیار نزدیک است و انحراف ۲۳.۵ درجه‌ای محور زمین علت تغییر فصول است.",
-        localFile: "keplers-laws.html",
-        localUrl: "/simulators/phet/keplers-laws.html",
+        localFile: "keplers-laws.php",
+        localUrl: "/simulators/phet/keplers-laws.php",
         phetSlug: "keplers-laws"
     },
 
@@ -928,8 +928,8 @@ const SIMULATOR_CATALOG = [
         "دما را روی ۳۰۰۰ کلوین کاهش دهید و غالب بودن پرتوهای نامرئی فروسرخ را تحلیل نمایید."
 ],
         misconceptions: "اشتباه رایج: ستارگان قرمز داغ‌ترین ستاره‌ها هستند! برعکس؛ در علم نجوم ستارگان آبی داغ‌ترین و ستارگان سرخ خنک‌ترین دمای سطحی را دارند.",
-        localFile: "blackbody-spectrum.html",
-        localUrl: "/simulators/phet/blackbody-spectrum.html",
+        localFile: "blackbody-spectrum.php",
+        localUrl: "/simulators/phet/blackbody-spectrum.php",
         phetSlug: "blackbody-spectrum"
     }
 ];
@@ -950,7 +950,7 @@ class PhysicsSimulators {
         if (this.catalog.some(s => s.id === raw)) return raw;
 
         // Match by localFile or file basename
-        const matchByFile = this.catalog.find(s => s.localFile === raw || s.localFile === `${raw}.html` || s.localFile.replace('.html', '') === raw);
+        const matchByFile = this.catalog.find(s => s.localFile === raw || s.localFile === `${raw}.php` || s.localFile.replace('.php', '') === raw);
         if (matchByFile) return matchByFile.id;
 
         // Clean aliases mapping to official PhET simulations

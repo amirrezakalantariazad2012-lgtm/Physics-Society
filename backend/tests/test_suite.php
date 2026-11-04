@@ -218,6 +218,12 @@ $sDetails = DB::fetchOne(
 );
 assertTest("Student Details Query Integrity", $sDetails !== null && !empty($sDetails['username']));
 
+// 100% PHP Simulators Architecture Integrity
+$phpSims = glob(__DIR__ . '/../../simulators/phet/*.php');
+$htmlSims = glob(__DIR__ . '/../../simulators/phet/*.html');
+assertTest("PhET Simulators Converted to 100% PHP (29 Sims)", count($phpSims) === 29);
+assertTest("Zero Legacy HTML Simulators Remaining", count($htmlSims) === 0);
+
 echo "\n--------------------------------------------------------\n";
 echo "SUMMARY: Total: $totalTests | Passed: $passedTests | Failed: $failedTests\n";
 if ($failedTests === 0) {

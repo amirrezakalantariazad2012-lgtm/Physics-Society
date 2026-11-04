@@ -1,3 +1,10 @@
+<?php
+/**
+ * QUANTUM CUT — PhET Offline Laboratory Simulator (PHP Edition)
+ */
+declare(strict_types=1);
+header('Content-Type: text/html; charset=utf-8');
+?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>

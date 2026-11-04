@@ -2,10 +2,10 @@
 ## پلتفرم جامع یادگیری تعاملی، لیگ‌های علمی و دستیار هوشمند سقراطی (پایه‌های هفتم، هشتم و نهم)
 
 [![PHP 8.0+](https://img.shields.io/badge/PHP-8.0%2B-777BB4.svg?logo=php&logoColor=white)](https://www.php.net/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-Migrated%20to%20PHP-009688.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-37%20Passed%20(100%25)-brightgreen.svg)]()
+[![Pure PHP](https://img.shields.io/badge/Architecture-100%25%20Pure%20PHP-009688.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-39%20Passed%20(100%25)-brightgreen.svg)]()
 [![Android](https://img.shields.io/badge/Android%20App-v2.2.0-3DDC84.svg?logo=android&logoColor=white)](/downloads/physics-society.apk)
-[![PhET](https://img.shields.io/badge/PhET%20Labs-29%20Offline%20Sims-0284c7.svg)]()
+[![PhET](https://img.shields.io/badge/PhET%20Labs-29%20PHP%20Native%20Sims-0284c7.svg)]()
 [![AI Engine](https://img.shields.io/badge/AI%20Engine-Inferbase%20%7C%20GPT%20Oss%20120B-8B5CF6.svg)](https://api.inferbase.ai/)
 [![Anti--Cheat](https://img.shields.io/badge/Security-Anti--Cheat%20Suite-22D3EE.svg)]()
 [![Curriculum](https://img.shields.io/badge/Curriculum-Pure%20Physics%20%2B%20SAMPAD-f59e0b.svg)]()
@@ -65,7 +65,7 @@
 - **پخش زنده تعاملی بدون تاخیر (Real-Time Synchronized Broadcast):** هدایت آزمایش‌های فیزیک توسط استاد با اشتراک تصویر و آینه‌سازی اکشن‌های شبیه‌ساز با فریم‌ریت روان و کیفیت متوسط متوازن (Medium Quality, Zero-Lag).
 - **پایداری در بار همزمانی سنگین (150+ Concurrent Students):** معماری توزیع‌شده با گذرگاه داده بین‌پروسسی SQLite WAL، امکان حضور بیش از ۱۵۰ دانش‌آموز همزمان بدون کمترین افت سرعت و تاخیر زیر ۵ میلی‌ثانیه.
 - **تخته سیاه دیجیتال، نظرسنجی آنی و گفتگوی متنی:** ارسال یادداشت‌های تدریس، برگزاری آزمونک‌های سریع چندگزینه‌ای و چت آنلاین در حین آزمایش.
-- **۲۹ شبیه‌ساز رسمی و آفلاین PhET:** دسترسی کامل، بومی و بدون نیاز به اینترنت خارجی به ۲۹ آزمایشگاه دانشگاه کلرادو منطبق بر کتب درسی هفتم، هشتم و نهم.
+- **۲۹ شبیه‌ساز رسمی و کاملاً مبتنی بر PHP (PhET PHP Edition):** دسترسی کامل، بومی و بدون نیاز به اینترنت خارجی به ۲۹ آزمایشگاه دانشگاه کلرادو بازنویسی‌شده به زبان PHP و منطبق بر کتب درسی هفتم، هشتم و نهم.
 
 ### ۷. اپلیکیشن بومی و مستقل اندروید (Standalone Native Android APK)
 - **اپلیکیشن رسمی نسخه ۲.۲.۰:** پکیج اختصاصی `ir.sampad.physicssociety` امضاشده با گواهینامه معتبر (طرح‌های امضای v1، v2 و v3) قابل نصب روی تمامی نسخه‌های اندروید ۵.۰ به بالا (API 21 تا 34).

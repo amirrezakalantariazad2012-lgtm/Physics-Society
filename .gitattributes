@@ -1,0 +1,11 @@
+# GitHub Linguist Overrides
+* text=auto
+
+# Enforce PHP classification for all backend and simulator files
+*.php linguist-language=PHP
+simulators/** linguist-language=PHP
+simulators/phet/** linguist-language=PHP
+
+# Treat bundled third-party assets as vendored
+assets/katex/** linguist-vendored
+downloads/** linguist-vendored
