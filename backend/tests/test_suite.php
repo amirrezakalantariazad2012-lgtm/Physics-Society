@@ -230,6 +230,78 @@ $cssFiles = glob(__DIR__ . '/../../css/*.css');
 assertTest("Zero Legacy JS Code Files (All Converted to PHP)", count($jsFiles) === 0);
 assertTest("Zero Legacy CSS Code Files (All Converted to PHP)", count($cssFiles) === 0);
 
+// ==========================================
+// ADVANCED 10-FEATURE SCIENTIFIC TEST SUITE
+// ==========================================
+require_once __DIR__ . '/../controllers/GuildController.php';
+require_once __DIR__ . '/../controllers/DuelController.php';
+require_once __DIR__ . '/../controllers/AdaptiveExamController.php';
+require_once __DIR__ . '/../controllers/TeacherDeckController.php';
+
+// 1. Database Advanced Schema & Guilds
+DB::ensureAdvancedSchema();
+$guildCount = (int) DB::fetchColumn("SELECT COUNT(*) FROM guilds");
+assertTest("Scientific Guilds Seeded (Maxwell, Newton, Bohr, Feynman)", $guildCount >= 4);
+
+$maxwell = DB::fetchOne("SELECT * FROM guilds WHERE slug = 'maxwell'");
+assertTest("Maxwell Guild Details & Theme Color", !empty($maxwell) && $maxwell['theme_color'] === '#22d3ee');
+
+// 2. Quantum Duel Table & ELO Leaderboard
+$duelTableCols = DB::fetchAll("PRAGMA table_info(quantum_duels)");
+assertTest("Quantum Duels Table Schema Verified", count($duelTableCols) >= 10);
+
+ob_start();
+DuelController::getLeaderboard();
+$duelLbRaw = ob_get_clean();
+$duelLb = json_decode($duelLbRaw, true);
+assertTest("Quantum Duel Leaderboard Endpoint", !empty($duelLb) && isset($duelLb['leaders']));
+
+// 3. AI Handwritten Grader Partial Credit Rubric
+$gradeResult = AiService::gradeHandwrittenSolution(
+    "گلوله‌ای با تندی ۱۰ متر بر ثانیه پرتاب شد.",
+    "v = 10 m/s\nE = 1/2 * m * v^2\nE = 0.5 * 2 * 100 = 100 J",
+    20.0
+);
+assertTest("AI Handwritten Solution Partial Credit Total", $gradeResult['total_score'] > 0 && $gradeResult['total_score'] <= 20.0);
+assertTest("AI Handwritten Rubric 4-Criteria Breakdown", count($gradeResult['criteria_breakdown']) === 4);
+assertTest("AI Handwritten Formula Identification Score", isset($gradeResult['criteria_breakdown']['formula']['score']));
+
+// 4. Multi-Tier Olympiad Physics Hint Engine
+$hintTier1 = AiService::getOlympiadHint("مقاومت معادل مدار پل وتستون را محاسبه کنید.", 1);
+assertTest("Olympiad Hint Engine Tier 1 (Conceptual)", $hintTier1['tier'] === 1 && !empty($hintTier1['hint_text']));
+$hintTier4 = AiService::getOlympiadHint("مقاومت معادل مدار پل وتستون را محاسبه کنید.", 4);
+assertTest("Olympiad Hint Engine Tier 4 (Analytic)", $hintTier4['tier'] === 4 && $hintTier4['next_tier'] === null);
+
+// 5. Adaptive Exam Controller (CAT / IRT Rasch Model)
+$catSessionCols = DB::fetchAll("PRAGMA table_info(adaptive_test_sessions)");
+assertTest("Adaptive Test Sessions Table Schema Verified", count($catSessionCols) >= 8);
+
+// 6. Teacher Misconception Heatmap Diagnostic Deck
+ob_start();
+Auth::setSessionUser($adminUser); // Authenticate as admin/teacher
+TeacherDeckController::getMisconceptionHeatmap();
+$heatmapRaw = ob_get_clean();
+$heatmapData = json_decode($heatmapRaw, true);
+assertTest("Teacher Misconception Heatmap Diagnostic Data", !empty($heatmapData) && isset($heatmapData['matrix']));
+assertTest("Teacher Diagnosed Misconceptions Count", ($heatmapData['total_diagnosed_misconceptions'] ?? 0) >= 5);
+
+// 7. Printable SAMPAD Standard Exam Generator
+ob_start();
+TeacherDeckController::generatePrintableExam([
+    'title' => 'آزمون هماهنگ فیزیک پایه نهم سمپاد',
+    'grade_title' => 'پایه نهم سمپاد',
+    'questions_count' => 6,
+    'include_answer_key' => true
+]);
+$examSheetRaw = ob_get_clean();
+$examSheetData = json_decode($examSheetRaw, true);
+assertTest("Printable Standard Exam Generator Output", !empty($examSheetData['exam_meta']) && count($examSheetData['questions']) >= 3);
+assertTest("Printable Exam SAMPAD Official Header", str_contains($examSheetData['exam_meta']['school_name'] ?? '', 'شهید بهشتی ۲'));
+
+// 8. Service Worker PWA Offline File
+$swFile = __DIR__ . '/../../sw.js.php';
+assertTest("PWA 100% Offline Service Worker (sw.js.php)", file_exists($swFile) && str_contains(file_get_contents($swFile), 'CACHE_NAME'));
+
 echo "\n--------------------------------------------------------\n";
 echo "SUMMARY: Total: $totalTests | Passed: $passedTests | Failed: $failedTests\n";
 if ($failedTests === 0) {

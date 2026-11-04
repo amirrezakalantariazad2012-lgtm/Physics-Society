@@ -287,7 +287,16 @@ header("Content-Type: text/html; charset=UTF-8");
     <script src="/js/components/competition_view.js.php?v=4.0.0-php"></script>
     <script src="/js/components/leaderboards.js.php?v=4.0.0-php"></script>
     <script src="/js/components/admin_views.js.php?v=4.0.0-php"></script>
-    <script src="/js/app.js.php?v=4.0.0-php"></script>
+    <script src="/js/components/pvp_duel_view.js.php?v=4.2.0-php"></script>
+    <script src="/js/components/guild_view.js.php?v=4.2.0-php"></script>
+    <script src="/js/components/adaptive_exam_view.js.php?v=4.2.0-php"></script>
+    <script src="/js/components/mobile_sensor_lab.js.php?v=4.2.0-php"></script>
+    <script src="/js/components/lab_data_logger.js.php?v=4.2.0-php"></script>
+    <script src="/js/components/handwriting_grader_view.js.php?v=4.2.0-php"></script>
+    <script src="/js/components/olympiad_hint_modal.js.php?v=4.2.0-php"></script>
+    <script src="/js/components/teacher_heatmap_view.js.php?v=4.2.0-php"></script>
+    <script src="/js/components/printable_exam_view.js.php?v=4.2.0-php"></script>
+    <script src="/js/app.js.php?v=4.2.0-php"></script>
 
     <!-- Math & KaTeX Automatic Scientific Formula Renderer -->
     <script>
@@ -349,6 +358,14 @@ header("Content-Type: text/html; charset=UTF-8");
                 observer.observe(mainApp, { childList: true, subtree: true });
             }
         });
+        // PWA Offline Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => {
+                    console.log('SW registration note:', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>

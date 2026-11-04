@@ -79,6 +79,18 @@ function renderNavbar() {
                         <i data-lucide="medal" class="w-3.5 h-3.5 ${isTabActive('badges') ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}"></i>
                         <span>مدال‌ها</span>
                     </a>
+                    <a href="#duel" onclick="window.store.setView('duel')" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl transition-all ${isTabActive('duel') ? 'bg-cyan-50 text-cyan-700 dark:bg-cyan-950/80 dark:text-cyan-300 font-bold border border-cyan-200 dark:border-cyan-800/80 shadow-sm' : 'text-cyan-600 hover:text-cyan-800 hover:bg-cyan-50 dark:text-cyan-400 dark:hover:bg-cyan-950/40'}">
+                        <i data-lucide="swords" class="w-3.5 h-3.5 text-cyan-500"></i>
+                        <span>دوئل ۱v۱</span>
+                    </a>
+                    <a href="#guilds" onclick="window.store.setView('guilds')" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl transition-all ${isTabActive('guilds') ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 font-bold border border-amber-200 dark:border-amber-800/80 shadow-sm' : 'text-amber-600 hover:text-amber-800 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/40'}">
+                        <i data-lucide="landmark" class="w-3.5 h-3.5 text-amber-500"></i>
+                        <span>خاندان‌ها</span>
+                    </a>
+                    <a href="#sensor-lab" onclick="window.store.setView('sensor-lab')" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl transition-all ${isTabActive('sensor-lab') ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800/80 shadow-sm' : 'text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40'}">
+                        <i data-lucide="smartphone" class="w-3.5 h-3.5 text-blue-500"></i>
+                        <span>سنسورها</span>
+                    </a>
                     ${user && user.role === 'admin' ? `
                     <a href="#admin" onclick="window.store.setView('admin')" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl transition-all ${isTabActive('admin') ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 font-bold border border-rose-200 dark:border-rose-800/80 shadow-sm' : 'text-rose-600 hover:text-rose-800 hover:bg-rose-50 dark:text-rose-400 dark:hover:text-rose-200 dark:hover:bg-rose-950/40'}">
                         <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-rose-500"></i>
@@ -221,6 +233,34 @@ function renderNavbar() {
                 <button onclick="window.store.setView('badges'); window.toggleMobileDrawer(false)" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right flex items-center gap-2 text-slate-800 dark:text-emerald-300">
                     <i data-lucide="medal" class="w-4 h-4 text-emerald-600"></i>
                     <span>نشان‌ها و مدال‌ها</span>
+                </button>
+                <button onclick="window.store.setView('duel'); window.toggleMobileDrawer(false)" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right flex items-center gap-2 text-slate-800 dark:text-cyan-300">
+                    <i data-lucide="swords" class="w-4 h-4 text-cyan-500"></i>
+                    <span>دوئل ۱ به ۱ کوانتومی</span>
+                </button>
+                <button onclick="window.store.setView('guilds'); window.toggleMobileDrawer(false)" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right flex items-center gap-2 text-slate-800 dark:text-amber-300">
+                    <i data-lucide="landmark" class="w-4 h-4 text-amber-500"></i>
+                    <span>خاندان‌های علمی سمپاد</span>
+                </button>
+                <button onclick="window.store.setView('adaptive-exam'); window.toggleMobileDrawer(false)" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right flex items-center gap-2 text-slate-800 dark:text-emerald-300">
+                    <i data-lucide="target" class="w-4 h-4 text-emerald-500"></i>
+                    <span>آزمون تطبیقی (CAT)</span>
+                </button>
+                <button onclick="window.store.setView('sensor-lab'); window.toggleMobileDrawer(false)" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right flex items-center gap-2 text-slate-800 dark:text-blue-300">
+                    <i data-lucide="smartphone" class="w-4 h-4 text-blue-500"></i>
+                    <span>آزمایشگاه سنسوری</span>
+                </button>
+                <button onclick="window.store.setView('data-logger'); window.toggleMobileDrawer(false)" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right flex items-center gap-2 text-slate-800 dark:text-teal-300">
+                    <i data-lucide="line-chart" class="w-4 h-4 text-teal-500"></i>
+                    <span>برازش خطی و رگرسیون</span>
+                </button>
+                <button onclick="window.store.setView('handwriting-grader'); window.toggleMobileDrawer(false)" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right flex items-center gap-2 text-slate-800 dark:text-violet-300">
+                    <i data-lucide="scan-text" class="w-4 h-4 text-violet-500"></i>
+                    <span>تصحیح دست‌نوشته AI</span>
+                </button>
+                <button onclick="window.store.setView('teacher-heatmap'); window.toggleMobileDrawer(false)" class="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-right flex items-center gap-2 text-slate-800 dark:text-rose-300 col-span-2">
+                    <i data-lucide="flame" class="w-4 h-4 text-rose-500"></i>
+                    <span>ماتریس تشخیصی کج‌فهمی‌های فیزیک دبیران</span>
                 </button>
             </div>
 

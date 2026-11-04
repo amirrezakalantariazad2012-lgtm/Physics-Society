@@ -194,6 +194,34 @@ async function renderCurrentView() {
         if (window.renderBadgesView) {
             await window.renderBadgesView('app-main-content');
         }
+    } else if (view === 'duel') {
+        if (window.QuantumDuel) {
+            await window.QuantumDuel.render('app-main-content');
+        }
+    } else if (view === 'guilds') {
+        if (window.ScientificGuilds) {
+            await window.ScientificGuilds.render('app-main-content');
+        }
+    } else if (view === 'adaptive-exam') {
+        if (window.AdaptiveExam) {
+            await window.AdaptiveExam.render('app-main-content');
+        }
+    } else if (view === 'sensor-lab') {
+        if (window.MobileSensorLab) {
+            await window.MobileSensorLab.render('app-main-content');
+        }
+    } else if (view === 'data-logger') {
+        if (window.LabDataLogger) {
+            await window.LabDataLogger.render('app-main-content');
+        }
+    } else if (view === 'handwriting-grader') {
+        if (window.HandwritingGrader) {
+            await window.HandwritingGrader.render('app-main-content');
+        }
+    } else if (view === 'teacher-heatmap') {
+        if (window.TeacherHeatmap) {
+            await window.TeacherHeatmap.render('app-main-content');
+        }
     } else if (view === 'admin') {
         if (!window.store.currentUser || window.store.currentUser.role !== 'admin') {
             openAuthModal('login');

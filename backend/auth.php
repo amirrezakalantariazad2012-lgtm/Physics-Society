@@ -135,13 +135,22 @@ class Auth {
         return $_GET['token'] ?? null;
     }
 
+    private static ?array $cachedUser = null;
+
+    public static function setSessionUser(?array $user): void {
+        self::$cachedUser = $user;
+    }
+
+    public static function clearSession(): void {
+        self::$cachedUser = null;
+    }
+
     /**
      * Get Current Authenticated User (Returns null if guest)
      */
     public static function getCurrentUser(): ?array {
-        static $cachedUser = null;
-        if ($cachedUser !== null) {
-            return $cachedUser;
+        if (self::$cachedUser !== null) {
+            return self::$cachedUser;
         }
 
         $token = self::getBearerToken();
@@ -183,6 +192,22 @@ class Auth {
             http_response_code(401);
             echo json_encode([
                 'detail' => 'جلسه کاری شما به پایان رسیده است یا نیاز به ورود به حساب کاربری دارد.'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        return $user;
+    }
+
+    /**
+     * Require Specific Role(s) (Exits with 403 if not authorized)
+     */
+    public static function requireRole(array|string $roles): array {
+        $user = self::requireAuth();
+        $allowed = is_array($roles) ? $roles : [$roles];
+        if (!in_array($user['role'], $allowed, true) && $user['role'] !== 'admin') {
+            http_response_code(403);
+            echo json_encode([
+                'detail' => 'دسترسی غیرمجاز برای این سطح کاربری.'
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }

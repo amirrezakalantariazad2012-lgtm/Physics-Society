@@ -31,6 +31,10 @@ require_once __DIR__ . '/../backend/controllers/GamificationController.php';
 require_once __DIR__ . '/../backend/controllers/AdminController.php';
 require_once __DIR__ . '/../backend/controllers/AiController.php';
 require_once __DIR__ . '/../backend/controllers/LiveLabController.php';
+require_once __DIR__ . '/../backend/controllers/GuildController.php';
+require_once __DIR__ . '/../backend/controllers/DuelController.php';
+require_once __DIR__ . '/../backend/controllers/AdaptiveExamController.php';
+require_once __DIR__ . '/../backend/controllers/TeacherDeckController.php';
 
 // 3. Resolve Request URI & Method
 $rawUri = $_SERVER['REQUEST_URI'] ?? '/';
@@ -376,6 +380,70 @@ try {
     }
     if ($path === '/ai/explain-mistake' && $method === 'POST') {
         AiController::explainMistake($input);
+        exit;
+    }
+    if ($path === '/ai/grade-handwriting' && $method === 'POST') {
+        AiController::gradeHandwriting($input);
+        exit;
+    }
+    if ($path === '/ai/olympiad-hint' && $method === 'POST') {
+        AiController::olympiadHint($input);
+        exit;
+    }
+
+    // --- Scientific Guilds & House Cup ---
+    if ($path === '/guilds/list' && $method === 'GET') {
+        GuildController::list();
+        exit;
+    }
+    if ($path === '/guilds/my' && $method === 'GET') {
+        GuildController::myGuild();
+        exit;
+    }
+    if ($path === '/guilds/join' && $method === 'POST') {
+        GuildController::join($input);
+        exit;
+    }
+
+    // --- Quantum Duel 1v1 PvP ---
+    if ($path === '/duel/find' && $method === 'POST') {
+        DuelController::findMatch($input);
+        exit;
+    }
+    if (preg_match('#^/duel/state/([a-zA-Z0-9_\-]+)$#', $path, $m) && $method === 'GET') {
+        DuelController::getState($m[1]);
+        exit;
+    }
+    if ($path === '/duel/submit' && $method === 'POST') {
+        DuelController::submitAnswer($input);
+        exit;
+    }
+    if ($path === '/duel/leaderboard' && $method === 'GET') {
+        DuelController::getLeaderboard();
+        exit;
+    }
+
+    // --- Computerized Adaptive Testing (CAT / IRT) ---
+    if ($path === '/exam/adaptive-start' && $method === 'POST') {
+        AdaptiveExamController::start($input);
+        exit;
+    }
+    if ($path === '/exam/adaptive-next' && $method === 'POST') {
+        AdaptiveExamController::nextQuestion($input);
+        exit;
+    }
+
+    // --- Teacher Diagnostic Deck & Printable Exam ---
+    if ($path === '/teacher/misconception-heatmap' && $method === 'GET') {
+        TeacherDeckController::getMisconceptionHeatmap();
+        exit;
+    }
+    if ($path === '/teacher/misconception-remedy' && $method === 'POST') {
+        TeacherDeckController::assignRemedy($input);
+        exit;
+    }
+    if ($path === '/teacher/printable-exam' && $method === 'POST') {
+        TeacherDeckController::generatePrintableExam($input);
         exit;
     }
 

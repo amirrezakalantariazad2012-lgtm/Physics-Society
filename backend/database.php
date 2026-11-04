@@ -41,6 +41,7 @@ class DB {
         }
 
         self::ensureSchema();
+        self::ensureAdvancedSchema();
         return self::$pdo;
     }
 
@@ -61,6 +62,10 @@ class DB {
 
     public static function fetchColumn(string $sql, array $params = [], int $col = 0): mixed {
         return self::query($sql, $params)->fetchColumn($col);
+    }
+
+    public static function fetchValue(string $sql, array $params = []): mixed {
+        return self::fetchColumn($sql, $params);
     }
 
     public static function execute(string $sql, array $params = []): int {
@@ -440,5 +445,101 @@ class DB {
         );
 SQL;
         self::$pdo->exec($schemaSql);
+    }
+
+    /**
+     * Initializes advanced schemas: Guilds, Duels, Adaptive Testing & Misconception Tracking
+     */
+    public static function ensureAdvancedSchema(): void {
+        if (self::$pdo === null) return;
+        
+        // 1. student_profiles columns
+        try {
+            $cols = self::$pdo->query("PRAGMA table_info(student_profiles)")->fetchAll();
+            $colNames = array_column($cols, 'name');
+            if (!in_array('elo_rating', $colNames, true)) {
+                @self::$pdo->exec("ALTER TABLE student_profiles ADD COLUMN elo_rating INTEGER NOT NULL DEFAULT 1200");
+            }
+            if (!in_array('guild_id', $colNames, true)) {
+                @self::$pdo->exec("ALTER TABLE student_profiles ADD COLUMN guild_id INTEGER DEFAULT NULL");
+            }
+        } catch (Exception) {}
+
+        // 2. guilds table
+        self::$pdo->exec("CREATE TABLE IF NOT EXISTS guilds (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR(64) NOT NULL,
+            slug VARCHAR(64) UNIQUE NOT NULL,
+            motto_fa VARCHAR(256) NOT NULL,
+            icon_name VARCHAR(64) DEFAULT 'atom',
+            theme_color VARCHAR(32) DEFAULT '#22d3ee',
+            total_points INTEGER DEFAULT 0 NOT NULL,
+            member_count INTEGER DEFAULT 0 NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+        );");
+
+        // Seed default 4 scientific guilds if empty
+        $gCount = (int)self::$pdo->query("SELECT COUNT(*) FROM guilds")->fetchColumn();
+        if ($gCount === 0) {
+            $defaultGuilds = [
+                ['name' => 'خاندان ماکسول', 'slug' => 'maxwell', 'motto_fa' => 'فرمانروایان نور، امواج و میدان‌های الکترومغناطیس', 'icon_name' => 'zap', 'theme_color' => '#22d3ee'],
+                ['name' => 'خاندان نیوتون', 'slug' => 'newton', 'motto_fa' => 'پیشگامان نیرو، حرکت و معماری گرانش کیهانی', 'icon_name' => 'compass', 'theme_color' => '#f59e0b'],
+                ['name' => 'خاندان بوهر', 'slug' => 'bohr', 'motto_fa' => 'کاشفان ترازهای کوانتومی و رازهای درون‌اتمی', 'icon_name' => 'atom', 'theme_color' => '#8b5cf6'],
+                ['name' => 'خاندان فاینمن', 'slug' => 'feynman', 'motto_fa' => 'استادان نسبیت، مسیرهای چندگانه و ذرات بنیادی', 'icon_name' => 'flame', 'theme_color' => '#ec4899'],
+            ];
+            $stmt = self::$pdo->prepare("INSERT INTO guilds (name, slug, motto_fa, icon_name, theme_color) VALUES (:name, :slug, :motto_fa, :icon_name, :theme_color)");
+            foreach ($defaultGuilds as $dg) {
+                $stmt->execute($dg);
+            }
+        }
+
+        // 3. quantum_duels table
+        self::$pdo->exec("CREATE TABLE IF NOT EXISTS quantum_duels (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            duel_code VARCHAR(32) UNIQUE NOT NULL,
+            player1_id INTEGER NOT NULL REFERENCES users(id),
+            player2_id INTEGER REFERENCES users(id),
+            winner_id INTEGER REFERENCES users(id),
+            status VARCHAR(32) DEFAULT 'waiting' NOT NULL,
+            grade_id INTEGER DEFAULT 7,
+            questions_json TEXT NOT NULL,
+            p1_score REAL DEFAULT 0,
+            p2_score REAL DEFAULT 0,
+            p1_time REAL DEFAULT 0,
+            p2_time REAL DEFAULT 0,
+            p1_answers_json TEXT,
+            p2_answers_json TEXT,
+            elo_change_p1 INTEGER DEFAULT 0,
+            elo_change_p2 INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            completed_at DATETIME
+        );");
+
+        // 4. adaptive_test_sessions table
+        self::$pdo->exec("CREATE TABLE IF NOT EXISTS adaptive_test_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            grade_id INTEGER DEFAULT 7,
+            current_theta REAL DEFAULT 0.0,
+            status VARCHAR(32) DEFAULT 'in_progress',
+            questions_history_json TEXT,
+            total_questions INTEGER DEFAULT 0,
+            correct_count INTEGER DEFAULT 0,
+            final_aptitude_label VARCHAR(64),
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            completed_at DATETIME
+        );");
+
+        // 5. student_misconceptions table
+        self::$pdo->exec("CREATE TABLE IF NOT EXISTS student_misconceptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            chapter_id INTEGER NOT NULL REFERENCES chapters(id),
+            topic_name VARCHAR(128) NOT NULL,
+            misconception_text TEXT NOT NULL,
+            error_count INTEGER DEFAULT 1,
+            remedy_assigned BOOLEAN DEFAULT 0,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
+        );");
     }
 }

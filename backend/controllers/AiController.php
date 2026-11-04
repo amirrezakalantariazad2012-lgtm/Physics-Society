@@ -54,4 +54,33 @@ class AiController {
             'related_formulas' => $result['related_formulas'] ?? []
         ], JSON_UNESCAPED_UNICODE);
     }
+
+    public static function gradeHandwriting(array $input): void {
+        $prompt = trim((string)($input['question_prompt'] ?? 'مسئله فیزیک دوره اول متوسطه سمپاد'));
+        $studentSolution = trim((string)($input['student_solution'] ?? $input['ocr_text'] ?? ''));
+        $maxScore = isset($input['max_score']) ? (float)$input['max_score'] : 20.0;
+
+        if (empty($studentSolution)) {
+            http_response_code(422);
+            echo json_encode(['detail' => 'متن یا تصویر دست‌نوشته جهت تصحیح الزامی است.'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $result = AiService::gradeHandwrittenSolution($prompt, $studentSolution, $maxScore);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+    }
+
+    public static function olympiadHint(array $input): void {
+        $prompt = trim((string)($input['question_prompt'] ?? $input['prompt'] ?? ''));
+        $tier = isset($input['tier']) ? (int)$input['tier'] : 1;
+
+        if (empty($prompt)) {
+            http_response_code(422);
+            echo json_encode(['detail' => 'صورت مسئله المپیاد الزامی است.'], JSON_UNESCAPED_UNICODE);
+            return;
+        }
+
+        $result = AiService::getOlympiadHint($prompt, $tier);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+    }
 }

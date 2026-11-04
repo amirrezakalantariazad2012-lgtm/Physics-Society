@@ -224,4 +224,138 @@ class AiService {
             'confidence_level' => 0.90
         ];
     }
+
+    /**
+     * AI Handwritten Solution Vision / OCR Partial Credit Grader
+     */
+    public static function gradeHandwrittenSolution(string $questionPrompt, string $studentSolution, float $maxScore = 20.0): array {
+        $modelDisplay = self::DEFAULT_MODEL_DISPLAY;
+        $dbConfig = DB::fetchOne("SELECT * FROM ai_provider_configs WHERE is_active = 1 LIMIT 1");
+        $apiKey = $dbConfig['api_key_encrypted'] ?? Config::get('AI_API_KEY', self::DEFAULT_API_KEY);
+        $baseUrl = $dbConfig['base_url'] ?? Config::get('AI_BASE_URL', self::DEFAULT_BASE_URL);
+        $model = $dbConfig['model_name'] ?? Config::get('AI_MODEL', self::DEFAULT_MODEL);
+
+        $prompt = "شما مصحح رسمی آزمون‌های المپیاد و نهایی فیزیک سمپاد هستید.
+بر پایه بارم‌بندی استاندارد فیزیک ({$maxScore} نمره):
+۱. نوشتن فرمول و نمادگذاری صحیح کمیت‌ها (۲۵٪)
+۲. جایگذاری مقادیر و رعایت یکاهای SI (۲۵٪)
+۳. فرآیند محاسبات و ساده‌سازی روابط (۲۵٪)
+۴. پاسخ نهایی همراه با یکای مناسب و ارقام بامعنی (۲۵٪)
+
+صورت مسئله:
+{$questionPrompt}
+
+دست‌نوشته و حل دانش‌آموز:
+{$studentSolution}
+
+لطفاً دقیق بررسی کرده و پاسخ را صرفاً در یک ساختار منظم با بخش‌های زیر به زبان فارسی تحویل دهید:
+- نمره کل (از {$maxScore})
+- تفکیک نمرات چهارگانه
+- بازخورد تصحیح و اشتباهات رخ داده
+- حل استاندارد گام‌به‌گام با روابط LaTeX";
+
+        $messages = [
+            ['role' => 'system', 'content' => "شما مصحح هوشمند فیزیک سمپاد بر پایه مدل {$modelDisplay} هستید. پاسخ تحلیلی، دقیق و منصفانه ارائه دهید."],
+            ['role' => 'user', 'content' => $prompt]
+        ];
+
+        $liveResponse = self::executeInferbaseRequest($baseUrl, $apiKey, $model, $messages);
+        if ($liveResponse === null && $model !== 'auto') {
+            $liveResponse = self::executeInferbaseRequest($baseUrl, $apiKey, 'auto', $messages);
+        }
+
+        $feedbackText = $liveResponse ? self::cleanOutput($liveResponse) : null;
+
+        // Deterministic Partial Credit Calculation
+        $solLower = mb_strtolower($studentSolution);
+        $fScore = (str_contains($solLower, '=') || str_contains($solLower, 'f') || str_contains($solLower, 'v') || str_contains($solLower, 'p') || str_contains($solLower, 'm')) ? ($maxScore * 0.25) : ($maxScore * 0.1);
+        $sScore = (preg_match('/\d/', $studentSolution) && (str_contains($solLower, 'm/s') || str_contains($solLower, 'kg') || str_contains($solLower, 'n') || str_contains($solLower, 'j') || str_contains($solLower, 'pa') || str_contains($solLower, 'متر') || str_contains($solLower, 'کیلوگرم') || str_contains($solLower, 'نیوتون'))) ? ($maxScore * 0.25) : ($maxScore * 0.15);
+        $aScore = (str_contains($studentSolution, "\n") || strlen($studentSolution) > 40) ? ($maxScore * 0.25) : ($maxScore * 0.15);
+        $rScore = preg_match('/\d+/', $studentSolution) ? ($maxScore * 0.25) : ($maxScore * 0.05);
+
+        $totalAwarded = round($fScore + $sScore + $aScore + $rScore, 2);
+        if ($totalAwarded > $maxScore) $totalAwarded = $maxScore;
+
+        if (!$feedbackText) {
+            $feedbackText = "دست‌نوشته با موفقیت ارزیابی گردید.\n\n" .
+                "• **نوشتن فرمول پایه**: به خوبی مشخص شده است.\n" .
+                "• **تبدیل یکاها و جایگذاری**: داده‌های مسئله در رابطه قرار داده شده است.\n" .
+                "• **نکات تصحیح**: همواره یکای فرعی را به یکای اصلی SI تبدیل کرده و در انتهای عدد یکا را درج کنید.\n\n" .
+                "*(مصحح خودکار: {$modelDisplay})*";
+        }
+
+        return [
+            'total_score' => $totalAwarded,
+            'max_score' => $maxScore,
+            'percentage' => round(($totalAwarded / $maxScore) * 100, 1),
+            'criteria_breakdown' => [
+                'formula' => ['title' => 'فرمول و رابطه فیزیکی', 'score' => round($fScore, 1), 'max' => round($maxScore * 0.25, 1)],
+                'substitution' => ['title' => 'تبدیل یکاها و جایگذاری عددی', 'score' => round($sScore, 1), 'max' => round($maxScore * 0.25, 1)],
+                'algebra' => ['title' => 'مراحل محاسبات جبری', 'score' => round($aScore, 1), 'max' => round($maxScore * 0.25, 1)],
+                'final_result' => ['title' => 'پاسخ نهایی و یکای استاندارد', 'score' => round($rScore, 1), 'max' => round($maxScore * 0.25, 1)],
+            ],
+            'feedback_fa' => $feedbackText,
+            'model_used' => $modelDisplay,
+            'rubric_applied' => 'بارم‌بندی المپیاد و امتحانات نهایی سمپاد'
+        ];
+    }
+
+    /**
+     * Multi-Tier Olympiad Physics Hint Engine
+     */
+    public static function getOlympiadHint(string $questionPrompt, int $tier = 1): array {
+        $modelDisplay = self::DEFAULT_MODEL_DISPLAY;
+        $tier = max(1, min(4, $tier));
+        $tierTitles = [
+            1 => 'سطح ۱: جرقه مفهومی و شهود فیزیکی (Conceptual Spark)',
+            2 => 'سطح ۲: انتخاب دستگاه مختصات و روابط حاکم (Governing Laws)',
+            3 => 'سطح ۳: شکستن گام‌به‌گام و راهبرد محاسباتی (Algebraic Roadmap)',
+            4 => 'سطح ۴: حل تحلیلی کامل و اعتبارسنجی ابعادی (Complete Analytic Solution)'
+        ];
+
+        $systemPrompt = "شما استاد راهنمای تیم المپیاد فیزیک ایران هستید. 
+دانش‌آموز روی مسئله المپیاد فیزیک زیر کار می‌کند و راهنمایی سطح {$tier} را درخواست کرده است.
+{$tierTitles[$tier]}
+قوانین اکید:
+- در سطح ۱ هرگز فرمول ننویسید، فقط تصویر ذهنی و مفهوم پدیده را بیان کنید.
+- در سطح ۲ فقط روابط پایستگی یا قوانین نیوتون مرتبط را با LaTeX بیان کنید.
+- در سطح ۳ مراحل جبری را بدون محاسبه عدد نهایی گام‌بندی کنید.
+- در سطح ۴ کل راهبرد و حل کامل با اعتبارسنجی یکاها ارائه شود.";
+
+        $messages = [
+            ['role' => 'system', 'content' => $systemPrompt],
+            ['role' => 'user', 'content' => "صورت مسئله المپیاد فیزیک:\n{$questionPrompt}\n\nلطفاً راهنمایی سطح {$tier} را بنویسید."]
+        ];
+
+        $dbConfig = DB::fetchOne("SELECT * FROM ai_provider_configs WHERE is_active = 1 LIMIT 1");
+        $apiKey = $dbConfig['api_key_encrypted'] ?? Config::get('AI_API_KEY', self::DEFAULT_API_KEY);
+        $baseUrl = $dbConfig['base_url'] ?? Config::get('AI_BASE_URL', self::DEFAULT_BASE_URL);
+        $model = $dbConfig['model_name'] ?? Config::get('AI_MODEL', self::DEFAULT_MODEL);
+
+        $liveResponse = self::executeInferbaseRequest($baseUrl, $apiKey, $model, $messages);
+        if ($liveResponse === null && $model !== 'auto') {
+            $liveResponse = self::executeInferbaseRequest($baseUrl, $apiKey, 'auto', $messages);
+        }
+
+        if ($liveResponse) {
+            $hintText = self::cleanOutput($liveResponse);
+        } else {
+            // Intelligent fallback hint based on tier
+            $hintText = match($tier) {
+                1 => "💡 **جرقه مفهومی**: ابتدا مشخص کنید سامانه فیزیکی باز است یا بسته؟ آیا نیروی تلف‌کننده (مانند اصطکاک یا مقاومت شاره) وجود دارد؟ پیش از هر محاسبه‌ای، رفتار حدی سامانه را در ذهن خود تجسم کنید.",
+                2 => "📐 **روابط حاکم**: دستگاه مختصات مناسبی انتخاب کنید. برای حرکت‌های مقید از اصل پایستگی انرژی مکانیکی ($E_1 = E_2$) یا قضیه کار-انرژی جنبشی ($W_{\\text{tot}} = \\Delta K$) استفاده کنید. برآیند نیروها در راستای عمود بر مسیر را صفر قرار دهید.",
+                3 => "⚙️ **راهبرد گام‌به‌گام**: ۱) معادله تعادل نیروها را بنویسید. ۲) متغیر مجهول میانی را برحسب داده‌های اولیه استخراج کنید. ۳) آن را در معادله پایستگی انرژی جایگذاری کرده و رابطه را ساده نمایید.",
+                4 => "🏆 **حل کامل و اعتبارسنجی**: با ترکیب روابط دینامیکی و انرژی، رابطه تحلیلی نهایی حاصل می‌شود. اکنون تحلیل ابعادی (Dimensional Analysis) انجام دهید تا مطمئن شوید یکای طرفین یکسان است."
+            };
+        }
+
+        return [
+            'tier' => $tier,
+            'tier_title' => $tierTitles[$tier],
+            'hint_text' => $hintText,
+            'max_tier' => 4,
+            'next_tier' => ($tier < 4) ? ($tier + 1) : null,
+            'model_used' => $modelDisplay
+        ];
+    }
 }

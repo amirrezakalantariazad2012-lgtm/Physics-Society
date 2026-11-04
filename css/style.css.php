@@ -570,3 +570,66 @@ input[type=range].physics-slider::-webkit-slider-thumb:hover {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
 }
+
+/* ==============================================================================
+   PHYSICS CYBERPUNK & QUANTUM HUD GRAPHICS
+   ============================================================================== */
+.quantum-grid-bg {
+    background-size: 32px 32px;
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}
+
+.quantum-glow-cyan {
+    box-shadow: 0 0 25px -5px rgba(34, 211, 238, 0.35);
+}
+
+.quantum-glow-amber {
+    box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.35);
+}
+
+.quantum-glow-rose {
+    box-shadow: 0 0 25px -5px rgba(244, 63, 94, 0.35);
+}
+
+@keyframes quantum-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.04); opacity: 1; }
+}
+
+.animate-quantum-pulse {
+    animation: quantum-pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Glassmorphism HUD Panels */
+.quantum-glass {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Print Optimization for Printable Standard Exams */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #printable-a4-sheet, #printable-a4-sheet * {
+        visibility: visible;
+    }
+    #printable-a4-sheet {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+
