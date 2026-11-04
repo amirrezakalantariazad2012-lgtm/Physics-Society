@@ -572,42 +572,105 @@ input[type=range].physics-slider::-webkit-slider-thumb:hover {
 }
 
 /* ==============================================================================
-   PHYSICS CYBERPUNK & QUANTUM HUD GRAPHICS
+   PHYSICS CYBERPUNK & QUANTUM HUD GRAPHICS (SUPERIOR SCIENTIFIC ENGINE)
    ============================================================================== */
+
+/* Isolation for Scientific, Math, English Terms and Units */
+.sci-term,
+.math-term,
+[dir="ltr"] {
+    direction: ltr !important;
+    unicode-bidi: isolate !important;
+    text-align: left;
+    font-family: var(--font-mono) !important;
+    font-feature-settings: "tnum" 1;
+}
+
+/* Custom Cyberpunk Dark Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #030712;
+}
+::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 9999px;
+    border: 1px solid rgba(34, 211, 238, 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #0284c7;
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+}
+
 .quantum-grid-bg {
-    background-size: 32px 32px;
+    background-size: 36px 36px;
     background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        linear-gradient(to right, rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+}
+
+.quantum-hud-panel {
+    background: rgba(10, 18, 38, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.quantum-hud-panel:hover {
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7), 0 0 20px -5px rgba(34, 211, 238, 0.25);
+}
+
+.lcd-display {
+    font-family: var(--font-mono) !important;
+    font-feature-settings: "tnum" 1;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 12px currentColor;
 }
 
 .quantum-glow-cyan {
-    box-shadow: 0 0 25px -5px rgba(34, 211, 238, 0.35);
+    box-shadow: 0 0 25px -4px rgba(34, 211, 238, 0.4);
 }
 
 .quantum-glow-amber {
-    box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.35);
+    box-shadow: 0 0 25px -4px rgba(245, 158, 11, 0.4);
 }
 
 .quantum-glow-rose {
-    box-shadow: 0 0 25px -5px rgba(244, 63, 94, 0.35);
+    box-shadow: 0 0 25px -4px rgba(244, 63, 94, 0.4);
+}
+
+.quantum-glow-violet {
+    box-shadow: 0 0 25px -4px rgba(168, 85, 247, 0.4);
 }
 
 @keyframes quantum-pulse {
-    0%, 100% { transform: scale(1); opacity: 0.9; }
-    50% { transform: scale(1.04); opacity: 1; }
+    0%, 100% { transform: scale(1); opacity: 0.85; filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.3)); }
+    50% { transform: scale(1.02); opacity: 1; filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.6)); }
 }
 
 .animate-quantum-pulse {
     animation: quantum-pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+@keyframes radar-sweep {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.animate-radar-sweep {
+    animation: radar-sweep 4s linear infinite;
+}
+
 /* Glassmorphism HUD Panels */
 .quantum-glass {
-    background: rgba(15, 23, 42, 0.75);
+    background: rgba(10, 18, 38, 0.75);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Print Optimization for Printable Standard Exams */

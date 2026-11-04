@@ -28,10 +28,10 @@ const AdaptiveExam = (function() {
                         <span>🎯</span> مدل پاسخ‌گویی به پرسش (IRT Rasch Model)
                     </div>
                     <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight flex items-center justify-center md:justify-start gap-3">
-                        <span>📐</span> آزمون تطبیقی هوشمند (CAT)
+                        <span>📐</span> آزمون تطبیقی هوشمند <bdi class="sci-term text-cyan-300 font-mono">(CAT)</bdi>
                     </h1>
                     <p class="text-slate-400 text-sm max-w-2xl">
-                        این سیستم با هر پاسخ شما، برآورد توانایی علمی ($\theta$) را به‌صورت بلادرنگ کالیبره کرده و سوال بعدی را دقیقاً در مرز توانمندی ذهنی شما انتخاب می‌کند.
+                        این سیستم با هر پاسخ شما، برآورد توانایی علمی <bdi class="sci-term text-cyan-300 font-mono">(&theta;)</bdi> را به‌صورت بلادرنگ کالیبره کرده و سوال بعدی را دقیقاً در مرز توانمندی ذهنی شما انتخاب می‌کند.
                     </p>
                 </div>
             </div>
@@ -63,7 +63,7 @@ const AdaptiveExam = (function() {
             <div class="space-y-3">
                 <h3 class="text-2xl font-bold text-white">سنجش دقیق استعداد فیزیک بدون اتلاف وقت</h3>
                 <p class="text-slate-400 text-sm leading-relaxed">
-                    برخلاف آزمون‌های سنتی که برای همه سوالات یکسان دارند، آزمون تطبیقی با ۶ الی ۱۰ سوال، شاخص استعداد علمی شما را در مقیاس $\\theta \\in [-3.0, +3.0]$ با خطای استاندارد حداقلی تخمین می‌زند.
+                    برخلاف آزمون‌های سنتی که برای همه سوالات یکسان دارند، آزمون تطبیقی با ۶ الی ۱۰ سوال، شاخص استعداد علمی شما را در مقیاس <bdi class="sci-term text-cyan-300 font-mono">&theta; &isin; [-3.0, +3.0]</bdi> با خطای استاندارد حداقلی تخمین می‌زند.
                 </p>
             </div>
 

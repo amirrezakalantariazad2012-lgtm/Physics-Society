@@ -222,6 +222,10 @@ async function renderCurrentView() {
         if (window.TeacherHeatmap) {
             await window.TeacherHeatmap.render('app-main-content');
         }
+    } else if (view === 'printable-exam') {
+        if (window.PrintableExamView) {
+            await window.PrintableExamView.render('app-main-content');
+        }
     } else if (view === 'admin') {
         if (!window.store.currentUser || window.store.currentUser.role !== 'admin') {
             openAuthModal('login');

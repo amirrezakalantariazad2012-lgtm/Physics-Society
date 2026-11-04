@@ -135,7 +135,7 @@ class AiService {
         string $apiKey,
         string $model,
         array $messages,
-        int $timeout = 35
+        int $timeout = 10
     ): ?string {
         if (empty($apiKey) || $apiKey === 'your-ai-api-key-here') {
             return null;
@@ -156,7 +156,7 @@ class AiService {
                 CURLOPT_POSTFIELDS => $payload,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => $timeout,
-                CURLOPT_CONNECTTIMEOUT => 10,
+                CURLOPT_CONNECTTIMEOUT => 4,
                 CURLOPT_SSL_VERIFYPEER => false,
                 CURLOPT_SSL_VERIFYHOST => false,
                 CURLOPT_HTTPHEADER => [

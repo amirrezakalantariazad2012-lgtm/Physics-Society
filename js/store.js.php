@@ -15,25 +15,30 @@ class AppStore {
         this.viewParams = {};
         this.grades = [];
         this.selectedGrade = null;
-        // Temporarily disable dark theme and strictly enforce clean academic light theme
-        this.theme = 'light';
-        try { localStorage.setItem('theme', 'light'); } catch (e) {}
+        // Quantum Deep Space Dark Theme by Default
+        const storedTheme = localStorage.getItem('theme');
+        this.theme = (storedTheme === 'light') ? 'light' : 'dark';
         this.initTheme();
     }
 
     initTheme() {
-        this.theme = 'light';
-        try { localStorage.setItem('theme', 'light'); } catch (e) {}
-        document.documentElement.classList.remove('dark');
-        document.documentElement.classList.add('light');
-        const metaTheme = document.querySelector('meta[name="theme-color"]');
-        if (metaTheme) metaTheme.setAttribute('content', '#f8fafc');
+        if (this.theme === 'light') {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+            const metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', '#f8fafc');
+        } else {
+            this.theme = 'dark';
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+            const metaTheme = document.querySelector('meta[name="theme-color"]');
+            if (metaTheme) metaTheme.setAttribute('content', '#030712');
+        }
+        try { localStorage.setItem('theme', this.theme); } catch (e) {}
     }
 
     toggleTheme() {
-        // Dark theme is temporarily disabled per user request; maintain crisp light theme
-        this.theme = 'light';
-        try { localStorage.setItem('theme', 'light'); } catch (e) {}
+        this.theme = (this.theme === 'dark') ? 'light' : 'dark';
         this.initTheme();
         if (window.updateNavbar) {
             window.updateNavbar();

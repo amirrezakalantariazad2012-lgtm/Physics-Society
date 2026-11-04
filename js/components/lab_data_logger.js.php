@@ -97,10 +97,10 @@ const LabDataLogger = (function() {
                             <span>📊</span> جعبه‌ابزار تحلیل داده‌های تجربی فیزیک
                         </div>
                         <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight flex items-center justify-center md:justify-start gap-3">
-                            <span>📈</span> ثبت داده‌ها و برازش خطی (Linear Regression)
+                            <span>📈</span> ثبت داده‌ها و برازش خطی <bdi class="sci-term text-cyan-300 font-mono">(Linear Regression)</bdi>
                         </h1>
                         <p class="text-slate-400 text-sm max-w-xl">
-                            نقاط تجربی آزمایشگاه را وارد کنید، شیب خط، عرض از مبدأ و ضریب تعیین ($R^2$) را به‌صورت خودکار استخراج کرده و خطای آزمایش را اعتبارسنجی کنید.
+                            نقاط تجربی آزمایشگاه را وارد کنید، شیب خط، عرض از مبدأ و ضریب تعیین <bdi class="sci-term text-cyan-300 font-mono">(R&sup2;)</bdi> را به‌صورت خودکار استخراج کرده و خطای آزمایش را اعتبارسنجی کنید.
                         </p>
                     </div>
 
@@ -283,16 +283,16 @@ const LabDataLogger = (function() {
         box.innerHTML = `
         <div class="grid grid-cols-2 gap-2 text-xs">
             <div>
-                <span class="text-slate-400">شیب خط (m):</span>
-                <span class="font-bold text-white font-mono mr-1">${reg.m.toFixed(3)}</span>
+                <span class="text-slate-400">شیب خط <bdi class="sci-term">(m)</bdi>:</span>
+                <span class="font-bold text-white font-mono mr-1 sci-term">${reg.m.toFixed(3)}</span>
             </div>
             <div>
-                <span class="text-slate-400">عرض از مبدأ (c):</span>
-                <span class="font-bold text-white font-mono mr-1">${reg.c.toFixed(3)}</span>
+                <span class="text-slate-400">عرض از مبدأ <bdi class="sci-term">(c)</bdi>:</span>
+                <span class="font-bold text-white font-mono mr-1 sci-term">${reg.c.toFixed(3)}</span>
             </div>
             <div>
-                <span class="text-slate-400">ضریب تعیین (R²):</span>
-                <span class="font-bold text-emerald-400 font-mono mr-1">${reg.r2.toFixed(4)}</span>
+                <span class="text-slate-400">ضریب تعیین <bdi class="sci-term">(R&sup2;)</bdi>:</span>
+                <span class="font-bold text-emerald-400 font-mono mr-1 sci-term">${reg.r2.toFixed(4)}</span>
             </div>
             <div>
                 <span class="text-slate-400">اعتبار تجربی:</span>
@@ -301,9 +301,12 @@ const LabDataLogger = (function() {
         </div>
 
         <div class="pt-2 border-t border-slate-800 text-center">
-            <div class="text-[11px] text-slate-400">کمیت فیزیکی استخراج شده (${p.constName})</div>
-            <div class="text-xl font-black text-cyan-400 font-mono mt-0.5">
-                ${reg.m.toFixed(2)} ${p.constUnit}
+            <div class="text-[11px] text-slate-400 flex items-center justify-center gap-1">
+                <span>کمیت فیزیکی استخراج شده</span>
+                <bdi class="sci-term text-cyan-400 font-mono">(${p.constName})</bdi>
+            </div>
+            <div class="text-xl font-black text-cyan-400 font-mono mt-0.5 lcd-display">
+                <span class="sci-term">${reg.m.toFixed(2)} ${p.constUnit}</span>
             </div>
         </div>
         `;

@@ -37,7 +37,7 @@ const QuantumDuel = (function() {
                             <span>⚔️</span> دوئل کوانتومی ۱ به ۱
                         </h1>
                         <p class="text-slate-400 text-sm max-w-xl">
-                            در نبردهای سرعتی ۳۰ تا ۶۰ ثانیه‌ای با همکلاسی‌های سمپادی رقابت کنید، ریتینگ کوانتومی (ELO) خود را ارتقا دهید و برای خاندان علمی خود امتیاز کسب کنید.
+                            در نبردهای سرعتی ۳۰ تا ۶۰ ثانیه‌ای با همکلاسی‌های سمپادی رقابت کنید، ریتینگ کوانتومی <bdi class="sci-term text-cyan-300 font-mono">(ELO)</bdi> خود را ارتقا دهید و برای خاندان علمی خود امتیاز کسب کنید.
                         </p>
                     </div>
 
@@ -85,7 +85,7 @@ const QuantumDuel = (function() {
                 </div>
                 <div class="p-4 rounded-2xl bg-slate-800/50 border border-slate-750 text-center">
                     <div class="text-xs text-slate-400">جایزه برد</div>
-                    <div class="text-lg font-bold text-emerald-400 mt-1">+۳۲ ELO</div>
+                    <div class="text-lg font-bold text-emerald-400 mt-1"><bdi class="sci-term">+32 ELO</bdi></div>
                 </div>
             </div>
 
@@ -180,21 +180,21 @@ const QuantumDuel = (function() {
                     </div>
                     <div>
                         <div class="text-sm font-bold text-white">شما</div>
-                        <div class="text-xs text-indigo-400 font-mono">ELO: ۱۲۰۰+</div>
+                        <div class="text-xs text-indigo-400 font-mono"><bdi class="sci-term">ELO: 1200+</bdi></div>
                     </div>
                 </div>
 
                 <!-- Timer / Match Status -->
                 <div class="text-center">
                     <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">زمان باقی‌مانده</div>
-                    <div id="duel-timer" class="text-3xl font-extrabold text-cyan-400 font-mono">00:60</div>
+                    <div id="duel-timer" class="text-3xl font-extrabold text-cyan-400 font-mono lcd-display sci-term">00:60</div>
                 </div>
 
                 <!-- Player 2 (Opponent) -->
                 <div class="flex items-center justify-end gap-3">
                     <div class="text-left">
                         <div class="text-sm font-bold text-white">${opponent.name}</div>
-                        <div class="text-xs text-red-400 font-mono">ELO: ${opponent.elo}</div>
+                        <div class="text-xs text-rose-400 font-mono"><bdi class="sci-term">ELO: ${opponent.elo}</bdi></div>
                     </div>
                     <div class="w-12 h-12 rounded-xl bg-red-600/30 border border-red-500/50 flex items-center justify-center text-xl text-red-400">
                         ⚔️
@@ -348,11 +348,11 @@ const QuantumDuel = (function() {
                 </div>
                 <div>
                     <div class="text-xs text-slate-400">تغییر ELO</div>
-                    <div class="text-2xl font-bold ${isWin ? 'text-emerald-400' : 'text-amber-400'} mt-1 font-mono">${eloDelta}</div>
+                    <div class="text-2xl font-bold ${isWin ? 'text-emerald-400' : 'text-amber-400'} mt-1 font-mono"><bdi class="sci-term">${eloDelta}</bdi></div>
                 </div>
                 <div>
                     <div class="text-xs text-slate-400">زمان صرف شده</div>
-                    <div class="text-2xl font-bold text-cyan-400 mt-1 font-mono">${Math.round(timeSpent)}s</div>
+                    <div class="text-2xl font-bold text-cyan-400 mt-1 font-mono"><bdi class="sci-term">${Math.round(timeSpent)} s</bdi></div>
                 </div>
             </div>
 

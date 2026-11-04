@@ -19,7 +19,7 @@ header("Expires: 0");
 header("Content-Type: text/html; charset=UTF-8");
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" class="h-full overflow-x-hidden max-w-full">
+<html lang="fa" dir="rtl" class="dark h-full overflow-x-hidden max-w-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
@@ -27,16 +27,21 @@ header("Content-Type: text/html; charset=UTF-8");
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="description" content="انجمن فیزیک شهید بهشتی دو دوره اول - پلتفرم پیشرفته و تعاملی آموزش فیزیک، لیگ‌های علمی، شبیه‌سازهای آزمایشگاهی و تصحیح هوش مصنوعی">
-    <meta name="theme-color" content="#f8fafc">
+    <meta name="theme-color" content="#030712">
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
     <title>انجمن فیزیک شهید بهشتی دو دوره اول</title>
 
-    <!-- Immediate Light Theme Enforcer -->
+    <!-- Immediate Theme Enforcer (Default Deep Cosmos Dark) -->
     <script>
         try {
-            localStorage.setItem('theme', 'light');
-            document.documentElement.classList.remove('dark');
-            document.documentElement.classList.add('light');
+            const t = localStorage.getItem('theme');
+            if (t === 'light') {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+            }
         } catch(e) {}
     </script>
 
@@ -98,7 +103,7 @@ header("Content-Type: text/html; charset=UTF-8");
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/style.css.php">
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased transition-colors duration-200 relative overflow-x-hidden max-w-full w-full">
+<body class="bg-[#030712] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-cyan-500 selection:text-slate-950 transition-colors duration-200 relative overflow-x-hidden max-w-full w-full">
 
     <!-- Interactive Scientific Particle / Constellation Canvas Background -->
     <canvas id="physics-particles-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-35 dark:opacity-45"></canvas>
@@ -110,7 +115,7 @@ header("Content-Type: text/html; charset=UTF-8");
     <main id="app-main-content" class="flex-1 w-full relative z-10 pb-20 md:pb-6"></main>
 
     <!-- Footer -->
-    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-10 mt-auto transition-colors relative z-10 pb-28 md:pb-10">
+    <footer class="bg-slate-950/90 border-t border-cyan-500/20 py-10 mt-auto transition-colors relative z-10 pb-28 md:pb-10 shadow-2xl backdrop-blur-xl">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                 <div class="md:col-span-2 space-y-3">

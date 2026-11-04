@@ -20,7 +20,7 @@ const MobileSensorLab = (function() {
     let microphone = null;
     let animationFrame = null;
     let accelHistory = [];
-    const MAX_HISTORY = 80;
+    const MAX_HISTORY = 90;
 
     async function render(containerId) {
         const container = document.getElementById(containerId);
@@ -28,43 +28,56 @@ const MobileSensorLab = (function() {
 
         container.innerHTML = `
         <div class="max-w-5xl mx-auto space-y-8 pb-16">
-            <!-- Header HUD -->
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-950 via-slate-900 to-cyan-950 border border-blue-500/30 p-8 shadow-2xl">
-                <div class="absolute -top-24 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <!-- Header HUD (Quantum Obsidian Physics) -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-950 via-slate-950 to-cyan-950 border border-cyan-500/30 p-6 md:p-8 shadow-2xl quantum-hud-panel">
+                <div class="absolute -top-24 -left-24 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -right-24 w-80 h-80 bg-violet-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                <div class="relative z-10 space-y-2 text-center md:text-right">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
-                        <span>📱</span> آزمایشگاه همراه پژوهشگران سمپاد
+                <div class="relative z-10 space-y-3 text-center md:text-right">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-semibold backdrop-blur-md">
+                        <i data-lucide="smartphone" class="w-3.5 h-3.5 text-cyan-400"></i>
+                        <span>آزمایشگاه همراه پژوهشگران سمپاد</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200 font-mono">v4.2</span>
                     </div>
-                    <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight flex items-center justify-center md:justify-start gap-3">
-                        <span>🛰️</span> آزمایشگاه سنسوری تلفن همراه
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight flex items-center justify-center md:justify-start gap-3">
+                        <span class="p-2 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30">
+                            <i data-lucide="activity" class="w-6 h-6 md:w-8 md:h-8"></i>
+                        </span>
+                        <span>آزمایشگاه سنسوری تلفن همراه</span>
                     </h1>
-                    <p class="text-slate-400 text-sm max-w-2xl">
-                        تبدیل گوشی هوشمند یا تبلت به یک آزمایشگاه اندازه‌گیری دقیق فیزیک با استفاده از سنسورهای شتاب‌سنج، ژیروسکوپ زاویه‌سنج و میکروفون با تحلیل تبدیل فوریه (FFT).
+                    <p class="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
+                        تبدیل گوشی هوشمند یا تبلت به یک آزمایشگاه اندازه‌گیری دقیق فیزیک با استفاده از سنسورهای شتاب‌سنج، ژیروسکوپ زاویه‌سنج و میکروفون با تحلیل تبدیل سریع فوریه <bdi class="sci-term text-cyan-300 font-mono">(FFT)</bdi>.
                     </p>
                 </div>
             </div>
 
-            <!-- Tab Selectors -->
-            <div class="flex flex-wrap gap-3 bg-slate-950/80 p-2 rounded-2xl border border-slate-800">
-                <button onclick="MobileSensorLab.switchTab('accel')" id="tab-btn-accel" class="flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'accel' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'text-slate-400 hover:text-slate-200'}">
-                    <span>⚡</span> ۱. شتاب‌سنج و سنجش گرانش ($g$)
+            <!-- Tab Selectors (Cyber HUD Segmented Bar) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-950/90 p-2 rounded-2xl border border-slate-800/80 shadow-lg">
+                <button onclick="MobileSensorLab.switchTab('accel')" id="tab-btn-accel" class="py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'accel' ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-500/25 border border-cyan-400/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'}">
+                    <i data-lucide="zap" class="w-4 h-4 text-cyan-300"></i>
+                    <span>۱. شتاب‌سنج و گرانش</span>
+                    <bdi class="sci-term font-mono text-cyan-300">(g)</bdi>
                 </button>
-                <button onclick="MobileSensorLab.switchTab('incline')" id="tab-btn-incline" class="flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'incline' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'text-slate-400 hover:text-slate-200'}">
-                    <span>📐</span> ۲. زاویه‌سنج شیب و دوره آونگ ($T$)
+                <button onclick="MobileSensorLab.switchTab('incline')" id="tab-btn-incline" class="py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'incline' ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-500/25 border border-cyan-400/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'}">
+                    <i data-lucide="compass" class="w-4 h-4 text-teal-300"></i>
+                    <span>۲. زاویه‌سنج و آونگ</span>
+                    <bdi class="sci-term font-mono text-teal-300">(T)</bdi>
                 </button>
-                <button onclick="MobileSensorLab.switchTab('audio')" id="tab-btn-audio" class="flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'audio' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'text-slate-400 hover:text-slate-200'}">
-                    <span>🎵</span> ۳. رزونانس صوتی و تحلیل فرکانس (FFT)
+                <button onclick="MobileSensorLab.switchTab('audio')" id="tab-btn-audio" class="py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'audio' ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-500/25 border border-cyan-400/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'}">
+                    <i data-lucide="volume-2" class="w-4 h-4 text-violet-300"></i>
+                    <span>۳. رزونانس صوتی</span>
+                    <bdi class="sci-term font-mono text-violet-300">(FFT)</bdi>
                 </button>
             </div>
 
             <!-- Instrument Stage -->
-            <div id="sensor-stage" class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl">
-                <!-- Dynamic Content -->
+            <div id="sensor-stage" class="bg-slate-950/90 border border-slate-800/90 rounded-3xl p-5 md:p-8 shadow-2xl relative overflow-hidden">
+                <!-- Dynamic Content Loaded Below -->
             </div>
         </div>
         `;
 
+        if (window.lucide) window.lucide.createIcons();
         renderActiveTab();
     }
 
@@ -104,6 +117,8 @@ const MobileSensorLab = (function() {
         } else if (activeTab === 'audio') {
             renderAudioTab(stage);
         }
+
+        if (window.lucide) window.lucide.createIcons();
     }
 
     // --- Tab 1: Accelerometer g ---
@@ -111,48 +126,85 @@ const MobileSensorLab = (function() {
         stage.innerHTML = `
         <div class="space-y-6">
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-                <div>
-                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                        <span>⚡</span> اسیلوسکوپ شتاب و شتاب گرانش زمین
+                <div class="space-y-1">
+                    <h3 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                        <i data-lucide="activity" class="w-5 h-5 text-cyan-400"></i>
+                        <span>اسیلوسکوپ شتاب و شتاب گرانش زمین</span>
                     </h3>
-                    <p class="text-xs text-slate-400 mt-1">
-                        اندازه‌گیری مقدار کل بردار شتاب $|\vec{a}| = \\sqrt{a_x^2 + a_y^2 + a_z^2}$ و تشخیص لحظه سقوط آزاد ($a \\approx 0$)
+                    <p class="text-xs text-slate-400 flex flex-wrap items-center gap-1.5 leading-relaxed">
+                        <span>اندازه‌گیری مقدار کل بردار شتاب</span>
+                        <bdi class="sci-term text-cyan-300 font-mono text-xs font-semibold px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">|a| = &radic;(a<sub>x</sub>&sup2; + a<sub>y</sub>&sup2; + a<sub>z</sub>&sup2;)</bdi>
+                        <span>و تشخیص خودکار لحظه سقوط آزاد</span>
+                        <bdi class="sci-term text-amber-300 font-mono text-xs font-semibold px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">(a &asymp; 0)</bdi>
                     </p>
                 </div>
-                <button id="accel-start-btn" onclick="MobileSensorLab.startAccelerometer()" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2">
-                    <span>📡</span> فعال‌سازی سنسور شتاب‌سنج
+                <button id="accel-start-btn" onclick="MobileSensorLab.startAccelerometer()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-cyan-600/30 transition-all flex items-center gap-2 shrink-0">
+                    <i data-lucide="radio" class="w-4 h-4"></i>
+                    <span>فعال‌سازی سنسور شتاب‌سنج</span>
                 </button>
             </div>
 
-            <!-- Readout Gauges -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
-                    <div class="text-xs text-slate-400">شتاب کل ($|\vec{g}|$)</div>
-                    <div id="accel-total" class="text-2xl font-black text-cyan-400 font-mono mt-1">9.80 m/s²</div>
+            <!-- Readout Gauges (LCD Digital Scientific HUD) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 text-center">
+                <div class="p-4 rounded-2xl bg-slate-900/80 border border-cyan-500/20 quantum-hud-panel relative overflow-hidden">
+                    <div class="text-[11px] text-cyan-400 font-medium flex items-center justify-center gap-1">
+                        <span>شتاب کل گرانش</span>
+                        <bdi class="sci-term text-cyan-300 font-mono">(|g|)</bdi>
+                    </div>
+                    <div class="mt-2 flex items-baseline justify-center gap-1 font-mono">
+                        <span id="accel-total" class="text-2xl sm:text-3xl font-black text-cyan-400 lcd-display sci-term">9.80</span>
+                        <span class="text-xs font-bold text-cyan-500/90 font-mono sci-term">m/s&sup2;</span>
+                    </div>
                 </div>
-                <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
-                    <div class="text-xs text-slate-400">محور X ($a_x$)</div>
-                    <div id="accel-x" class="text-xl font-bold text-slate-200 font-mono mt-1">0.00</div>
+
+                <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 quantum-hud-panel">
+                    <div class="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1">
+                        <span>محور افقی</span>
+                        <bdi class="sci-term text-slate-300 font-mono">(a<sub>x</sub>)</bdi>
+                    </div>
+                    <div class="mt-2 flex items-baseline justify-center gap-1 font-mono">
+                        <span id="accel-x" class="text-xl sm:text-2xl font-bold text-slate-200 lcd-display sci-term">0.00</span>
+                        <span class="text-[10px] text-slate-500 font-mono sci-term">m/s&sup2;</span>
+                    </div>
                 </div>
-                <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
-                    <div class="text-xs text-slate-400">محور Y ($a_y$)</div>
-                    <div id="accel-y" class="text-xl font-bold text-slate-200 font-mono mt-1">0.00</div>
+
+                <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 quantum-hud-panel">
+                    <div class="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1">
+                        <span>محور عمودی</span>
+                        <bdi class="sci-term text-slate-300 font-mono">(a<sub>y</sub>)</bdi>
+                    </div>
+                    <div class="mt-2 flex items-baseline justify-center gap-1 font-mono">
+                        <span id="accel-y" class="text-xl sm:text-2xl font-bold text-slate-200 lcd-display sci-term">0.00</span>
+                        <span class="text-[10px] text-slate-500 font-mono sci-term">m/s&sup2;</span>
+                    </div>
                 </div>
-                <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
-                    <div class="text-xs text-slate-400">محور Z ($a_z$)</div>
-                    <div id="accel-z" class="text-xl font-bold text-slate-200 font-mono mt-1">9.80</div>
+
+                <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 quantum-hud-panel">
+                    <div class="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1">
+                        <span>محور عمق</span>
+                        <bdi class="sci-term text-slate-300 font-mono">(a<sub>z</sub>)</bdi>
+                    </div>
+                    <div class="mt-2 flex items-baseline justify-center gap-1 font-mono">
+                        <span id="accel-z" class="text-xl sm:text-2xl font-bold text-slate-200 lcd-display sci-term">9.80</span>
+                        <span class="text-[10px] text-slate-500 font-mono sci-term">m/s&sup2;</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Oscilloscope Canvas -->
+            <!-- Oscilloscope Canvas HUD -->
             <div class="space-y-2">
                 <div class="text-xs text-slate-400 flex items-center justify-between">
-                    <span>نمودار نوسان‌نمای شتاب لحظه‌ای ($m/s^2$)</span>
-                    <span id="freefall-badge" class="hidden px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold text-[10px] animate-pulse">
-                        سقوط آزاد تشخیص داده شد! ($a \\approx 0$)
+                    <div class="flex items-center gap-2">
+                        <span>نمودار نوسان‌نمای شتاب لحظه‌ای</span>
+                        <bdi class="sci-term text-cyan-400 font-mono text-xs">(m/s&sup2;)</bdi>
+                    </div>
+                    <span id="freefall-badge" class="hidden px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold text-[11px] animate-pulse flex items-center gap-1">
+                        <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                        <span>سقوط آزاد تشخیص داده شد!</span>
+                        <bdi class="sci-term font-mono">(a &asymp; 0)</bdi>
                     </span>
                 </div>
-                <div class="relative w-full h-48 bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
+                <div class="relative w-full h-56 bg-slate-950 rounded-2xl border border-cyan-500/20 overflow-hidden shadow-inner">
                     <canvas id="accel-canvas" class="w-full h-full block"></canvas>
                 </div>
             </div>
@@ -168,21 +220,21 @@ const MobileSensorLab = (function() {
         canvas.width = canvas.parentElement.clientWidth;
         canvas.height = canvas.parentElement.clientHeight;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#0f172a';
+        ctx.fillStyle = '#030712';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         drawGrid(ctx, canvas.width, canvas.height);
     }
 
     function drawGrid(ctx, w, h) {
-        ctx.strokeStyle = '#1e293b';
+        ctx.strokeStyle = '#0f172a';
         ctx.lineWidth = 1;
-        for (let x = 0; x < w; x += 30) {
+        for (let x = 0; x < w; x += 32) {
             ctx.beginPath();
             ctx.moveTo(x, 0);
             ctx.lineTo(x, h);
             ctx.stroke();
         }
-        for (let y = 0; y < h; y += 30) {
+        for (let y = 0; y < h; y += 32) {
             ctx.beginPath();
             ctx.moveTo(0, y);
             ctx.lineTo(w, y);
@@ -205,9 +257,9 @@ const MobileSensorLab = (function() {
         }
 
         if (btn) {
-            btn.textContent = 'سنسور فعال است ✓';
-            btn.classList.remove('bg-blue-600', 'hover:bg-blue-500');
-            btn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+            btn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300"></i><span>سنسور فعال است ✓</span>`;
+            btn.className = "px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2 shrink-0";
+            if (window.lucide) window.lucide.createIcons();
         }
 
         accelHistory = [];
@@ -227,7 +279,7 @@ const MobileSensorLab = (function() {
             const zEl = document.getElementById('accel-z');
             const ffEl = document.getElementById('freefall-badge');
 
-            if (totalEl) totalEl.textContent = total.toFixed(2) + ' m/s²';
+            if (totalEl) totalEl.textContent = total.toFixed(2);
             if (xEl) xEl.textContent = ax.toFixed(2);
             if (yEl) yEl.textContent = ay.toFixed(2);
             if (zEl) zEl.textContent = az.toFixed(2);
@@ -259,7 +311,7 @@ const MobileSensorLab = (function() {
         setInterval(() => {
             if (!accelListener) return;
             simT += 0.1;
-            const fakeAcc = 9.8 + Math.sin(simT) * 1.5 + (Math.random() - 0.5) * 0.4;
+            const fakeAcc = 9.8 + Math.sin(simT) * 1.5 + (Math.random() - 0.5) * 0.35;
             const ev = {
                 accelerationIncludingGravity: {
                     x: Math.sin(simT * 0.7) * 0.8,
@@ -278,13 +330,14 @@ const MobileSensorLab = (function() {
         const w = canvas.width;
         const h = canvas.height;
 
-        ctx.fillStyle = '#070b14';
+        ctx.fillStyle = '#030712';
         ctx.fillRect(0, 0, w, h);
         drawGrid(ctx, w, h);
 
-        // Reference line 9.8 m/s²
+        // Reference line 9.80 m/s²
         const midY = h / 2;
-        ctx.strokeStyle = '#334155';
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
         ctx.moveTo(0, midY);
@@ -292,19 +345,25 @@ const MobileSensorLab = (function() {
         ctx.stroke();
         ctx.setLineDash([]);
 
+        // Reference text
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px JetBrains Mono, monospace';
+        ctx.fillText('9.80 m/s²', 10, midY - 6);
+
         if (accelHistory.length < 2) return;
 
-        ctx.strokeStyle = '#38bdf8';
+        // Waveform trace
+        ctx.strokeStyle = '#22d3ee';
         ctx.lineWidth = 2.5;
-        ctx.shadowColor = '#38bdf8';
-        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#06b6d4';
+        ctx.shadowBlur = 10;
         ctx.beginPath();
 
         const step = w / (MAX_HISTORY - 1);
         for (let i = 0; i < accelHistory.length; i++) {
             const val = accelHistory[i];
-            const y = midY - (val - 9.8) * 8; // Scale factor
-            const clampedY = Math.max(5, Math.min(h - 5, y));
+            const y = midY - (val - 9.8) * 9;
+            const clampedY = Math.max(8, Math.min(h - 8, y));
             if (i === 0) {
                 ctx.moveTo(0, clampedY);
             } else {
@@ -320,63 +379,93 @@ const MobileSensorLab = (function() {
         stage.innerHTML = `
         <div class="space-y-6">
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-                <div>
-                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                        <span>📐</span> زاویه‌سنج شیب و دوره تناوب آونگ ساده ($T$)
+                <div class="space-y-1">
+                    <h3 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                        <i data-lucide="compass" class="w-5 h-5 text-teal-400"></i>
+                        <span>زاویه‌سنج شیب و دوره تناوب آونگ ساده</span>
+                        <bdi class="sci-term text-teal-300 font-mono">(T)</bdi>
                     </h3>
-                    <p class="text-xs text-slate-400 mt-1">
-                        اندازه‌گیری زاویه شیب و سطح تراز با ژیروسکوپ گوشی و محاسبه فرمول $T = 2\\pi \\sqrt{\\frac{L}{g}}$
+                    <p class="text-xs text-slate-400 flex flex-wrap items-center gap-1.5 leading-relaxed">
+                        <span>اندازه‌گیری زاویه شیب و سطح تراز با ژیروسکوپ و محاسبه دوره تناوب با رابطه</span>
+                        <bdi class="sci-term text-cyan-300 font-mono text-xs font-semibold px-2 py-0.5 rounded bg-slate-900 border border-slate-800">T = 2&pi; &radic;(L / g)</bdi>
                     </p>
                 </div>
-                <button id="incline-start-btn" onclick="MobileSensorLab.startInclinometer()" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2">
-                    <span>🧭</span> فعال‌سازی ژیروسکوپ
+                <button id="incline-start-btn" onclick="MobileSensorLab.startInclinometer()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-teal-600/30 transition-all flex items-center gap-2 shrink-0">
+                    <i data-lucide="compass" class="w-4 h-4"></i>
+                    <span>فعال‌سازی ژیروسکوپ</span>
                 </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Artificial Horizon / Level Display -->
-                <div class="bg-slate-950/70 p-6 rounded-2xl border border-slate-800 flex flex-col items-center justify-center space-y-4">
-                    <div class="text-sm font-bold text-slate-300">تراز کروی و شیب‌سنج ۲ محوره</div>
-                    <div class="relative w-44 h-44 rounded-full border-4 border-slate-700 bg-slate-900 flex items-center justify-center overflow-hidden">
-                        <div class="absolute inset-0 border border-slate-800 flex items-center justify-center">
-                            <div class="w-full h-0.5 bg-slate-700"></div>
-                            <div class="h-full w-0.5 bg-slate-700 absolute"></div>
+                <div class="bg-slate-900/80 p-6 rounded-3xl border border-cyan-500/20 quantum-hud-panel flex flex-col items-center justify-center space-y-4">
+                    <div class="text-xs sm:text-sm font-bold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="crosshair" class="w-4 h-4 text-cyan-400"></i>
+                        <span>تراز کروی و شیب‌سنج ۲ محوره ژیروسکوپی</span>
+                    </div>
+                    <div class="relative w-48 h-48 rounded-full border-4 border-cyan-500/40 bg-slate-950 flex items-center justify-center overflow-hidden shadow-2xl">
+                        <!-- Crosshairs -->
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div class="w-full h-0.5 bg-cyan-500/20"></div>
+                            <div class="h-full w-0.5 bg-cyan-500/20 absolute"></div>
+                            <div class="w-24 h-24 rounded-full border border-cyan-500/20"></div>
                         </div>
-                        <div id="bubble-level" class="w-10 h-10 rounded-full bg-cyan-400/80 border-2 border-cyan-200 shadow-lg shadow-cyan-400/50 transition-all duration-75 flex items-center justify-center text-[10px] font-bold text-slate-900">
+                        <div id="bubble-level" class="w-11 h-11 rounded-full bg-gradient-to-tr from-cyan-400 to-teal-300 border-2 border-white shadow-lg shadow-cyan-400/60 transition-transform duration-75 flex items-center justify-center text-xs font-black text-slate-950 font-mono">
                             +
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 w-full text-center text-xs">
-                        <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-                            <div class="text-slate-400">زاویه شیب (Pitch &beta;)</div>
-                            <div id="pitch-val" class="text-base font-bold text-cyan-400 font-mono mt-1">0.0°</div>
+                    <div class="grid grid-cols-2 gap-3 w-full text-center text-xs">
+                        <div class="p-3 rounded-2xl bg-slate-950/80 border border-slate-800">
+                            <div class="text-[11px] text-slate-400 flex items-center justify-center gap-1">
+                                <span>زاویه شیب</span>
+                                <bdi class="sci-term text-cyan-400 font-mono">(Pitch &beta;)</bdi>
+                            </div>
+                            <div id="pitch-val" class="text-lg font-black text-cyan-400 font-mono mt-1 sci-term">0.0°</div>
                         </div>
-                        <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-                            <div class="text-slate-400">زاویه غلتش (Roll &gamma;)</div>
-                            <div id="roll-val" class="text-base font-bold text-cyan-400 font-mono mt-1">0.0°</div>
+                        <div class="p-3 rounded-2xl bg-slate-950/80 border border-slate-800">
+                            <div class="text-[11px] text-slate-400 flex items-center justify-center gap-1">
+                                <span>زاویه غلتش</span>
+                                <bdi class="sci-term text-cyan-400 font-mono">(Roll &gamma;)</bdi>
+                            </div>
+                            <div id="roll-val" class="text-lg font-black text-cyan-400 font-mono mt-1 sci-term">0.0°</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Simple Pendulum Calculator -->
-                <div class="bg-slate-950/70 p-6 rounded-2xl border border-slate-800 space-y-4">
-                    <div class="text-sm font-bold text-slate-300">محاسبه‌گر دوره تناوب آونگ ساده ($T$)</div>
+                <div class="bg-slate-900/80 p-6 rounded-3xl border border-slate-800 quantum-hud-panel space-y-4">
+                    <div class="text-xs sm:text-sm font-bold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="timer" class="w-4 h-4 text-emerald-400"></i>
+                        <span>محاسبه‌گر دوره تناوب آونگ ساده</span>
+                        <bdi class="sci-term text-emerald-400 font-mono">(T)</bdi>
+                    </div>
                     <p class="text-xs text-slate-400 leading-relaxed">
-                        با تغییر طول نخ آونگ ($L$)، دوره تناوب نوسان‌های کوچک را بر پایه شتاب گرانش اندازه‌گیری شده محاسبه کنید:
+                        با تغییر طول نخ آونگ <bdi class="sci-term text-cyan-300 font-mono">(L)</bdi>، دوره تناوب نوسان‌های کوچک را بر پایه شتاب گرانش اندازه‌گیری شده محاسبه کنید:
                     </p>
 
                     <div class="space-y-2 pt-2">
-                        <div class="flex justify-between text-xs text-slate-300">
-                            <span>طول نخ آونگ ($L$):</span>
-                            <span id="pendulum-len-display" class="font-mono text-cyan-400 font-bold">0.50 متر (۵۰ سانتی‌متر)</span>
+                        <div class="flex justify-between items-center text-xs text-slate-300">
+                            <span class="flex items-center gap-1">
+                                <span>طول نخ آونگ</span>
+                                <bdi class="sci-term text-cyan-400 font-mono">(L):</bdi>
+                            </span>
+                            <span id="pendulum-len-display" class="font-mono text-cyan-300 font-bold sci-term">0.50 m (۵۰ سانتی‌متر)</span>
                         </div>
-                        <input type="range" id="pendulum-length-slider" min="0.1" max="2.0" step="0.05" value="0.5" oninput="MobileSensorLab.updatePendulumPeriod()" class="w-full accent-cyan-500">
+                        <input type="range" id="pendulum-length-slider" min="0.1" max="2.0" step="0.05" value="0.5" oninput="MobileSensorLab.updatePendulumPeriod()" class="w-full accent-cyan-500 cursor-pointer">
                     </div>
 
-                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 text-center space-y-2">
-                        <div class="text-xs text-slate-400">دوره تناوب تئوری ($T$)</div>
-                        <div id="pendulum-period-display" class="text-3xl font-black text-emerald-400 font-mono">1.42 s</div>
-                        <div class="text-[11px] text-slate-500 font-mono">T = 2 &times; &pi; &times; &radic;(L / 9.8)</div>
+                    <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-center space-y-2">
+                        <div class="text-xs text-slate-400 flex items-center justify-center gap-1">
+                            <span>دوره تناوب تئوری</span>
+                            <bdi class="sci-term text-emerald-400 font-mono">(T)</bdi>
+                        </div>
+                        <div class="flex items-baseline justify-center gap-1 font-mono">
+                            <span id="pendulum-period-display" class="text-3xl font-black text-emerald-400 lcd-display sci-term">1.42</span>
+                            <span class="text-xs font-bold text-emerald-500 font-mono sci-term">s</span>
+                        </div>
+                        <div class="text-[11px] text-cyan-400/90 font-mono py-1">
+                            <bdi class="sci-term">T = 2 &times; &pi; &times; &radic;(L / 9.80)</bdi>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -399,9 +488,9 @@ const MobileSensorLab = (function() {
         }
 
         if (btn) {
-            btn.textContent = 'ژیروسکوپ فعال است ✓';
-            btn.classList.remove('bg-blue-600', 'hover:bg-blue-500');
-            btn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+            btn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300"></i><span>ژیروسکوپ فعال است ✓</span>`;
+            btn.className = "px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2 shrink-0";
+            if (window.lucide) window.lucide.createIcons();
         }
 
         orientListener = function(event) {
@@ -416,8 +505,8 @@ const MobileSensorLab = (function() {
             if (rollEl) rollEl.textContent = gamma.toFixed(1) + '°';
 
             if (bubbleEl) {
-                const clampedX = Math.max(-55, Math.min(55, gamma * 1.5));
-                const clampedY = Math.max(-55, Math.min(55, beta * 1.5));
+                const clampedX = Math.max(-60, Math.min(60, gamma * 1.5));
+                const clampedY = Math.max(-60, Math.min(60, beta * 1.5));
                 bubbleEl.style.transform = `translate(${clampedX}px, ${clampedY}px)`;
             }
         };
@@ -432,11 +521,11 @@ const MobileSensorLab = (function() {
         if (!slider) return;
 
         const L = parseFloat(slider.value);
-        if (lenDisplay) lenDisplay.textContent = `${L.toFixed(2)} متر (${Math.round(L * 100)} سانتی‌متر)`;
+        if (lenDisplay) lenDisplay.textContent = `${L.toFixed(2)} m (${Math.round(L * 100)} سانتی‌متر)`;
 
         const g = 9.80;
         const T = 2 * Math.PI * Math.sqrt(L / g);
-        if (periodDisplay) periodDisplay.textContent = `${T.toFixed(2)} s`;
+        if (periodDisplay) periodDisplay.textContent = T.toFixed(2);
     }
 
     // --- Tab 3: Audio FFT Resonator ---
@@ -444,42 +533,71 @@ const MobileSensorLab = (function() {
         stage.innerHTML = `
         <div class="space-y-6">
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-                <div>
-                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                        <span>🎵</span> تحلیل فرکانس امواج صوتی و تشدید لوله‌ها (FFT)
+                <div class="space-y-1">
+                    <h3 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                        <i data-lucide="volume-2" class="w-5 h-5 text-violet-400"></i>
+                        <span>تحلیل فرکانس امواج صوتی و تشدید لوله‌ها</span>
+                        <bdi class="sci-term text-violet-300 font-mono">(FFT)</bdi>
                     </h3>
-                    <p class="text-xs text-slate-400 mt-1">
-                        استخراج بسامد هماهنگ‌ها و محاسبه طول لوله تشدید: $f = \\frac{v}{4L}$ (لوله بسته) یا $f = \\frac{v}{2L}$ (لوله باز)
+                    <p class="text-xs text-slate-400 flex flex-wrap items-center gap-1.5 leading-relaxed">
+                        <span>استخراج بسامد هماهنگ‌ها و محاسبه طول لوله تشدید:</span>
+                        <bdi class="sci-term text-cyan-300 font-mono text-xs font-semibold px-2 py-0.5 rounded bg-slate-900 border border-slate-800">f = v / (4L)</bdi>
+                        <span>(لوله بسته) یا</span>
+                        <bdi class="sci-term text-cyan-300 font-mono text-xs font-semibold px-2 py-0.5 rounded bg-slate-900 border border-slate-800">f = v / (2L)</bdi>
+                        <span>(لوله باز)</span>
                     </p>
                 </div>
-                <button id="audio-start-btn" onclick="MobileSensorLab.startAudioAnalyzer()" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2">
-                    <span>🎤</span> شروع ضبط و تحلیل فوریه (FFT)
+                <button id="audio-start-btn" onclick="MobileSensorLab.startAudioAnalyzer()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-violet-600/30 transition-all flex items-center gap-2 shrink-0">
+                    <i data-lucide="mic" class="w-4 h-4"></i>
+                    <span>شروع ضبط و تحلیل فوریه (FFT)</span>
                 </button>
             </div>
 
-            <!-- Peak Telemetry -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
-                    <div class="text-xs text-slate-400">فرکانس غالب ($f_0$)</div>
-                    <div id="fft-peak-freq" class="text-3xl font-black text-cyan-400 font-mono mt-1">-- Hz</div>
+            <!-- Peak Telemetry Gauges -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-center">
+                <div class="p-4 rounded-2xl bg-slate-900/80 border border-cyan-500/20 quantum-hud-panel">
+                    <div class="text-[11px] text-cyan-400 font-medium flex items-center justify-center gap-1">
+                        <span>فرکانس تشدید غالب</span>
+                        <bdi class="sci-term text-cyan-300 font-mono">(f<sub>0</sub>)</bdi>
+                    </div>
+                    <div class="mt-2 flex items-baseline justify-center gap-1 font-mono">
+                        <span id="fft-peak-freq" class="text-2xl sm:text-3xl font-black text-cyan-400 lcd-display sci-term">--</span>
+                        <span class="text-xs font-bold text-cyan-500 font-mono sci-term">Hz</span>
+                    </div>
                 </div>
-                <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
-                    <div class="text-xs text-slate-400">طول لوله بسته تشدید ($L = \\frac{v}{4f}$)</div>
-                    <div id="fft-closed-tube" class="text-2xl font-bold text-emerald-400 font-mono mt-1">-- cm</div>
+
+                <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 quantum-hud-panel">
+                    <div class="text-[11px] text-emerald-400 font-medium flex items-center justify-center gap-1">
+                        <span>طول لوله بسته تشدید</span>
+                        <bdi class="sci-term text-emerald-300 font-mono">(L = v / 4f)</bdi>
+                    </div>
+                    <div class="mt-2 flex items-baseline justify-center gap-1 font-mono">
+                        <span id="fft-closed-tube" class="text-xl sm:text-2xl font-bold text-emerald-400 lcd-display sci-term">--</span>
+                        <span class="text-xs font-bold text-emerald-500 font-mono sci-term">cm</span>
+                    </div>
                 </div>
-                <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800">
-                    <div class="text-xs text-slate-400">طول لوله باز تشدید ($L = \\frac{v}{2f}$)</div>
-                    <div id="fft-open-tube" class="text-2xl font-bold text-indigo-400 font-mono mt-1">-- cm</div>
+
+                <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 quantum-hud-panel">
+                    <div class="text-[11px] text-indigo-400 font-medium flex items-center justify-center gap-1">
+                        <span>طول لوله باز تشدید</span>
+                        <bdi class="sci-term text-indigo-300 font-mono">(L = v / 2f)</bdi>
+                    </div>
+                    <div class="mt-2 flex items-baseline justify-center gap-1 font-mono">
+                        <span id="fft-open-tube" class="text-xl sm:text-2xl font-bold text-indigo-400 lcd-display sci-term">--</span>
+                        <span class="text-xs font-bold text-indigo-500 font-mono sci-term">cm</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Spectrogram Spectrum Canvas -->
             <div class="space-y-2">
                 <div class="text-xs text-slate-400 flex items-center justify-between">
-                    <span>طیف بسامد پیوسته (اسپکتروگرام ۰ الی ۲۰۰۰ هرتز)</span>
-                    <span class="text-slate-500 font-mono text-[11px]">v_sound = 343 m/s</span>
+                    <div class="flex items-center gap-2">
+                        <span>طیف بسامد پیوسته (اسپکتروگرام فوریه ۰ الی ۲۵۰۰ هرتز)</span>
+                    </div>
+                    <bdi class="sci-term text-slate-400 font-mono text-[11px]">v_sound = 343 m/s</bdi>
                 </div>
-                <div class="relative w-full h-52 bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
+                <div class="relative w-full h-56 bg-slate-950 rounded-2xl border border-violet-500/20 overflow-hidden shadow-inner">
                     <canvas id="fft-canvas" class="w-full h-full block"></canvas>
                 </div>
             </div>
@@ -498,9 +616,9 @@ const MobileSensorLab = (function() {
             microphone.connect(analyser);
 
             if (btn) {
-                btn.textContent = 'تحلیل صوتی فعال است ✓';
-                btn.classList.remove('bg-blue-600', 'hover:bg-blue-500');
-                btn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+                btn.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300"></i><span>تحلیل صوتی فعال است ✓</span>`;
+                btn.className = "px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2 shrink-0";
+                if (window.lucide) window.lucide.createIcons();
             }
 
             drawAudioSpectrogram();
@@ -524,13 +642,15 @@ const MobileSensorLab = (function() {
             animationFrame = requestAnimationFrame(renderFrame);
             analyser.getByteFrequencyData(dataArray);
 
-            ctx.fillStyle = '#070b14';
+            ctx.fillStyle = '#030712';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Frequency Grid
+            drawGrid(ctx, canvas.width, canvas.height);
 
             // Find peak frequency
             let maxVal = -1;
             let maxIdx = -1;
-            // Focus on 20Hz - 2500Hz
             const maxBin = Math.floor(2500 / (audioContext.sampleRate / analyser.fftSize));
 
             for (let i = 2; i < maxBin; i++) {
@@ -546,25 +666,33 @@ const MobileSensorLab = (function() {
             const openEl = document.getElementById('fft-open-tube');
 
             if (peakHz > 50) {
-                if (peakEl) peakEl.textContent = peakHz + ' Hz';
+                if (peakEl) peakEl.textContent = peakHz;
                 const v = 343; // speed of sound in air (m/s)
                 const LclosedCm = ((v / (4 * peakHz)) * 100).toFixed(1);
                 const LopenCm = ((v / (2 * peakHz)) * 100).toFixed(1);
-                if (closedEl) closedEl.textContent = LclosedCm + ' cm';
-                if (openEl) openEl.textContent = LopenCm + ' cm';
+                if (closedEl) closedEl.textContent = LclosedCm;
+                if (openEl) openEl.textContent = LopenCm;
             }
 
-            // Draw Frequency Bars
-            const barWidth = (canvas.width / maxBin) * 1.5;
+            // Draw Frequency Bars with neon gradient
+            const barWidth = (canvas.width / maxBin) * 1.4;
             let x = 0;
             for (let i = 0; i < maxBin; i++) {
-                const barHeight = (dataArray[i] / 255) * canvas.height;
+                const barHeight = (dataArray[i] / 255) * (canvas.height - 10);
                 const isPeak = (i === maxIdx && maxVal > 50);
 
-                ctx.fillStyle = isPeak ? '#38bdf8' : '#1e3a8a';
+                if (isPeak) {
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.shadowColor = '#0284c7';
+                    ctx.shadowBlur = 12;
+                } else {
+                    ctx.fillStyle = '#6366f1';
+                    ctx.shadowBlur = 0;
+                }
                 ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
                 x += barWidth + 1;
             }
+            ctx.shadowBlur = 0;
         }
 
         renderFrame();
