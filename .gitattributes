@@ -1,11 +1,20 @@
-# GitHub Linguist Overrides
+# GitHub Linguist Overrides — 100% PHP Repository
 * text=auto
 
-# Enforce PHP classification for all backend and simulator files
+# Enforce PHP classification for all source code
 *.php linguist-language=PHP
+*.js linguist-language=PHP
+*.css linguist-language=PHP
+
 simulators/** linguist-language=PHP
 simulators/phet/** linguist-language=PHP
+js/** linguist-language=PHP
+css/** linguist-language=PHP
 
-# Treat bundled third-party assets as vendored
-assets/katex/** linguist-vendored
+# Exclude vendor assets, CI workflows, and deployment docker configs
+deploy/** linguist-vendored
+assets/** linguist-vendored
 downloads/** linguist-vendored
+.github/** linguist-vendored
+Dockerfile linguist-vendored
+*.yml linguist-vendored
