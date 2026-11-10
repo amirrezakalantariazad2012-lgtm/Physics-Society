@@ -65,10 +65,18 @@ class AuthController {
             'current_streak' => 1,
             'max_streak' => 1,
             'last_activity_date' => date('Y-m-d'),
-            'created_at' => date('Y-m-d H:i:s')
+            'updated_at' => date('Y-m-d H:i:s')
         ]);
 
-        $user = DB::fetchOne("SELECT u.*, p.grade_id, p.total_xp, p.current_level, p.current_streak FROM users u JOIN student_profiles p ON p.user_id = u.id WHERE u.id = :id", ['id' => $userId]);
+        $user = DB::fetchOne(
+            "SELECT u.*, p.grade_id, p.total_xp, p.current_level, p.current_streak, p.max_streak,
+                    p.student_number, p.avatar_url, g.title_fa AS grade_title_fa
+             FROM users u
+             JOIN student_profiles p ON p.user_id = u.id
+             LEFT JOIN grades g ON g.id = p.grade_id
+             WHERE u.id = :id",
+            ['id' => $userId]
+        );
         $token = Auth::createToken(['sub' => $user['username'], 'role' => 'student']);
 
         echo json_encode([

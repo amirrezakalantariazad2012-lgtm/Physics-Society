@@ -1,7 +1,22 @@
 # QUANTUM CUT — Apache/LiteSpeed Server Configuration (cPanel/DirectAdmin 100% PHP Ready)
+
+# Deny access to hidden files, storage artefacts and private application folders
+<FilesMatch "(^\\.|\\.env|\\.db|\\.sqlite|\\.sql|\\.log|\\.ini|\\.bak|\\.sh|composer\\.(json|lock)|package(-lock)?\\.json)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
+
+    # Private directories are never web-accessible
+    RewriteRule ^(?:\.git|\.backup|\.github|backend|data|deploy)(?:/|$) - [F,L]
 
     # Pass Authorization header to PHP in Apache / FastCGI / cPanel environments
     RewriteCond %{HTTP:Authorization} ^(.*)
@@ -10,6 +25,9 @@
     # Route all /api/* requests to api/index.php
     RewriteCond %{REQUEST_URI} ^/api(/.*)?$ [NC]
     RewriteRule ^api(/.*)?$ api/index.php [QSA,L]
+
+    # Stream uploaded study materials through the PHP gateway (no direct storage access)
+    RewriteRule ^uploads/(.+)$ uploads.php?f=$1 [L,QSA]
 
     # Rewrite any legacy .html simulator request to .php
     RewriteRule ^simulators/(.+)\.html$ simulators/$1.php [L,QSA]

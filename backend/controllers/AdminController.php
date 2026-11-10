@@ -384,7 +384,7 @@ class AdminController {
             'total_xp' => 100,
             'current_level' => 1,
             'current_streak' => 1,
-            'created_at' => date('Y-m-d H:i:s')
+            'updated_at' => date('Y-m-d H:i:s')
         ]);
 
         echo json_encode(['id' => $userId, 'message' => 'حساب دانش‌آموز با موفقیت ساخته شد.'], JSON_UNESCAPED_UNICODE);

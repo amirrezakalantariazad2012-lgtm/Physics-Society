@@ -68,8 +68,30 @@ class GamificationController {
             ['uid' => $userId]
         );
 
+        // Latest in-app notices for the learner dashboard.
+        $notifications = DB::fetchAll(
+            "SELECT id, title_fa, message_fa, is_read, notification_type, link_url, created_at
+             FROM notifications WHERE user_id = :uid
+             ORDER BY created_at DESC LIMIT 6",
+            ['uid' => $userId]
+        );
+
+        $formattedUser = Auth::formatUser($user);
+
         echo json_encode([
-            'user' => Auth::formatUser($user),
+            // Canonical student record consumed by the dashboard view
+            'student' => array_merge($formattedUser, [
+                'rank' => $userRank,
+                'current_streak' => $currentStreak,
+                'longest_streak' => $maxStreak,
+                'total_xp' => $totalXp,
+                'level' => $currentLevel,
+                'next_level_xp' => $nextXp,
+                'badges_count' => $unlockedBadgesCount,
+                'completed_lessons' => $completedLessonsCount
+            ]),
+            // Backwards-compatible flat fields
+            'user' => $formattedUser,
             'total_xp' => $totalXp,
             'current_level' => $currentLevel,
             'next_level_xp' => $nextXp,
@@ -79,6 +101,7 @@ class GamificationController {
             'unlocked_badges_count' => $unlockedBadgesCount,
             'completed_lessons_count' => $completedLessonsCount,
             'recent_exams' => $recentExams,
+            'notifications' => $notifications,
             'active_competition' => $activeComp
         ], JSON_UNESCAPED_UNICODE);
     }
@@ -165,8 +188,23 @@ class GamificationController {
             "SELECT * FROM xp_transactions WHERE user_id = :uid AND activity_type = 'lab_experiment' ORDER BY created_at DESC",
             ['uid' => $user['id']]
         );
+
+        // reference_id is written as lab_{simType}_{YYYYMMDD}: derive the distinct lab list.
+        $simIds = [];
+        $totalXp = 0;
+        foreach ($records as $record) {
+            $totalXp += (int) ($record['amount'] ?? 0);
+            $ref = (string) ($record['reference_id'] ?? '');
+            if (preg_match('/^lab_(.+)_\d{8}$/', $ref, $m)) {
+                $simIds[$m[1]] = true;
+            }
+        }
+
         echo json_encode([
             'completed_count' => count($records),
+            'completed_labs_count' => count($simIds),
+            'total_lab_xp' => $totalXp,
+            'completed_sim_ids' => array_keys($simIds),
             'recent_labs' => $records
         ], JSON_UNESCAPED_UNICODE);
     }

@@ -12,85 +12,97 @@ async function renderLeaderboardsView(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    container.innerHTML = `
-    <div class="text-center py-12">
-        <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-    </div>
-    `;
+    container.innerHTML = `<div class="qc-shell qc-loading"><div class="qc-spinner"></div><span>در حال دریافت جدول رتبه‌بندی…</span></div>`;
 
     try {
-        const data = await window.api.getLeaderboards();
-        const list = data.leaderboard || [];
+        const raw = await window.api.getLeaderboards();
+        const list = Array.isArray(raw) ? raw : (Array.isArray(raw.leaderboard) ? raw.leaderboard : []);
+        const me = window.store.currentUser;
+        const faNum = (n) => { try { return Number(n || 0).toLocaleString('fa-IR'); } catch (e) { return String(n); } };
+        const gradeOf = (s) => s.grade_title_fa || s.grade_title || 'دوره اول';
+
+        const podium = list.slice(0, 3);
+        const order = podium.length >= 3 ? [podium[1], podium[0], podium[2]] : podium;
 
         container.innerHTML = `
-        <div class="max-w-3xl mx-auto px-4 py-8 space-y-8">
-            <div class="text-center space-y-2">
-                <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 flex items-center justify-center">
-                    <i data-lucide="award" class="w-6 h-6"></i>
-                </div>
-                <h1 class="text-2xl font-extrabold text-slate-800 dark:text-white">جدول رده‌بندی دانش‌آموزان</h1>
-                <p class="text-xs text-slate-500">رتبه‌بندی بر اساس مجموع امتیازات تجربه (XP) کسب شده در درس‌ها، آزمون‌ها و مسابقات</p>
+        <div class="qc-shell qc-section space-y-6">
+          <header class="flex flex-wrap items-end justify-between gap-3 qc-reveal">
+            <div>
+              <span class="qc-eyebrow">LEADERBOARD</span>
+              <h1 class="qc-h2 mt-1.5">جدول رتبه‌بندی دانش‌آموزان</h1>
+              <p class="qc-lede mt-2" style="max-width:60ch;">رتبه‌بندی بر پایه مجموع امتیاز تجربه (XP) کسب‌شده در درسنامه‌ها، آزمون‌ها و مسابقات علمی.</p>
             </div>
+            <div class="flex items-center gap-2">
+              <span class="qc-chip qc-chip--mono" style="font-size:9.5px;">${faNum(list.length)} پژوهشگر</span>
+              <button type="button" class="qc-btn qc-btn--ghost qc-btn--sm" onclick="window.store.setView('competitions')">
+                <i data-lucide="trophy" class="w-3.5 h-3.5"></i> لیگ‌ها
+              </button>
+            </div>
+          </header>
 
-            <!-- Top 3 Podium if >= 3 students -->
-            ${list.length >= 3 ? `
-            <div class="grid grid-cols-3 gap-3 items-end pt-8 pb-4 text-center">
-                <!-- 2nd Place -->
-                <div class="bg-white dark:bg-slate-900/95 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-md space-y-2 h-[170px] flex flex-col justify-end">
-                    <span class="w-7 h-7 mx-auto rounded-full bg-slate-300 text-slate-800 font-bold text-xs flex items-center justify-center">۲</span>
-                    <span class="font-bold text-xs text-slate-800 dark:text-white block truncate">${list[1].display_name}</span>
-                    <span class="text-[11px] text-slate-400 block">${list[1].grade_title_fa}</span>
-                    <span class="text-xs font-bold text-sky-400 font-sans font-bold">${list[1].total_xp} XP</span>
-                </div>
-                <!-- 1st Place -->
-                <div class="bg-white dark:bg-slate-900/95 rounded-3xl p-4 border border-amber-500/50 shadow-md space-y-2 h-[200px] flex flex-col justify-end relative">
-                    <i data-lucide="crown" class="w-6 h-6 text-amber-500 absolute -top-3 left-1/2 -translate-x-1/2"></i>
-                    <span class="w-8 h-8 mx-auto rounded-full bg-amber-400 text-slate-900 font-black text-sm flex items-center justify-center shadow">۱</span>
-                    <span class="font-extrabold text-sm text-slate-900 dark:text-white block truncate">${list[0].display_name}</span>
-                    <span class="text-[11px] text-slate-400 block">${list[0].grade_title_fa}</span>
-                    <span class="text-sm font-black text-amber-500 font-sans">${list[0].total_xp} XP</span>
-                </div>
-                <!-- 3rd Place -->
-                <div class="bg-white dark:bg-slate-900/95 rounded-3xl p-4 border border-slate-200 dark:border-slate-800 shadow-md space-y-2 h-[150px] flex flex-col justify-end">
-                    <span class="w-7 h-7 mx-auto rounded-full bg-amber-700 text-white font-bold text-xs flex items-center justify-center">۳</span>
-                    <span class="font-bold text-xs text-slate-800 dark:text-white block truncate">${list[2].display_name}</span>
-                    <span class="text-[11px] text-slate-400 block">${list[2].grade_title_fa}</span>
-                    <span class="text-xs font-bold text-sky-400 font-sans font-bold">${list[2].total_xp} XP</span>
-                </div>
-            </div>
-            ` : ''}
+          ${list.length === 0 ? `
+          <div class="qc-empty">
+            <i data-lucide="award" class="w-8 h-8"></i>
+            <span class="qc-empty__title">هنوز رتبه‌ای ثبت نشده است</span>
+            <span class="qc-empty__text">با تکمیل درسنامه‌ها و شرکت در آزمون‌ها، اولین امتیاز خود را ثبت کنید.</span>
+            <button type="button" class="qc-btn qc-btn--sm" onclick="window.store.setView('curriculum')">شروع یادگیری</button>
+          </div>` : `
+          <section class="grid grid-cols-3 gap-2.5 items-end qc-reveal" data-delay="1">
+            ${order.map((s, idx) => {
+                const rank = Number(s.rank) || (idx + 1);
+                const isFirst = rank === 1;
+                return `
+                <article class="qc-card text-center flex flex-col justify-end gap-1.5" style="padding:${isFirst ? '1.4rem 1rem 1.1rem' : '1rem .7rem'};min-height:${isFirst ? '210px' : '170px'};${isFirst ? 'border-color:rgba(251,191,36,.45);' : ''}">
+                  ${isFirst ? '<i data-lucide="crown" class="w-5 h-5 mx-auto" style="color:var(--warn)"></i>' : ''}
+                  <span class="mx-auto grid place-items-center w-8 h-8 rounded-full text-[11px] font-black"
+                        style="${isFirst ? 'background:var(--warn);color:#1b1203;' : 'background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);'}">${faNum(rank)}</span>
+                  <span class="block text-[12px] font-black text-[var(--ink)] truncate">${window.qcEscape(s.display_name || s.full_name || 'دانش‌آموز')}</span>
+                  <span class="block text-[10px] text-[var(--muted)] truncate">${gradeOf(s)}</span>
+                  <span class="block font-mono text-[12px] font-bold" style="color:var(--accent);">${faNum(s.total_xp)} XP</span>
+                </article>`;
+            }).join('')}
+          </section>
 
-            <!-- Full Ranked List -->
-            <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden">
-                ${list.map(s => `
-                <div class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <div class="flex items-center gap-3">
-                        <span class="w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center font-sans ${s.rank <= 3 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
-                            ${s.rank}
-                        </span>
-                        <div>
-                            <span class="font-bold text-sm text-slate-800 dark:text-white block">${s.display_name}</span>
-                            <span class="text-xs text-slate-400">سطح ${s.current_level} • ${s.grade_title_fa}</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <span class="flex items-center gap-1 text-xs text-orange-500 font-bold" title="روزهای استمرار">
-                            <i data-lucide="flame" class="w-3.5 h-3.5 fill-orange-500"></i>
-                            ${s.streak}
-                        </span>
-                        <span class="text-sm font-black text-sky-400 font-sans font-bold">
-                            ${s.total_xp} XP
-                        </span>
-                    </div>
-                </div>
-                `).join('')}
+          <section class="qc-card qc-card--p qc-reveal" data-delay="2">
+            <div class="flex items-center justify-between mb-2">
+              <h2 class="text-[13px] font-black text-[var(--ink)]">رتبه‌بندی کامل</h2>
+              <span class="qc-chip qc-chip--ok" style="font-size:9px;"><span class="qc-dot qc-dot--live"></span> به‌روزرسانی زنده</span>
             </div>
-        </div>
-        `;
+            <div class="qc-table-wrap" style="border:0;">
+              <table class="qc-table" style="min-width:640px;">
+                <thead>
+                  <tr><th style="width:64px;">رتبه</th><th>پژوهشگر</th><th>پایه</th><th>سطح</th><th>استمرار</th><th style="text-align:left;">امتیاز</th></tr>
+                </thead>
+                <tbody>
+                  ${list.map(s => {
+                      const isMe = me && Number(me.id) === Number(s.id);
+                      return `
+                      <tr ${isMe ? 'style="background:var(--accent-soft);"' : ''}>
+                        <td>
+                          <span class="inline-grid place-items-center w-6 h-6 rounded-lg text-[10px] font-bold"
+                                style="${Number(s.rank) <= 3 ? 'background:var(--warn-soft);color:var(--warn);' : 'background:var(--surface-2);color:var(--muted);'}">${faNum(s.rank)}</span>
+                        </td>
+                        <td>
+                          <span class="text-[11.5px] font-bold text-[var(--ink)]">${window.qcEscape(s.display_name || s.full_name || 'دانش‌آموز')}</span>
+                          ${isMe ? '<span class="qc-chip qc-chip--accent ms-1" style="font-size:8px;">شما</span>' : ''}
+                        </td>
+                        <td class="text-[10.5px]">${gradeOf(s)}</td>
+                        <td class="qc-table__num">${faNum(s.current_level)}</td>
+                        <td class="qc-table__num" style="color:var(--warn);">${faNum(s.current_streak ?? s.streak)} روز</td>
+                        <td class="qc-table__num font-bold" style="text-align:left;color:var(--accent);">${faNum(s.total_xp)}</td>
+                      </tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </section>`}
+        </div>`;
 
         if (window.lucide) window.lucide.createIcons();
+        if (window.qcRevealScan) window.qcRevealScan(container);
     } catch (e) {
-        container.innerHTML = `<div class="p-6 text-center text-rose-500 font-bold">${e.message}</div>`;
+        container.innerHTML = `<div class="qc-shell qc-section"><div class="qc-empty"><i data-lucide="satellite-dish" class="w-8 h-8 text-[var(--danger)]"></i><span class="qc-empty__title">دریافت جدول رتبه‌بندی ممکن نشد</span><span class="qc-empty__text">${e.message}</span></div></div>`;
+        if (window.lucide) window.lucide.createIcons();
     }
 }
 
@@ -98,53 +110,74 @@ async function renderBadgesView(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    container.innerHTML = `
-    <div class="text-center py-12">
-        <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-    </div>
-    `;
+    container.innerHTML = `<div class="qc-shell qc-loading"><div class="qc-spinner"></div><span>در حال دریافت ویترین مدال‌ها…</span></div>`;
 
     try {
-        const badges = await window.api.getBadges();
+        const raw = await window.api.getBadges();
+        const badges = Array.isArray(raw) ? raw : (Array.isArray(raw.badges) ? raw.badges : []);
+        const unlocked = badges.filter(b => b.is_unlocked).length;
+        const faNum = (n) => { try { return Number(n || 0).toLocaleString('fa-IR'); } catch (e) { return String(n); } };
+        const percent = badges.length ? Math.round((unlocked / badges.length) * 100) : 0;
 
         container.innerHTML = `
-        <div class="max-w-4xl mx-auto px-4 py-8 space-y-8">
-            <div class="text-center space-y-2">
-                <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center">
-                    <i data-lucide="medal" class="w-6 h-6"></i>
-                </div>
-                <h1 class="text-2xl font-extrabold text-slate-800 dark:text-white">نشان‌ها و مدال‌های افتخار</h1>
-                <p class="text-xs text-slate-500">با استمرار در مطالعه، حل تمرین‌های سخت و شرکت در مسابقات مدال‌های ویژه کسب کنید</p>
+        <div class="qc-shell qc-section space-y-5">
+          <header class="flex flex-wrap items-end justify-between gap-3 qc-reveal">
+            <div>
+              <span class="qc-eyebrow">ACHIEVEMENTS</span>
+              <h1 class="qc-h2 mt-1.5">نشان‌ها و مدال‌های افتخار</h1>
+              <p class="qc-lede mt-2" style="max-width:60ch;">با استمرار در مطالعه، حل تمرین‌های سخت و حضور در مسابقات، مدال‌های ویژه پژوهشگری را باز کنید.</p>
             </div>
+            <div class="flex items-center gap-2">
+              <span class="qc-chip qc-chip--ok qc-chip--mono">${faNum(unlocked)} از ${faNum(badges.length)}</span>
+              <span class="qc-chip qc-chip--mono">${faNum(percent)}٪</span>
+            </div>
+          </header>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                ${badges.map(b => `
-                <div class="p-6 rounded-3xl border transition-all ${b.is_unlocked ? 'bg-slate-900/95 border-emerald-700/60 shadow-xl' : 'bg-slate-900/40 border-slate-800 opacity-60'}">
-                    <div class="flex items-center gap-4 mb-3">
-                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center ${b.is_unlocked ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-700/60' : 'bg-slate-800 text-slate-500 border border-slate-700'}">
-                            <i data-lucide="${b.icon || 'star'}" class="w-6 h-6"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-sm text-slate-800 dark:text-white">${b.title_fa}</h3>
-                            <span class="text-[11px] font-bold ${b.is_unlocked ? 'text-emerald-600' : 'text-slate-400'}">
-                                ${b.is_unlocked ? 'دریافت شده ✓' : 'قفل است'}
-                            </span>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">${b.description_fa}</p>
-                    <div class="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
-                        <span>پاداش: +${b.xp_bonus} XP</span>
-                        ${b.awarded_at ? `<span>${window.formatPersianDate(b.awarded_at)}</span>` : ''}
-                    </div>
-                </div>
-                `).join('')}
+          <section class="qc-card qc-card--p qc-reveal" data-delay="1">
+            <div class="flex items-center justify-between text-[10.5px] mb-1.5">
+              <span class="font-bold text-[var(--ink-2)]">پیشرفت ویترین مدال‌ها</span>
+              <span class="font-mono text-[var(--ok)]">${faNum(percent)}%</span>
             </div>
-        </div>
-        `;
+            <div class="h-2 rounded-full overflow-hidden" style="background:var(--surface-3);">
+              <div class="h-full rounded-full" style="width:${percent}%;background:linear-gradient(90deg,var(--ok),var(--accent));"></div>
+            </div>
+          </section>
+
+          ${badges.length === 0 ? `
+          <div class="qc-empty">
+            <i data-lucide="medal" class="w-8 h-8"></i>
+            <span class="qc-empty__title">مدالی تعریف نشده است</span>
+          </div>` : `
+          <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            ${badges.map((b, i) => `
+            <article class="qc-card qc-card--p qc-reveal ${b.is_unlocked ? '' : 'qc-card--hover'}" data-delay="${(i % 4) + 1}"
+                     style="${b.is_unlocked ? 'border-color:rgba(52,211,153,.38);' : 'background:var(--surface-2);'}">
+              <div class="flex items-start gap-3">
+                <span class="grid place-items-center w-11 h-11 rounded-xl shrink-0"
+                      style="${b.is_unlocked ? 'background:var(--ok-soft);color:var(--ok);border:1px solid rgba(52,211,153,.35);' : 'background:var(--surface-2);color:var(--muted-2);border:1px solid var(--line);'}">
+                  <i data-lucide="${b.icon || 'star'}" class="w-5 h-5"></i>
+                </span>
+                <div class="min-w-0">
+                  <h2 class="text-[12.5px] font-black text-[var(--ink)]">${window.qcEscape(b.title_fa)}</h2>
+                  <span class="qc-chip ${b.is_unlocked ? 'qc-chip--ok' : ''} mt-1" style="font-size:8.5px;">
+                    ${b.is_unlocked ? 'دریافت‌شده' : 'قفل'}
+                  </span>
+                </div>
+              </div>
+              <p class="mt-3 text-[11px] leading-[1.95] text-[var(--muted)]">${window.qcEscape(b.description_fa || '')}</p>
+              <div class="mt-3 pt-2.5 border-t border-[var(--line)] flex items-center justify-between text-[10px]">
+                <span class="text-[var(--muted)]">${b.category || 'دستاورد علمی'}</span>
+                <span class="font-mono font-bold" style="color:var(--warn);">+${faNum(b.xp_bonus)} XP</span>
+              </div>
+            </article>`).join('')}
+          </section>`}
+        </div>`;
 
         if (window.lucide) window.lucide.createIcons();
+        if (window.qcRevealScan) window.qcRevealScan(container);
     } catch (e) {
-        container.innerHTML = `<div class="p-6 text-center text-rose-500 font-bold">${e.message}</div>`;
+        container.innerHTML = `<div class="qc-shell qc-section"><div class="qc-empty"><i data-lucide="medal" class="w-8 h-8 text-[var(--danger)]"></i><span class="qc-empty__title">دریافت مدال‌ها ممکن نشد</span><span class="qc-empty__text">${e.message}</span></div></div>`;
+        if (window.lucide) window.lucide.createIcons();
     }
 }
 

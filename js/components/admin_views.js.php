@@ -24,57 +24,87 @@ class AdminViews {
         const container = document.getElementById(this.containerId);
         if (!container) return;
 
+        const adminTabs = [
+            { key: 'overview', label: 'داشبورد مدیریت', icon: 'layout-dashboard' },
+            { key: 'curriculum', label: 'سرفصل‌ها و درسنامه‌ساز', icon: 'book-open' },
+            { key: 'materials', label: 'درسنامه‌ها و جزوات', icon: 'file-text' },
+            { key: 'competitions', label: 'لیگ‌ها و مسابقات', icon: 'trophy' },
+            { key: 'questions', label: 'بانک سؤالات', icon: 'database' },
+            { key: 'reviews', label: 'مرکز بازبینی و تصحیح', icon: 'clipboard-check' },
+            { key: 'validation', label: 'اعتبارسنجی سؤالات', icon: 'shield-check' },
+            { key: 'ai', label: 'تنظیمات هوش مصنوعی', icon: 'sparkles' },
+            { key: 'textbooks', label: 'کتاب‌ها و استخراج PDF', icon: 'library' },
+            { key: 'students', label: 'دانش‌آموزان', icon: 'users' }
+        ];
+
         container.innerHTML = `
-        <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
-            <!-- Admin Top Bar -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
+        <div class="qc-adapt qc-shell qc-section">
+          <div class="grid grid-cols-1 lg:grid-cols-[248px_minmax(0,1fr)] gap-4">
+
+            <!-- Administration sidebar -->
+            <aside class="qc-card qc-card--p lg:sticky lg:top-[84px] h-max" style="padding:.8rem;">
+              <div class="flex items-center gap-2.5 px-1.5 pb-3 mb-2 border-b border-[var(--line)]">
+                <span class="grid place-items-center w-9 h-9 rounded-xl" style="background:var(--danger-soft);color:var(--danger);border:1px solid rgba(251,113,133,.3);">
+                  <i data-lucide="shield-check" class="w-4 h-4"></i>
+                </span>
                 <div>
-                    <div class="flex items-center gap-2 text-rose-600 font-bold text-xs mb-1">
-                        <i data-lucide="shield-check" class="w-4 h-4"></i>
-                        <span>پنل مدیریت انجمن فیزیک شهید بهشتی دو دوره اول</span>
-                    </div>
-                    <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">پنل جامع مدیریت آموزشی</h1>
+                  <div class="text-[12px] font-black text-[var(--ink)]">کنسول مدیریت</div>
+                  <div class="font-mono text-[8.5px] tracking-[.16em] text-[var(--muted)]">ADMIN COMMAND DECK</div>
                 </div>
+              </div>
 
-                <!-- Admin Tabs Navigation (Responsive Horizontal Scroll on Mobile) -->
-                <div class="flex items-center sm:flex-wrap gap-1.5 p-1.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 text-xs font-bold overflow-x-auto no-scrollbar w-full sm:w-auto">
-                    <button onclick="window.currentAdminViews.switchTab('overview')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'overview' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        داشبورد
-                    </button>
-                    <button onclick="window.currentAdminViews.switchTab('curriculum')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'curriculum' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        سرفصل‌ها و درسنامه‌ساز
-                    </button>
-                    <button onclick="window.currentAdminViews.switchTab('materials')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'materials' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        درسنامه‌ها و جزوات متفرقه
-                    </button>
-                    <button onclick="window.currentAdminViews.switchTab('competitions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'competitions' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        مدیریت لیگ‌ها و مسابقات
-                    </button>
-                    <button onclick="window.currentAdminViews.switchTab('questions')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'questions' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        بانک سؤالات
-                    </button>
-                    <button onclick="window.currentAdminViews.switchTab('reviews')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'reviews' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        مرکز بازبینی و تصحیح
-                    </button>
-                    <button onclick="window.currentAdminViews.switchTab('validation')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'validation' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        اعتبارسنجی سؤالات
-                    </button>
-                    <button onclick="window.currentAdminViews.switchTab('ai')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'ai' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        تنظیمات هوش مصنوعی
-                    </button>
-                    <button onclick="window.currentAdminViews.switchTab('textbooks')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'textbooks' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        کتاب‌ها و استخراج PDF
-                    </button>
-                    <button onclick="window.currentAdminViews.switchTab('students')" class="shrink-0 px-3 py-2 rounded-xl transition-all ${this.activeTab === 'students' ? 'bg-sky-600 text-white shadow-sm font-bold' : 'text-slate-400 hover:text-white hover:bg-slate-800/60'}">
-                        دانش‌آموزان
-                    </button>
+              <nav class="hidden lg:grid gap-1" aria-label="بخش‌های مدیریت">
+                ${adminTabs.map(tab => `
+                <button type="button" onclick="window.currentAdminViews.switchTab('${tab.key}')"
+                  ${this.activeTab === tab.key ? 'aria-current="page"' : ''}
+                  class="qc-menu__item ${this.activeTab === tab.key ? 'is-active' : ''}"
+                  style="${this.activeTab === tab.key ? 'background:var(--accent-soft);border-color:var(--accent-line);color:var(--ink);' : ''}">
+                  <i data-lucide="${tab.icon}" class="w-4 h-4 ${this.activeTab === tab.key ? 'text-[var(--accent)]' : 'text-[var(--muted)]'}"></i>
+                  <span class="text-[11.5px] font-bold">${tab.label}</span>
+                </button>`).join('')}
+              </nav>
+
+              <div class="hidden lg:block mt-3 pt-3 border-t border-[var(--line)] space-y-1.5">
+                <button type="button" onclick="window.store.setView('landing')" class="qc-btn qc-btn--ghost qc-btn--sm qc-btn--block">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> مشاهده پرتال عمومی
+                </button>
+                <div class="flex items-center justify-between px-1 pt-1 text-[9px] text-[var(--muted)] font-mono">
+                  <span class="flex items-center gap-1"><span class="qc-dot qc-dot--live" style="color:var(--ok)"></span> SYSTEM ONLINE</span>
+                  <span>PHP 8.x</span>
                 </div>
-            </div>
+              </div>
+            </aside>
 
-            <!-- Tab Content Container -->
-            <div id="admin-tab-content">
-                <div class="text-center py-12"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div></div>
+            <!-- Administration workspace -->
+            <div class="min-w-0 space-y-3">
+              <div class="qc-card qc-card--p">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span class="qc-eyebrow">ADMINISTRATION</span>
+                    <h1 class="text-lg font-black text-[var(--ink)] mt-1">پنل جامع مدیریت آموزشی</h1>
+                    <p class="text-[10.5px] text-[var(--muted)] mt-0.5">کاربران، محتوا، سؤالات، مسابقات و پیکربندی هوش مصنوعی</p>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="window.openCommandPalette()" class="qc-icon-btn" title="جستجوی سریع"><i data-lucide="search" class="w-4 h-4"></i></button>
+                    <button type="button" data-qc-theme-toggle class="qc-icon-btn" title="تغییر پوسته"><i data-theme-icon data-lucide="sun" class="w-4 h-4"></i></button>
+                    <button type="button" onclick="window.store.setView('dashboard')" class="qc-btn qc-btn--ghost qc-btn--sm"><i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i> داشبورد من</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mobile tab strip -->
+              <div class="lg:hidden qc-tabs w-full" role="tablist">
+                ${adminTabs.map(tab => `
+                <button type="button" role="tab" aria-selected="${this.activeTab === tab.key}" class="qc-tab ${this.activeTab === tab.key ? 'is-active' : ''}"
+                  onclick="window.currentAdminViews.switchTab('${tab.key}')">${tab.label}</button>`).join('')}
+              </div>
+
+              <!-- Tab content container -->
+              <div id="admin-tab-content">
+                <div class="qc-card qc-card--p"><div class="qc-loading"><div class="qc-spinner"></div><span>در حال بارگذاری بخش مدیریت…</span></div></div>
+              </div>
             </div>
+          </div>
         </div>
         `;
 
@@ -92,98 +122,165 @@ class AdminViews {
         if (!target) return;
 
         if (this.activeTab === 'overview') {
-            const data = await window.api.getAdminOverview();
+            let data = null;
+            try {
+                data = await window.api.getAdminOverview();
+            } catch (err) {
+                target.innerHTML = `<div class="qc-card qc-card--p"><div class="qc-empty">
+                    <i data-lucide="shield-alert" class="w-8 h-8 text-[var(--danger)]"></i>
+                    <span class="qc-empty__title">دریافت آمار مدیریتی ممکن نشد</span>
+                    <span class="qc-empty__text">${err.message || 'خطای نامشخص'}</span>
+                    <button type="button" class="qc-btn qc-btn--sm" onclick="window.currentAdminViews.loadTabContent()">تلاش مجدد</button>
+                </div></div>`;
+                if (window.lucide) window.lucide.createIcons();
+                return;
+            }
             target.innerHTML = `
             <div class="space-y-6">
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
-                        <span class="text-xs text-slate-400 font-bold block mb-1">دانش‌آموزان ثبت‌نامی</span>
-                        <span class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">${data.total_students}</span>
+            <div class="space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <span class="qc-section-head__index">SYSTEM OVERVIEW</span>
+                        <h2 class="text-sm font-black text-[var(--ink)] mt-1">نمای کلی سامانه آموزشی</h2>
                     </div>
-                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
-                        <span class="text-xs text-slate-400 font-bold block mb-1">کل پرسش‌های فعال</span>
-                        <span class="text-3xl font-extrabold text-blue-600 font-mono">${data.total_questions}</span>
+                    <span class="qc-chip qc-chip--ok" style="font-size:9.5px;"><span class="qc-dot qc-dot--live"></span> داده‌های زنده از پایگاه داده</span>
+                </div>
+
+                <!-- KPI readouts -->
+                <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+                    <div class="qc-stat">
+                        <div class="flex items-center justify-between">
+                            <span class="qc-readout__label">دانش‌آموزان ثبت‌نامی</span>
+                            <i data-lucide="users" class="w-4 h-4 text-[var(--accent)]"></i>
+                        </div>
+                        <div class="qc-stat__value qc-stat__value--accent mt-1.5">${Number(data.total_students || 0).toLocaleString('fa-IR')}</div>
+                        <div class="qc-stat__label">حساب فعال دانش‌آموزی</div>
                     </div>
-                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
-                        <span class="text-xs text-slate-400 font-bold block mb-1">آزمون‌های برگزار شده</span>
-                        <span class="text-3xl font-extrabold text-indigo-600 font-mono">${data.total_attempts}</span>
+                    <div class="qc-stat">
+                        <div class="flex items-center justify-between">
+                            <span class="qc-readout__label">پرسش‌های فعال</span>
+                            <i data-lucide="database" class="w-4 h-4 text-[var(--accent-2)]"></i>
+                        </div>
+                        <div class="qc-stat__value mt-1.5">${Number(data.total_questions || 0).toLocaleString('fa-IR')}</div>
+                        <div class="qc-stat__label">در بانک سؤالات منتشرشده</div>
                     </div>
-                    <div class="bg-slate-900/95 p-6 rounded-3xl border border-slate-800 shadow-xl">
-                        <span class="text-xs text-slate-400 font-bold block mb-1">پاسخ‌های در صف بازبینی دبیر</span>
-                        <span class="text-3xl font-extrabold text-amber-600 font-mono">${data.pending_written_reviews}</span>
+                    <div class="qc-stat">
+                        <div class="flex items-center justify-between">
+                            <span class="qc-readout__label">آزمون‌های برگزارشده</span>
+                            <i data-lucide="clipboard-check" class="w-4 h-4 text-[var(--accent-3)]"></i>
+                        </div>
+                        <div class="qc-stat__value mt-1.5">${Number(data.total_attempts || 0).toLocaleString('fa-IR')}</div>
+                        <div class="qc-stat__label">تلاش ثبت‌شده دانش‌آموزان</div>
+                    </div>
+                    <div class="qc-stat" style="border-color:rgba(251,191,36,.32);">
+                        <div class="flex items-center justify-between">
+                            <span class="qc-readout__label">در صف بازبینی</span>
+                            <i data-lucide="hourglass" class="w-4 h-4 text-[var(--warn)]"></i>
+                        </div>
+                        <div class="qc-stat__value mt-1.5" style="color:var(--warn);">${Number(data.pending_written_reviews || 0).toLocaleString('fa-IR')}</div>
+                        <div class="qc-stat__label">پاسخ تشریحی نیازمند داوری</div>
                     </div>
                 </div>
 
-                <!-- Admin Quick Command Deck -->
-                <div class="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-cyan-500/30 cyber-glow-cyan space-y-4">
-                    <div class="flex items-center justify-between">
+                <!-- Quick command deck -->
+                <div class="qc-card qc-card--p">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                         <div class="flex items-center gap-2">
-                            <i data-lucide="terminal" class="w-5 h-5 text-cyan-400"></i>
-                            <h3 class="text-sm font-extrabold text-white">مرکز فرماندهی و دسترسی‌های سریع مدیر (Admin Control Deck)</h3>
+                            <span class="qc-feature__icon"><i data-lucide="terminal" class="w-4 h-4"></i></span>
+                            <div>
+                                <h3 class="text-[12.5px] font-black text-[var(--ink)]">میز فرمان سریع مدیر</h3>
+                                <p class="text-[10px] text-[var(--muted)] mt-0.5">دسترسی یک‌کلیکه به پرکاربردترین عملیات مدیریتی</p>
+                            </div>
                         </div>
-                        <span class="text-[11px] px-2.5 py-1 rounded-full bg-sky-950/80 border border-sky-800/80 text-sky-300 font-sans font-medium">مدیریت انجمن فیزیک</span>
+                        <span class="qc-chip qc-chip--mono" style="font-size:9px;">ADMIN CONTROL DECK</span>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-                        <button onclick="window.currentAdminViews.switchTab('curriculum'); setTimeout(() => window.currentAdminViews.openCreateChapterModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-purple-500/40 text-right flex items-center justify-between transition-all group">
-                            <div>
-                                <span class="block text-xs font-black text-purple-300 group-hover:text-white">📖 سرفصل‌ها و درسنامه‌ساز</span>
-                                <span class="text-[11px] text-slate-400">طراحی فصول و دروس بدون کد</span>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5">
+                        <button type="button" onclick="window.currentAdminViews.switchTab('curriculum'); setTimeout(() => window.currentAdminViews.openCreateChapterModal(), 200)" class="qc-card qc-card--hover text-right" style="padding:.75rem;box-shadow:none;">
+                            <div class="flex items-center justify-between gap-2">
+                                <div>
+                                    <span class="block text-[11.5px] font-black text-[var(--ink)]">سرفصل‌ها و درسنامه‌ساز</span>
+                                    <span class="block text-[10px] text-[var(--muted)] mt-0.5">طراحی فصول و دروس بدون کد</span>
+                                </div>
+                                <i data-lucide="book-plus" class="w-4 h-4 text-[var(--accent)] shrink-0"></i>
                             </div>
-                            <i data-lucide="book-plus" class="w-5 h-5 text-purple-400"></i>
                         </button>
-                        <button onclick="window.currentAdminViews.switchTab('materials'); setTimeout(() => window.currentAdminViews.openCreateMaterialModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-emerald-500/40 text-right flex items-center justify-between transition-all group">
-                            <div>
-                                <span class="block text-xs font-black text-emerald-300 group-hover:text-white">📄 بارگذاری جزوه و درسنامه</span>
-                                <span class="text-[11px] text-slate-400">بانک درسنامه‌های متفرقه</span>
+                        <button type="button" onclick="window.currentAdminViews.switchTab('materials'); setTimeout(() => window.currentAdminViews.openCreateMaterialModal(), 200)" class="qc-card qc-card--hover text-right" style="padding:.75rem;box-shadow:none;">
+                            <div class="flex items-center justify-between gap-2">
+                                <div>
+                                    <span class="block text-[11.5px] font-black text-[var(--ink)]">بارگذاری جزوه و درسنامه</span>
+                                    <span class="block text-[10px] text-[var(--muted)] mt-0.5">بانک درسنامه‌های متفرقه</span>
+                                </div>
+                                <i data-lucide="file-plus" class="w-4 h-4 text-[var(--ok)] shrink-0"></i>
                             </div>
-                            <i data-lucide="file-plus" class="w-5 h-5 text-emerald-400"></i>
                         </button>
-                        <button onclick="window.currentAdminViews.switchTab('competitions'); setTimeout(() => window.currentAdminViews.openCreateCompetitionModal(), 200)" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-cyan-500/30 text-right flex items-center justify-between transition-all group">
-                            <div>
-                                <span class="block text-xs font-black text-cyan-300 group-hover:text-white">➕ ساخت مسابقه یا چالش</span>
-                                <span class="text-[11px] text-slate-400">لیگ هفتگی، ماهانه یا سرعتی</span>
+                        <button type="button" onclick="window.currentAdminViews.switchTab('competitions'); setTimeout(() => window.currentAdminViews.openCreateCompetitionModal(), 200)" class="qc-card qc-card--hover text-right" style="padding:.75rem;box-shadow:none;">
+                            <div class="flex items-center justify-between gap-2">
+                                <div>
+                                    <span class="block text-[11.5px] font-black text-[var(--ink)]">ساخت مسابقه یا چالش</span>
+                                    <span class="block text-[10px] text-[var(--muted)] mt-0.5">لیگ هفتگی، ماهانه یا سرعتی</span>
+                                </div>
+                                <i data-lucide="trophy" class="w-4 h-4 text-[var(--warn)] shrink-0"></i>
                             </div>
-                            <i data-lucide="trophy" class="w-5 h-5 text-cyan-400"></i>
                         </button>
-                        <button onclick="window.currentAdminViews.switchTab('competitions')" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-violet-500/30 text-right flex items-center justify-between transition-all group">
-                            <div>
-                                <span class="block text-xs font-black text-violet-300 group-hover:text-white">⚖️ داوری پاسخ‌های مسابقات</span>
-                                <span class="text-[11px] text-slate-400">بررسی، نمره‌دهی و بازخورد</span>
+                        <button type="button" onclick="window.currentAdminViews.switchTab('competitions')" class="qc-card qc-card--hover text-right" style="padding:.75rem;box-shadow:none;">
+                            <div class="flex items-center justify-between gap-2">
+                                <div>
+                                    <span class="block text-[11.5px] font-black text-[var(--ink)]">داوری پاسخ‌های مسابقات</span>
+                                    <span class="block text-[10px] text-[var(--muted)] mt-0.5">بررسی، نمره‌دهی و بازخورد</span>
+                                </div>
+                                <i data-lucide="clipboard-check" class="w-4 h-4 text-[var(--accent-3)] shrink-0"></i>
                             </div>
-                            <i data-lucide="clipboard-check" class="w-5 h-5 text-violet-400"></i>
                         </button>
-                        <button onclick="window.currentAdminViews.switchTab('ai')" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-teal-500/30 text-right flex items-center justify-between transition-all group">
-                            <div>
-                                <span class="block text-xs font-black text-teal-300 group-hover:text-white">⚡ پایش هوش مصنوعی نکسورا</span>
-                                <span class="text-[11px] text-slate-400">تست تاخیر و مدل‌های آزاد</span>
+                        <button type="button" onclick="window.currentAdminViews.switchTab('ai')" class="qc-card qc-card--hover text-right" style="padding:.75rem;box-shadow:none;">
+                            <div class="flex items-center justify-between gap-2">
+                                <div>
+                                    <span class="block text-[11.5px] font-black text-[var(--ink)]">پایش هوش مصنوعی نکسورا</span>
+                                    <span class="block text-[10px] text-[var(--muted)] mt-0.5">تأخیر، مدل‌ها و مسیریاب</span>
+                                </div>
+                                <i data-lucide="cpu" class="w-4 h-4 text-[var(--accent-2)] shrink-0"></i>
                             </div>
-                            <i data-lucide="cpu" class="w-5 h-5 text-teal-400"></i>
                         </button>
-                        <button onclick="window.currentAdminViews.switchTab('questions')" class="p-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 border border-amber-500/30 text-right flex items-center justify-between transition-all group">
-                            <div>
-                                <span class="block text-xs font-black text-amber-300 group-hover:text-white">📚 بانک سؤالات و طراحی نو</span>
-                                <span class="text-[11px] text-slate-400">طراحی تستی و تشریحی</span>
+                        <button type="button" onclick="window.currentAdminViews.switchTab('questions')" class="qc-card qc-card--hover text-right" style="padding:.75rem;box-shadow:none;">
+                            <div class="flex items-center justify-between gap-2">
+                                <div>
+                                    <span class="block text-[11.5px] font-black text-[var(--ink)]">بانک سؤالات و طراحی نو</span>
+                                    <span class="block text-[10px] text-[var(--muted)] mt-0.5">طراحی تستی و تشریحی</span>
+                                </div>
+                                <i data-lucide="help-circle" class="w-4 h-4 text-[var(--warn)] shrink-0"></i>
                             </div>
-                            <i data-lucide="help-circle" class="w-5 h-5 text-amber-400"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Recent Activity Logs -->
-                <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                    <h3 class="font-bold text-base text-slate-800 dark:text-white">رویدادها و گزارش‌های امنیتی اخیر (Audit Logs)</h3>
-                    <div class="divide-y divide-slate-100 dark:divide-slate-800">
-                        ${(data.recent_logs && data.recent_logs.length > 0) ? data.recent_logs.map(l => `
-                        <div class="py-3 flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-mono text-[11px]">${l.action}</span>
-                                <span class="text-slate-600 dark:text-slate-300">موجودیت: ${l.target_entity} (شناسه: ${l.target_id || '-'})</span>
-                            </div>
-                            <span class="text-slate-400 font-mono">${window.formatPersianTime ? window.formatPersianTime(l.created_at) : (l.created_at || '-')}</span>
-                        </div>
-                        `).join('') : '<div class="py-4 text-center text-xs text-slate-400">هیچ رویداد جدیدی ثبت نشده است.</div>'}
+                <!-- Audit trail -->
+                <div class="qc-card qc-card--p">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-[12.5px] font-black text-[var(--ink)] flex items-center gap-2">
+                            <i data-lucide="scroll-text" class="w-4 h-4 text-[var(--muted)]"></i>
+                            رویدادها و گزارش‌های امنیتی اخیر
+                        </h3>
+                        <span class="qc-chip qc-chip--mono" style="font-size:9px;">AUDIT LOG</span>
                     </div>
+                    ${(data.recent_logs && data.recent_logs.length > 0) ? `
+                    <div class="qc-table-wrap" style="border:0;">
+                        <table class="qc-table" style="min-width:0;">
+                            <thead><tr><th>رویداد</th><th>موجودیت</th><th>شناسه</th><th>زمان</th></tr></thead>
+                            <tbody>
+                                ${data.recent_logs.map(l => `
+                                <tr>
+                                    <td><span class="qc-chip qc-chip--mono" style="font-size:9px;">${l.action}</span></td>
+                                    <td class="text-[11px]">${l.target_entity || '—'}</td>
+                                    <td class="qc-table__num text-[11px]">${l.target_id || '—'}</td>
+                                    <td class="text-[10px] text-[var(--muted)] whitespace-nowrap">${window.formatPersianTime ? window.formatPersianTime(l.created_at) : (l.created_at || '—')}</td>
+                                </tr>`).join('')}
+                            </tbody>
+                        </table>
+                    </div>` : `
+                    <div class="qc-empty" style="padding:1.4rem .8rem;">
+                        <i data-lucide="scroll" class="w-6 h-6"></i>
+                        <span class="qc-empty__title">رویدادی ثبت نشده است</span>
+                    </div>`}
                 </div>
             </div>
             `;

@@ -15,6 +15,7 @@ require_once __DIR__ . '/../services/MobileAppService.php';
 require_once __DIR__ . '/../controllers/AdminController.php';
 require_once __DIR__ . '/../controllers/CompetitionController.php';
 require_once __DIR__ . '/../controllers/CurriculumController.php';
+require_once __DIR__ . '/../controllers/GamificationController.php';
 
 $totalTests = 0;
 $passedTests = 0;
@@ -301,6 +302,65 @@ assertTest("Printable Exam SAMPAD Official Header", str_contains($examSheetData[
 // 8. Service Worker PWA Offline File
 $swFile = __DIR__ . '/../../sw.js.php';
 assertTest("PWA 100% Offline Service Worker (sw.js.php)", file_exists($swFile) && str_contains(file_get_contents($swFile), 'CACHE_NAME'));
+
+// 9. Observatory redesign — data contracts restored for the public portal
+try {
+    ob_start();
+    CurriculumController::getChaptersByBook(1);
+    $chapterList = json_decode(ob_get_clean(), true);
+    $firstChapter = is_array($chapterList) && !empty($chapterList) ? $chapterList[0] : [];
+    assertTest('Chapter Cards Expose Question Breakdown', isset($firstChapter['mcq_count'], $firstChapter['written_count'], $firstChapter['question_count']));
+    assertTest('Chapter Cards Expose Source Page Reference', array_key_exists('source_pages', $firstChapter));
+
+    ob_start();
+    CurriculumController::getChapterDetail((int) ($firstChapter['id'] ?? 1));
+    $chapterDetail = json_decode(ob_get_clean(), true);
+    assertTest('Chapter Detail Exposes Learning Objectives', isset($chapterDetail['objectives_fa']));
+    assertTest('Chapter Detail Exposes Grade & Book Context', isset($chapterDetail['book_title_fa'], $chapterDetail['grade_number']));
+    assertTest('Chapter Detail Exposes Attached Exam', array_key_exists('exam_id', (array) $chapterDetail));
+
+    $_GET = ['grade_id' => '1', 'category' => 'pamphlet'];
+    ob_start();
+    CurriculumController::getStudyMaterials();
+    $materials = json_decode(ob_get_clean(), true);
+    assertTest('Study Materials Endpoint Returns Rows', is_array($materials));
+    if (is_array($materials) && !empty($materials)) {
+        assertTest('Study Materials Use Persisted Schema Columns', isset($materials[0]['category'], $materials[0]['author_name']));
+        assertTest('Study Materials Expose Grade Title', isset($materials[0]['grade_title_fa']));
+    }
+    $_GET = [];
+
+    Auth::setSessionUser($studentUser);
+    ob_start();
+    GamificationController::dashboard();
+    $dashboard = json_decode(ob_get_clean(), true);
+    assertTest('Student Dashboard Contract Includes Profile', isset($dashboard['student']['full_name'], $dashboard['student']['rank']));
+    assertTest('Student Dashboard Contract Includes Notifications', array_key_exists('notifications', (array) $dashboard));
+    assertTest('Student Dashboard Keeps Flat Compatibility Fields', isset($dashboard['total_xp'], $dashboard['recent_exams']));
+} catch (Throwable $e) {
+    assertTest('Observatory data contracts', false, $e->getMessage());
+}
+
+// 10. Upload gateway hardening
+$gatewayFile = __DIR__ . '/../../uploads.php';
+$gatewaySrc = file_exists($gatewayFile) ? file_get_contents($gatewayFile) : '';
+assertTest('Upload Gateway Streams Through PHP', $gatewaySrc !== '' && str_contains($gatewaySrc, 'realpath'));
+assertTest('Upload Gateway Enforces Extension Allow-list', str_contains($gatewaySrc, "'pdf'"));
+
+// 11. Observatory design system file
+$styleFile = __DIR__ . '/../../css/style.css.php';
+$styleSrc = file_exists($styleFile) ? file_get_contents($styleFile) : '';
+assertTest('Dual Theme Tokens Present (dark + light)', str_contains($styleSrc, 'html.dark') && str_contains($styleSrc, 'html.light'));
+assertTest('Reduced Motion Preference Honoured', str_contains($styleSrc, 'prefers-reduced-motion'));
+
+$uiFile = __DIR__ . '/../../js/components/ui.js.php';
+assertTest('Theme Engine & Command Palette Shipped', file_exists($uiFile) && str_contains(file_get_contents($uiFile), 'qc-theme-changed'));
+
+$swSrc = file_exists($swFile) ? file_get_contents($swFile) : '';
+assertTest('Service Worker Precaches Observatory UI Layer', str_contains($swSrc, '/js/components/ui.js.php'));
+
+$routerSrc = file_exists(__DIR__ . '/../../router.php') ? file_get_contents(__DIR__ . '/../../router.php') : '';
+assertTest('Dev Router Blocks Private Storage Paths', str_contains($routerSrc, "'/backend'") && str_contains($routerSrc, "'env'"));
 
 echo "\n--------------------------------------------------------\n";
 echo "SUMMARY: Total: $totalTests | Passed: $passedTests | Failed: $failedTests\n";

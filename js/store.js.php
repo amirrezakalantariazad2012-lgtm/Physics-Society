@@ -15,31 +15,44 @@ class AppStore {
         this.viewParams = {};
         this.grades = [];
         this.selectedGrade = null;
-        // Quantum Deep Space Dark Theme by Default
-        const storedTheme = localStorage.getItem('theme');
-        this.theme = (storedTheme === 'light') ? 'light' : 'dark';
-        this.initTheme();
+        // Resolve the initial appearance: stored choice → OS preference → deep space.
+        let storedTheme = null;
+        try { storedTheme = localStorage.getItem('theme'); } catch (e) {}
+        const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        this.theme = (storedTheme === 'light' || storedTheme === 'dark')
+            ? storedTheme
+            : (prefersLight ? 'light' : 'dark');
+        this.applyThemeClass();
+    }
+
+    applyThemeClass() {
+        const isLight = this.theme === 'light';
+        document.documentElement.classList.toggle('light', isLight);
+        document.documentElement.classList.toggle('dark', !isLight);
+        document.documentElement.setAttribute('data-theme', this.theme);
+        document.documentElement.style.colorScheme = this.theme;
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', isLight ? '#f4f7fc' : '#070d18');
     }
 
     initTheme() {
-        if (this.theme === 'light') {
-            document.documentElement.classList.remove('dark');
-            document.documentElement.classList.add('light');
-            const metaTheme = document.querySelector('meta[name="theme-color"]');
-            if (metaTheme) metaTheme.setAttribute('content', '#f8fafc');
+        if (window.qcTheme) {
+            window.qcTheme.apply(this.theme, true);
         } else {
-            this.theme = 'dark';
-            document.documentElement.classList.add('dark');
-            document.documentElement.classList.remove('light');
-            const metaTheme = document.querySelector('meta[name="theme-color"]');
-            if (metaTheme) metaTheme.setAttribute('content', '#030712');
+            this.applyThemeClass();
+            try { localStorage.setItem('theme', this.theme); } catch (e) {}
         }
-        try { localStorage.setItem('theme', this.theme); } catch (e) {}
     }
 
     toggleTheme() {
-        this.theme = (this.theme === 'dark') ? 'light' : 'dark';
-        this.initTheme();
+        if (window.qcTheme) {
+            window.qcTheme.toggle();
+            this.theme = window.qcTheme.get();
+        } else {
+            this.theme = (this.theme === 'dark') ? 'light' : 'dark';
+            this.applyThemeClass();
+            try { localStorage.setItem('theme', this.theme); } catch (e) {}
+        }
         if (window.updateNavbar) {
             window.updateNavbar();
         }
@@ -117,6 +130,12 @@ class AppStore {
         this.viewParams = params;
         window.location.hash = view + (params.id ? `/${params.id}` : '');
         window.dispatchEvent(new CustomEvent('view-changed', { detail: { view, params } }));
+    }
+
+    // Lightweight toast bridge so every legacy component can surface feedback
+    notify(message, type = 'info', ms) {
+        if (window.qcToast) return window.qcToast(message, type, ms);
+        return null;
     }
 
     // Web Audio API Synthesized Sound Effects (zero external mp3 file dependencies!)

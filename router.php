@@ -7,6 +7,31 @@
 declare(strict_types=1);
 
 $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+$uri = is_string($uri) ? rawurldecode($uri) : '/';
+
+// 0. Hardening: never serve dotfiles, private folders or storage artefacts.
+$blockedPrefixes = ['/.git', '/.backup', '/.github', '/backend', '/data', '/deploy'];
+foreach ($blockedPrefixes as $prefix) {
+    if ($uri === $prefix || str_starts_with($uri, $prefix . '/')) {
+        http_response_code(404);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo 'Not found';
+        exit;
+    }
+}
+
+$blockedExtensions = ['env', 'db', 'sqlite', 'sqlite3', 'db-wal', 'db-shm', 'log', 'ini', 'bak', 'sql', 'tar', 'gz', 'zip', 'sh', 'yml', 'yaml', 'lock'];
+foreach ($blockedExtensions as $blockedExt) {
+    if (strtolower(pathinfo($uri, PATHINFO_EXTENSION)) === $blockedExt) {
+        // Study materials may legitimately be ZIP archives, served only through the gateway.
+        if (!str_starts_with($uri, '/uploads/')) {
+            http_response_code(404);
+            header('Content-Type: text/plain; charset=utf-8');
+            echo 'Not found';
+            exit;
+        }
+    }
+}
 
 // 1. Direct API Routes
 if (str_starts_with($uri, '/api')) {
@@ -14,7 +39,14 @@ if (str_starts_with($uri, '/api')) {
     exit;
 }
 
-// 2. Backward compatibility: if an old .html, .js, or .css link is accessed, resolve to .php
+// 1b. Uploaded study materials are streamed through the PHP gateway
+if (str_starts_with($uri, '/uploads/')) {
+    $_GET['f'] = substr($uri, strlen('/uploads/'));
+    require __DIR__ . '/uploads.php';
+    exit;
+}
+
+// 2. Backward compatibility: legacy .html / .js / .css links resolve to .php
 $filePath = __DIR__ . $uri;
 if (!is_file($filePath)) {
     if (is_file($filePath . '.php')) {
@@ -30,12 +62,21 @@ if (!is_file($filePath)) {
     }
 }
 
-// 3. Direct PHP Script Execution (e.g. /js/*.php, /css/*.php, /simulators/phet/*.php)
+// 3. PHP entry scripts only (application code never lives behind static requests)
 if (is_file($filePath)) {
     $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-    
+
     if ($ext === 'php' && $filePath !== __DIR__ . '/index.php' && $filePath !== __DIR__ . '/router.php') {
         require $filePath;
+        exit;
+    }
+
+    // Allow-list of genuinely public static assets.
+    $publicAssets = ['svg', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'ico', 'woff', 'woff2', 'ttf', 'otf', 'apk', 'pdf', 'md', 'txt', 'csv'];
+    if (!in_array($ext, $publicAssets, true)) {
+        http_response_code(404);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo 'Not found';
         exit;
     }
 
@@ -46,17 +87,21 @@ if (is_file($filePath)) {
         'jpg' => 'image/jpeg',
         'jpeg' => 'image/jpeg',
         'gif' => 'image/gif',
+        'webp' => 'image/webp',
         'ico' => 'image/x-icon',
         'woff' => 'font/woff',
         'woff2' => 'font/woff2',
         'ttf' => 'font/ttf',
+        'otf' => 'font/otf',
         'apk' => 'application/vnd.android.package-archive',
         'pdf' => 'application/pdf',
+        'md' => 'text/markdown; charset=utf-8',
+        'txt' => 'text/plain; charset=utf-8',
+        'csv' => 'text/csv; charset=utf-8',
     ];
 
-    if (isset($mimes[$ext])) {
-        header('Content-Type: ' . $mimes[$ext]);
-    }
+    header('X-Content-Type-Options: nosniff');
+    header('Content-Type: ' . ($mimes[$ext] ?? 'application/octet-stream'));
     readfile($filePath);
     exit;
 }

@@ -55,72 +55,182 @@ document.addEventListener('DOMContentLoaded', async () => {
 function initParticleCanvas() {
     const canvas = document.getElementById('physics-particles-canvas');
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
 
-    window.addEventListener('resize', () => {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-    });
-
-    const particles = [];
-    const count = Math.min(Math.floor((width * height) / 22000), 55);
-
-    for (let i = 0; i < count; i++) {
-        particles.push({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            vx: (Math.random() - 0.5) * 0.4,
-            vy: (Math.random() - 0.5) * 0.4,
-            radius: Math.random() * 2 + 1,
-            color: i % 3 === 0 ? 'rgba(59, 130, 246, 0.7)' : (i % 3 === 1 ? 'rgba(168, 85, 247, 0.6)' : 'rgba(14, 165, 233, 0.6)')
-        });
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const lowPower = document.documentElement.classList.contains('qc-low-power');
+    if (reduceMotion || lowPower) {
+        canvas.style.display = 'none';
+        return;
     }
 
-    function animate() {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = 0;
+    let height = 0;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let stars = [];
+    let motes = [];
+    let running = true;
+    let rafId = null;
+
+    const palette = () => (document.documentElement.classList.contains('light')
+        ? { mote: ['rgba(11,116,216,.55)', 'rgba(79,70,229,.45)', 'rgba(124,58,237,.40)'], link: '11,116,216', star: 'rgba(20,52,96,.28)' }
+        : { mote: ['rgba(56,189,248,.85)', 'rgba(129,140,248,.75)', 'rgba(167,139,250,.65)'], link: '96,165,250', star: 'rgba(214,232,255,.55)' });
+
+    function build() {
+        const area = width * height;
+        const starCount = Math.min(Math.floor(area / 16000), 130);
+        const moteCount = Math.min(Math.floor(area / 26000), 46);
+
+        stars = Array.from({ length: starCount }, () => ({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            r: Math.random() * 1.25 + 0.25,
+            a: Math.random() * 0.55 + 0.15,
+            tw: Math.random() * Math.PI * 2
+        }));
+
+        motes = Array.from({ length: moteCount }, (_, i) => ({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.22,
+            vy: (Math.random() - 0.5) * 0.22,
+            r: Math.random() * 1.7 + 0.8,
+            color: palette().mote[i % 3]
+        }));
+    }
+
+    function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        build();
+    }
+
+    const ORBITS = [
+        { cx: 0.78, cy: 0.24, rx: 0.34, ry: 0.14, rot: -0.38, speed: 0.00012, phase: 0 },
+        { cx: 0.2, cy: 0.72, rx: 0.26, ry: 0.1, rot: 0.45, speed: 0.00009, phase: 1.7 }
+    ];
+
+    let t0 = performance.now();
+
+    function frame(now) {
+        if (!running) return;
+        const t = now - t0;
         ctx.clearRect(0, 0, width, height);
+        const p = palette();
 
-        for (let i = 0; i < particles.length; i++) {
-            const p = particles[i];
-            p.x += p.vx;
-            p.y += p.vy;
+        // Star field with slow twinkle
+        for (const s of stars) {
+            const alpha = s.a * (0.65 + 0.35 * Math.sin(t * 0.0009 + s.tw));
+            ctx.beginPath();
+            ctx.fillStyle = p.star;
+            ctx.globalAlpha = alpha;
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
 
-            if (p.x < 0) p.x = width;
-            if (p.x > width) p.x = 0;
-            if (p.y < 0) p.y = height;
-            if (p.y > height) p.y = 0;
+        // Orbital arcs — the "instrument" signature
+        for (const orb of ORBITS) {
+            const cx = width * orb.cx;
+            const cy = height * orb.cy;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(orb.rot);
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(${p.link},0.12)`;
+            ctx.lineWidth = 1;
+            ctx.ellipse(0, 0, width * orb.rx, height * orb.ry, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            const angle = t * orb.speed + orb.phase;
+            const ex = Math.cos(angle) * width * orb.rx;
+            const ey = Math.sin(angle) * height * orb.ry;
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(${p.link},0.55)`;
+            ctx.arc(ex, ey, 2.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Drifting scientific motes with constellation links
+        for (let i = 0; i < motes.length; i++) {
+            const m = motes[i];
+            m.x += m.vx;
+            m.y += m.vy;
+            if (m.x < -20) m.x = width + 20;
+            if (m.x > width + 20) m.x = -20;
+            if (m.y < -20) m.y = height + 20;
+            if (m.y > height + 20) m.y = -20;
 
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.fillStyle = p.color;
+            ctx.fillStyle = m.color;
+            ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
             ctx.fill();
 
-            for (let j = i + 1; j < particles.length; j++) {
-                const p2 = particles[j];
-                const dx = p.x - p2.x;
-                const dy = p.y - p2.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-
-                if (dist < 115) {
+            for (let j = i + 1; j < motes.length; j++) {
+                const n = motes[j];
+                const dx = m.x - n.x;
+                const dy = m.y - n.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < 128) {
                     ctx.beginPath();
-                    ctx.strokeStyle = `rgba(59, 130, 246, ${0.16 * (1 - dist / 115)})`;
-                    ctx.lineWidth = 0.75;
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p2.x, p2.y);
+                    ctx.strokeStyle = `rgba(${p.link},${(0.1 * (1 - dist / 128)).toFixed(3)})`;
+                    ctx.lineWidth = 0.7;
+                    ctx.moveTo(m.x, m.y);
+                    ctx.lineTo(n.x, n.y);
                     ctx.stroke();
                 }
             }
         }
-        requestAnimationFrame(animate);
+
+        rafId = requestAnimationFrame(frame);
     }
-    requestAnimationFrame(animate);
+
+    resize();
+    window.addEventListener('resize', () => {
+        window.clearTimeout(window.__qcCanvasResize);
+        window.__qcCanvasResize = window.setTimeout(resize, 180);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            running = false;
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = null;
+        } else if (!running) {
+            running = true;
+            t0 = performance.now();
+            rafId = requestAnimationFrame(frame);
+        }
+    });
+
+    window.addEventListener('qc-theme-changed', () => {
+        const p2 = palette();
+        motes.forEach((m, i) => { m.color = p2.mote[i % 3]; });
+    });
+
+    rafId = requestAnimationFrame(frame);
 }
 
 function updateNavbar() {
     const navContainer = document.getElementById('navbar-container');
-    if (navContainer && window.renderNavbar) {
-        navContainer.innerHTML = window.renderNavbar();
+    if (!navContainer || !window.renderNavbar) return;
+    navContainer.innerHTML = window.renderNavbar();
+    if (window.lucide) window.lucide.createIcons();
+    if (window.qcRenderBreadcrumbs) window.qcRenderBreadcrumbs();
+    if (window.qcTheme && typeof window.qcTheme.get === 'function') {
+        // Repaint the toggle icons for the active theme
+        document.querySelectorAll('[data-qc-theme-toggle] [data-theme-icon]').forEach(icon => {
+            icon.setAttribute('data-lucide', window.qcTheme.get() === 'light' ? 'moon' : 'sun');
+        });
         if (window.lucide) window.lucide.createIcons();
     }
 }
@@ -129,7 +239,7 @@ window.updateNavbar = updateNavbar;
 function handleRouting() {
     const hash = window.location.hash.replace('#', '') || 'landing';
     const parts = hash.split('/');
-    const viewName = parts[0];
+    const viewName = parts[0] || 'landing';
     const viewId = parts[1] || null;
 
     window.store.currentView = viewName;
@@ -143,106 +253,108 @@ async function renderCurrentView() {
     if (!mainContainer) return;
 
     const view = window.store.currentView;
-    const params = window.store.viewParams;
+    const params = window.store.viewParams || {};
 
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    mainContainer.dataset.module = view;
 
-    if (view === 'login') {
-        openAuthModal('login');
-        return;
-    } else if (view === 'register') {
-        openAuthModal('register');
-        return;
-    } else if (view === 'landing') {
-        await renderLandingView(mainContainer);
-    } else if (view === 'dashboard') {
-        if (!window.store.currentUser) {
-            openAuthModal('login');
-            return;
-        }
-        if (window.store.currentUser.must_change_password) {
-            openForcedPasswordModal();
-            return;
-        }
-        await renderDashboardView(mainContainer);
-    } else if (view === 'curriculum') {
-        await renderCurriculumView(mainContainer, params.id);
-    } else if (view === 'materials') {
-        await renderStudyMaterialsView(mainContainer, params.id);
-    } else if (view === 'chapter') {
-        await renderChapterDetailView(mainContainer, params.id);
-    } else if (view === 'lesson') {
-        await loadAndStartLesson(mainContainer, params.id);
-    } else if (view === 'exam') {
-        await loadAndStartExam(mainContainer, params.id);
-    } else if (view === 'competitions') {
-        if (window.renderCompetitionsView) {
-            await window.renderCompetitionsView('app-main-content');
-        }
-    } else if (view === 'leaderboards') {
-        if (window.renderLeaderboardsView) {
-            await window.renderLeaderboardsView('app-main-content');
-        }
-    } else if (view === 'live-lab') {
-        if (window.liveLab) {
-            await window.liveLab.render(mainContainer, params.id || null);
-        }
-    } else if (view === 'simulators') {
-        await renderSimulatorsCatalogView(mainContainer, params.id || 'density');
-    } else if (view === 'badges') {
-        if (window.renderBadgesView) {
-            await window.renderBadgesView('app-main-content');
-        }
-    } else if (view === 'duel') {
-        if (window.QuantumDuel) {
-            await window.QuantumDuel.render('app-main-content');
-        }
-    } else if (view === 'guilds') {
-        if (window.ScientificGuilds) {
-            await window.ScientificGuilds.render('app-main-content');
-        }
-    } else if (view === 'adaptive-exam') {
-        if (window.AdaptiveExam) {
-            await window.AdaptiveExam.render('app-main-content');
-        }
-    } else if (view === 'sensor-lab') {
-        if (window.MobileSensorLab) {
-            await window.MobileSensorLab.render('app-main-content');
-        }
-    } else if (view === 'data-logger') {
-        if (window.LabDataLogger) {
-            await window.LabDataLogger.render('app-main-content');
-        }
-    } else if (view === 'handwriting-grader') {
-        if (window.HandwritingGrader) {
-            await window.HandwritingGrader.render('app-main-content');
-        }
-    } else if (view === 'teacher-heatmap') {
-        if (window.TeacherHeatmap) {
-            await window.TeacherHeatmap.render('app-main-content');
-        }
-    } else if (view === 'printable-exam') {
-        if (window.PrintableExamView) {
-            await window.PrintableExamView.render('app-main-content');
-        }
-    } else if (view === 'admin') {
-        if (!window.store.currentUser || window.store.currentUser.role !== 'admin') {
-            openAuthModal('login');
-            return;
-        }
-        if (window.store.currentUser.must_change_password) {
-            openForcedPasswordModal();
-            return;
-        }
-        window.currentAdminViews = new window.AdminViews('app-main-content');
-        window.currentAdminViews.render();
-    } else {
-        await renderLandingView(mainContainer);
+    // Laboratory modules authored for the deep-space palette are re-mapped onto
+    // the light theme by the compatibility layer instead of being restyled.
+    const ADAPTED_MODULES = [
+        'adaptive-exam', 'guilds', 'duel', 'sensor-lab', 'data-logger',
+        'handwriting-grader', 'teacher-heatmap', 'printable-exam',
+        'competitions'
+    ];
+    mainContainer.classList.toggle('qc-adapt', ADAPTED_MODULES.includes(view));
+
+    mainContainer.setAttribute('aria-busy', 'true');
+    document.documentElement.classList.add('qc-route-changing');
+
+    if (!['lesson', 'exam', 'chapter'].includes(view)) {
+        window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
+    try {
+        if (view === 'login') {
+            openAuthModal('login');
+        } else if (view === 'register') {
+            openAuthModal('register');
+        } else if (view === 'landing') {
+            await renderLandingView(mainContainer);
+        } else if (view === 'dashboard') {
+            if (!window.store.currentUser) {
+                openAuthModal('login');
+            } else if (window.store.currentUser.must_change_password) {
+                openForcedPasswordModal();
+            } else {
+                await renderDashboardView(mainContainer);
+            }
+        } else if (view === 'curriculum') {
+            await renderCurriculumView(mainContainer, params.id);
+        } else if (view === 'materials') {
+            await renderStudyMaterialsView(mainContainer, params.id);
+        } else if (view === 'chapter') {
+            await renderChapterDetailView(mainContainer, params.id);
+        } else if (view === 'lesson') {
+            await loadAndStartLesson(mainContainer, params.id);
+        } else if (view === 'exam') {
+            await loadAndStartExam(mainContainer, params.id);
+        } else if (view === 'competitions') {
+            if (window.renderCompetitionsView) await window.renderCompetitionsView('app-main-content');
+        } else if (view === 'leaderboards') {
+            if (window.renderLeaderboardsView) await window.renderLeaderboardsView('app-main-content');
+        } else if (view === 'live-lab') {
+            if (window.liveLab) await window.liveLab.render(mainContainer, params.id || null);
+        } else if (view === 'simulators') {
+            await renderSimulatorsCatalogView(mainContainer, params.id || 'density');
+        } else if (view === 'badges') {
+            if (window.renderBadgesView) await window.renderBadgesView('app-main-content');
+        } else if (view === 'duel') {
+            if (window.QuantumDuel) await window.QuantumDuel.render('app-main-content');
+        } else if (view === 'guilds') {
+            if (window.ScientificGuilds) await window.ScientificGuilds.render('app-main-content');
+        } else if (view === 'adaptive-exam') {
+            if (window.AdaptiveExam) await window.AdaptiveExam.render('app-main-content');
+        } else if (view === 'sensor-lab') {
+            if (window.MobileSensorLab) await window.MobileSensorLab.render('app-main-content');
+        } else if (view === 'data-logger') {
+            if (window.LabDataLogger) await window.LabDataLogger.render('app-main-content');
+        } else if (view === 'handwriting-grader') {
+            if (window.HandwritingGrader) await window.HandwritingGrader.render('app-main-content');
+        } else if (view === 'teacher-heatmap') {
+            if (window.TeacherHeatmap) await window.TeacherHeatmap.render('app-main-content');
+        } else if (view === 'printable-exam') {
+            if (window.PrintableExamView) await window.PrintableExamView.render('app-main-content');
+        } else if (view === 'admin') {
+            if (!window.store.currentUser || window.store.currentUser.role !== 'admin') {
+                openAuthModal('login');
+            } else if (window.store.currentUser.must_change_password) {
+                openForcedPasswordModal();
+            } else {
+                window.currentAdminViews = new window.AdminViews('app-main-content');
+                window.currentAdminViews.render();
+            }
+        } else {
+            await renderLandingView(mainContainer);
+        }
+    } catch (err) {
+        console.error('[router]', err);
+        mainContainer.innerHTML = `
+        <div class="qc-shell qc-section">
+            <div class="qc-empty">
+                <i data-lucide="satellite-dish" class="w-8 h-8 text-[var(--danger)]"></i>
+                <span class="qc-empty__title">بارگذاری این بخش ممکن نشد</span>
+                <span class="qc-empty__text">${(err && err.message) ? err.message : 'خطای نامشخص در ارتباط با سرور'}</span>
+                <button type="button" class="qc-btn qc-btn--soft qc-btn--sm" onclick="window.store.setView('landing')">بازگشت به صفحه اصلی</button>
+            </div>
+        </div>`;
+    }
+
+    mainContainer.removeAttribute('aria-busy');
+    document.documentElement.classList.remove('qc-route-changing');
     if (window.lucide) window.lucide.createIcons();
     if (window.renderMathInPage) window.renderMathInPage(mainContainer);
+    if (window.qcRenderBreadcrumbs) window.qcRenderBreadcrumbs();
+    if (window.qcRevealScan) window.qcRevealScan(mainContainer);
 }
 
 // ==========================================
@@ -252,326 +364,392 @@ async function renderCurrentView() {
 // VIEW: ACADEMIC ENTERPRISE LANDING PAGE (MIT Physics & CERN Inspired)
 // ==========================================
 async function renderLandingView(container) {
-    let stats = { students_count: 0, questions_count: 360, exams_count: 12, competitions_count: 1 };
+    let stats = { total_students: 0, total_questions: 0, total_lessons: 0, total_exams: 0 };
     try {
-        stats = await window.api.getPublicStats();
-    } catch (e) {}
+        const remote = await window.api.getPublicStats();
+        stats = Object.assign(stats, remote || {});
+    } catch (e) {
+        console.warn('Public statistics unavailable:', e);
+    }
+
+    const faNum = (n) => {
+        const value = Number(n) || 0;
+        try { return value.toLocaleString('fa-IR'); } catch (e) { return String(value); }
+    };
+
+    const labCatalog = (window.physicsSimulators && Array.isArray(window.physicsSimulators.catalog))
+        ? window.physicsSimulators.catalog : [];
+    const labByKey = (key) => labCatalog.find(s => s.id === key || (s.key === key));
+    const featureds = [
+        { sim: labByKey('interactive-spring') || labByKey('hookes-law') || labCatalog[0], icon: 'waves', formula: 'F = -k x', label: 'قانون هوک' },
+        { icon: 'orbit', formula: 'F = G \\frac{m_1 m_2}{r^2}', label: 'گرانش و مدارها' },
+        { icon: 'zap', formula: 'V = I R', label: 'مدار و قانون اهم' },
+        { icon: 'droplets', formula: '\\rho = \\frac{m}{V}', label: 'چگالی و شناوری' }
+    ];
+    const labTargets = ['projectile-motion', 'circuit-dc', 'density', 'wave-on-a-string'];
+    const showcase = labTargets.map(id => labCatalog.find(s => s.id === id || (s.aliases || []).includes(id))).filter(Boolean);
+    const showcaseList = showcase.length ? showcase : labCatalog.slice(0, 4);
+
+    const user = window.store.currentUser;
+    const faCount = (labCatalog.length || 28).toLocaleString('fa-IR');
 
     container.innerHTML = `
-    <!-- Institutional Accreditation Top Bar -->
-    <div class="w-full border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur py-2 px-3 sm:px-6 lg:px-8 overflow-hidden">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
-            <div class="flex items-center gap-2 max-w-full truncate">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-                <span class="font-bold text-slate-800 dark:text-slate-200 truncate text-[11px] sm:text-xs">دبیرستان استعدادهای درخشان شهید بهشتی دو • دوره اول</span>
-                <span class="hidden lg:inline text-slate-300 dark:text-slate-700">|</span>
-                <span class="hidden lg:inline text-[10px] text-sky-600 dark:text-sky-400 font-mono tracking-wider shrink-0">SAMPAD DEPARTMENT OF EXPERIMENTAL PHYSICS</span>
+    <!-- Institutional accreditation strip -->
+    <div class="border-b border-[var(--line)] bg-[var(--surface-glass)] backdrop-blur">
+        <div class="qc-shell flex flex-col sm:flex-row items-center justify-between gap-2 py-2 text-[11px]">
+            <div class="flex items-center gap-2 min-w-0">
+                <span class="qc-dot qc-dot--live text-[var(--ok)]"></span>
+                <span class="font-bold text-[var(--ink-2)] truncate">دبیرستان استعدادهای درخشان شهید بهشتی دو · دوره اول</span>
+                <span class="hidden md:inline text-[var(--line-strong)]">|</span>
+                <span class="hidden md:inline font-mono text-[9.5px] tracking-[.16em] text-[var(--muted)]" dir="ltr">SAMPAD · DEPARTMENT OF EXPERIMENTAL PHYSICS</span>
             </div>
-            <div class="flex items-center gap-2 font-mono text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
-                <span class="hidden sm:inline">سامانه مصوب آموزشی سمپاد</span>
-                <span class="hidden sm:inline">•</span>
-                <span class="text-emerald-700 dark:text-emerald-300 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">ورژن سراسری ۲.۲</span>
+            <div class="flex items-center gap-2 shrink-0 font-mono text-[10px] text-[var(--muted)]">
+                <span>سال تحصیلی ۱۴۰۴–۱۴۰۵</span>
+                <span class="qc-chip qc-chip--ok" style="font-size:9.5px;">نسخه ۵ · آفلاین‌پذیر</span>
             </div>
         </div>
     </div>
 
-    <!-- Main Academic Hero Section -->
-    <section class="relative overflow-hidden py-12 sm:py-20 academic-hero-glow">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-                
-                <!-- Left/Text Column (RTL) -->
-                <div class="lg:col-span-7 space-y-6 text-right">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-800/80 text-blue-700 dark:text-blue-300 text-xs font-bold shadow-sm">
-                        <i data-lucide="atom" class="w-4 h-4 text-blue-500"></i>
-                        <span>پرتال تخصصی آموزش، آزمایشگاه‌های تعاملی و سنجش فیزیک</span>
-                    </div>
+    <!-- HERO -->
+    <section class="qc-hero">
+      <div class="qc-container-pad max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="qc-hero-grid grid grid-cols-1 lg:grid-cols-[1.06fr_.94fr] gap-8 lg:gap-12 items-center py-9 sm:py-14 lg:py-16">
 
-                    <h1 class="text-3xl sm:text-5xl lg:text-[3.25rem] font-black text-slate-900 dark:text-white leading-[1.25] tracking-tight">
-                        یادگیری مفهومی فیزیک، <br/>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-sky-500 to-teal-500 dark:from-blue-400 dark:via-sky-300 dark:to-teal-300">
-                            آزمایشگاه‌های استاندارد PhET و سنجش تشریحی
-                        </span>
-                    </h1>
+          <div class="space-y-6 text-right">
+            <div class="qc-eyebrow qc-reveal">THE UNIVERSE IS OUR LABORATORY</div>
 
-                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl font-normal">
-                        سامانه جامع آموزش علوم تجربی و فیزیک دوره‌ اول متوسطه و مدارس استعدادهای درخشان (سمپاد) — پایه‌های هفتم، هشتم و نهم. منطبق با کتاب‌های درسی رسمی وزارت آموزش و پرورش و کتب تکمیلی فیزیک سمپاد، همراه با ۲۷ آزمایشگاه رسمی دانشگاه کلرادو، لیگ‌های علمی هفتگی و آزمون‌ساز هوشمند.
-                    </p>
+            <h1 class="qc-display qc-reveal" data-delay="1">
+              کیهان، <span class="qc-gradient-text">آزمایشگاه ماست.</span>
+            </h1>
 
-                    <!-- Academic Primary Action Buttons -->
-                    <div class="flex flex-wrap items-center gap-3 pt-2">
-                        <button onclick="window.store.setView('curriculum')" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-500/20 flex items-center gap-2 transition-all hover:scale-[1.02]">
-                            <i data-lucide="book-open" class="w-4 h-4"></i>
-                            <span>سرفصل‌ها و نقشه یادگیری</span>
-                        </button>
-                        
-                        <button onclick="window.store.setView('simulators')" class="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-teal-300 font-bold text-xs sm:text-sm border border-slate-300 dark:border-slate-700 flex items-center gap-2 transition-all">
-                            <i data-lucide="flask-conical" class="w-4 h-4 text-teal-500"></i>
-                            <span>آزمایشگاه‌های ۲۷گانه PhET</span>
-                        </button>
+            <p class="qc-lede qc-reveal" data-delay="2" style="max-width:56ch;">
+              پرتال علمی انجمن فیزیک شهید بهشتی دو؛ از اندازه‌گیری چگالی تا ترازهای کوانتومی.
+              درسنامه‌های تعاملی، آزمایشگاه‌های استاندارد، آزمون تطبیقی و سنجش تشریحی هوشمند —
+              همه در یک محیط پژوهشی یکپارچه برای پایه‌های هفتم، هشتم و نهم.
+            </p>
 
-                        <button onclick="window.store.setView('live-lab')" class="px-5 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-rose-600/20 flex items-center gap-2 transition-all hover:scale-[1.02]">
-                            <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
-                            <i data-lucide="radio" class="w-4 h-4"></i>
-                            <span>پخش زنده کلاس دبیر</span>
-                        </button>
-
-                        <a href="/downloads/physics-society.apk" download="PhysicsSociety-SAMPAD.apk" 
-                           target="_blank" 
-                           rel="noopener noreferrer" 
-                           class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 flex items-center gap-2 transition-all hover:scale-[1.02]"
-                           title="دانلود مستقیم اپلیکیشن اندروید (APK)">
-                            <i data-lucide="smartphone" class="w-4 h-4"></i>
-                            <span>دانلود اپلیکیشن اندروید (APK)</span>
-                        </a>
-
-                        <button onclick="window.store.setView('competitions')" class="px-4 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/50 dark:hover:bg-amber-900/50 text-amber-800 dark:text-amber-300 font-bold text-xs sm:text-sm border border-amber-300 dark:border-amber-800/80 flex items-center gap-2 transition-all">
-                            <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
-                            <span>لیگ المپیاد</span>
-                        </button>
-                    </div>
-
-                    <!-- Academic Telemetry Badges Strip -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-slate-200 dark:border-slate-800 text-xs">
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                            <span class="text-lg sm:text-xl font-black text-blue-600 dark:text-blue-400 font-mono block">۲۷</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">آزمایشگاه تعاملی بومی</span>
-                        </div>
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                            <span class="text-lg sm:text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono block">۵۰۰+</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">مسئله تشریحی و تستی</span>
-                        </div>
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                            <span class="text-lg sm:text-xl font-black text-teal-600 dark:text-teal-400 font-mono block">۳ پایه</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">هفتم، هشتم، نهم سمپاد</span>
-                        </div>
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                            <span class="text-lg sm:text-xl font-black text-amber-600 dark:text-amber-400 font-mono block">۱۰۰٪</span>
-                            <span class="text-[11px] text-slate-500 dark:text-slate-400">انطباق با کتب درسی</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right/Academic Terminal Showcase Column -->
-                <div class="lg:col-span-5">
-                    <div class="academic-panel rounded-2xl p-5 sm:p-6 space-y-4 relative overflow-hidden">
-                        <!-- Terminal Header -->
-                        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 text-xs">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
-                                <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
-                                <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
-                                <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400 mr-2">PHYSICS APPARATUS MONITOR</span>
-                            </div>
-                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300 dark:border-emerald-800 font-mono">
-                                LIVE ONLINE
-                            </span>
-                        </div>
-
-                        <!-- Scientific Formulas Matrix -->
-                        <div class="space-y-2.5">
-                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 text-center">
-                                <span class="text-[10px] text-slate-500 block mb-1 font-mono">KINEMATICS & DYNAMICS (معادلات حرکت سمپاد)</span>
-                                <div id="hero-formula-kinematics" class="text-sm sm:text-base font-bold text-sky-700 dark:text-sky-300 min-h-[32px] flex items-center justify-center academic-mono katex-ltr-container" dir="ltr"></div>
-                            </div>
-                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 text-center">
-                                <span class="text-[10px] text-slate-500 block mb-1 font-mono">ENERGY & PRESSURE (پایستگی انرژی و فشار)</span>
-                                <div id="hero-formula-energy" class="text-sm sm:text-base font-bold text-teal-700 dark:text-teal-300 min-h-[32px] flex items-center justify-center academic-mono katex-ltr-container" dir="ltr"></div>
-                            </div>
-                        </div>
-
-                        <!-- Direct Launch Links to Core Labs -->
-                        <div class="pt-2 space-y-2">
-                            <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">دسترسی سریع به آزمایشگاه‌های شاخص:</span>
-                            <div class="grid grid-cols-2 gap-2 text-xs font-bold">
-                                <button onclick="window.store.setView('simulators', { id: 'motion-1d' })" class="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-slate-800/80 dark:hover:bg-slate-750 border border-blue-200 dark:border-slate-700 text-blue-700 dark:text-blue-300 text-right flex items-center justify-between group transition-all">
-                                    <span class="truncate">حرکت خط راست (سینماتیک)</span>
-                                    <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i>
-                                </button>
-                                <button onclick="window.store.setView('simulators', { id: 'energy-skate-park' })" class="p-2.5 rounded-xl bg-teal-50 hover:bg-teal-100 dark:bg-slate-800/80 dark:hover:bg-slate-750 border border-teal-200 dark:border-slate-700 text-teal-700 dark:text-teal-300 text-right flex items-center justify-between group transition-all">
-                                    <span class="truncate">پایستگی انرژی (اسکیت)</span>
-                                    <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i>
-                                </button>
-                                <button onclick="window.store.setView('simulators', { id: 'circuit-dc' })" class="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-slate-800/80 dark:hover:bg-slate-750 border border-amber-200 dark:border-slate-700 text-amber-700 dark:text-amber-300 text-right flex items-center justify-between group transition-all">
-                                    <span class="truncate">مدار الکتریکی DC</span>
-                                    <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i>
-                                </button>
-                                <button onclick="window.store.setView('simulators', { id: 'density' })" class="p-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800/80 dark:hover:bg-slate-750 border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 text-right flex items-center justify-between group transition-all">
-                                    <span class="truncate">چگالی و غوطه‌وری</span>
-                                    <i data-lucide="arrow-left" class="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="flex flex-wrap items-center gap-2.5 qc-reveal" data-delay="3">
+              <button type="button" class="qc-btn qc-btn--lg" onclick="window.store.setView('curriculum')">
+                <i data-lucide="book-open" class="w-4 h-4"></i>
+                <span>شروع مسیر یادگیری</span>
+              </button>
+              <button type="button" class="qc-btn qc-btn--lg qc-btn--ghost" onclick="window.store.setView('simulators')">
+                <i data-lucide="flask-conical" class="w-4 h-4 text-[var(--accent)]"></i>
+                <span>ورود به آزمایشگاه</span>
+              </button>
+              <button type="button" class="qc-btn qc-btn--lg qc-btn--soft" onclick="window.toggleAiTutorModal(true)">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                <span>پرسش از معلم هوشمند</span>
+              </button>
             </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2 qc-reveal" data-delay="4">
+              <div class="qc-stat" style="padding:.8rem .85rem;">
+                <div class="qc-stat__value qc-stat__value--accent"><span data-countup="${Number(stats.total_lessons) || 0}" data-locale="fa">۰</span></div>
+                <div class="qc-stat__label">درسنامه تعاملی</div>
+              </div>
+              <div class="qc-stat" style="padding:.8rem .85rem;">
+                <div class="qc-stat__value"><span data-countup="${Number(stats.total_questions) || 0}" data-locale="fa">۰</span></div>
+                <div class="qc-stat__label">مسئله و سنجه</div>
+              </div>
+              <div class="qc-stat" style="padding:.8rem .85rem;">
+                <div class="qc-stat__value"><span data-countup="${Number(stats.total_students) || 0}" data-locale="fa">۰</span></div>
+                <div class="qc-stat__label">پژوهشگر دانش‌آموز</div>
+              </div>
+              <div class="qc-stat" style="padding:.8rem .85rem;">
+                <div class="qc-stat__value">${faCount}</div>
+                <div class="qc-stat__label">آزمایشگاه PhET</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instrument console -->
+          <div class="qc-card qc-card--glass qc-ticks qc-reveal" data-delay="2" style="padding:1rem;">
+            <div class="qc-panel__head" style="padding-inline:.35rem;border:0;">
+              <span class="flex items-center gap-2">
+                <span class="qc-dot qc-dot--live text-[var(--ok)]"></span>
+                <span>PHYSICS LAB CONSOLE</span>
+              </span>
+              <span class="font-mono text-[9px] text-[var(--muted)]">LIVE TELEMETRY</span>
+            </div>
+
+            <div class="flex items-center justify-center py-2">
+              <div class="qc-orbit" style="max-width:220px;">
+                <span class="qc-orbit__ring"></span>
+                <span class="qc-orbit__ring"></span>
+                <span class="qc-orbit__ring"></span>
+                <span class="qc-orbit__core"></span>
+                <span class="qc-orbit__label" style="top:6%;right:2%;">1s</span>
+                <span class="qc-orbit__label" style="bottom:8%;left:0;">2p</span>
+                <span class="qc-orbit__label" style="top:48%;right:-2%;">3d</span>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div class="qc-panel" style="padding:.6rem .75rem;">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-mono text-[9px] tracking-wider text-[var(--muted)]">KINEMATICS · DYNAMICS</span>
+                  <span class="qc-chip qc-chip--accent" style="font-size:9px;">SAMPAD</span>
+                </div>
+                <div id="hero-formula-kinematics" class="katex-ltr-container text-sm" dir="ltr" style="min-height:30px;display:flex;align-items:center;justify-content:center;"></div>
+              </div>
+              <div class="qc-panel" style="padding:.6rem .75rem;">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-mono text-[9px] tracking-wider text-[var(--muted)]">ENERGY · PRESSURE</span>
+                  <span class="qc-chip qc-chip--violet" style="font-size:9px;">LAB</span>
+                </div>
+                <div id="hero-formula-energy" class="katex-ltr-container text-sm" dir="ltr" style="min-height:30px;display:flex;align-items:center;justify-content:center;"></div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 mt-2">
+              <div class="qc-readout">
+                <span class="qc-readout__label">λ (طول موج)</span>
+                <span class="qc-readout__value" style="font-size:.85rem;">532 nm</span>
+              </div>
+              <div class="qc-readout">
+                <span class="qc-readout__label">g (گرانش)</span>
+                <span class="qc-readout__value" style="font-size:.85rem;">9.81 m/s²</span>
+              </div>
+              <div class="qc-readout">
+                <span class="qc-readout__label">h (ثابت پلانک)</span>
+                <span class="qc-readout__value" style="font-size:.85rem;">6.63e-34</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t border-[var(--line)]">
+              <button type="button" class="qc-btn qc-btn--sm qc-btn--soft" onclick="window.store.setView('live-lab')">
+                <span class="qc-dot qc-dot--live text-[var(--danger)]"></span>
+                <span>کلاس زنده</span>
+              </button>
+              <a href="/downloads/physics-society.apk" download="PhysicsSociety-SAMPAD.apk" target="_blank" rel="noopener noreferrer" class="qc-btn qc-btn--sm qc-btn--ghost">
+                <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+                <span>اپلیکیشن اندروید</span>
+              </a>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="qc-spectrum" aria-hidden="true"></div>
     </section>
 
-    <!-- 3 Academic Grade Departments Grid -->
-    <section class="py-14 bg-white dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-            <div class="text-center space-y-2 max-w-2xl mx-auto">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold">
-                    <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-blue-500"></i>
-                    <span>دپارتمان‌های آموزشی دوره اول متوسطه</span>
-                </div>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">سرفصل‌های تحصیلی و آزمایشگاه‌های تخصصی</h2>
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">کتاب‌های درسی وزارتی علوم تجربی به همراه کتاب‌های تکمیلی سمپاد (سازمان ملی پرورش استعدادهای درخشان)</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Grade 7 Card -->
-                <div onclick="window.store.setView('curriculum', { id: 1 })" 
-                     class="academic-card p-6 cursor-pointer space-y-5 relative overflow-hidden group">
-                    <div class="flex items-center justify-between">
-                        <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center justify-center font-black text-xl group-hover:scale-105 transition-transform">
-                            ۷
-                        </div>
-                        <span class="text-[10px] px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 font-mono">
-                            GRADE 07
-                        </span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            پایه هفتم • فیزیک و اندازه‌گیری
-                        </h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                            فصل ۲: اندازه‌گیری و چگالی • فصل ۳ و ۱۰: جنبش ذرات، دما و گرما • فصل ۸: کار، انرژی و پایستگی مکانیکی
-                        </p>
-                    </div>
-                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400">
-                        <span>ورود به سرفصل‌ها و درسنامه‌ها</span>
-                        <i data-lucide="chevron-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
-                    </div>
-                </div>
-
-                <!-- Grade 8 Card -->
-                <div onclick="window.store.setView('curriculum', { id: 2 })" 
-                     class="academic-card p-6 cursor-pointer space-y-5 relative overflow-hidden group">
-                    <div class="flex items-center justify-between">
-                        <div class="w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-950/80 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800 flex items-center justify-center font-black text-xl group-hover:scale-105 transition-transform">
-                            ۸
-                        </div>
-                        <span class="text-[10px] px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 font-mono">
-                            GRADE 08
-                        </span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                            پایه هشتم • الکتریسیته، مغناطیس و نور
-                        </h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                            فصل ۹: بار الکتریکی، قانون کولن و اهم • فصل ۱۰: مغناطیس و القا • فصل ۱۴ و ۱۵: بازتاب، شکست نور و عدسی‌ها
-                        </p>
-                    </div>
-                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-teal-600 dark:text-teal-400">
-                        <span>ورود به سرفصل‌ها و درسنامه‌ها</span>
-                        <i data-lucide="chevron-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
-                    </div>
-                </div>
-
-                <!-- Grade 9 Card -->
-                <div onclick="window.store.setView('curriculum', { id: 3 })" 
-                     class="academic-card p-6 cursor-pointer space-y-5 relative overflow-hidden group">
-                    <div class="flex items-center justify-between">
-                        <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center font-black text-xl group-hover:scale-105 transition-transform">
-                            ۹
-                        </div>
-                        <span class="text-[10px] px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 font-mono">
-                            GRADE 09
-                        </span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                            پایه نهم • سینماتیک، دینامیک، فشار و فضا
-                        </h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                            فصل ۴: حرکت و نمودارهای x-t, v-t, a-t • فصل ۵: قوانین نیوتون و اصطکاک • فصل ۸: فشار شاره‌ها • فصل ۹: ماشین‌ها • فصل ۱۰: فضا
-                        </p>
-                    </div>
-                    <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                        <span>ورود به سرفصل‌ها و درسنامه‌ها</span>
-                        <i data-lucide="chevron-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
-                    </div>
-                </div>
-            </div>
+    <!-- RESEARCH PROGRAMMES -->
+    <section class="qc-section">
+      <div class="qc-shell">
+        <div class="qc-section-head">
+          <div class="space-y-1.5">
+            <span class="qc-section-head__index">01 — ACADEMIC PROGRAMMES</span>
+            <h2 class="qc-h2">سه دپارتمان، سه میدان پژوهش</h2>
+            <p class="qc-lede" style="max-width:60ch;">سرفصل‌های رسمی علوم تجربی به‌همراه کتب تکمیلی سمپاد، مرتب‌شده بر اساس منطق مفهومی فیزیک.</p>
+          </div>
+          <button type="button" class="qc-btn qc-btn--ghost qc-btn--sm" onclick="window.store.setView('curriculum')">
+            <span>نقشه کامل سرفصل‌ها</span>
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          ${[
+            { n: '۷', gid: 1, title: 'ماده، اندازه‌گیری و انرژی', short: 'GRADE 07', topics: 'اندازه‌گیری و چگالی · جنبش ذرات و گرما · کار، انرژی و پایستگی', icon: 'flame', accent: 'var(--accent)' },
+            { n: '۸', gid: 2, title: 'الکتریسیته، مغناطیس و نور', short: 'GRADE 08', topics: 'بار الکتریکی و قانون کولن · مغناطیس و القا · بازتاب، شکست و عدسی‌ها', icon: 'zap', accent: 'var(--accent-2)' },
+            { n: '۹', gid: 3, title: 'مکانیک، فشار و فضا', short: 'GRADE 09', topics: 'سینماتیک و نمودارها · قوانین نیوتون و اصطکاک · فشار شاره‌ها و ماشین‌ها', icon: 'orbit', accent: 'var(--accent-3)' }
+          ].map((card, i) => `
+          <article class="qc-card qc-card--hover qc-card--p qc-reveal" data-delay="${i + 1}" role="button" tabindex="0"
+                   onclick="window.store.setView('curriculum', { id: ${card.gid} })"
+                   onkeydown="if(event.key==='Enter'){window.store.setView('curriculum',{id:${card.gid}})}">
+            <div class="flex items-start justify-between">
+              <span class="grid place-items-center w-12 h-12 rounded-2xl font-black text-xl" style="color:${card.accent};background:var(--surface-2);border:1px solid var(--line);">${card.n}</span>
+              <span class="qc-chip qc-chip--mono" style="font-size:9px;">${card.short}</span>
+            </div>
+            <h3 class="mt-4 text-base font-black text-[var(--ink)]">${card.title}</h3>
+            <p class="mt-2 text-[11.5px] leading-[2] text-[var(--muted)]">${card.topics}</p>
+            <div class="flex items-center justify-between mt-4 pt-3 border-t border-[var(--line)] text-[11px] font-bold" style="color:${card.accent};">
+              <span>ورود به سرفصل‌ها و درسنامه‌ها</span>
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            </div>
+          </article>`).join('')}
+        </div>
+      </div>
     </section>
 
-    <!-- Institutional Quality & Pedagogical Framework -->
-    <section class="py-14">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-            <div class="text-center space-y-2 max-w-xl mx-auto">
-                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 tracking-wide uppercase font-mono">PEDAGOGICAL STANDARDS</span>
-                <h3 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">چهار اصل حاکم بر طراحی علمی پلتفرم</h3>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div class="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
-                    <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
-                        ۱
-                    </div>
-                    <h4 class="font-bold text-sm text-slate-900 dark:text-white">یادگیری کاوش‌محور (Inquiry)</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        دانش‌آموز ابتدا با متغیرها در شبیه‌ساز آزمایشگاهی کار می‌کند و سپس رابطه تحلیلی و فرمول حاکم را استخراج می‌نماید.
-                    </p>
-                </div>
-
-                <div class="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
-                    <div class="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold">
-                        ۲
-                    </div>
-                    <h4 class="font-bold text-sm text-slate-900 dark:text-white">تفکیک نرده‌ای و برداری</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        حل ریشه‌ای بدفهمی‌های رایج دانش‌آموزان در تمایز مسافت با جابه‌جایی، تندی با سرعت و ارتباط جهت شتاب با تندشوندگی.
-                    </p>
-                </div>
-
-                <div class="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
-                    <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
-                        ۳
-                    </div>
-                    <h4 class="font-bold text-sm text-slate-900 dark:text-white">تحلیل هندسی ۳ نمودار</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        درک شهودی مفهوم شیب مماس (مشتق لحظه‌ای) و مساحت زیر منحنی (انتگرال جابه‌جایی و تغییر سرعت) به سبک آزمون‌های سمپاد.
-                    </p>
-                </div>
-
-                <div class="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
-                    <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-                        ۴
-                    </div>
-                    <h4 class="font-bold text-sm text-slate-900 dark:text-white">سنجه ارزیابی روبیک</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        تصحیح سوالات تشریحی بر اساس ۴ مؤلفه استاندارد: استخراج داده‌های اولیه، فرمول، جایگذاری با یکا و استنتاج نهایی.
-                    </p>
-                </div>
-            </div>
+    <!-- SIGNATURE LABORATORIES -->
+    <section class="qc-section qc-section--tight" style="background:linear-gradient(180deg,transparent,var(--surface-2),transparent);border-block:1px solid var(--line);">
+      <div class="qc-shell">
+        <div class="qc-section-head">
+          <div class="space-y-1.5">
+            <span class="qc-section-head__index">02 — INSTRUMENTATION</span>
+            <h2 class="qc-h2">آزمایشگاه‌های شاخص</h2>
+            <p class="qc-lede" style="max-width:60ch;">متغیرها را تغییر دهید، داده ثبت کنید و رابطه حاکم را خودتان استخراج کنید.</p>
+          </div>
+          <button type="button" class="qc-btn qc-btn--ghost qc-btn--sm" onclick="window.store.setView('simulators')">
+            <span>همه ${faCount} آزمایشگاه</span>
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          ${showcaseList.map((sim, i) => `
+          <button type="button" class="qc-card qc-card--hover qc-card--p text-right qc-reveal" data-delay="${i + 1}"
+                  onclick="window.store.setView('simulators', { id: '${sim.id}' })">
+            <div class="flex items-center justify-between">
+              <span class="qc-feature__icon"><i data-lucide="${sim.icon || 'flask-conical'}" class="w-4 h-4"></i></span>
+              <span class="qc-chip" style="font-size:9px;">${sim.gradeTitle || ('پایه ' + (sim.grade || 7))}</span>
+            </div>
+            <h3 class="mt-3 text-[13px] font-black text-[var(--ink)] leading-snug line-clamp-2">${sim.title || 'آزمایشگاه تعاملی'}</h3>
+            <p class="mt-1.5 text-[10.5px] leading-[1.9] text-[var(--muted)] line-clamp-2">${sim.topic || sim.desc || ''}</p>
+            <div class="mt-3 pt-2.5 border-t border-[var(--line)] flex items-center justify-between">
+              <span class="text-[10px] text-[var(--accent)] overflow-hidden font-mono qc-formula" dir="ltr">${sim.formula || 'f(x) = y'}</span>
+              <i data-lucide="arrow-up-left" class="w-3.5 h-3.5 text-[var(--muted)]"></i>
+            </div>
+          </button>`).join('')}
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mt-4">
+          ${featureds.map(f => `
+          <div class="qc-panel" style="padding:.6rem .8rem;">
+            <div class="flex items-center gap-1.5 mb-1">
+              <i data-lucide="${f.icon}" class="w-3.5 h-3.5 text-[var(--accent)]"></i>
+              <span class="text-[10px] font-bold text-[var(--muted)]">${f.label}</span>
+            </div>
+            <div class="text-[11px] text-[var(--ink-2)] font-mono" dir="ltr"><span class="qc-formula qc-formula--mini">${f.formula}</span></div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </section>
+
+    <!-- PEDAGOGICAL FRAMEWORK -->
+    <section class="qc-section">
+      <div class="qc-shell">
+        <div class="qc-section-head">
+          <div class="space-y-1.5">
+            <span class="qc-section-head__index">03 — SCIENTIFIC METHOD</span>
+            <h2 class="qc-h2">چهار اصل حاکم بر طراحی علمی</h2>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          ${[
+            { i: 'compass', t: 'یادگیری کاوش‌محور', d: 'دانش‌آموز ابتدا با متغیرها کار می‌کند، سپس رابطه تحلیلی را استخراج می‌کند.', c: 'var(--accent)', idx: '01' },
+            { i: 'move-3d', t: 'تفکیک نرده‌ای و برداری', d: 'رفع بدفهمی‌های رایج: مسافت/جابه‌جایی، تندی/سرعت و جهت شتاب.', c: 'var(--accent-2)', idx: '02' },
+            { i: 'line-chart', t: 'تحلیل هندسی نمودارها', d: 'درک شهودی شیب مماس و مساحت زیر منحنی در آزمون‌های سمپاد.', c: 'var(--accent-3)', idx: '03' },
+            { i: 'clipboard-check', t: 'سنجه ارزیابی روبیک', d: 'تصحیح تشریحی بر چهار مؤلفه: داده، فرمول، جایگذاری و استنتاج.', c: 'var(--ok)', idx: '04' }
+          ].map((f, i) => `
+          <article class="qc-card qc-card--p qc-reveal" data-delay="${i + 1}">
+            <div class="flex items-center justify-between">
+              <span class="qc-feature__icon" style="color:${f.c};">
+                <i data-lucide="${f.i}" class="w-4 h-4"></i>
+              </span>
+              <span class="font-mono text-[10px] text-[var(--muted-2)]">${f.idx}</span>
+            </div>
+            <h3 class="mt-3 text-[13px] font-black text-[var(--ink)]">${f.t}</h3>
+            <p class="mt-1.5 text-[11px] leading-[1.95] text-[var(--muted)]">${f.d}</p>
+          </article>`).join('')}
+        </div>
+      </div>
+    </section>
+
+    <!-- ARENA & AI -->
+    <section class="qc-section qc-section--tight">
+      <div class="qc-shell">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <article class="relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] p-5 sm:p-7 qc-reveal" style="background:linear-gradient(135deg,var(--accent-3-soft),var(--surface) 62%);">
+            <div class="flex items-center gap-2">
+              <span class="qc-chip qc-chip--violet"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> NEXORA COPILOT</span>
+              <span class="qc-chip qc-chip--mono" style="font-size:9px;">GPT OSS 120B</span>
+            </div>
+            <h2 class="qc-h2 mt-4">پرسش‌هایت را از یک معلم سقراطی بپرس</h2>
+            <p class="qc-lede mt-2" style="max-width:52ch;">دستیار هوشمند، زمینه صفحه جاری را می‌شناسد؛ فرمول‌ها، اثبات‌ها و رفع اشکال را گام‌به‌گام توضیح می‌دهد و پاسخ نهایی را مستقیم لو نمی‌دهد.</p>
+            <div class="flex flex-wrap gap-2 mt-4">
+              <button type="button" class="qc-btn" onclick="window.toggleAiTutorModal(true)"><i data-lucide="message-square" class="w-4 h-4"></i> شروع گفتگو</button>
+              <button type="button" class="qc-btn qc-btn--ghost" onclick="window.store.setView('handwriting-grader')"><i data-lucide="scan-text" class="w-4 h-4"></i> تصحیح دست‌نوشته</button>
+            </div>
+            <div class="mt-4 pt-3 border-t border-[var(--line)]">
+              <div class="qc-wave">
+                <svg viewBox="0 0 320 60" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M0,30 C30,4 52,56 84,30 C116,4 138,56 170,30 C202,4 224,56 256,30 C288,4 304,44 320,30" />
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <article class="relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] p-5 sm:p-7 qc-reveal" data-delay="1" style="background:linear-gradient(135deg,var(--warn-soft),var(--surface) 62%);">
+            <div class="flex items-center gap-2">
+              <span class="qc-chip qc-chip--warn"><i data-lucide="trophy" class="w-3.5 h-3.5"></i> QUANTUM ARENA</span>
+              <span class="qc-chip qc-chip--mono" style="font-size:9px;">ELO 1200</span>
+            </div>
+            <h2 class="qc-h2 mt-4">در آرنای علمی، دانشت را به چالش بکش</h2>
+            <p class="qc-lede mt-2" style="max-width:52ch;">دوئل‌های ۶۰ ثانیه‌ای ۱ به ۱، خاندان‌های علمی و لیگ‌های هفتگی؛ با ریتینگ ELO، سامانه ضدتقلب و جدول رتبه‌بندی زنده.</p>
+            <div class="flex flex-wrap gap-2 mt-4">
+              <button type="button" class="qc-btn qc-btn--warn" onclick="window.store.setView('duel')"><i data-lucide="swords" class="w-4 h-4"></i> ورود به دوئل</button>
+              <button type="button" class="qc-btn qc-btn--ghost" onclick="window.store.setView('leaderboards')"><i data-lucide="bar-chart-3" class="w-4 h-4"></i> جدول رتبه‌بندی</button>
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-2">
+              ${[['ماکسول', 'امواج و الکترومغناطیس'], ['نیوتون', 'نیرو و گرانش'], ['بوهر', 'ترازهای کوانتومی']].map(g => `
+              <div class="qc-panel text-center" style="padding:.55rem .3rem;">
+                <span class="block text-[11px] font-black text-[var(--ink)]">${g[0]}</span>
+                <span class="block text-[9px] text-[var(--muted)] mt-0.5">${g[1]}</span>
+              </div>`).join('')}
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="qc-section qc-section--tight">
+      <div class="qc-shell">
+        <div class="qc-card qc-ticks qc-reveal" style="padding:clamp(1.4rem,1rem+1.6vw,2.4rem);background:linear-gradient(120deg,var(--surface),var(--surface-2));">
+          <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+            <div class="space-y-2">
+              <span class="qc-eyebrow">JOIN THE OBSERVATORY</span>
+              <h2 class="qc-h2">${user ? 'مسیر پژوهشی خود را ادامه بده، ' + (user.display_name || 'پژوهشگر') : 'به جمع پژوهشگران فیزیک بپیوند'}</h2>
+              <p class="qc-lede" style="max-width:58ch;">${user ? 'آزمون تطبیقی بعدی، آزمایشگاه پیشنهادی و پیشرفت هفتگی شما آماده است.' : 'با ساخت حساب دانش‌آموزی، پیشرفت درسی، مدال‌ها و سابقه آزمایشگاهی شما به‌صورت دائمی ذخیره می‌شود.'}</p>
+            </div>
+            <div class="flex flex-wrap gap-2 shrink-0">
+              ${user
+                ? `<button type="button" class="qc-btn qc-btn--lg" onclick="window.store.setView('dashboard')"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> داشبورد من</button>`
+                : `<button type="button" class="qc-btn qc-btn--lg" onclick="window.openAuthModal('register')"><i data-lucide="user-plus" class="w-4 h-4"></i> ثبت‌نام دانش‌آموزی</button>
+                   <button type="button" class="qc-btn qc-btn--lg qc-btn--ghost" onclick="window.openAuthModal('login')">ورود به حساب</button>`}
+              <a href="/downloads/physics-society.apk" download="PhysicsSociety-SAMPAD.apk" target="_blank" rel="noopener noreferrer" class="qc-btn qc-btn--lg qc-btn--soft">
+                <i data-lucide="download" class="w-4 h-4"></i> نسخه اندروید
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
     `;
 
-    // Render Hero Mathematical Matrix with Zero-Escape String.raw KaTeX
     if (window.katex) {
+        // Render the compact formula strips on the laboratory cards
+        container.querySelectorAll('.qc-formula').forEach(el => {
+            if (el.getAttribute('data-rendered') === '1') return;
+            const raw = (el.textContent || '').trim();
+            if (!raw) return;
+            el.setAttribute('data-rendered', '1');
+            try {
+                window.katex.render(raw, el, { displayMode: false, throwOnError: false });
+            } catch (e) {
+                console.warn('Mini formula render notice:', e);
+            }
+        });
         try {
             const kEl = container.querySelector('#hero-formula-kinematics');
             if (kEl) {
-                window.katex.render(String.raw`x(t) = \frac{1}{2}at^2 + v_0t + x_0 \quad \Longleftrightarrow \quad \vec{F} = m\vec{a}`, kEl, { displayMode: true, throwOnError: false });
+                window.katex.render(String.raw`x(t) = \tfrac{1}{2}at^2 + v_0t + x_0 \;\;\Longleftrightarrow\;\; \vec{F} = m\vec{a}`, kEl, { displayMode: true, throwOnError: false });
             }
             const eEl = container.querySelector('#hero-formula-energy');
             if (eEl) {
-                window.katex.render(String.raw`K = \frac{1}{2}mv^2 + mgh \quad , \quad P = \rho gh + P_0`, eEl, { displayMode: true, throwOnError: false });
+                window.katex.render(String.raw`K = \tfrac{1}{2}mv^2 + mgh \quad,\quad P = \rho gh + P_0`, eEl, { displayMode: true, throwOnError: false });
             }
         } catch (err) {
             console.warn('Hero KaTeX render notice:', err);
         }
     }
 
-    if (window.renderMathInPage) {
-        setTimeout(() => window.renderMathInPage(container), 30);
-    }
+    if (window.lucide) window.lucide.createIcons();
+    if (window.qcRevealScan) window.qcRevealScan(container);
+    if (window.renderMathInPage) setTimeout(() => window.renderMathInPage(container), 30);
 }
 
 
@@ -579,274 +757,262 @@ async function renderLandingView(container) {
 // VIEW: STUDENT DASHBOARD (DEDICATED 7, 8, 9)
 // ==========================================
 async function renderDashboardView(container) {
-    container.innerHTML = `<div class="text-center py-12"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div></div>`;
+    container.innerHTML = `<div class="qc-shell qc-loading"><div class="qc-spinner"></div><span>در حال دریافت پرونده علمی…</span></div>`;
+
     try {
         const data = await window.api.getDashboard();
-        const s = data.student;
+        const s = data.student || data.user || {};
+        const rank = (data.rank !== undefined && data.rank !== null) ? data.rank : (s.rank || '—');
+        const totalXp = Number(data.total_xp || s.total_xp || 0);
+        const level = Number(data.current_level || s.current_level || 1);
+        const streak = Number(data.current_streak || s.current_streak || 0);
+        const nextXp = Math.max(Number(data.next_level_xp) || 1000, totalXp, 1);
+        const xpPercent = Math.min(100, Math.round((totalXp / nextXp) * 100));
+        const exams = Array.isArray(data.recent_exams) ? data.recent_exams : [];
+        const notes = Array.isArray(data.notifications) ? data.notifications : [];
+        const badges = Number(data.unlocked_badges_count || 0);
+        const lessonsDone = Number(data.completed_lessons_count || 0);
 
-        // Determine student's grade (7, 8, or 9)
         let gradeNum = 7;
-        let gradeId = 1;
-        if (s.grade_title_fa) {
-            if (s.grade_title_fa.includes('هشتم')) { gradeNum = 8; gradeId = 2; }
-            else if (s.grade_title_fa.includes('نهم')) { gradeNum = 9; gradeId = 3; }
-        }
+        let gradeId = Number(s.grade_id) || 1;
+        if (s.grade_title_fa && s.grade_title_fa.includes('هشتم')) gradeNum = 8;
+        else if (s.grade_title_fa && s.grade_title_fa.includes('نهم')) gradeNum = 9;
+        else if (gradeId === 2) gradeNum = 8;
+        else if (gradeId === 3) gradeNum = 9;
 
-        // Fetch student's books from real DB
         let books = [];
-        try {
-            books = await window.api.getBooks(gradeId);
-        } catch (e) {
-            console.warn('Could not fetch grade books:', e);
-        }
+        try { books = await window.api.getBooks(gradeId); } catch (e) { console.warn('books unavailable', e); }
 
-        // Distinct scientific themes & labs for each grade
-        const gradeConfigs = {
+        const cfg = {
             7: {
-                themeClass: 'grade-theme-7',
-                heroGradient: 'from-slate-900 via-slate-900/95 to-slate-950 border-slate-800',
-                gradeBadge: 'پایه هفتم — کاوشگر ماده، اندازه‌گیری و انرژی',
-                badgeIcon: 'flame',
-                accentColor: 'sky',
-                formula: '$$W = F \\cdot d \\quad , \\quad E_k = \\frac{1}{2}m v^2 \\quad , \\quad Q = mc\\Delta T$$',
-                labTitle: 'میز کار آزمایشگاه هفتم: اندازه‌گیری، چگالی و تبدیل انرژی (PhET)',
-                labDesc: 'بررسی دقیق یکاهای استاندارد SI، رابطه چگالی $\\rho = \\frac{m}{V}$، تبدیلات انرژی پتانسیل گرانشی و جنبشی، و سازوکار انتقال گرما (رسانش، همرفت، تابش).',
-                labActionText: 'ورود به آزمایشگاه PhET',
+                badge: 'پایه هفتم — کاوشگر ماده، اندازه‌گیری و انرژی',
+                icon: 'flame',
+                formula: 'W = F \\cdot d \\quad,\\quad E_k = \\tfrac{1}{2}mv^2 \\quad,\\quad Q = mc\\Delta T',
+                labTitle: 'میز کار هفتم: چگالی، فشار و تبدیل انرژی',
+                labDesc: 'یکاهای SI، رابطه چگالی، پایستگی انرژی مکانیکی و سازوکارهای انتقال گرما (رسانش، همرفت، تابش).',
                 simId: 'density'
             },
             8: {
-                themeClass: 'grade-theme-8',
-                heroGradient: 'from-slate-900 via-slate-900/95 to-slate-950 border-slate-800',
-                gradeBadge: 'پایه هشتم — پژوهشگر بارهای الکتریکی، مغناطیس و نور',
-                badgeIcon: 'zap',
-                accentColor: 'sky',
-                formula: '$$V = I \\cdot R \\quad , \\quad \\theta_i = \\theta_r \\quad , \\quad n = \\frac{c}{v}$$',
-                labTitle: 'میز کار آزمایشگاه هشتم: مدار الکتریکی و شکست نور در عدسی‌ها (PhET)',
-                labDesc: 'کاوش قانون اهم، مقاومت معادل مدارهای متوالی و موازی، اثر متقابل قطب‌های مغناطیسی، تشکیل تصویر در آینه‌های کروی و پدیده شکست نور در منشور.',
-                labActionText: 'ورود به آزمایشگاه PhET',
+                badge: 'پایه هشتم — پژوهشگر بار الکتریکی، مغناطیس و نور',
+                icon: 'zap',
+                formula: 'V = I R \\quad,\\quad \\theta_i = \\theta_r \\quad,\\quad n = \\frac{c}{v}',
+                labTitle: 'میز کار هشتم: مدار الکتریکی و شکست نور',
+                labDesc: 'قانون اهم، مقاومت معادل مدارهای متوالی و موازی، میدان مغناطیسی و تشکیل تصویر در عدسی‌ها.',
                 simId: 'circuit-dc'
             },
             9: {
-                themeClass: 'grade-theme-9',
-                heroGradient: 'from-slate-900 via-slate-900/95 to-slate-950 border-slate-800',
-                gradeBadge: 'پایه نهم — نخبه مکانیک کلاسیک، دینامیک نیوتون و فشار',
-                badgeIcon: 'orbit',
-                accentColor: 'sky',
-                formula: '$$F_{net} = m \\cdot a \\quad , \\quad P = \\rho g h \\quad , \\quad v = \\frac{\\Delta x}{\\Delta t}$$',
-                labTitle: 'رصدخانه تخصصی نهم: بردار نیرو، قوانین نیوتون و فشار شاره‌ها (PhET)',
-                labDesc: 'تحلیل برداری سینماتیک حرکت، قوانین اول تا سوم نیوتون و نیروی اصطکاک، فشار در عمق مایعات، قانون پاسکال و مزیت مکانیکی قرقره‌ها و اهرم‌ها.',
-                labActionText: 'ورود به آزمایشگاه PhET',
+                badge: 'پایه نهم — نخبه مکانیک کلاسیک، دینامیک و فشار',
+                icon: 'orbit',
+                formula: '\\vec{F}_{net} = m\\vec{a} \\quad,\\quad P = \\rho g h \\quad,\\quad v = \\frac{\\Delta x}{\\Delta t}',
+                labTitle: 'میز کار نهم: بردار نیرو، قوانین نیوتون و فشار شاره‌ها',
+                labDesc: 'سینماتیک برداری، قوانین سه‌گانه نیوتون و اصطکاک، فشار در عمق مایعات و مزیت مکانیکی ماشین‌ها.',
                 simId: 'forces-motion'
             }
-        };
+        }[gradeNum];
 
-        const cfg = gradeConfigs[gradeNum] || gradeConfigs[7];
+        const quickActions = [
+            { icon: 'book-open', label: 'سرفصل‌ها', view: 'curriculum', color: 'var(--accent)' },
+            { icon: 'target', label: 'آزمون تطبیقی', view: 'adaptive-exam', color: 'var(--ok)' },
+            { icon: 'flask-conical', label: 'آزمایشگاه', view: 'simulators', color: 'var(--accent-2)' },
+            { icon: 'swords', label: 'دوئل ۱v۱', view: 'duel', color: 'var(--warn)' },
+            { icon: 'bar-chart-3', label: 'رتبه‌بندی', view: 'leaderboards', color: 'var(--accent-3)' },
+            { icon: 'sparkles', label: 'معلم هوشمند', action: 'ai', color: 'var(--accent-3)' }
+        ];
+
+        const days = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+        const streakDays = days.map((d, i) => ({ d, on: i < Math.min(streak, 7) }));
 
         container.innerHTML = `
-        <div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
-            <!-- Dedicated Scientific Hero Header -->
-            <div class="bg-gradient-to-r ${cfg.heroGradient} rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-6 border">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-950/80 backdrop-blur-md border border-sky-800/80 text-sky-300 text-xs font-bold mb-2 shadow-sm">
-                            <i data-lucide="${cfg.badgeIcon}" class="w-3.5 h-3.5 text-amber-300"></i>
-                            <span>${cfg.gradeBadge}</span>
-                        </div>
-                        <h1 class="text-2xl sm:text-3xl font-black">${s.full_name}</h1>
-                        <span class="text-xs text-white/80 mt-1 inline-block">${s.grade_title_fa} • رتبه ${s.rank} انجمن فیزیک شهید بهشتی دو</span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center">
-                            <span class="text-[11px] text-white/70 block">سطح علمی</span>
-                            <span class="text-lg font-black font-sans">سطح ${s.current_level}</span>
-                        </div>
-                        <div class="px-4 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center">
-                            <span class="text-[11px] text-white/70 block">مجموع امتیاز</span>
-                            <span class="text-lg font-black font-sans">${s.total_xp} XP</span>
-                        </div>
-                    </div>
-                </div>
+        <div class="qc-shell qc-section space-y-6">
 
-                <!-- Daily Streak Banner -->
-                <div class="flex items-center justify-between p-4 rounded-2xl bg-black/25 backdrop-blur-md border border-white/15 text-xs">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="flame" class="w-6 h-6 text-orange-400 streak-flame-active fill-orange-400 shrink-0"></i>
-                        <div>
-                            <span class="font-bold block text-sm">${s.current_streak} روز استمرار یادگیری در فیزیک!</span>
-                            <span class="text-white/80 text-[11px]">با تمرین مستمر، نشان‌های افتخار و مدال‌های سمپاد را باز کنید.</span>
-                        </div>
-                    </div>
-                    <button onclick="window.store.setView('curriculum')" class="btn-duo-green text-white font-bold px-4 py-2 rounded-xl text-xs whitespace-nowrap shadow-sm">
-                        ادامه مطالعه سرفصل‌ها
-                    </button>
+          <!-- Student observatory header -->
+          <section class="qc-card qc-ticks overflow-hidden qc-reveal" style="padding:clamp(1.1rem,1rem+1vw,1.8rem);">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+              <div class="flex items-center gap-4 min-w-0">
+                <div class="relative grid place-items-center w-16 h-16 rounded-2xl shrink-0" style="background:linear-gradient(145deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 18px 36px -22px var(--accent);">
+                  <span class="text-2xl font-black">${(s.display_name || s.full_name || 'د').charAt(0)}</span>
+                  <span class="absolute -bottom-1.5 -left-1.5 qc-chip qc-chip--mono" style="font-size:9px;background:var(--surface);border-color:var(--line-strong);">LVL ${level}</span>
                 </div>
+                <div class="min-w-0">
+                  <span class="qc-chip qc-chip--accent" style="font-size:9.5px;"><i data-lucide="${cfg.icon}" class="w-3 h-3"></i> ${cfg.badge}</span>
+                  <h1 class="qc-h2 mt-2 truncate">${window.qcEscape(s.full_name || s.display_name || 'دانش‌آموز')}</h1>
+                  <p class="text-[11px] text-[var(--muted)] mt-1">
+                    ${s.grade_title_fa || ('پایه ' + gradeNum)} · رتبه <span class="font-bold text-[var(--ink-2)]">${rank}</span> در انجمن فیزیک
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2.5 w-full lg:w-auto">
+                <div class="qc-readout text-center">
+                  <span class="qc-readout__label">امتیاز کل</span>
+                  <span class="qc-readout__value" style="font-size:1rem;">${totalXp.toLocaleString('fa-IR')}</span>
+                </div>
+                <div class="qc-readout text-center">
+                  <span class="qc-readout__label">استمرار</span>
+                  <span class="qc-readout__value" style="font-size:1rem;color:var(--warn);">${streak} روز</span>
+                </div>
+                <div class="qc-readout text-center">
+                  <span class="qc-readout__label">درس‌های کامل</span>
+                  <span class="qc-readout__value" style="font-size:1rem;color:var(--ok);">${lessonsDone}</span>
+                </div>
+              </div>
             </div>
 
-            <!-- Grade Scientific Focus Spotlight & Formulas -->
-            <div class="p-6 rounded-3xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-500 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold">
-                            <i data-lucide="microscope" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-black text-base text-slate-900 dark:text-white">${cfg.labTitle}</h3>
-                            <span class="text-xs text-slate-400">سرفصل‌های تخصصی فیزیک دوره اول متوسطه</span>
-                        </div>
+            <div class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 mt-5 pt-4 border-t border-[var(--line)] items-center">
+              <div>
+                <div class="flex items-center justify-between text-[10.5px] mb-1.5">
+                  <span class="font-bold text-[var(--ink-2)]">مسیر تا سطح ${level + 1}</span>
+                  <span class="font-mono text-[var(--accent)]" dir="ltr">${totalXp} / ${nextXp} XP</span>
+                </div>
+                <div class="h-2 rounded-full overflow-hidden" style="background:var(--surface-3);">
+                  <div class="h-full rounded-full" style="width:${xpPercent}%;background:linear-gradient(90deg,var(--accent),var(--accent-2));"></div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                ${streakDays.map(d => `
+                <span class="grid place-items-center w-7 h-7 rounded-lg text-[10px] font-bold" style="${d.on ? 'background:var(--warn-soft);border:1px solid var(--warn);color:var(--warn);' : 'background:var(--surface-2);border:1px solid var(--line);color:var(--muted-2);'}">${d.d}</span>`).join('')}
+                <span class="text-[9.5px] text-[var(--muted)] mr-1">۷ روز اخیر</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Quick actions -->
+          <section class="grid grid-cols-3 sm:grid-cols-6 gap-2.5 qc-reveal" data-delay="1">
+            ${quickActions.map(a => `
+            <button type="button" class="qc-card qc-card--hover text-center" style="padding:.85rem .4rem;"
+              onclick="${a.action === 'ai' ? "window.toggleAiTutorModal(true)" : `window.store.setView('${a.view}')`}">
+              <i data-lucide="${a.icon}" class="w-5 h-5 mx-auto" style="color:${a.color};"></i>
+              <span class="block mt-2 text-[10.5px] font-bold text-[var(--ink-2)]">${a.label}</span>
+            </button>`).join('')}
+          </section>
+
+          <!-- Grade lab spotlight -->
+          <section class="qc-card qc-card--p qc-reveal" data-delay="2">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div class="flex items-start gap-3">
+                <span class="qc-feature__icon"><i data-lucide="microscope" class="w-4 h-4"></i></span>
+                <div>
+                  <h2 class="text-sm font-black text-[var(--ink)]">${cfg.labTitle}</h2>
+                  <p class="text-[11px] text-[var(--muted)] mt-1 leading-[1.9] max-w-2xl">${cfg.labDesc}</p>
+                </div>
+              </div>
+              <button type="button" class="qc-btn qc-btn--sm shrink-0" onclick="window.store.setView('simulators', { id: '${cfg.simId}' })">
+                <i data-lucide="play" class="w-3.5 h-3.5"></i> ورود به آزمایشگاه
+              </button>
+            </div>
+            <div class="mt-4 p-3 rounded-xl text-center overflow-x-auto katex-ltr-container" dir="ltr"
+                 style="background:var(--surface-2);border:1px solid var(--line);font-family:var(--font-mono);font-size:.86rem;color:var(--accent);">
+              $${cfg.formula}$$
+            </div>
+          </section>
+
+          <!-- Active competition -->
+          ${data.active_competition ? `
+          <section class="qc-card qc-card--p qc-reveal" data-delay="2" style="border-color:rgba(251,191,36,.35);background:linear-gradient(120deg,var(--warn-soft),var(--surface));">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="grid place-items-center w-11 h-11 rounded-xl" style="background:var(--warn);color:#1b1203;">
+                  <i data-lucide="trophy" class="w-5 h-5"></i>
+                </span>
+                <div>
+                  <span class="qc-chip qc-chip--warn" style="font-size:9px;">مسابقه فعال هفته</span>
+                  <h3 class="text-sm font-black text-[var(--ink)] mt-1">${window.qcEscape(data.active_competition.title_fa)}</h3>
+                </div>
+              </div>
+              <button type="button" class="qc-btn qc-btn--warn qc-btn--sm" onclick="window.store.setView('competitions')">ورود به مسابقه</button>
+            </div>
+          </section>` : ''}
+
+          <!-- Textbooks -->
+          <section class="space-y-3 qc-reveal" data-delay="2">
+            <div class="qc-section-head" style="margin-bottom:.4rem;">
+              <div>
+                <span class="qc-section-head__index">RESOURCES</span>
+                <h2 class="text-sm font-black text-[var(--ink)] mt-1">منابع درسی رسمی شما (${s.grade_title_fa || ('پایه ' + gradeNum)})</h2>
+              </div>
+              <button type="button" class="qc-btn qc-btn--ghost qc-btn--sm" onclick="window.store.setView('curriculum')">همه فصل‌ها</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              ${books.length ? books.map(b => `
+              <div class="qc-card qc-card--hover qc-card--p" role="button" tabindex="0" onclick="window.store.setView('curriculum')">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <span class="qc-feature__icon"><i data-lucide="book" class="w-4 h-4"></i></span>
+                    <div class="min-w-0">
+                      <h3 class="text-[12.5px] font-black text-[var(--ink)] truncate">${window.qcEscape(b.title_fa)}</h3>
+                      <p class="text-[10px] text-[var(--muted)] mt-0.5">${window.qcEscape(b.publisher_fa || 'آموزش و پرورش')} · ${b.academic_year || '۱۴۰۴–۱۴۰۵'}</p>
                     </div>
-                    <button onclick="window.store.setView('simulators', { id: '${cfg.simId}' })" class="btn-duo-blue text-white font-bold text-xs px-4 py-2 rounded-xl whitespace-nowrap shadow-md hover:scale-105 transition-all">
-                        ${cfg.labActionText}
-                    </button>
+                  </div>
+                  <span class="qc-chip ${b.book_type === 'sampad' ? 'qc-chip--violet' : 'qc-chip--accent'}" style="font-size:9px;">
+                    ${b.book_type === 'sampad' ? 'تکمیلی سمپاد' : 'کتاب رسمی'}
+                  </span>
                 </div>
-                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${cfg.labDesc}</p>
-                <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-center text-center font-mono text-sm text-cyan-300 katex-ltr-container overflow-x-auto">
-                    ${cfg.formula}
+                <div class="flex items-center justify-between mt-3 pt-3 border-t border-[var(--line)] text-[10.5px]">
+                  <span class="text-[var(--muted)]"><i data-lucide="layers" class="w-3.5 h-3.5 inline"></i> ${Number(b.chapter_count) > 0 ? Number(b.chapter_count).toLocaleString('fa-IR') + ' فصل آموزشی' : 'منبع مرجع تکمیلی'}</span>
+                  <span class="font-bold text-[var(--accent)]">مشاهده فصل‌ها ←</span>
                 </div>
+              </div>`).join('') : `<div class="qc-empty md:col-span-2"><i data-lucide="book-x" class="w-7 h-7"></i><span class="qc-empty__title">منبعی برای این پایه ثبت نشده است</span></div>`}
+            </div>
+          </section>
+
+          <!-- Exams + notifications -->
+          <section class="grid grid-cols-1 lg:grid-cols-2 gap-3 qc-reveal" data-delay="3">
+            <div class="qc-card qc-card--p">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-[13px] font-black text-[var(--ink)] flex items-center gap-2"><i data-lucide="file-check" class="w-4 h-4 text-[var(--ok)]"></i> نتایج آزمون‌های اخیر</h3>
+                <button type="button" class="qc-btn qc-btn--ghost qc-btn--sm" onclick="window.store.setView('adaptive-exam')">آزمون جدید</button>
+              </div>
+              ${exams.length ? `
+              <div class="qc-table-wrap" style="border:0;">
+                <table class="qc-table" style="min-width:0;">
+                  <thead><tr><th>آزمون</th><th>تاریخ</th><th>درصد</th><th>وضعیت</th></tr></thead>
+                  <tbody>
+                    ${exams.map(e => `
+                    <tr>
+                      <td class="text-[11px] font-bold text-[var(--ink)]">${window.qcEscape(e.title_fa)}</td>
+                      <td class="text-[10px] text-[var(--muted)] whitespace-nowrap">${window.formatPersianDate(e.date)}</td>
+                      <td class="qc-table__num font-bold">${Number(e.percentage || 0).toLocaleString('fa-IR')}٪</td>
+                      <td><span class="qc-chip ${e.is_passed ? 'qc-chip--ok' : 'qc-chip--danger'}" style="font-size:9px;">${e.is_passed ? 'قبول' : 'نیازمند مرور'}</span></td>
+                    </tr>`).join('')}
+                  </tbody>
+                </table>
+              </div>` : `<div class="qc-empty" style="padding:1.6rem .8rem;"><i data-lucide="clipboard-list" class="w-6 h-6"></i><span class="qc-empty__title">هنوز آزمونی ثبت نشده است</span><span class="qc-empty__text">با آزمون تطبیقی، سطح فعلی خود را بسنجید.</span></div>`}
             </div>
 
-            <!-- Nexora AI Physics Assistant Interactive Banner -->
-            <div class="p-6 rounded-3xl bg-slate-900/95 border border-slate-800 shadow-xl space-y-4">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div class="flex items-center gap-3.5">
-                        <div class="w-12 h-12 rounded-2xl bg-sky-950/80 text-sky-400 border border-sky-800/80 flex items-center justify-center shadow-md">
-                            <i data-lucide="sparkles" class="w-6 h-6"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="font-extrabold text-white text-base font-sans">معلم همراه هوش مصنوعی نکسورا (مدل GPT Oss 120B)</h3>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950/70 text-cyan-300 border border-cyan-500/40 font-mono font-bold">GPT Oss 120B</span>
-                            </div>
-                            <p class="text-xs text-slate-300 mt-0.5">پاسخگویی مفهومی، اثبات فرمول‌ها و رفع اشکال گام‌به‌گام فیزیک ${s.grade_title_fa}</p>
-                        </div>
-                    </div>
-                    <button onclick="window.toggleAiTutorModal()" class="btn-duo-green text-white font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-lg whitespace-nowrap">
-                        <i data-lucide="message-square" class="w-4 h-4"></i>
-                        <span>گفتگو با معلم هوشمند</span>
-                    </button>
-                </div>
-                <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
-                    <span class="text-[11px] text-slate-400 font-bold self-center">پرسش سریع:</span>
-                    <button onclick="window.toggleAiTutorModal(); window.askQuickTutor('چگالی چطور محاسبه می‌شود و چرا بعضی اجسام روی آب شناور می‌مانند؟')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-cyan-800/40 text-[11px] transition-colors">
-                        🔍 چگالی و شناوری در آب
-                    </button>
-                    <button onclick="window.toggleAiTutorModal(); window.askQuickTutor('قانون دوم نیوتون و رابطه نیرو، جرم و شتاب را با یک مثال توضیح بده')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-violet-300 border border-violet-800/40 text-[11px] transition-colors">
-                        ⚡ قانون دوم نیوتون (F=ma)
-                    </button>
-                    <button onclick="window.toggleAiTutorModal(); window.askQuickTutor('کار و توان چیست و یکای آن‌ها در SI چیست؟')" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-amber-300 border border-amber-800/40 text-[11px] transition-colors">
-                        ⚙️ کار، انرژی و توان
-                    </button>
-                </div>
+            <div class="qc-card qc-card--p">
+              <h3 class="text-[13px] font-black text-[var(--ink)] flex items-center gap-2 mb-3"><i data-lucide="bell" class="w-4 h-4 text-[var(--warn)]"></i> اعلان‌های آموزشی</h3>
+              ${notes.length ? `
+              <div class="space-y-2">
+                ${notes.map(n => `
+                <div class="p-3 rounded-xl" style="background:var(--surface-2);border:1px solid var(--line);">
+                  <span class="block text-[11.5px] font-black text-[var(--ink)]">${window.qcEscape(n.title_fa)}</span>
+                  <p class="text-[10.5px] text-[var(--muted)] mt-1 leading-[1.9]">${window.qcEscape(n.message_fa || '')}</p>
+                </div>`).join('')}
+              </div>` : `<div class="qc-empty" style="padding:1.6rem .8rem;"><i data-lucide="bell-off" class="w-6 h-6"></i><span class="qc-empty__title">اعلان جدیدی وجود ندارد</span></div>`}
+
+              <div class="grid grid-cols-2 gap-2 mt-3">
+                <div class="qc-readout text-center"><span class="qc-readout__label">مدال‌های کسب‌شده</span><span class="qc-readout__value" style="font-size:1rem;color:var(--warn);">${badges}</span></div>
+                <button type="button" class="qc-btn qc-btn--soft qc-btn--sm" onclick="window.store.setView('badges')">مشاهده ویترین مدال‌ها</button>
+              </div>
             </div>
-
-            <!-- Grade Dedicated Textbooks (Standard National & Sampad Supplementary) -->
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="font-black text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                        <i data-lucide="book-marked" class="w-5 h-5 text-blue-500"></i>
-                        <span>منابع درسی رسمی شما (${s.grade_title_fa})</span>
-                    </h3>
-                    <span class="text-xs text-slate-400">دسترسی اختصاصی طبق پایه تحصیلی</span>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    ${books.map(b => `
-                    <div onclick="window.store.setView('curriculum')" class="physics-card-3d bg-white dark:bg-slate-900/90 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer space-y-4">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl flex items-center justify-center ${b.book_type === 'sampad' ? 'bg-purple-900/40 text-purple-400 border border-purple-500/30' : 'bg-blue-900/40 text-blue-400 border border-blue-500/30'}">
-                                    <i data-lucide="book" class="w-5 h-5"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-black text-base text-slate-800 dark:text-white">${b.title_fa}</h4>
-                                    <span class="text-[11px] text-slate-400">${b.publisher_fa || 'آموزش و پرورش'} • سال ${b.academic_year || '۱۴۰۴-۱۴۰۵'}</span>
-                                </div>
-                            </div>
-                            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${b.book_type === 'sampad' ? 'bg-purple-950/70 text-purple-300 border border-purple-700/50' : 'bg-blue-950/70 text-blue-300 border border-blue-700/50'}">
-                                ${b.book_type === 'sampad' ? 'تکمیلی سمپاد' : 'کتاب رسمی'}
-                            </span>
-                        </div>
-                        <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800/80 text-xs">
-                            <span class="text-slate-400 flex items-center gap-1.5">
-                                <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i>
-                                <span>${b.chapter_count} فصل آموزشی</span>
-                            </span>
-                            <span class="text-blue-500 dark:text-blue-400 font-bold flex items-center gap-1">
-                                <span>مشاهده فصل‌ها</span>
-                                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-                            </span>
-                        </div>
-                    </div>
-                    `).join('')}
-                </div>
-            </div>
-
-            <!-- Active Competition Widget -->
-            ${data.active_competition ? `
-            <div class="p-6 rounded-3xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md shadow-amber-500/30">
-                        <i data-lucide="trophy" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-amber-700 dark:text-amber-300 block">مسابقه فعال هفته</span>
-                        <h3 class="font-bold text-base text-slate-800 dark:text-white">${data.active_competition.title_fa}</h3>
-                    </div>
-                </div>
-                <button onclick="window.store.setView('competitions')" class="btn-duo-yellow text-slate-900 font-bold px-6 py-2.5 rounded-xl text-xs whitespace-nowrap shadow-sm">
-                    ورود به مسابقه
-                </button>
-            </div>
-            ` : ''}
-
-            <!-- Recent Exams and Notifications Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Recent Exam Attempts -->
-                <div class="bg-white dark:bg-slate-900/90 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h3 class="font-bold text-base text-slate-800 dark:text-white flex items-center gap-2">
-                            <i data-lucide="file-check" class="w-4 h-4 text-emerald-500"></i>
-                            <span>نتایج آزمون‌های اخیر شما</span>
-                        </h3>
-                    </div>
-
-                    <div class="divide-y divide-slate-100 dark:divide-slate-800">
-                        ${data.recent_exams.length === 0 ? '<p class="text-xs text-slate-400 py-4">هنوز در آزمونی شرکت نکرده‌اید.</p>' : data.recent_exams.map(e => `
-                        <div class="py-3 flex items-center justify-between text-xs">
-                            <div>
-                                <span class="font-bold text-slate-800 dark:text-white block">${e.title_fa}</span>
-                                <span class="text-[11px] text-slate-400">${window.formatPersianDate(e.date)}</span>
-                            </div>
-                            <div class="text-left font-sans">
-                                <span class="font-bold ${e.is_passed ? 'text-emerald-500' : 'text-rose-500'} text-sm">${e.score} / ${e.total_points}</span>
-                                <span class="text-[10px] text-slate-400 block">${e.percentage}٪</span>
-                            </div>
-                        </div>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <!-- Notifications -->
-                <div class="bg-white dark:bg-slate-900/90 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                    <h3 class="font-bold text-base text-slate-800 dark:text-white flex items-center gap-2">
-                        <i data-lucide="bell" class="w-4 h-4 text-amber-400"></i>
-                        <span>پیام‌ها و اعلان‌های آموزشی</span>
-                    </h3>
-                    <div class="divide-y divide-slate-100 dark:divide-slate-800">
-                        ${data.notifications.length === 0 ? '<p class="text-xs text-slate-400 py-4">پیام جدیدی وجود ندارد.</p>' : data.notifications.map(n => `
-                        <div class="py-3 space-y-1 text-xs">
-                            <span class="font-bold text-slate-800 dark:text-white block">${n.title_fa}</span>
-                            <p class="text-slate-600 dark:text-slate-300 text-[11px]">${n.message_fa}</p>
-                        </div>
-                        `).join('')}
-                    </div>
-                </div>
-            </div>
+          </section>
         </div>
         `;
+
         if (window.lucide) window.lucide.createIcons();
         if (window.renderMathInPage) window.renderMathInPage(container);
+        if (window.qcRevealScan) window.qcRevealScan(container);
     } catch (e) {
-        container.innerHTML = `<div class="p-6 text-center text-rose-500">${e.message}</div>`;
+        container.innerHTML = `
+        <div class="qc-shell qc-section">
+          <div class="qc-empty">
+            <i data-lucide="satellite-dish" class="w-8 h-8 text-[var(--danger)]"></i>
+            <span class="qc-empty__title">دریافت پرونده علمی ممکن نشد</span>
+            <span class="qc-empty__text">${e.message}</span>
+            <button type="button" class="qc-btn qc-btn--sm" onclick="window.store.setView('landing')">بازگشت</button>
+          </div>
+        </div>`;
+        if (window.lucide) window.lucide.createIcons();
     }
 }
 
@@ -854,166 +1020,210 @@ async function renderDashboardView(container) {
 // VIEW: CURRICULUM BROWSER
 // ==========================================
 async function renderCurriculumView(container, gradeId = null) {
-    container.innerHTML = `<div class="text-center py-12"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div></div>`;
+    container.innerHTML = `<div class="qc-shell qc-loading"><div class="qc-spinner"></div><span>در حال بارگذاری نقشه یادگیری…</span></div>`;
+
     try {
         const grades = await window.api.getGrades();
         const user = window.store.currentUser;
 
-        // Active grade selection: default to student's grade if not specified, but allow switching
-        let activeGradeId = gradeId ? parseInt(gradeId) : (user && user.grade_id ? user.grade_id : (grades[0] ? grades[0].id : 1));
-        const isRegisteredGrade = Boolean(user && user.grade_id && (user.grade_id === activeGradeId));
+        let activeGradeId = gradeId ? parseInt(gradeId, 10) : (user && user.grade_id ? Number(user.grade_id) : (grades[0] ? grades[0].id : 1));
+        const activeGrade = grades.find(g => Number(g.id) === Number(activeGradeId)) || { id: activeGradeId, title_fa: 'پایه تحصیلی', number: activeGradeId };
+        const isRegisteredGrade = Boolean(user && user.grade_id && Number(user.grade_id) === Number(activeGradeId));
 
-        const books = await window.api.getBooks(activeGradeId);
-        const currentGradeObj = grades.find(g => g.id == activeGradeId) || { title_fa: 'پایه تحصیلی' };
+        let books = [];
+        let accessDenied = false;
+        let loadError = null;
+        try {
+            books = await window.api.getBooks(activeGradeId);
+        } catch (err) {
+            if (String(err.message || '').includes('403') || String(err.message || '').includes('دسترسی')) {
+                accessDenied = true;
+            } else {
+                loadError = err;
+            }
+        }
 
         const isPhysicsCh = (chNum) => {
-            if (activeGradeId == 1) return [2, 8, 9, 10].includes(chNum);
-            if (activeGradeId == 2) return [9, 10, 14, 15].includes(chNum);
-            if (activeGradeId == 3) return [4, 5, 8, 9, 10].includes(chNum);
-            return false;
+            if (Number(activeGradeId) === 1) return [2, 8, 9, 10].includes(chNum);
+            if (Number(activeGradeId) === 2) return [9, 10, 14, 15].includes(chNum);
+            if (Number(activeGradeId) === 3) return [4, 5, 8, 9, 10].includes(chNum);
+            return true;
         };
 
-        let booksHtml = '';
-        for (let b of books) {
-            let chapters = await window.api.getChapters(b.id);
-            // Permanently display ONLY physics chapters across books
-            const filtered = chapters.filter(ch => isPhysicsCh(ch.chapter_number));
-            if (filtered.length > 0) chapters = filtered;
-            chapters.sort((a, b) => a.chapter_number - b.chapter_number);
+        const faNum = (n) => { try { return Number(n || 0).toLocaleString('fa-IR'); } catch (e) { return String(n); } };
+        let totalChapters = 0;
+        let completedChapters = 0;
+        const bookBlocks = [];
 
-            booksHtml += `
-            <div class="space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl flex items-center justify-center ${b.book_type === 'sampad' ? 'bg-purple-900/40 text-purple-400 border border-purple-500/30' : 'bg-cyan-900/40 text-cyan-400 border border-cyan-500/30'}">
-                            <i data-lucide="book" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-lg text-slate-800 dark:text-white">${b.title_fa}</h3>
-                            <span class="text-xs text-slate-400">${b.publisher_fa || 'آموزش و پرورش'} • سال تحصیلی ${b.academic_year || '۱۴۰۴-۱۴۰۵'}</span>
-                        </div>
-                    </div>
-                    <span class="text-xs px-3 py-1 rounded-full font-bold ${b.book_type === 'sampad' ? 'bg-purple-950/60 text-purple-300 border border-purple-700/50' : 'bg-blue-950/60 text-blue-300 border border-blue-700/50'}">
-                        ${b.book_type === 'sampad' ? 'کتاب تکمیلی سمپاد (استعدادهای درخشان)' : 'کتاب رسمی آموزش و پرورش'}
-                    </span>
+        for (const b of books) {
+            let chapters = [];
+            try { chapters = await window.api.getChapters(b.id); } catch (e) { chapters = []; }
+            const filtered = chapters.filter(ch => isPhysicsCh(Number(ch.chapter_number)));
+            chapters = filtered.length ? filtered : chapters;
+            chapters.sort((a, b2) => a.chapter_number - b2.chapter_number);
+            totalChapters += chapters.length;
+            completedChapters += chapters.filter(ch => Number(ch.user_progress_percent) >= 100).length;
+
+            bookBlocks.push(`
+            <section class="space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[var(--line)]">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="qc-feature__icon"><i data-lucide="book" class="w-4 h-4"></i></span>
+                  <div class="min-w-0">
+                    <h2 class="text-[13.5px] font-black text-[var(--ink)] truncate">${window.qcEscape(b.title_fa)}</h2>
+                    <p class="text-[10.5px] text-[var(--muted)] mt-0.5">${window.qcEscape(b.publisher_fa || 'آموزش و پرورش')} · سال تحصیلی ${b.academic_year || '۱۴۰۴–۱۴۰۵'}</p>
+                  </div>
                 </div>
+                <span class="qc-chip ${b.book_type === 'sampad' ? 'qc-chip--violet' : 'qc-chip--accent'}" style="font-size:9.5px;">
+                  ${b.book_type === 'sampad' ? 'کتاب تکمیلی سمپاد' : 'کتاب رسمی آموزش و پرورش'}
+                </span>
+              </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    ${chapters.map(ch => {
-                        const isPhys = isPhysicsCh(ch.chapter_number);
-                        return `
-                        <div onclick="window.store.setView('chapter', { id: ${ch.id} })" 
-                            class="physics-card-3d bg-white dark:bg-slate-900/90 p-6 rounded-3xl border border-slate-800 hover:border-sky-500/60 shadow-xl shadow-sm cursor-pointer space-y-3.5 transition-all">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs font-black px-3 py-1 rounded-xl bg-sky-950/80 text-sky-300 border border-sky-800/80 font-bold">
-                                        فصل ${ch.chapter_number}
-                                    </span>
-                                    <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-lg bg-slate-800/80 text-slate-300 border border-slate-700/60 flex items-center gap-1">
-                                        <i data-lucide="zap" class="w-3 h-3 text-sky-400 fill-sky-400"></i>
-                                        فصل تخصصی فیزیک
-                                    </span>
-                                </div>
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800/90 text-[11px] font-medium text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60">
-                                    <i data-lucide="bookmark" class="w-3.5 h-3.5 text-cyan-400"></i>
-                                    <span>${ch.source_pages || ''}</span>
-                                </span>
-                            </div>
-
-                            <h4 class="font-black text-lg text-slate-800 dark:text-white leading-snug">${ch.title_fa}</h4>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">${ch.description_fa || ''}</p>
-
-                            <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800/80 text-xs">
-                                <span class="text-slate-400 flex items-center gap-1.5">
-                                    <i data-lucide="play-circle" class="w-4 h-4 text-emerald-500"></i>
-                                    <span>${ch.lesson_count} درس تعاملی</span>
-                                </span>
-                                <span class="text-slate-400 flex items-center gap-1.5 font-sans">
-                                    <i data-lucide="help-circle" class="w-4 h-4 text-indigo-400"></i>
-                                    <span>${ch.mcq_count} تست • ${ch.written_count} تشریحی</span>
-                                </span>
-                            </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                ${chapters.map((ch, i) => {
+                    const progress = Math.max(0, Math.min(100, Number(ch.user_progress_percent) || 0));
+                    const qCount = Number(ch.question_count || ((Number(ch.mcq_count) || 0) + (Number(ch.written_count) || 0))) || 0;
+                    return `
+                    <article class="qc-card qc-card--hover qc-card--p qc-reveal" data-delay="${(i % 4) + 1}" role="button" tabindex="0"
+                             onclick="window.store.setView('chapter', { id: ${ch.id} })"
+                             onkeydown="if(event.key==='Enter'){window.store.setView('chapter',{id:${ch.id}})}">
+                      <div class="flex items-start justify-between gap-2">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                          <span class="qc-chip qc-chip--accent qc-chip--mono" style="font-size:9.5px;">فصل ${faNum(ch.chapter_number)}</span>
+                          <span class="qc-chip" style="font-size:9px;"><i data-lucide="atom" class="w-3 h-3 text-[var(--accent)]"></i> فیزیک</span>
+                          ${progress >= 100 ? '<span class="qc-chip qc-chip--ok" style="font-size:9px;"><i data-lucide="check" class="w-3 h-3"></i> تکمیل‌شده</span>' : ''}
                         </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-            `;
+                        ${ch.source_pages ? `<span class="qc-chip qc-chip--mono" style="font-size:9px;white-space:nowrap;">${ch.source_pages}</span>` : ''}
+                      </div>
+
+                      <h3 class="mt-3 text-[14px] font-black text-[var(--ink)] leading-snug">${window.qcEscape(ch.title_fa)}</h3>
+                      <p class="mt-1.5 text-[11px] leading-[1.95] text-[var(--muted)] line-clamp-2">${window.qcEscape(ch.description_fa || '')}</p>
+
+                      ${progress > 0 ? `
+                      <div class="mt-3">
+                        <div class="flex items-center justify-between text-[9.5px] mb-1">
+                          <span class="text-[var(--muted)]">پیشرفت شما</span>
+                          <span class="font-mono text-[var(--ok)]">${progress}%</span>
+                        </div>
+                        <div class="h-1.5 rounded-full overflow-hidden" style="background:var(--surface-3);">
+                          <div class="h-full rounded-full" style="width:${progress}%;background:var(--ok);"></div>
+                        </div>
+                      </div>` : ''}
+
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-[var(--line)] text-[10.5px]">
+                        <span class="flex items-center gap-1 text-[var(--muted)]"><i data-lucide="play-circle" class="w-3.5 h-3.5 text-[var(--accent)]"></i> ${faNum(ch.lesson_count)} درس تعاملی</span>
+                        <span class="flex items-center gap-1 text-[var(--muted)]"><i data-lucide="help-circle" class="w-3.5 h-3.5 text-[var(--accent-2)]"></i> ${faNum(qCount)} سنجه</span>
+                        <span class="font-bold text-[var(--accent)]">ورود ←</span>
+                      </div>
+                    </article>`;
+                }).join('')}
+              </div>
+            </section>`);
         }
 
         container.innerHTML = `
-        <div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
-            <!-- Grade Switcher Tabs for All Users -->
-            <div class="flex flex-col items-center justify-center gap-4 text-center">
-                <div class="inline-flex items-center gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 shadow-md">
-                    ${grades.map(g => `
-                    <button onclick="window.store.setView('curriculum', { id: ${g.id} })" class="px-5 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 ${g.id == activeGradeId ? 'btn-duo-blue text-white shadow-md' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'}">
-                        <span>${g.title_fa}</span>
-                        ${user && user.grade_id === g.id ? '<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 font-bold border border-emerald-500/30">پایه شما</span>' : ''}
-                    </button>
-                    `).join('')}
-                </div>
-                ${!user ? `
-                <p class="text-xs text-slate-500 dark:text-slate-400">
-                    دانش‌آموز عزیز؛ برای ذخیره پیشرفت درسی و شرکت در آزمون‌ها، لطفاً <button onclick="window.openAuthModal('login')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">وارد شوید</button> یا <button onclick="window.openAuthModal('register')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">ثبت‌نام کنید</button>.
-                </p>
-                ` : ''}
+        <div class="qc-shell qc-section space-y-6">
+          <header class="space-y-4 qc-reveal">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <span class="qc-eyebrow">CURRICULUM MAP</span>
+                <h1 class="qc-h2 mt-1.5">نقشه یادگیری فیزیک</h1>
+                <p class="text-[11.5px] text-[var(--muted)] mt-1">سرفصل‌های تخصصی فیزیک، منطبق بر کتاب رسمی و کتب تکمیلی سمپاد</p>
+              </div>
+              <button type="button" class="qc-btn qc-btn--ghost qc-btn--sm" onclick="window.store.setView('materials')">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i> درسنامه‌ها و جزوات
+              </button>
             </div>
 
-            <!-- Grade Informational Banner -->
-            <div class="relative overflow-hidden p-6 rounded-3xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-slate-900/50 border border-blue-500/30 backdrop-blur-md shadow-lg">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-2xl shadow-lg shadow-blue-500/30">
-                            ${activeGradeId == 1 ? '۷' : (activeGradeId == 2 ? '۸' : '۹')}
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs px-2.5 py-0.5 rounded-full ${isRegisteredGrade ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30' : 'bg-blue-500/20 text-blue-300 border border-blue-400/30'} font-bold">
-                                    ${isRegisteredGrade ? 'پایه تحصیلی ثبت‌نامی شما' : 'مطالعه و کاوش علمی سرفصل‌ها'}
-                                </span>
-                                <span class="text-xs text-slate-300">• ۲ منبع آموزشی کامل (فصول تخصصی فیزیک)</span>
-                            </div>
-                            <h2 class="text-xl sm:text-2xl font-black text-white mt-1">
-                                برنامه درسی فیزیک ${currentGradeObj.title_fa}
-                            </h2>
-                            <p class="text-xs text-slate-300 mt-0.5">مطابق سرفصل‌های کتاب رسمی آموزش و پرورش و کتاب علوم تکمیلی سمپاد</p>
-                        </div>
-                    </div>
-                    ${isRegisteredGrade ? `
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold self-start sm:self-center">
-                        <i data-lucide="shield-check" class="w-4 h-4"></i>
-                        <span>ثبت‌نام رسمی در این پایه</span>
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="qc-tabs" role="tablist" aria-label="انتخاب پایه">
+                ${grades.map(g => `
+                <button type="button" role="tab" aria-selected="${Number(g.id) === Number(activeGradeId)}"
+                        class="qc-tab ${Number(g.id) === Number(activeGradeId) ? 'is-active' : ''}"
+                        onclick="window.store.setView('curriculum', { id: ${g.id} })">
+                  ${g.title_fa}
+                  ${user && Number(user.grade_id) === Number(g.id) ? '<span class="ms-1 text-[9px] opacity-80">• پایه شما</span>' : ''}
+                </button>`).join('')}
+              </div>
+              <span class="qc-chip qc-chip--mono" style="font-size:9.5px;">${faNum(totalChapters)} فصل فیزیک</span>
+              ${user ? `<span class="qc-chip qc-chip--ok" style="font-size:9.5px;">${faNum(completedChapters)} فصل تکمیل‌شده</span>` : ''}
+            </div>
+          </header>
+
+          ${!user ? `
+          <div class="qc-card qc-card--p qc-reveal" style="border-color:var(--accent-line);background:linear-gradient(120deg,var(--accent-soft),var(--surface));">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <p class="text-[11.5px] text-[var(--ink-2)] leading-[1.9]">
+                برای ذخیره پیشرفت درسی، شرکت در آزمون‌ها و دریافت مدال، وارد حساب دانش‌آموزی خود شوید.
+              </p>
+              <div class="flex gap-2 shrink-0">
+                <button type="button" class="qc-btn qc-btn--sm" onclick="window.openAuthModal('login')">ورود</button>
+                <button type="button" class="qc-btn qc-btn--ghost qc-btn--sm" onclick="window.openAuthModal('register')">ثبت‌نام</button>
+              </div>
+            </div>
+          </div>` : ''}
+
+          <div class="qc-card qc-card--p qc-ticks qc-reveal" style="background:linear-gradient(120deg,var(--surface),var(--surface-2));">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="grid place-items-center w-12 h-12 rounded-2xl font-black text-xl shrink-0" style="background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);">
+                  ${activeGrade.number ? Number(activeGrade.number).toLocaleString('fa-IR') : (Number(activeGradeId) === 1 ? '۷' : Number(activeGradeId) === 2 ? '۸' : '۹')}
+                </span>
+                <div>
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="qc-chip ${isRegisteredGrade ? 'qc-chip--ok' : 'qc-chip--accent'}" style="font-size:9px;">
+                      ${isRegisteredGrade ? 'پایه ثبت‌نامی شما' : 'مطالعه آزاد سرفصل‌ها'}
                     </span>
-                    ` : ''}
+                    <span class="qc-chip qc-chip--mono" style="font-size:9px;">${books.length} منبع · ${faNum(totalChapters)} فصل</span>
+                  </div>
+                  <h2 class="text-[15px] font-black text-[var(--ink)] mt-1.5">برنامه درسی فیزیک ${activeGrade.title_fa}</h2>
                 </div>
+              </div>
+              ${user && user.grade_id && Number(user.grade_id) !== Number(activeGradeId) ? `
+              <button type="button" class="qc-btn qc-btn--sm" onclick="window.store.setView('curriculum', { id: ${user.grade_id} })">بازگشت به پایه من</button>` : ''}
             </div>
+          </div>
 
-            <!-- Supplementary Study Materials Banner -->
-            <div class="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                        <i data-lucide="book-marked" class="w-5 h-5"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-extrabold text-sm text-white">درسنامه‌ها، خلاصه‌ها و جزوات متفرقه فیزیک</h4>
-                        <p class="text-xs text-emerald-300/80">دریافت فایل جزوات دبیران، فرمول‌نامه‌های سریع و نمونه سؤالات امتحانی به همراه پاسخ تشریحی</p>
-                    </div>
-                </div>
-                <button onclick="window.store.setView('materials')" class="btn-duo-green text-white font-bold text-xs px-4 py-2.5 rounded-xl self-start sm:self-auto shrink-0 shadow-sm flex items-center gap-1.5 hover:scale-105 transition-all">
-                    <span>مشاهده جزوات و درسنامه‌ها</span>
-                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-                </button>
-            </div>
+          ${accessDenied ? `
+          <div class="qc-empty">
+            <i data-lucide="lock" class="w-8 h-8 text-[var(--warn)]"></i>
+            <span class="qc-empty__title">دسترسی به این پایه محدود است</span>
+            <span class="qc-empty__text">سامانه تنها اجازه مطالعه منابع پایه ثبت‌نامی شما را می‌دهد. برای مشاهده این پایه، از حساب کاربری مربوط به آن استفاده کنید.</span>
+            <button type="button" class="qc-btn qc-btn--sm" onclick="window.store.setView('curriculum', { id: ${user && user.grade_id ? user.grade_id : 1} })">بازگشت به پایه من</button>
+          </div>` : ''}
 
-            <!-- Books & Chapters -->
-            <div class="space-y-12">
-                ${booksHtml}
-            </div>
+          ${loadError ? `
+          <div class="qc-empty">
+            <i data-lucide="satellite-dish" class="w-8 h-8 text-[var(--danger)]"></i>
+            <span class="qc-empty__title">بارگذاری منابع ممکن نشد</span>
+            <span class="qc-empty__text">${loadError.message}</span>
+          </div>` : ''}
+
+          ${!accessDenied && !loadError && books.length === 0 ? `
+          <div class="qc-empty">
+            <i data-lucide="book-x" class="w-8 h-8"></i>
+            <span class="qc-empty__title">منبعی برای این پایه ثبت نشده است</span>
+            <span class="qc-empty__text">به‌زودی منابع این پایه از سوی دبیرخانه منتشر می‌شود.</span>
+          </div>` : ''}
+
+          <div class="space-y-7">${bookBlocks.join('')}</div>
         </div>
         `;
+
+        if (window.lucide) window.lucide.createIcons();
+        if (window.qcRevealScan) window.qcRevealScan(container);
+        if (window.renderMathInPage) window.renderMathInPage(container);
     } catch (e) {
-        container.innerHTML = `<div class="p-6 text-center text-rose-500">${e.message}</div>`;
+        container.innerHTML = `
+        <div class="qc-shell qc-section">
+          <div class="qc-empty">
+            <i data-lucide="satellite-dish" class="w-8 h-8 text-[var(--danger)]"></i>
+            <span class="qc-empty__title">بارگذاری سرفصل‌ها ممکن نشد</span>
+            <span class="qc-empty__text">${e.message}</span>
+            <button type="button" class="qc-btn qc-btn--sm" onclick="window.store.setView('landing')">بازگشت</button>
+          </div>
+        </div>`;
+        if (window.lucide) window.lucide.createIcons();
     }
 }
 
@@ -1021,86 +1231,129 @@ async function renderCurriculumView(container, gradeId = null) {
 // VIEW: CHAPTER DETAIL & LESSON LIST
 // ==========================================
 async function renderChapterDetailView(container, chapterId) {
-    container.innerHTML = `<div class="text-center py-12"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div></div>`;
+    container.innerHTML = `<div class="qc-shell qc-loading"><div class="qc-spinner"></div><span>در حال بارگذاری فصل…</span></div>`;
+
+    if (!chapterId) {
+        container.innerHTML = `<div class="qc-shell qc-section"><div class="qc-empty"><i data-lucide="compass" class="w-8 h-8"></i><span class="qc-empty__title">فصلی انتخاب نشده است</span><button type="button" class="qc-btn qc-btn--sm" onclick="window.store.setView('curriculum')">بازگشت به سرفصل‌ها</button></div></div>`;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+    }
+
     try {
         const ch = await window.api.getChapter(chapterId);
+        const lessons = Array.isArray(ch.lessons) ? ch.lessons : [];
+        const faNum = (n) => { try { return Number(n || 0).toLocaleString('fa-IR'); } catch (e) { return String(n); } };
+        const totalMinutes = lessons.reduce((sum, l) => sum + (Number(l.estimated_minutes) || 0), 0);
+        const completed = lessons.filter(l => l.is_completed).length;
 
         container.innerHTML = `
-        <div class="max-w-4xl mx-auto px-4 py-8 space-y-8">
-            <!-- Chapter Hero -->
-            <div class="physics-card-3d bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                <div class="flex items-center justify-between text-xs text-slate-500">
-                    <span class="font-bold text-blue-500">پایه ${ch.grade_number} • ${ch.book_title_fa}</span>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-medium text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                        <i data-lucide="bookmark" class="w-3.5 h-3.5 text-blue-400"></i>
-                        <span>${ch.source_pages || ''}</span>
-                    </span>
-                </div>
-                <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">فصل ${ch.chapter_number}: ${ch.title_fa}</h1>
-                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${ch.description_fa || ''}</p>
+        <div class="qc-shell qc-section space-y-5">
+          <header class="qc-card qc-card--p qc-ticks qc-reveal">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span class="qc-chip qc-chip--accent qc-chip--mono" style="font-size:9.5px;">فصل ${faNum(ch.chapter_number)}</span>
+              ${ch.grade_number ? `<span class="qc-chip qc-chip--mono" style="font-size:9px;">GRADE ${faNum(ch.grade_number)}</span>` : ''}
+              ${ch.book_title_fa ? `<span class="qc-chip" style="font-size:9px;">${ch.book_title_fa}</span>` : ''}
+              ${ch.source_pages ? `<span class="qc-chip" style="font-size:9px;">${ch.source_pages}</span>` : ''}
+            </div>
+            <h1 class="qc-h2 mt-3">${window.qcEscape(ch.title_fa)}</h1>
+            <p class="qc-lede mt-2" style="max-width:66ch;">${window.qcEscape(ch.description_fa || '')}</p>
 
-                ${ch.objectives_fa ? `
-                <div class="p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 text-xs text-slate-700 dark:text-slate-200 space-y-1">
-                    <span class="font-bold text-blue-800 dark:text-blue-300 block mb-1">اهداف یادگیری فصل:</span>
-                    <div class="whitespace-pre-line leading-relaxed">${ch.objectives_fa}</div>
-                </div>
-                ` : ''}
+            <div class="grid grid-cols-3 gap-2 mt-4">
+              <div class="qc-readout"><span class="qc-readout__label">درس تعاملی</span><span class="qc-readout__value" style="font-size:.95rem;">${faNum(lessons.length)}</span></div>
+              <div class="qc-readout"><span class="qc-readout__label">زمان تقریبی</span><span class="qc-readout__value" style="font-size:.95rem;">${faNum(totalMinutes)} <span style="font-size:.6rem;color:var(--muted)">دقیقه</span></span></div>
+              <div class="qc-readout"><span class="qc-readout__label">تکمیل‌شده</span><span class="qc-readout__value" style="font-size:.95rem;color:var(--ok);">${faNum(completed)}</span></div>
             </div>
 
-            <!-- Lessons Progression Path -->
-            <div class="space-y-4">
-                <h3 class="font-bold text-lg text-slate-800 dark:text-white">دروس تعاملی فصل (مسیر یادگیری):</h3>
-                <div class="space-y-3">
-                    ${ch.lessons.map(l => {
-                        const simType = window.physicsSimulators ? window.physicsSimulators.getSimulatorForLesson(l, ch) : null;
-                        return `
-                    <div class="flex items-center justify-between p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-500/50 transition-all">
-                        <div class="flex items-center gap-4">
-                            <div class="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-sm ${l.is_completed ? 'bg-emerald-950/50 text-emerald-400 border border-emerald-500/40' : 'bg-blue-950/50 text-blue-400 border border-blue-500/40'}">
-                                <i data-lucide="${l.is_completed ? 'check' : 'play'}" class="w-5 h-5"></i>
-                            </div>
-                            <div class="space-y-1">
-                                <div class="flex items-center gap-2">
-                                    <h4 class="font-bold text-sm text-slate-800 dark:text-white">${l.title_fa}</h4>
-                                    ${simType ? `
-                                    <button onclick="event.stopPropagation(); window.store.setView('simulators', { id: '${simType}' })" title="انتقال به آزمایشگاه مجازی این درس" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-teal-950/70 hover:bg-teal-900 border border-teal-600/50 text-teal-300 hover:text-teal-100 text-[11px] font-bold transition-all shadow-sm cursor-pointer">
-                                        <i data-lucide="atom" class="w-3.5 h-3.5 text-teal-400"></i>
-                                        <span>آزمایشگاه مجازی</span>
-                                    </button>
-                                    ` : ''}
-                                </div>
-                                <span class="text-xs text-slate-400 font-sans block">مدت: ${l.estimated_minutes} دقیقه • پاداش: +${l.xp_reward} XP</span>
-                            </div>
-                        </div>
+            ${ch.objectives_fa ? `
+            <div class="mt-4 p-3.5 rounded-xl" style="background:var(--accent-soft);border:1px solid var(--accent-line);">
+              <span class="block text-[11px] font-black text-[var(--accent)] mb-1">اهداف یادگیری فصل</span>
+              <div class="text-[11.5px] leading-[2] text-[var(--ink-2)] whitespace-pre-line">${window.qcEscape(ch.objectives_fa)}</div>
+            </div>` : ''}
 
-                        <div class="flex items-center gap-2">
-                            <button onclick="window.store.setView('lesson', { id: ${l.id} })" class="${l.is_completed ? 'btn-duo-blue' : 'btn-duo-green'} text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-sm whitespace-nowrap hover:scale-105 transition-all">
-                                ${l.is_completed ? 'مرور مجدد' : 'شروع درس'}
-                            </button>
+            ${ch.prerequisites_fa ? `
+            <div class="mt-2.5 p-3.5 rounded-xl" style="background:var(--surface-2);border:1px solid var(--line);">
+              <span class="block text-[11px] font-black text-[var(--muted)] mb-1">پیش‌نیازها</span>
+              <div class="text-[11px] leading-[1.95] text-[var(--ink-2)] whitespace-pre-line">${window.qcEscape(ch.prerequisites_fa)}</div>
+            </div>` : ''}
+          </header>
+
+          <section class="space-y-3">
+            <div class="qc-section-head" style="margin-bottom:.2rem;">
+              <div>
+                <span class="qc-section-head__index">LEARNING PATH</span>
+                <h2 class="text-sm font-black text-[var(--ink)] mt-1">دروس تعاملی فصل</h2>
+              </div>
+              <span class="qc-chip qc-chip--mono" style="font-size:9.5px;">${faNum(lessons.length)} درس · ${faNum(ch.question_count || 0)} سنجه</span>
+            </div>
+
+            <div class="space-y-2.5">
+              ${lessons.length ? lessons.map((l, i) => {
+                  const simType = window.physicsSimulators ? window.physicsSimulators.getSimulatorForLesson(l, ch) : null;
+                  return `
+                  <div class="qc-card qc-card--hover qc-card--p qc-reveal" data-delay="${(i % 4) + 1}">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div class="flex items-start gap-3 min-w-0">
+                        <span class="grid place-items-center w-9 h-9 rounded-xl shrink-0 text-[11px] font-black" style="${l.is_completed ? 'background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok);' : 'background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);'}">
+                          ${l.is_completed ? '<i data-lucide="check" class="w-4 h-4"></i>' : faNum(i + 1)}
+                        </span>
+                        <div class="min-w-0">
+                          <h3 class="text-[12.5px] font-black text-[var(--ink)]">${window.qcEscape(l.title_fa)}</h3>
+                          <div class="flex flex-wrap items-center gap-2 mt-1.5 text-[10px] text-[var(--muted)]">
+                            <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i>${faNum(l.estimated_minutes)} دقیقه</span>
+                            <span class="flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3 text-[var(--warn)]"></i>+${faNum(l.xp_reward)} XP</span>
+                            <span class="flex items-center gap-1"><i data-lucide="pencil-line" class="w-3 h-3"></i>${faNum(l.exercise_count)} تمرین</span>
+                            ${l.is_completed ? '<span class="qc-chip qc-chip--ok" style="font-size:8.5px;">تکمیل‌شده</span>' : ''}
+                          </div>
                         </div>
+                      </div>
+                      <div class="flex items-center gap-2 shrink-0">
+                        ${simType ? `
+                        <button type="button" class="qc-btn qc-btn--ghost qc-btn--sm" onclick="window.store.setView('simulators', { id: '${simType}' })">
+                          <i data-lucide="flask-conical" class="w-3.5 h-3.5"></i> آزمایشگاه
+                        </button>` : ''}
+                        <button type="button" class="qc-btn qc-btn--sm" onclick="window.store.setView('lesson', { id: ${l.id} })">
+                          ${l.is_completed ? 'مرور درس' : 'شروع درس'} <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                        </button>
+                      </div>
                     </div>
-                        `;
-                    }).join('')}
-                </div>
+                  </div>`;
+              }).join('') : `
+              <div class="qc-empty">
+                <i data-lucide="book-x" class="w-8 h-8"></i>
+                <span class="qc-empty__title">درسی برای این فصل ثبت نشده است</span>
+              </div>`}
             </div>
+          </section>
 
-            <!-- Chapter Examination Card -->
-            ${ch.exam_id ? `
-            <div class="p-6 rounded-3xl bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-slate-800 dark:to-slate-900 border-2 border-indigo-200 dark:border-indigo-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 block mb-1">ارزیابی پایان فصل</span>
-                    <h3 class="font-bold text-lg text-slate-900 dark:text-white">${ch.exam_title_fa}</h3>
-                    <p class="text-xs text-slate-500 mt-1">آزمون جامع شامل سؤالات تستی و تشریحی با تصحیح هوشمند هوش مصنوعی</p>
-                </div>
-                <button onclick="window.store.setView('exam', { id: ${ch.exam_id} })" class="btn-duo-green text-white font-bold text-xs px-6 py-3 rounded-2xl shadow-md whitespace-nowrap">
-                    شرکت در آزمون فصل
-                </button>
+          ${ch.exam_id ? `
+          <section class="qc-card qc-card--p qc-reveal" style="border-color:var(--accent-line);background:linear-gradient(120deg,var(--accent-soft),var(--surface));">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span class="qc-chip qc-chip--accent" style="font-size:9px;">ارزیابی پایان فصل</span>
+                <h3 class="text-[14px] font-black text-[var(--ink)] mt-2">${window.qcEscape(ch.exam_title_fa || 'آزمون جامع فصل')}</h3>
+                <p class="text-[11px] text-[var(--muted)] mt-1">سؤالات تستی و تشریحی با تصحیح هوشمند و بارم‌بندی استاندارد</p>
+              </div>
+              <button type="button" class="qc-btn qc-btn--lg shrink-0" onclick="window.store.setView('exam', { id: ${ch.exam_id} })">
+                <i data-lucide="play" class="w-4 h-4"></i> شرکت در آزمون فصل
+              </button>
             </div>
-            ` : ''}
-        </div>
-        `;
+          </section>` : ''}
+        </div>`;
+
+        if (window.lucide) window.lucide.createIcons();
+        if (window.renderMathInPage) window.renderMathInPage(container);
+        if (window.qcRevealScan) window.qcRevealScan(container);
     } catch (e) {
-        container.innerHTML = `<div class="p-6 text-center text-rose-500">${e.message}</div>`;
+        container.innerHTML = `
+        <div class="qc-shell qc-section">
+          <div class="qc-empty">
+            <i data-lucide="book-x" class="w-8 h-8 text-[var(--danger)]"></i>
+            <span class="qc-empty__title">فصل مورد نظر یافت نشد</span>
+            <span class="qc-empty__text">${e.message}</span>
+            <button type="button" class="qc-btn qc-btn--sm" onclick="window.store.setView('curriculum')">بازگشت به سرفصل‌ها</button>
+          </div>
+        </div>`;
+        if (window.lucide) window.lucide.createIcons();
     }
 }
 
@@ -1143,111 +1396,177 @@ async function loadAndStartExam(container, examId) {
 function openAuthModal(mode = 'login') {
     const existing = document.getElementById('auth-modal-backdrop');
     if (existing) existing.remove();
+    const isRegister = mode === 'register';
 
     const backdrop = document.createElement('div');
     backdrop.id = 'auth-modal-backdrop';
-    backdrop.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto';
+    backdrop.className = 'qc-overlay';
+    backdrop.setAttribute('role', 'dialog');
+    backdrop.setAttribute('aria-modal', 'true');
 
     backdrop.innerHTML = `
-    <div class="bg-slate-900 border border-blue-500/30 w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-white my-8 relative">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/25">
-                    <i data-lucide="${mode === 'login' ? 'log-in' : 'user-plus'}" class="w-5 h-5"></i>
-                </div>
-                <div>
-                    <h3 class="text-lg font-black text-white" id="auth-modal-title">
-                        ${mode === 'login' ? 'ورود به سامانه انجمن فیزیک' : 'ثبت‌نام رسمی دانش‌آموز'}
-                    </h3>
-                    <span class="text-xs text-slate-400">انجمن فیزیک شهید بهشتی دو دوره اول</span>
-                </div>
+    <div class="qc-modal" style="max-width:860px;">
+      <div class="grid grid-cols-1 lg:grid-cols-[.9fr_1.1fr]">
+
+        <!-- Observatory panel -->
+        <aside class="relative hidden lg:flex flex-col justify-between p-7 overflow-hidden qc-dark-island"
+               style="background:linear-gradient(160deg,#07101f,#0b1730 58%,#12133a);color:#eaf3ff;">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <span class="qc-brand__mark" style="width:34px;height:34px;"><i data-lucide="atom" class="w-4 h-4"></i></span>
+              <div>
+                <div class="text-[12px] font-black">انجمن فیزیک شهید بهشتی دو</div>
+                <div class="font-mono text-[8.5px] tracking-[.18em] text-[#7dd3fc]">SAMPAD PHYSICS SOCIETY</div>
+              </div>
             </div>
-            <button onclick="document.getElementById('auth-modal-backdrop').remove()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
+
+            <h2 class="mt-8 text-[22px] font-black leading-[1.45]">
+              کیهان،<br><span style="background:linear-gradient(96deg,#38bdf8,#818cf8,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;">آزمایشگاه ماست.</span>
+            </h2>
+            <p class="mt-3 text-[11px] leading-[2] text-[#a9c1de]">
+              حساب دانش‌آموزی شما، پیشرفت درس‌به‌درس، مدال‌ها، سابقه آزمایشگاهی و رتبه علمی را به‌صورت دائمی ذخیره می‌کند.
+            </p>
+
+            <div class="mt-6 space-y-2.5">
+              ${[
+                ['book-open', 'درسنامه‌های تعاملی و نقشه یادگیری'],
+                ['flask-conical', 'آزمایشگاه‌های استاندارد PhET با ثبت داده'],
+                ['target', 'آزمون تطبیقی با تخمین توانمندی'],
+                ['sparkles', 'معلم هوشمند سقراطی در کنار شما']
+              ].map(x => `
+              <div class="flex items-center gap-2.5 text-[10.5px] text-[#c6d8ee]">
+                <span class="grid place-items-center w-7 h-7 rounded-lg" style="background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.32);color:#7dd3fc;">
+                  <i data-lucide="${x[0]}" class="w-3.5 h-3.5"></i>
+                </span>
+                <span>${x[1]}</span>
+              </div>`).join('')}
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <div class="qc-orbit" style="max-width:150px;margin-inline:0;">
+              <span class="qc-orbit__ring"></span>
+              <span class="qc-orbit__ring"></span>
+              <span class="qc-orbit__ring"></span>
+              <span class="qc-orbit__core"></span>
+            </div>
+            <div class="mt-4 flex items-center justify-between text-[9px] font-mono text-[#7f9ec4]" dir="ltr">
+              <span>λ = h / p</span><span>F = G m₁m₂ / r²</span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Form panel -->
+        <section class="p-5 sm:p-7">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <span class="qc-eyebrow">${isRegister ? 'ACCOUNT CREATION' : 'SECURE SIGN-IN'}</span>
+              <h3 class="text-[17px] font-black text-[var(--ink)] mt-1.5">${isRegister ? 'ثبت‌نام دانش‌آموزی' : 'ورود به پرتال علمی'}</h3>
+              <p class="text-[10.5px] text-[var(--muted)] mt-1">${isRegister ? 'برای شروع مسیر پژوهشی، اطلاعات زیر را تکمیل کنید.' : 'با نام کاربری و رمز عبور خود وارد شوید.'}</p>
+            </div>
+            <button type="button" onclick="document.getElementById('auth-modal-backdrop').remove()" class="qc-icon-btn" aria-label="بستن">
+              <i data-lucide="x" class="w-4 h-4"></i>
             </button>
-        </div>
+          </div>
 
-        <div id="auth-error-banner" class="hidden p-3.5 rounded-2xl bg-rose-950/70 border border-rose-500/40 text-rose-200 text-xs flex items-center gap-2.5 animate-shake">
-            <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400 shrink-0"></i>
-            <span id="auth-error-message"></span>
-        </div>
+          <div class="qc-tabs mt-4 w-full" role="tablist">
+            <button type="button" class="qc-tab ${!isRegister ? 'is-active' : ''}" role="tab" aria-selected="${!isRegister}" onclick="openAuthModal('login')">ورود</button>
+            <button type="button" class="qc-tab ${isRegister ? 'is-active' : ''}" role="tab" aria-selected="${isRegister}" onclick="openAuthModal('register')">ثبت‌نام</button>
+          </div>
 
-        <form id="auth-form" onsubmit="handleAuthSubmit(event, '${mode}')" class="space-y-4 text-xs font-semibold">
-            ${mode === 'register' ? `
-            <div>
-                <label class="block text-slate-300 mb-1.5">نام و نام خانوادگی:</label>
-                <div class="relative">
-                    <input type="text" id="auth-fullname" required placeholder="مثال: امیررضا علوی"
-                        class="w-full p-3 pl-10 rounded-xl border border-slate-700 bg-slate-800/90 text-white outline-none focus:border-blue-500 transition-colors" />
-                    <i data-lucide="user" class="w-4 h-4 absolute left-3 top-3.5 text-slate-400"></i>
-                </div>
+          <div id="auth-error-banner" class="hidden mt-3 p-3 rounded-xl animate-shake" style="background:var(--danger-soft);border:1px solid var(--danger);color:var(--danger);">
+            <div class="flex items-center gap-2 text-[11px] font-bold">
+              <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+              <span id="auth-error-message"></span>
+            </div>
+          </div>
+
+          <form id="auth-form" onsubmit="handleAuthSubmit(event, '${isRegister ? 'register' : 'login'}')" class="mt-4 space-y-3.5" novalidate>
+            ${isRegister ? `
+            <div class="qc-field">
+              <label class="qc-label" for="auth-fullname">نام و نام خانوادگی</label>
+              <input type="text" id="auth-fullname" required placeholder="مثال: امیررضا علوی" autocomplete="name" class="qc-input" />
             </div>
 
-            <div>
-                <label class="block text-slate-300 mb-2">انتخاب پایه تحصیلی شما:</label>
-                <input type="hidden" id="auth-grade" value="1" />
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="grade-selector-cards">
-                    <div onclick="selectAuthGrade(1)" id="grade-card-1" class="cursor-pointer p-3 rounded-2xl border-2 border-amber-500 bg-amber-500/20 text-center transition-all opacity-100 shadow-md">
-                        <span class="block font-black text-sm text-white">پایه هفتم</span>
-                        <span class="text-[10px] text-amber-300 block mt-1">گرما، انرژی و اندازه‌گیری</span>
-                    </div>
-                    <div onclick="selectAuthGrade(2)" id="grade-card-2" class="cursor-pointer p-3 rounded-2xl border border-slate-700 bg-slate-800/60 text-center transition-all opacity-60 hover:opacity-100">
-                        <span class="block font-black text-sm text-white">پایه هشتم</span>
-                        <span class="text-[10px] text-blue-300 block mt-1">الکتریسیته، مغناطیس و نور</span>
-                    </div>
-                    <div onclick="selectAuthGrade(3)" id="grade-card-3" class="cursor-pointer p-3 rounded-2xl border border-slate-700 bg-slate-800/60 text-center transition-all opacity-60 hover:opacity-100">
-                        <span class="block font-black text-sm text-white">پایه نهم</span>
-                        <span class="text-[10px] text-purple-300 block mt-1">حرکت، نیرو و فشار</span>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
-
-            <div>
-                <label class="block text-slate-300 mb-1.5">نام کاربری:</label>
-                <div class="relative">
-                    <input type="text" id="auth-username" required placeholder="نام کاربری (حداقل ۳ کاراکتر)"
-                        class="w-full p-3 pl-10 rounded-xl border border-slate-700 bg-slate-800/90 text-white font-mono outline-none focus:border-blue-500 transition-colors" />
-                    <i data-lucide="at-sign" class="w-4 h-4 absolute left-3 top-3.5 text-slate-400"></i>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-slate-300 mb-1.5">رمز عبور:</label>
-                <div class="relative">
-                    <input type="password" id="auth-password" required placeholder="••••••••"
-                        ${mode === 'register' ? 'oninput="updatePasswordStrength(this.value, \'auth-reg-strength\')"' : ''}
-                        class="w-full p-3 pl-10 rounded-xl border border-slate-700 bg-slate-800/90 text-white font-mono outline-none focus:border-blue-500 transition-colors" />
-                    <button type="button" onclick="togglePasswordVisibility('auth-password', this)" class="absolute left-3 top-3 text-slate-400 hover:text-white transition-colors" title="نمایش/پنهان‌سازی رمز">
-                        <i data-lucide="eye" class="w-4 h-4"></i>
-                    </button>
-                </div>
-                ${mode === 'register' ? '<div id="auth-reg-strength" class="mt-2"></div>' : ''}
-            </div>
-
-            <div class="pt-2">
-                <button type="submit" id="auth-submit-btn" class="btn-duo-green w-full text-white font-black py-3 rounded-2xl shadow-lg text-sm flex items-center justify-center gap-2">
-                    <i data-lucide="${mode === 'login' ? 'arrow-left' : 'check'}" class="w-4 h-4"></i>
-                    <span>${mode === 'login' ? 'ورود به حساب کاربری' : 'تکمیل ثبت‌نام و شروع یادگیری'}</span>
+            <div class="qc-field">
+              <label class="qc-label">پایه تحصیلی</label>
+              <input type="hidden" id="auth-grade" value="1" />
+              <div class="grid grid-cols-3 gap-2" id="grade-selector-cards">
+                <button type="button" onclick="selectAuthGrade(1)" id="grade-card-1" class="p-2.5 rounded-xl text-center transition-all is-active" style="border:1px solid var(--accent);background:var(--accent-soft);">
+                  <span class="block text-[11.5px] font-black text-[var(--ink)]">هفتم</span>
+                  <span class="block text-[9px] text-[var(--muted)] mt-0.5">گرما و انرژی</span>
                 </button>
+                <button type="button" onclick="selectAuthGrade(2)" id="grade-card-2" class="p-2.5 rounded-xl text-center transition-all" style="background:var(--surface-2);border:1px solid var(--line);">
+                  <span class="block text-[11px] font-bold text-[var(--ink-2)]">هشتم</span>
+                  <span class="block text-[9px] text-[var(--muted)] mt-0.5">الکتریسیته و نور</span>
+                </button>
+                <button type="button" onclick="selectAuthGrade(3)" id="grade-card-3" class="p-2.5 rounded-xl text-center transition-all" style="background:var(--surface-2);border:1px solid var(--line);">
+                  <span class="block text-[11px] font-bold text-[var(--ink-2)]">نهم</span>
+                  <span class="block text-[9px] text-[var(--muted)] mt-0.5">حرکت و نیرو</span>
+                </button>
+              </div>
+            </div>` : ''}
+
+            <div class="qc-field">
+              <label class="qc-label" for="auth-username">نام کاربری</label>
+              <div class="relative">
+                <input type="text" id="auth-username" required placeholder="نام کاربری خود را وارد کنید" autocomplete="username" class="qc-input" style="padding-inline-start:2.2rem;" dir="ltr" />
+                <i data-lucide="at-sign" class="w-4 h-4 absolute top-1/2 -translate-y-1/2 text-[var(--muted)]" style="inset-inline-start:.75rem;"></i>
+              </div>
             </div>
-        </form>
 
+            <div class="qc-field">
+              <label class="qc-label" for="auth-password">رمز عبور</label>
+              <div class="relative">
+                <input type="password" id="auth-password" required placeholder="${isRegister ? 'حداقل ۸ کاراکتر شامل عدد و نماد' : '••••••••'}" autocomplete="${isRegister ? 'new-password' : 'current-password'}" class="qc-input" style="padding-inline-start:2.2rem;${isRegister ? "padding-inline-end:2.2rem;" : ''}" dir="ltr"
+                  ${isRegister ? 'oninput="updatePasswordStrength(this.value, \'auth-reg-strength\')"' : ''} />
+                <button type="button" onclick="togglePasswordVisibility('auth-password', this)" class="absolute top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--accent)]" style="inset-inline-end:.7rem;" aria-label="نمایش رمز عبور">
+                  <i data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <div id="auth-reg-strength" class="mt-1.5"></div>
+            </div>
 
-        <div class="text-center pt-3 border-t border-slate-800 text-xs">
-            ${mode === 'login' ? `
-            <span class="text-slate-400">دانش‌آموز جدید هستید؟</span>
-            <button onclick="openAuthModal('register')" class="text-blue-400 font-bold hover:underline mr-1">ثبت‌نام کنید</button>
-            ` : `
-            <span class="text-slate-400">قبلاً حساب کاربری ساخته‌اید؟</span>
-            <button onclick="openAuthModal('login')" class="text-blue-400 font-bold hover:underline mr-1">وارد شوید</button>
-            `}
-        </div>
-    </div>
-    `;
+            ${isRegister ? `
+            <label class="flex items-start gap-2 text-[10px] leading-[1.9] text-[var(--muted)] cursor-pointer">
+              <input type="checkbox" id="auth-terms" class="mt-1 accent-[var(--accent)]" checked />
+              <span>با <a href="/docs/STUDENT_GUIDE.md" target="_blank" rel="noopener noreferrer" class="text-[var(--accent)] font-bold underline">آیین‌نامه آموزشی</a> و قواعد استفادهٔ علمی سامانه موافقم.</span>
+            </label>` : `
+            <div class="flex items-center justify-between text-[10px]">
+              <label class="flex items-center gap-1.5 text-[var(--muted)] cursor-pointer"><input type="checkbox" class="accent-[var(--accent)]" checked /> مرا به خاطر بسپار</label>
+              <span class="text-[var(--muted-2)]">بازیابی رمز از طریق دبیر انجام می‌شود</span>
+            </div>`}
+
+            <button type="submit" id="auth-submit-btn" class="qc-btn qc-btn--block qc-btn--lg" style="margin-top:.35rem;">
+              <i data-lucide="${isRegister ? 'user-plus' : 'log-in'}" class="w-4 h-4"></i>
+              <span>${isRegister ? 'تکمیل ثبت‌نام و شروع یادگیری' : 'ورود به حساب کاربری'}</span>
+            </button>
+          </form>
+
+          <div class="mt-4 pt-3 border-t border-[var(--line)] text-center text-[10.5px] text-[var(--muted)]">
+            ${isRegister ? 'قبلاً ثبت‌نام کرده‌اید؟' : 'دانش‌آموز جدید هستید؟'}
+            <button type="button" onclick="openAuthModal('${isRegister ? 'login' : 'register'}')" class="font-black text-[var(--accent)] hover:underline">${isRegister ? 'وارد شوید' : 'ثبت‌نام کنید'}</button>
+          </div>
+        </section>
+      </div>
+    </div>`;
 
     document.body.appendChild(backdrop);
+    backdrop.addEventListener('click', (ev) => {
+        if (ev.target === backdrop) backdrop.remove();
+    });
+    document.addEventListener('keydown', function onEsc(ev) {
+        if (ev.key === 'Escape') {
+            const el = document.getElementById('auth-modal-backdrop');
+            if (el) el.remove();
+            document.removeEventListener('keydown', onEsc);
+        }
+    });
     if (window.lucide) window.lucide.createIcons();
+    setTimeout(() => {
+        const first = document.getElementById(isRegister ? 'auth-fullname' : 'auth-username');
+        if (first) first.focus();
+    }, 60);
 }
 
 function selectAuthGrade(gradeNum) {
@@ -1255,14 +1574,14 @@ function selectAuthGrade(gradeNum) {
     if (input) input.value = gradeNum;
 
     [1, 2, 3].forEach(g => {
-        const card = document.getElementById(`grade-card-${g}`);
+        const card = document.getElementById('grade-card-' + g);
         if (!card) return;
-        if (g === gradeNum) {
-            const color = g === 1 ? 'amber' : (g === 2 ? 'blue' : 'purple');
-            card.className = `cursor-pointer p-3 rounded-2xl border-2 border-${color}-500 bg-${color}-500/20 text-center transition-all opacity-100 shadow-md`;
-        } else {
-            card.className = 'cursor-pointer p-3 rounded-2xl border border-slate-700 bg-slate-800/60 text-center transition-all opacity-60 hover:opacity-100';
-        }
+        const on = g === gradeNum;
+        card.style.background = on ? 'var(--accent-soft)' : 'var(--surface-2)';
+        card.style.border = on ? '1px solid var(--accent)' : '1px solid var(--line)';
+        card.style.boxShadow = on ? '0 10px 24px -18px var(--accent)' : 'none';
+        const title = card.querySelector('span');
+        if (title) title.className = on ? 'block text-[11.5px] font-black text-[var(--ink)]' : 'block text-[11px] font-bold text-[var(--ink-2)]';
     });
 }
 
@@ -1278,41 +1597,31 @@ function togglePasswordVisibility(inputId, btn) {
 function updatePasswordStrength(val, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    if (!val) {
-        container.innerHTML = '';
-        return;
-    }
+    if (!val) { container.innerHTML = ''; return; }
+
     let score = 0;
     if (val.length >= 8) score++;
     if (/[0-9]/.test(val)) score++;
-    if (/[a-zA-Z]/.test(val) && /[^a-zA-Z0-9]/.test(val)) score++;
+    if (/[a-z]/i.test(val) && /[^a-zA-Z0-9]/.test(val)) score++;
+    if (val.length >= 12) score++;
 
-    let levelClass = 'strength-weak';
-    let label = 'ضعیف';
-    let labelColor = 'text-rose-400';
-    if (score === 2) {
-        levelClass = 'strength-medium';
-        label = 'متوسط';
-        labelColor = 'text-amber-400';
-    } else if (score >= 3) {
-        levelClass = 'strength-strong';
-        label = 'قوی و امن';
-        labelColor = 'text-emerald-400';
-    }
+    const level = score >= 4 ? 'strong' : score >= 3 ? 'medium' : 'weak';
+    const klass = level === 'strong' ? 'strength-strong' : level === 'medium' ? 'strength-medium' : 'strength-weak';
+    const label = level === 'strong' ? 'قوی و امن' : level === 'medium' ? 'متوسط' : 'ضعیف';
+    const color = level === 'strong' ? 'var(--ok)' : level === 'medium' ? 'var(--warn)' : 'var(--danger)';
 
     container.innerHTML = `
-    <div class="${levelClass}">
-        <div class="flex items-center justify-between text-[11px] ${labelColor} font-bold mb-1">
-            <span>قدرت رمز عبور: ${label}</span>
-            <span>${val.length}/8 کاراکتر</span>
-        </div>
-        <div class="strength-track">
-            <div class="strength-seg seg-1"></div>
-            <div class="strength-seg seg-2"></div>
-            <div class="strength-seg seg-3"></div>
-        </div>
-    </div>
-    `;
+    <div class="${klass}">
+      <div class="flex items-center justify-between text-[10px] font-bold mb-1" style="color:${color};">
+        <span>قدرت رمز عبور: ${label}</span>
+        <span class="font-mono">${val.length} / 8+</span>
+      </div>
+      <div class="strength-track">
+        <div class="strength-seg seg-1"></div>
+        <div class="strength-seg seg-2"></div>
+        <div class="strength-seg seg-3"></div>
+      </div>
+    </div>`;
 }
 
 function fillQuickAuth(u, p) {
@@ -1331,75 +1640,75 @@ function openForcedPasswordModal() {
 
     const backdrop = document.createElement('div');
     backdrop.id = 'forced-pw-modal-backdrop';
-    // Non-dismissible: no close button, no backdrop click dismissal
-    backdrop.className = 'fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md';
+    backdrop.className = 'qc-overlay';
+    backdrop.setAttribute('role', 'dialog');
+    backdrop.setAttribute('aria-modal', 'true');
 
     backdrop.innerHTML = `
-    <div class="bg-slate-900 border-2 border-amber-500/50 w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-white relative">
+    <div class="qc-modal" style="max-width:520px;">
+      <div class="qc-modal__head" style="border-bottom-color:rgba(251,191,36,.4);">
         <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center shrink-0">
-                <i data-lucide="shield-alert" class="w-6 h-6"></i>
-            </div>
-            <div>
-                <h3 class="text-lg font-black text-white">تغییر اجباری رمز عبور پیش‌فرض</h3>
-                <span class="text-xs text-amber-300">الزام امنیتی سامانه انجمن فیزیک</span>
-            </div>
+          <span class="grid place-items-center w-11 h-11 rounded-xl shrink-0" style="background:var(--warn-soft);color:var(--warn);border:1px solid rgba(251,191,36,.4);">
+            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+          </span>
+          <div>
+            <h2 class="text-[15px] font-black text-[var(--ink)]">تغییر اجباری گذرواژه</h2>
+            <p class="text-[10.5px] text-[var(--warn)] mt-0.5">الزام امنیتی — پیش از ورود به پرتال</p>
+          </div>
         </div>
+      </div>
 
-        <p class="text-xs text-slate-300 leading-relaxed bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700/60">
-            حساب کاربری مدیر با رمز عبور پیش‌فرض فعال شده است. جهت حفاظت از اطلاعات و فعال‌سازی دسترسی به پنل مدیریت، تعیین یک رمز عبور جدید امن (حداقل ۸ کاراکتر) الزامی می‌باشد.
+      <div class="qc-modal__body space-y-4">
+        <p class="text-[11px] leading-[2] text-[var(--ink-2)] p-3 rounded-xl" style="background:var(--surface-2);border:1px solid var(--line);">
+          حساب مدیریتی شما با رمز پیش‌فرض فعال است. برای حفاظت از داده‌های آموزشی، تعیین گذرواژه‌ای جدید با حداقل ۸ کاراکتر الزامی است.
         </p>
 
-        <form id="forced-pw-form" onsubmit="handleForcedPasswordSubmit(event)" class="space-y-4 text-xs font-semibold">
-            <div id="forced-pw-error" class="hidden p-3 rounded-xl bg-rose-950/70 border border-rose-500/50 text-rose-300 animate-shake"></div>
+        <form id="forced-pw-form" onsubmit="handleForcedPasswordSubmit(event)" class="space-y-3">
+          <div id="forced-pw-error" class="hidden p-2.5 rounded-lg animate-shake text-[11px] font-bold" style="background:var(--danger-soft);border:1px solid var(--danger);color:var(--danger);"></div>
 
-            <div>
-                <label class="block text-slate-300 mb-1">رمز عبور فعلی (پیش‌فرض: admin):</label>
-                <div class="relative">
-                    <input type="password" id="forced-curr-pw" required placeholder="رمز عبور فعلی"
-                        class="w-full p-3 rounded-xl border border-slate-700 bg-slate-800 text-white font-mono outline-none focus:border-amber-400" />
-                    <button type="button" onclick="togglePasswordVisibility('forced-curr-pw', this)" class="absolute left-3 top-3 text-slate-400 hover:text-white">
-                        <i data-lucide="eye" class="w-4 h-4"></i>
-                    </button>
-                </div>
+          <div class="qc-field">
+            <label class="qc-label" for="forced-curr-pw">گذرواژه فعلی</label>
+            <div class="relative">
+              <input type="password" id="forced-curr-pw" required placeholder="گذرواژه فعلی" autocomplete="current-password" class="qc-input" dir="ltr" />
+              <button type="button" onclick="togglePasswordVisibility('forced-curr-pw', this)" class="absolute top-1/2 -translate-y-1/2 text-[var(--muted)]" style="inset-inline-end:.7rem;" aria-label="نمایش گذرواژه">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </button>
             </div>
+          </div>
 
-            <div>
-                <label class="block text-slate-300 mb-1">رمز عبور جدید (حداقل ۸ کاراکتر):</label>
-                <div class="relative">
-                    <input type="password" id="forced-new-pw" required minlength="8" placeholder="رمز عبور جدید و امن"
-                        oninput="updatePasswordStrength(this.value, 'forced-strength-container')"
-                        class="w-full p-3 rounded-xl border border-slate-700 bg-slate-800 text-white font-mono outline-none focus:border-amber-400" />
-                    <button type="button" onclick="togglePasswordVisibility('forced-new-pw', this)" class="absolute left-3 top-3 text-slate-400 hover:text-white">
-                        <i data-lucide="eye" class="w-4 h-4"></i>
-                    </button>
-                </div>
-                <div id="forced-strength-container" class="mt-2"></div>
+          <div class="qc-field">
+            <label class="qc-label" for="forced-new-pw">گذرواژه جدید</label>
+            <div class="relative">
+              <input type="password" id="forced-new-pw" required minlength="8" placeholder="حداقل ۸ کاراکتر" autocomplete="new-password" class="qc-input" dir="ltr"
+                oninput="updatePasswordStrength(this.value, 'forced-strength-container')" />
+              <button type="button" onclick="togglePasswordVisibility('forced-new-pw', this)" class="absolute top-1/2 -translate-y-1/2 text-[var(--muted)]" style="inset-inline-end:.7rem;" aria-label="نمایش گذرواژه">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </button>
             </div>
+            <div id="forced-strength-container" class="mt-1.5"></div>
+          </div>
 
-            <div>
-                <label class="block text-slate-300 mb-1">تکرار رمز عبور جدید:</label>
-                <div class="relative">
-                    <input type="password" id="forced-confirm-pw" required minlength="8" placeholder="تکرار رمز عبور جدید"
-                        class="w-full p-3 rounded-xl border border-slate-700 bg-slate-800 text-white font-mono outline-none focus:border-amber-400" />
-                    <button type="button" onclick="togglePasswordVisibility('forced-confirm-pw', this)" class="absolute left-3 top-3 text-slate-400 hover:text-white">
-                        <i data-lucide="eye" class="w-4 h-4"></i>
-                    </button>
-                </div>
+          <div class="qc-field">
+            <label class="qc-label" for="forced-confirm-pw">تکرار گذرواژه جدید</label>
+            <div class="relative">
+              <input type="password" id="forced-confirm-pw" required minlength="8" placeholder="تکرار گذرواژه جدید" autocomplete="new-password" class="qc-input" dir="ltr" />
+              <button type="button" onclick="togglePasswordVisibility('forced-confirm-pw', this)" class="absolute top-1/2 -translate-y-1/2 text-[var(--muted)]" style="inset-inline-end:.7rem;" aria-label="نمایش گذرواژه">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </button>
             </div>
+          </div>
 
-            <div class="pt-2">
-                <button type="submit" id="forced-submit-btn" class="btn-duo-green w-full text-white font-black py-3 rounded-2xl shadow-lg text-sm flex items-center justify-center gap-2">
-                    <i data-lucide="key" class="w-4 h-4"></i>
-                    <span>ثبت رمز جدید و ورود به پنل</span>
-                </button>
-            </div>
+          <button type="submit" id="forced-submit-btn" class="qc-btn qc-btn--block qc-btn--lg">
+            <i data-lucide="key" class="w-4 h-4"></i>
+            <span>ثبت گذرواژه جدید و ورود به پرتال</span>
+          </button>
         </form>
-    </div>
-    `;
+      </div>
+    </div>`;
 
     document.body.appendChild(backdrop);
     if (window.lucide) window.lucide.createIcons();
+    setTimeout(() => { const el = document.getElementById('forced-curr-pw'); if (el) el.focus(); }, 60);
 }
 
 async function handleForcedPasswordSubmit(e) {
@@ -1583,46 +1892,58 @@ function renderNexoraMarkdown(text) {
 // ==========================================
 
 function getCurrentPageContext() {
-    const view = window.store?.currentView || { name: 'dashboard' };
-    let summary = `نمای ${view.name}`;
+    const viewName = (window.store && window.store.currentView) || 'landing';
+    const viewParams = (window.store && window.store.viewParams) || {};
+    let summary = 'صفحه اصلی پرتال';
     let chapterId = null;
     let lessonId = null;
     let questionId = null;
     let snippet = '';
 
-    if (view.name === 'lesson') {
-        const titleEl = document.querySelector('h1, h2');
-        const lessonTitle = titleEl ? titleEl.innerText.trim() : 'درسنامه فیزیک';
-        summary = `درس: ${lessonTitle}`;
-        lessonId = view.params?.id || null;
+    const pageTitle = () => {
+        const el = document.querySelector('#app-main-content h1');
+        return el ? el.innerText.trim().replace(/\s+/g, ' ') : '';
+    };
+
+    if (viewName === 'lesson') {
+        summary = 'درس: ' + (pageTitle() || 'درسنامه تعاملی فیزیک');
+        lessonId = viewParams.id || null;
         const mainContent = document.getElementById('app-main-content');
-        if (mainContent) {
-            snippet = mainContent.innerText.slice(0, 1200).replace(/\s+/g, ' ');
-        }
-    } else if (view.name === 'chapter') {
-        const titleEl = document.querySelector('h1');
-        const chTitle = titleEl ? titleEl.innerText.trim() : 'فصل فیزیک';
-        summary = `فصل: ${chTitle}`;
-        chapterId = view.params?.id || null;
-    } else if (view.name === 'exam') {
+        if (mainContent) snippet = mainContent.innerText.slice(0, 1200).replace(/\s+/g, ' ');
+    } else if (viewName === 'chapter') {
+        summary = 'فصل: ' + (pageTitle() || 'فصل فیزیک');
+        chapterId = viewParams.id || null;
+        const mainContent = document.getElementById('app-main-content');
+        if (mainContent) snippet = mainContent.innerText.slice(0, 900).replace(/\s+/g, ' ');
+    } else if (viewName === 'exam') {
         summary = 'آزمون پایان فصل فیزیک';
-        const qPrompt = document.querySelector('.exam-question-prompt, h2');
+        const qPrompt = document.querySelector('.exam-question-prompt, #app-main-content h2');
         if (qPrompt) snippet = qPrompt.innerText.slice(0, 400);
     } else if (document.getElementById('comp-active-modal')) {
         summary = 'میدان رقابت و لیگ کوانتومی';
         const modal = document.getElementById('comp-active-modal');
         if (modal) snippet = modal.innerText.slice(0, 400);
-    } else if (view.name === 'curriculum') {
+    } else if (viewName === 'curriculum') {
         summary = 'سرفصل‌های فیزیک پایه';
-    } else if (view.name === 'competitions') {
-        summary = 'تالار مسابقات و لیگ‌های کوانتومی';
-    } else if (view.name === 'admin') {
-        summary = 'پنل مدیریت آموزشی';
-    } else if (view.name === 'dashboard') {
+    } else if (viewName === 'materials') {
+        summary = 'درسنامه‌ها و جزوات فیزیک';
+    } else if (viewName === 'simulators') {
+        summary = 'آزمایشگاه تعاملی PhET';
+    } else if (viewName === 'competitions' || viewName === 'duel' || viewName === 'guilds') {
+        summary = 'آرنای رقابت کوانتومی';
+    } else if (viewName === 'dashboard') {
         summary = 'داشبورد دانش‌آموز';
+    } else if (viewName === 'admin') {
+        summary = 'پنل مدیریت آموزشی';
+    } else if (viewName === 'adaptive-exam') {
+        summary = 'آزمون تطبیقی (IRT)';
+    } else if (viewName === 'live-lab') {
+        summary = 'کلاس زنده دبیر';
+    } else {
+        summary = 'صفحه ' + viewName;
     }
 
-    return { view_name: view.name, summary, chapterId, lessonId, questionId, snippet };
+    return { view_name: viewName, summary, chapterId, lessonId, questionId, snippet };
 }
 
 function updateAiTutorContextBadge() {
@@ -1729,7 +2050,7 @@ async function handleAiTutorSubmit(e) {
 
     // Append user question
     const userMsg = document.createElement('div');
-    userMsg.className = 'p-3 rounded-2xl bg-gradient-to-r from-violet-950/80 to-indigo-950/80 border border-violet-500/40 text-cyan-200 text-xs self-end mr-auto max-w-[85%] shadow-md';
+    userMsg.className = 'qc-chat-bubble--user';
     userMsg.textContent = query;
     chatBody.appendChild(userMsg);
     input.value = '';
@@ -1737,7 +2058,7 @@ async function handleAiTutorSubmit(e) {
 
     // Loading indicator
     const loadingMsg = document.createElement('div');
-    loadingMsg.className = 'p-3 rounded-2xl bg-slate-800/80 border border-cyan-500/30 text-slate-300 text-xs flex items-center gap-2 max-w-[85%] cyber-glow-cyan';
+    loadingMsg.className = 'qc-chat-bubble--bot flex items-center gap-2';
     loadingMsg.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full"></span> <span>موتور هوش مصنوعی نکسورا در حال پردازش علمی...</span>`;
     chatBody.appendChild(loadingMsg);
     chatBody.scrollTop = chatBody.scrollHeight;
@@ -1765,7 +2086,7 @@ async function handleAiTutorSubmit(e) {
         loadingMsg.remove();
 
         const tutorMsg = document.createElement('div');
-        tutorMsg.className = 'p-4 rounded-2xl bg-slate-900/95 border border-violet-500/40 text-slate-100 text-xs space-y-2.5 cyber-glow-violet max-w-[95%] shadow-xl';
+        tutorMsg.className = 'qc-chat-bubble--bot space-y-2.5';
         
         const renderedText = renderNexoraMarkdown(res.response_fa);
         const usedModelLabel = res.model_used ? `<span class="text-[9px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 font-mono">${res.model_used.replace(':free', '')}</span>` : '';
@@ -1814,7 +2135,10 @@ async function handleAiTutorSubmit(e) {
     } catch (err) {
         loadingMsg.remove();
         const errMsg = document.createElement('div');
-        errMsg.className = 'p-3 rounded-xl bg-rose-950/50 border border-rose-800 text-rose-300 text-xs';
+        errMsg.className = 'p-3 rounded-xl text-xs font-bold';
+        errMsg.style.background = 'var(--danger-soft)';
+        errMsg.style.border = '1px solid var(--danger)';
+        errMsg.style.color = 'var(--danger)';
         errMsg.textContent = `خطا در دریافت پاسخ: ${err.message}`;
         chatBody.appendChild(errMsg);
     } finally {
@@ -2024,210 +2348,180 @@ window.handleAiTutorSubmit = handleAiTutorSubmit;
 // ==========================================
 // VIEW: SUPPLEMENTARY STUDY MATERIALS & PAMPHLETS
 // ==========================================
-async function renderStudyMaterialsView(container, activeGradeId = null) {
-    container.innerHTML = `<div class="text-center py-16"><div class="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div></div>`;
-    
+async function renderStudyMaterialsView(initialFilter = null) {
+    // Supports both renderStudyMaterialsView(container, gradeId) — used by the
+    // router — and a direct grade filter call from the UI.
+    let container = document.getElementById('app-view');
+    let activeGradeId = initialFilter;
+    const firstArg = arguments.length > 0 ? arguments[0] : null;
+    if (firstArg && typeof firstArg === 'object' && firstArg.nodeType === 1) {
+        container = firstArg;
+        activeGradeId = arguments.length > 1 ? arguments[1] : null;
+    }
+    if (!container) container = document.getElementById('app-inner');
+    if (!container) return;
+
+    container.innerHTML = `<div class="qc-loading"><div class="qc-spinner"></div><div>در حال بارگذاری بانک منابع…</div></div>`;
+
     try {
         const user = window.store.currentUser;
-        let selectedGrade = activeGradeId ? parseInt(activeGradeId) : (user && user.grade_id ? user.grade_id : null);
+        let selectedGrade = activeGradeId ? parseInt(activeGradeId, 10) : (user && user.grade_id ? Number(user.grade_id) : null);
         let selectedCategory = null;
 
-        const loadMaterials = async () => {
-            const materials = await window.api.getStudyMaterials(selectedGrade, selectedCategory);
-            renderContent(materials);
+        const categoryMeta = {
+            pamphlet: { title: 'جزوه و درسنامه', icon: 'book-open', tone: 'accent' },
+            summary: { title: 'خلاصه و فرمول‌نامه', icon: 'sigma', tone: 'ok' },
+            exam_sample: { title: 'نمونه سؤال با پاسخ', icon: 'clipboard-check', tone: 'warn' },
+            slide: { title: 'اسلاید آموزشی', icon: 'presentation', tone: 'violet' },
+            other: { title: 'سایر منابع', icon: 'file', tone: 'muted' }
         };
 
-        const renderContent = (materials) => {
-            const categoryLabels = {
-                pamphlet: { title: 'جزوه و درسنامه کامل', color: 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
-                summary: { title: 'خلاصه درس و فرمول‌نامه', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' },
-                exam_sample: { title: 'نمونه سؤال با پاسخ', color: 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800' },
-                slide: { title: 'اسلاید آموزشی', color: 'bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
-                other: { title: 'سایر منابع', color: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700' }
-            };
+        const faNum = (n) => { try { return Number(n || 0).toLocaleString('fa-IR'); } catch (e) { return String(n); } };
 
+        const sizeLabel = (bytes) => {
+            const b = Number(bytes) || 0;
+            if (!b) return 'فایل تکمیلی';
+            if (b > 1024 * 1024) return (b / (1024 * 1024)).toFixed(1) + ' مگابایت';
+            return Math.max(1, Math.round(b / 1024)) + ' کیلوبایت';
+        };
+
+        const chipClass = (kind) => {
+            if (kind === 'violet') return 'qc-chip--violet';
+            if (kind === 'ok') return 'qc-chip--ok';
+            if (kind === 'warn') return 'qc-chip--warn';
+            if (kind === 'accent') return 'qc-chip--accent';
+            return '';
+        };
+
+        const renderLibrary = (materials) => {
             container.innerHTML = `
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-                <!-- Hero Header -->
-                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 p-6 sm:p-10 border border-slate-800 shadow-xl text-white space-y-4">
-                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
-                        <i data-lucide="book-marked" class="w-4 h-4 text-emerald-400"></i>
-                        <span>بانک تخصصی درسنامه‌ها و جزوات متفرقه فیزیک</span>
-                    </div>
-
-                    <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
-                        درسنامه‌ها، خلاصه‌ها و نمونه سؤالات تکمیلی
-                    </h1>
-
-                    <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-                        دسترسی رایگان به جزوات طلایی تدریس دبیران، فرمول‌نامه‌های سریع، خلاصه فصول کتب رسمی و سمپاد، و نمونه سؤالات امتحانات نوبت اول و دوم به همراه پاسخ‌های تشریحی.
-                    </p>
-
-                    <div class="flex flex-wrap items-center gap-3 pt-2 text-xs">
-                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-300">
-                            <i data-lucide="file-check" class="w-4 h-4 text-emerald-400"></i>
-                            <span>تأیید شده توسط دبیران سمپاد</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-300">
-                            <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
-                            <span>دانلود مستقیم و سریع فایل‌ها</span>
-                        </div>
-                    </div>
+            <div class="qc-shell qc-section space-y-5">
+              <header class="space-y-4 qc-reveal">
+                <div class="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <span class="qc-eyebrow">RESOURCE LIBRARY</span>
+                    <h1 class="qc-h2 mt-1.5">درسنامه‌ها، خلاصه‌ها و نمونه سؤال‌ها</h1>
+                    <p class="qc-lede mt-2" style="max-width:64ch;">جزوات دبیران، فرمول‌نامه‌های سریع، خلاصه فصول و نمونه سؤالات امتحانی با پاسخ تشریحی — تأییدشده توسط دبیرخانه فیزیک.</p>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="qc-chip qc-chip--ok" style="font-size:9.5px;"><i data-lucide="badge-check" class="w-3.5 h-3.5"></i> تأیید دبیران سمپاد</span>
+                    <span class="qc-chip qc-chip--mono" style="font-size:9.5px;">${faNum(materials.length)} فایل</span>
+                  </div>
                 </div>
 
-                <!-- Filter Strip -->
-                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <!-- Grade Switcher -->
-                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold">
-                        <span class="text-slate-400 text-xs shrink-0 pl-1">پایه:</span>
-                        <button id="mat-grade-all" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === null ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                            همه پایه‌ها
-                        </button>
-                        <button id="mat-grade-7" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 1 ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                            پایه هفتم
-                        </button>
-                        <button id="mat-grade-8" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 2 ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                            پایه هشتم
-                        </button>
-                        <button id="mat-grade-9" class="px-3 py-2 rounded-xl transition-all ${selectedGrade === 3 ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                            پایه نهم
-                        </button>
+                <div class="qc-card qc-card--p" style="padding:.8rem;">
+                  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                      <span class="text-[10px] font-bold text-[var(--muted)] shrink-0">پایه:</span>
+                      <div class="qc-tabs" id="mat-grade-tabs">
+                        ${[['', 'همه پایه‌ها'], ['1', 'پایه هفتم'], ['2', 'پایه هشتم'], ['3', 'پایه نهم']].map(g => `
+                        <button type="button" class="qc-tab ${String(selectedGrade || '') === g[0] ? 'is-active' : ''}" data-grade="${g[0]}">${g[1]}</button>`).join('')}
+                      </div>
                     </div>
 
-                    <!-- Category Switcher -->
-                    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-bold">
-                        <span class="text-slate-400 text-xs shrink-0 pl-1">موضوع:</span>
-                        <button id="mat-cat-all" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === null ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                            همه
-                        </button>
-                        <button id="mat-cat-pamphlet" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'pamphlet' ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                            جزوات
-                        </button>
-                        <button id="mat-cat-summary" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'summary' ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                            فرمول‌نامه
-                        </button>
-                        <button id="mat-cat-exam_sample" class="px-3 py-2 rounded-xl transition-all ${selectedCategory === 'exam_sample' ? 'bg-sky-600 text-white shadow-sm font-bold border border-sky-500' : 'bg-slate-800 text-slate-400 hover:text-white'}">
-                            نمونه سؤال
-                        </button>
+                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                      <span class="text-[10px] font-bold text-[var(--muted)] shrink-0">نوع:</span>
+                      <div class="qc-tabs" id="mat-category-tabs">
+                        ${[['', 'همه'], ['pamphlet', 'جزوه'], ['summary', 'فرمول‌نامه'], ['exam_sample', 'نمونه سؤال'], ['slide', 'اسلاید']].map(c => `
+                        <button type="button" class="qc-tab ${String(selectedCategory || '') === c[0] ? 'is-active' : ''}" data-category="${c[0]}">${c[1]}</button>`).join('')}
+                      </div>
                     </div>
+                  </div>
                 </div>
+              </header>
 
-                <!-- Materials Cards Grid -->
-                <div id="materials-grid-container">
-                    ${materials.length === 0 ? `
-                    <div class="text-center py-16 space-y-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8">
-                        <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
-                            <i data-lucide="folder-open" class="w-8 h-8"></i>
+              ${materials.length === 0 ? `
+              <div class="qc-empty">
+                <i data-lucide="folder-open" class="w-9 h-9"></i>
+                <span class="qc-empty__title">منبعی برای این فیلتر یافت نشد</span>
+                <span class="qc-empty__text">فیلتر پایه یا نوع منبع را تغییر دهید، یا به‌زودی دوباره سر بزنید.</span>
+                <button type="button" class="qc-btn qc-btn--ghost qc-btn--sm" id="mat-reset-filters">حذف فیلترها</button>
+              </div>` : `
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                ${materials.map((m, i) => {
+                    const meta = categoryMeta[m.category] || categoryMeta.other;
+                    const ready = Boolean(m.file_url) && m.file_exists_on_disk !== false;
+                    return `
+                    <article class="qc-card qc-card--p qc-reveal flex flex-col justify-between gap-4" data-delay="${(i % 4) + 1}">
+                      <div class="space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                          <span class="qc-chip ${chipClass(meta.tone)}" style="font-size:9px;">
+                            <i data-lucide="${meta.icon}" class="w-3 h-3"></i> ${meta.title}
+                          </span>
+                          <span class="qc-chip qc-chip--mono" style="font-size:9px;">${window.qcEscape(m.grade_title_fa || 'عمومی')}</span>
                         </div>
-                        <div class="space-y-1">
-                            <h3 class="font-bold text-slate-800 dark:text-white text-base">درسنامه‌ای برای این فیلتر یافت نشد</h3>
-                            <p class="text-xs text-slate-400">لطفاً فیلترهای پایه یا موضوع را تغییر دهید یا به زودی مجدداً سر بزنید.</p>
+
+                        <h3 class="text-[13.5px] font-black text-[var(--ink)] leading-snug">${window.qcEscape(m.title_fa)}</h3>
+                        ${m.description_fa ? `<p class="text-[11px] leading-[1.95] text-[var(--muted)] line-clamp-3">${window.qcEscape(m.description_fa)}</p>` : ''}
+
+                        <div class="pt-2.5 border-t border-[var(--line)] space-y-1.5 text-[10.5px] text-[var(--muted)]">
+                          <div class="flex items-center gap-1.5">
+                            <i data-lucide="user-check" class="w-3.5 h-3.5 text-[var(--ok)]"></i>
+                            <span>مؤلف: <strong class="text-[var(--ink-2)]">${window.qcEscape(m.author_name || 'دبیرخانه فیزیک')}</strong></span>
+                          </div>
+                          <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-1"><i data-lucide="hard-drive" class="w-3.5 h-3.5"></i>${sizeLabel(m.file_size_bytes)}</span>
+                            <span class="flex items-center gap-1 font-mono font-bold text-[var(--ok)]"><i data-lucide="download" class="w-3.5 h-3.5"></i>${faNum(m.download_count)}</span>
+                          </div>
                         </div>
-                    </div>
-                    ` : `
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        ${materials.map(m => {
-                            const cat = categoryLabels[m.category] || categoryLabels.other;
-                            const sizeStr = m.file_size_bytes > 0 
-                                ? (m.file_size_bytes > 1024 * 1024 ? (m.file_size_bytes / (1024 * 1024)).toFixed(1) + ' مگابایت' : Math.round(m.file_size_bytes / 1024) + ' کیلوبایت')
-                                : 'فایل تکمیلی';
-                            return `
-                            <div class="group flex flex-col justify-between p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/40 hover:shadow-xl hover:shadow-emerald-500/5 transition-all space-y-5">
-                                <div class="space-y-3">
-                                    <div class="flex items-center justify-between gap-2">
-                                        <span class="px-2.5 py-1 rounded-xl text-[11px] font-bold border ${cat.color}">
-                                            ${cat.title}
-                                        </span>
-                                        <span class="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-bold">
-                                            ${m.grade_title_fa}
-                                        </span>
-                                    </div>
+                      </div>
 
-                                    <h3 class="font-black text-base text-slate-900 dark:text-white leading-snug group-hover:text-emerald-500 transition-colors">
-                                        ${m.title_fa}
-                                    </h3>
+                      ${m.file_url ? (ready ? `
+                      <a href="${window.qcSafeUrl(m.file_url)}" target="_blank" rel="noopener noreferrer" onclick="window.api.incrementMaterialDownload(${m.id})" class="qc-btn qc-btn--ok qc-btn--block qc-btn--sm">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i> مشاهده و دریافت فایل
+                      </a>` : `
+                      <button type="button" class="qc-btn qc-btn--warn qc-btn--block qc-btn--sm" onclick="window.qcToast('این فایل در حال بازبینی و به‌روزرسانی توسط دبیر است.', 'warn')">
+                        <i data-lucide="clock" class="w-3.5 h-3.5"></i> در حال به‌روزرسانی
+                      </button>`) : `
+                      <button type="button" class="qc-btn qc-btn--ghost qc-btn--block qc-btn--sm" onclick="window.showComingSoon ? window.showComingSoon('فایل ضمیمه این جزوه') : window.qcToast('این فایل به‌زودی منتشر می‌شود.', 'info')">
+                        فایل در دست آماده‌سازی
+                      </button>`}
+                    </article>`;
+                }).join('')}
+              </div>`}
+            </div>`;
 
-                                    ${m.description_fa ? `
-                                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
-                                        ${m.description_fa}
-                                    </p>
-                                    ` : ''}
-
-                                    <div class="pt-3 border-t border-slate-100 dark:border-slate-800/80 text-xs text-slate-500 dark:text-slate-400 space-y-1.5">
-                                        <div class="flex items-center gap-1.5">
-                                            <i data-lucide="user-check" class="w-3.5 h-3.5 text-emerald-500"></i>
-                                            <span>مؤلف: <strong class="text-slate-700 dark:text-slate-200 font-semibold">${m.author_name || 'دبیرخانه فیزیک'}</strong></span>
-                                        </div>
-                                        <div class="flex items-center justify-between text-[11px] pt-1">
-                                            <span class="flex items-center gap-1">
-                                                <i data-lucide="hard-drive" class="w-3.5 h-3.5 text-slate-400"></i>
-                                                <span>حجم: ${sizeStr}</span>
-                                            </span>
-                                            <span class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-mono font-bold">
-                                                <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                                                <span>${m.download_count} دانلود</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    ${m.file_url ? (
-                                        m.file_exists_on_disk !== false ? `
-                                        <a href="${m.file_url}" target="_blank" onclick="window.api.incrementMaterialDownload(${m.id})"
-                                            class="w-full py-2.5 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.02]">
-                                            <i data-lucide="download" class="w-4 h-4"></i>
-                                            <span>مشاهده و دریافت فایل</span>
-                                        </a>
-                                        ` : `
-                                        <button onclick="alert('این فایل در حال بازبینی و به‌روزرسانی توسط دبیر محترم است.')" class="w-full py-2.5 px-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 font-bold text-xs flex items-center justify-center gap-2">
-                                            <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
-                                            <span>فایل در حال به‌روزرسانی دبیر</span>
-                                        </button>
-                                        `
-                                    ) : `
-                                    <button onclick="window.showComingSoon('فایل ضمیمه این جزوه')" class="w-full py-2.5 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold text-xs">
-                                        فایل در دست آماده‌سازی
-                                    </button>
-                                    `}
-                                </div>
-                            </div>
-                            `;
-                        }).join('')}
-                    </div>
-                    `}
-                </div>
-            </div>
-            `;
-
-            // Bind filter button events
-            const bindClick = (id, fn) => {
-                const el = document.getElementById(id);
-                if (el) el.onclick = fn;
-            };
-
-            bindClick('mat-grade-all', () => { selectedGrade = null; loadMaterials(); });
-            bindClick('mat-grade-7', () => { selectedGrade = 1; loadMaterials(); });
-            bindClick('mat-grade-8', () => { selectedGrade = 2; loadMaterials(); });
-            bindClick('mat-grade-9', () => { selectedGrade = 3; loadMaterials(); });
-
-            bindClick('mat-cat-all', () => { selectedCategory = null; loadMaterials(); });
-            bindClick('mat-cat-pamphlet', () => { selectedCategory = 'pamphlet'; loadMaterials(); });
-            bindClick('mat-cat-summary', () => { selectedCategory = 'summary'; loadMaterials(); });
-            bindClick('mat-cat-exam_sample', () => { selectedCategory = 'exam_sample'; loadMaterials(); });
+            container.querySelectorAll('#mat-grade-tabs [data-grade]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const v = btn.getAttribute('data-grade');
+                    selectedGrade = v ? parseInt(v, 10) : null;
+                    load();
+                });
+            });
+            container.querySelectorAll('#mat-category-tabs [data-category]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const v = btn.getAttribute('data-category');
+                    selectedCategory = v || null;
+                    load();
+                });
+            });
+            const reset = container.querySelector('#mat-reset-filters');
+            if (reset) reset.addEventListener('click', () => {
+                selectedGrade = null;
+                selectedCategory = null;
+                load();
+            });
 
             if (window.lucide) window.lucide.createIcons();
+            if (window.qcRevealScan) window.qcRevealScan(container);
         };
 
-        await loadMaterials();
+        const load = async () => {
+            const materials = await window.api.getStudyMaterials(selectedGrade, selectedCategory);
+            renderLibrary(Array.isArray(materials) ? materials : []);
+        };
+
+        await load();
     } catch (err) {
         container.innerHTML = `
-        <div class="max-w-md mx-auto my-12 p-6 rounded-3xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-center space-y-3">
-            <i data-lucide="alert-triangle" class="w-8 h-8 text-rose-500 mx-auto"></i>
-            <h3 class="font-bold text-rose-700 dark:text-rose-300">خطا در دریافت درسنامه‌ها</h3>
-            <p class="text-xs text-rose-600 dark:text-rose-400">${err.message}</p>
-        </div>
-        `;
+        <div class="qc-shell qc-section">
+          <div class="qc-empty">
+            <i data-lucide="alert-triangle" class="w-8 h-8 text-[var(--danger)]"></i>
+            <span class="qc-empty__title">دریافت درسنامه‌ها ممکن نشد</span>
+            <span class="qc-empty__text">${err.message}</span>
+            <button type="button" class="qc-btn qc-btn--sm" onclick="window.store.setView('curriculum')">بازگشت به سرفصل‌ها</button>
+          </div>
+        </div>`;
         if (window.lucide) window.lucide.createIcons();
     }
 }

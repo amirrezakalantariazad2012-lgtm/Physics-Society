@@ -3,7 +3,8 @@
 
 [![PHP 8.0+](https://img.shields.io/badge/PHP-8.0%2B-777BB4.svg?logo=php&logoColor=white)](https://www.php.net/)
 [![Pure PHP](https://img.shields.io/badge/Architecture-100%25%20Pure%20PHP-009688.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-56%20Passed%20(100%25)-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-72%20Passed%20(100%25)-brightgreen.svg)]()
+[![Theme](https://img.shields.io/badge/Theme-Dark%20%2B%20Light%20(%D8%AF%D9%88%20%D9%BE%D9%88%D8%B3%D8%AA%D9%87)-6366f1.svg)]()
 [![Android](https://img.shields.io/badge/Android%20App-v2.2.0-3DDC84.svg?logo=android&logoColor=white)](/downloads/physics-society.apk)
 [![PhET](https://img.shields.io/badge/PhET%20Labs-29%20PHP%20Native%20Sims-0284c7.svg)]()
 [![AI Engine](https://img.shields.io/badge/AI%20Engine-Inferbase%20%7C%20GPT%20Oss%20120B-8B5CF6.svg)](https://api.inferbase.ai/)

@@ -258,7 +258,45 @@ const PrintableExamView = (function() {
         printWindow.document.close();
     }
 
+    async function render(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = `
+        <div class="qc-shell qc-section space-y-4">
+          <header class="qc-card qc-card--p qc-ticks">
+            <span class="qc-eyebrow">SAMPAD EXAM PRESS</span>
+            <h1 class="qc-h2 mt-2">آزمون‌ساز استاندارد چاپی A4</h1>
+            <p class="qc-lede mt-2" style="max-width:64ch;">تولید برگه امتحان هماهنگ با سربرگ رسمی سازمان ملی پرورش استعدادهای درخشان، شناسه امنیتی، بارکد، محل محاسبات و کلید تصحیح جداشونده.</p>
+            <div class="flex flex-wrap gap-2 mt-4">
+              <button type="button" class="qc-btn qc-btn--lg" onclick="window.PrintableExamView.openModal()">
+                <i data-lucide="printer" class="w-4 h-4"></i> ساخت برگه آزمون
+              </button>
+              <button type="button" class="qc-btn qc-btn--ghost" onclick="window.store.setView('competitions')">
+                <i data-lucide="trophy" class="w-4 h-4"></i> لیگ‌ها و مسابقات
+              </button>
+            </div>
+          </header>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            ${[
+                ['file-text', 'سربرگ رسمی', 'قالب مصوب امتحانات هماهنگ با فیلدهای شناسنامه آزمون'],
+                ['calculator', 'محل محاسبات', 'کادر اختصاصی حل مسئله و بارم‌بندی چهارمرحله‌ای'],
+                ['scissors', 'کلید تصحیح جدا', 'پاسخ‌نامه تشریحی مستقل برای دبیر']
+            ].map(x => `
+            <div class="qc-card qc-card--p">
+              <span class="qc-feature__icon"><i data-lucide="${x[0]}" class="w-4 h-4"></i></span>
+              <h3 class="mt-3 text-[12.5px] font-black text-[var(--ink)]">${x[1]}</h3>
+              <p class="mt-1.5 text-[11px] leading-[1.95] text-[var(--muted)]">${x[2]}</p>
+            </div>`).join('')}
+          </div>
+        </div>`;
+
+        if (window.lucide) window.lucide.createIcons();
+    }
+
     return {
+        render,
         openModal,
         closeModal,
         generateExam,
