@@ -1,6 +1,7 @@
 <?php
 /**
  * QUANTUM CUT — School Guilds & House Cup Component (Pure PHP Edition)
+ * Observatory Scientific Guilds & House Cup
  */
 declare(strict_types=1);
 header('Content-Type: application/javascript; charset=utf-8');
@@ -17,49 +18,53 @@ const ScientificGuilds = (function() {
         if (!container) return;
 
         container.innerHTML = `
-        <div class="max-w-6xl mx-auto space-y-8 pb-16">
+        <div class="qc-adapt qc-shell qc-section space-y-6">
             <!-- House Cup Trophy Banner -->
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-950/70 via-slate-900 to-indigo-950/70 border border-amber-500/30 p-8 shadow-2xl">
-                <div class="absolute -top-24 -left-24 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="qc-telemetry-hud p-6 sm:p-8">
                 <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div class="space-y-2 text-center md:text-right">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--warn-soft)] border border-[var(--warn)] text-[var(--warn)] text-xs font-bold">
                             <span>🏆</span> جام سالانه خاندان‌های علمی سمپاد
                         </div>
-                        <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight flex items-center justify-center md:justify-start gap-3">
-                            <span>🏛️</span> خاندان‌های علمی و رقابت تیمی
+                        <h1 class="text-2xl sm:text-3xl font-black text-[var(--ink)] tracking-tight flex items-center justify-center md:justify-start gap-3">
+                            <span class="p-2.5 rounded-2xl bg-[var(--surface-2)] border border-[var(--line)] text-[var(--warn)] shadow-sm">
+                                <i data-lucide="shield" class="w-6 h-6"></i>
+                            </span>
+                            <span>خاندان‌های علمی و رقابت تیمی</span>
                         </h1>
-                        <p class="text-slate-400 text-sm max-w-xl">
-                            به یکی از چهار خاندان تاریخی فیزیک ملحق شوید. با شرکت در آزمون‌ها، دوئل‌ها و حل شبیه‌سازها، امتیاز خاندان خود را در صدر جدول جام سمپاد بنشانید.
+                        <p class="text-[var(--muted)] text-xs sm:text-sm max-w-xl leading-relaxed">
+                            به یکی از چهار خاندان تاریخی فیزیک ملحق شوید. با حل مسائل، شرکت در دوئل‌ها و آزمایشگاه‌ها، امتیاز خاندان خود را ارتقا دهید.
                         </p>
                     </div>
 
-                    <div id="my-guild-status-badge" class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-center min-w-[200px]">
-                        <div class="text-xs text-slate-400">خاندان شما</div>
-                        <div class="text-lg font-bold text-cyan-400 mt-1">در حال بررسی...</div>
+                    <div id="my-guild-status-badge" class="p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--line)] text-center min-w-[200px]">
+                        <div class="text-[11px] text-[var(--muted)]">خاندان شما</div>
+                        <div class="text-base font-bold text-[var(--accent)] mt-1">در حال بررسی...</div>
                     </div>
                 </div>
             </div>
 
             <!-- Guilds Deck Grid -->
-            <div id="guilds-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div id="guilds-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="col-span-full text-center py-12">
-                    <div class="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <div class="w-8 h-8 border-4 border-[var(--accent)] border-t-transparent rounded-full animate-spin mx-auto"></div>
                 </div>
             </div>
 
             <!-- House Cup Leaderboard -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl">
-                <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                    <span>⚡</span> نمودار امتیازات و سلطه علمی خاندان‌ها
+            <div class="qc-card qc-card--p space-y-4">
+                <h3 class="text-base sm:text-lg font-black text-[var(--ink)] flex items-center gap-2">
+                    <i data-lucide="zap" class="w-5 h-5 text-[var(--warn)]"></i>
+                    <span>نمودار امتیازات و سلطه علمی خاندان‌ها</span>
                 </h3>
-                <div id="guilds-progress-bars" class="space-y-4">
+                <div id="guilds-progress-bars" class="space-y-3 pt-2">
                     <!-- Dynamic Bars -->
                 </div>
             </div>
         </div>
         `;
 
+        if (window.lucide) window.lucide.createIcons();
         await loadData();
     }
 
@@ -76,6 +81,7 @@ const ScientificGuilds = (function() {
             renderMyGuildBadge();
             renderGuildCards();
             renderProgressBars();
+            if (window.lucide) window.lucide.createIcons();
         } catch (e) {
             console.error('Error loading guilds:', e);
         }
@@ -87,17 +93,17 @@ const ScientificGuilds = (function() {
 
         if (myGuildData) {
             badgeEl.innerHTML = `
-                <div class="text-xs text-slate-400">خاندان متعهد شما</div>
-                <div class="text-lg font-bold mt-1 flex items-center justify-center gap-2" style="color: ${myGuildData.theme_color}">
-                    <span>⭐</span> ${myGuildData.name}
+                <div class="text-[11px] text-[var(--muted)]">خاندان متعهد شما</div>
+                <div class="text-base font-black mt-1 flex items-center justify-center gap-1.5" style="color: ${myGuildData.theme_color}">
+                    <span>⭐</span> <span>${myGuildData.name}</span>
                 </div>
-                <div class="text-xs text-slate-500 mt-1">${myGuildData.member_count} پژوهشگر هم‌پیمان</div>
+                <div class="text-[10px] text-[var(--muted)] font-mono mt-0.5">${myGuildData.member_count} پژوهشگر هم‌پیمان</div>
             `;
         } else {
             badgeEl.innerHTML = `
-                <div class="text-xs text-slate-400">خاندان شما</div>
-                <div class="text-sm font-bold text-amber-400 mt-1">هنوز انتخاب نشده</div>
-                <div class="text-xs text-slate-500 mt-1">یکی از خاندان‌های زیر را برگزینید</div>
+                <div class="text-[11px] text-[var(--muted)]">خاندان شما</div>
+                <div class="text-xs font-bold text-[var(--warn)] mt-1">هنوز انتخاب نشده</div>
+                <div class="text-[10px] text-[var(--muted)] mt-0.5">یکی از خاندان‌های زیر را برگزینید</div>
             `;
         }
     }
@@ -106,11 +112,9 @@ const ScientificGuilds = (function() {
         const grid = document.getElementById('guilds-cards-grid');
         if (!grid) return;
 
-        const maxPoints = Math.max(1, ...allGuilds.map(g => g.total_points || 0));
-
         grid.innerHTML = allGuilds.map(g => {
             const isMy = myGuildData && myGuildData.id === g.id;
-            const color = g.theme_color || '#3b82f6';
+            const color = g.theme_color || 'var(--accent)';
             const iconMap = {
                 'maxwell': '⚡',
                 'newton': '🍎',
@@ -120,36 +124,36 @@ const ScientificGuilds = (function() {
             const icon = iconMap[g.slug] || '🏛️';
 
             return `
-            <div class="relative overflow-hidden rounded-3xl bg-slate-900 border ${isMy ? 'border-2 shadow-2xl' : 'border-slate-800 hover:border-slate-700'} p-6 flex flex-col justify-between transition-all group hover:-translate-y-1" style="${isMy ? 'border-color: ' + color + '; box-shadow: 0 0 25px ' + color + '33;' : ''}">
-                <div class="space-y-4">
+            <div class="qc-guild-card flex flex-col justify-between" style="--guild-color: ${color}; ${isMy ? 'border-color: ' + color + '; box-shadow: 0 0 20px ' + color + '33;' : ''}">
+                <div class="space-y-3">
                     <div class="flex items-center justify-between">
-                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-lg" style="background-color: ${color}22; border: 1px solid ${color}44;">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm" style="background-color: ${color}18; border: 1px solid ${color}33;">
                             ${icon}
                         </div>
-                        <span class="text-xs font-mono font-bold px-3 py-1 rounded-full" style="background-color: ${color}15; color: ${color};">
+                        <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full" style="background-color: ${color}15; color: ${color};">
                             ${g.total_points || 0} XP
                         </span>
                     </div>
 
                     <div>
-                        <h4 class="text-xl font-extrabold text-white">${g.name}</h4>
-                        <p class="text-xs text-slate-400 mt-2 leading-relaxed min-h-[40px]">${g.motto_fa || ''}</p>
+                        <h4 class="text-base font-black text-[var(--ink)]">${g.name}</h4>
+                        <p class="text-xs text-[var(--muted)] mt-1 leading-relaxed min-h-[36px]">${g.motto_fa || ''}</p>
                     </div>
 
-                    <div class="pt-2 text-xs text-slate-400 flex items-center justify-between border-t border-slate-800">
+                    <div class="pt-2 text-xs text-[var(--muted)] flex items-center justify-between border-t border-[var(--line)]">
                         <span>اعضای فعال:</span>
-                        <span class="font-bold text-white">${g.member_count || 0} دانش‌پژوه</span>
+                        <span class="font-bold text-[var(--ink-2)]">${g.member_count || 0} دانش‌پژوه</span>
                     </div>
                 </div>
 
-                <div class="pt-6">
+                <div class="pt-4">
                     ${isMy ? `
-                        <div class="w-full py-2.5 rounded-xl text-center text-xs font-bold border" style="background-color: ${color}20; color: ${color}; border-color: ${color}40;">
+                        <div class="w-full py-2 rounded-xl text-center text-xs font-bold border" style="background-color: ${color}18; color: ${color}; border-color: ${color}33;">
                             ✓ خاندان پیمان‌بسته شما
                         </div>
                     ` : `
-                        <button onclick="ScientificGuilds.joinGuild(${g.id})" class="w-full py-2.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white transition-all border border-slate-700 hover:border-slate-600">
-                            پیوستن به این خاندان ⚔️
+                        <button type="button" onclick="ScientificGuilds.joinGuild(${g.id})" class="qc-btn qc-btn--ghost qc-btn--sm qc-btn--block">
+                            <span>پیوستن به این خاندان ⚔️</span>
                         </button>
                     `}
                 </div>
@@ -166,16 +170,16 @@ const ScientificGuilds = (function() {
 
         container.innerHTML = allGuilds.map(g => {
             const pct = Math.min(100, Math.round(((g.total_points || 0) / maxPoints) * 100));
-            const color = g.theme_color || '#3b82f6';
+            const color = g.theme_color || 'var(--accent)';
 
             return `
-            <div class="space-y-1.5">
+            <div class="space-y-1">
                 <div class="flex items-center justify-between text-xs">
-                    <span class="font-bold text-white">${g.name}</span>
-                    <span class="text-slate-400 font-mono">${g.total_points || 0} امتیاز (${pct}%)</span>
+                    <span class="font-bold text-[var(--ink)]">${g.name}</span>
+                    <span class="text-[var(--muted)] font-mono">${g.total_points || 0} امتیاز (${pct}%)</span>
                 </div>
-                <div class="w-full h-3 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
-                    <div class="h-full rounded-full transition-all duration-1000" style="width: ${pct}%; background-color: ${color}; box-shadow: 0 0 10px ${color}88;"></div>
+                <div class="w-full h-2.5 rounded-full bg-[var(--surface-2)] overflow-hidden border border-[var(--line)]">
+                    <div class="h-full rounded-full transition-all duration-1000" style="width: ${pct}%; background-color: ${color}; box-shadow: 0 0 8px ${color}66;"></div>
                 </div>
             </div>
             `;

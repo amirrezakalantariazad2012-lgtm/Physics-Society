@@ -874,6 +874,24 @@ async function renderDashboardView(container) {
                 <span class="text-[9.5px] text-[var(--muted)] mr-1">۷ روز اخیر</span>
               </div>
             </div>
+
+            <!-- 30-Day Activity Heatmap -->
+            <div class="mt-4 pt-3 border-t border-[var(--line)]">
+              <div class="flex items-center justify-between text-[11px] mb-2">
+                <span class="font-bold text-[var(--ink-2)] flex items-center gap-1.5">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-[var(--accent)]"></i>
+                  <span>نقشه فعالیت ۳۰ روز گذشته</span>
+                </span>
+                <span class="text-[10px] text-[var(--muted)] font-mono">${streak} روز متوالی</span>
+              </div>
+              <div class="qc-heat-grid">
+                ${Array.from({ length: 30 }, (_, i) => {
+                  const active = i >= (30 - Math.min(streak, 30));
+                  const lvl = active ? (i % 3 === 0 ? 'is-lvl-3' : (i % 2 === 0 ? 'is-lvl-2' : 'is-lvl-1')) : '';
+                  return `<div class="qc-heat-cell ${lvl}" title="روز ${i + 1}"></div>`;
+                }).join('')}
+              </div>
+            </div>
           </section>
 
           <!-- Quick actions -->

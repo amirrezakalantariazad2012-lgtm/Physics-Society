@@ -1736,6 +1736,140 @@ html.light .qc-adapt input::placeholder,
 html.light .qc-adapt textarea::placeholder { color: var(--muted-2) !important; }
 
 /* ==================================================================
+   16.5 · TELEMETRY, OSCILLOSCOPE & MISSION CONTROL HUD
+   ================================================================== */
+.qc-telemetry-hud {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    transition: background-color var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out);
+}
+.qc-telemetry-hud::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 80% 20%, var(--accent-soft) 0%, transparent 60%),
+                radial-gradient(circle at 20% 80%, var(--accent-2-soft) 0%, transparent 60%);
+    opacity: 0.7;
+}
+
+.qc-scope-screen {
+    position: relative;
+    background: var(--surface-2);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+.qc-scope-screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.08),
+        rgba(0, 0, 0, 0.08) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    opacity: 0.35;
+}
+
+.qc-lcd {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+html.dark .qc-lcd-cyan { color: #38bdf8; text-shadow: 0 0 12px rgba(56, 189, 248, 0.65); }
+html.light .qc-lcd-cyan { color: #0284c7; text-shadow: none; }
+html.dark .qc-lcd-green { color: #34d399; text-shadow: 0 0 12px rgba(52, 211, 153, 0.65); }
+html.light .qc-lcd-green { color: #059669; text-shadow: none; }
+html.dark .qc-lcd-amber { color: #fbbf24; text-shadow: 0 0 12px rgba(251, 191, 36, 0.65); }
+html.light .qc-lcd-amber { color: #d97706; text-shadow: none; }
+
+/* Bento Grid System */
+.qc-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+@media (min-width: 640px) {
+    .qc-bento-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (min-width: 1024px) {
+    .qc-bento-grid {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+}
+
+.qc-bento-col-12 { grid-column: span 12 / span 12; }
+.qc-bento-col-8 { grid-column: span 12 / span 12; }
+.qc-bento-col-6 { grid-column: span 12 / span 12; }
+.qc-bento-col-4 { grid-column: span 12 / span 12; }
+
+@media (min-width: 1024px) {
+    .qc-bento-col-8 { grid-column: span 8 / span 8; }
+    .qc-bento-col-6 { grid-column: span 6 / span 6; }
+    .qc-bento-col-4 { grid-column: span 4 / span 4; }
+}
+
+/* Activity Heatmap Grid */
+.qc-heat-grid {
+    display: grid;
+    grid-template-columns: repeat(15, minmax(0, 1fr));
+    gap: 4px;
+}
+.qc-heat-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    background: var(--surface-3);
+    border: 1px solid var(--line);
+    transition: transform var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+.qc-heat-cell:hover {
+    transform: scale(1.2);
+    z-index: 2;
+}
+.qc-heat-cell.is-lvl-1 { background: rgba(56, 189, 248, 0.35); border-color: rgba(56, 189, 248, 0.5); }
+.qc-heat-cell.is-lvl-2 { background: rgba(56, 189, 248, 0.65); border-color: rgba(56, 189, 248, 0.8); }
+.qc-heat-cell.is-lvl-3 { background: #38bdf8; border-color: #38bdf8; box-shadow: 0 0 8px rgba(56, 189, 248, 0.6); }
+
+/* Guild Elemental Cards */
+.qc-guild-card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 1.5rem;
+    transition: all var(--dur) var(--ease-out);
+    overflow: hidden;
+}
+.qc-guild-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 4px;
+    background: var(--guild-color, var(--accent));
+}
+.qc-guild-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--guild-color, var(--accent));
+    box-shadow: 0 16px 36px -18px var(--guild-color, var(--accent));
+}
+
+/* ==================================================================
    17 · PRINT
    ================================================================== */
 @media print {
